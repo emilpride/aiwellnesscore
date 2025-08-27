@@ -92,7 +92,6 @@
             background-color: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(8px);
             z-index: 50;
-            /* display: flex; <-- THIS WAS THE PROBLEM. JS will handle this. */
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -207,6 +206,7 @@
         let currentQuestionIndex = 0;
         const userAnswers = {};
         const totalQuizQuestions = 15;
+        let capturedPhotoDataUrl = null; // Temporary storage for photo
 
         // --- QUIZ DATA ---
         const quizQuestions = [
@@ -389,7 +389,7 @@
         }
         async function initCamera() {
             cameraModal.classList.remove('hidden');
-            cameraModal.style.display = 'flex'; // Use style to show
+            cameraModal.style.display = 'flex';
             if (!faceApiLoaded) await loadFaceApiModels();
             try {
                 videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
@@ -413,7 +413,7 @@
                 videoStream.getTracks().forEach(track => track.stop());
             }
             cameraModal.classList.add('hidden');
-            cameraModal.style.display = 'none'; // Use style to hide
+            cameraModal.style.display = 'none';
             inputArea.style.display = 'block';
             setupInput(quizQuestions[currentQuestionIndex]);
         }
@@ -458,9 +458,10 @@
                 }
             }, 300);
         }
+        
         function takePicture(video) {
             clearInterval(detectionInterval);
-            document.getElementById('camera-status').textContent = "Captured! Analyzing...";
+            document.getElementById('camera-status').textContent = "Captured!";
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -468,12 +469,72 @@
             context.translate(canvas.width, 0);
             context.scale(-1, 1);
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            closeCamera();
+            
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+            cameraModal.classList.add('hidden');
+            cameraModal.style.display = 'none';
+
             const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-            userAnswers['selfie'] = dataUrl;
+            showPhotoForConfirmation(dataUrl);
+        }
+
+        function showPhotoForConfirmation(dataUrl) {
+            capturedPhotoDataUrl = dataUrl;
+
+            const messageWrapper = document.createElement('div');
+            messageWrapper.id = 'photo-preview-wrapper';
+            messageWrapper.className = 'fade-in flex w-full items-end gap-3 justify-start';
+            
+            const contentWrapper = document.createElement('div');
+            contentWrapper.className = 'p-3 rounded-2xl bg-indigo-600 text-white rounded-bl-lg';
+            contentWrapper.innerHTML = `
+                <p class="mb-2">Here's the photo. Happy with it?</p>
+                <img src="${dataUrl}" alt="Your selfie" class="rounded-lg max-w-full h-auto">
+            `;
+            
+            messageWrapper.appendChild(getBotAvatar());
+            messageWrapper.appendChild(contentWrapper);
+            chatContent.appendChild(messageWrapper);
+            chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
+
+            optionsContainer.innerHTML = '';
+            const confirmBtn = document.createElement('button');
+            confirmBtn.textContent = 'Looks Good!';
+            confirmBtn.className = "px-6 py-3 bg-green-500 border border-green-400 text-white rounded-full hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-200 font-semibold";
+            confirmBtn.onclick = confirmPhoto;
+
+            const retakeBtn = document.createElement('button');
+            retakeBtn.textContent = 'Retake';
+            retakeBtn.className = "px-6 py-3 bg-slate-700 border border-slate-600 text-gray-200 rounded-full hover:bg-red-500 hover:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 transition-all duration-200 font-semibold";
+            retakeBtn.onclick = retakePhoto;
+            
+            optionsContainer.appendChild(confirmBtn);
+            optionsContainer.appendChild(retakeBtn);
+            optionsContainer.className = 'flex gap-2 mb-3 pb-2 justify-center';
+            textInputContainer.style.display = 'none';
+            inputArea.style.display = 'block';
+        }
+
+        function confirmPhoto() {
+            addMessage('Looks Good!', 'user');
+            userAnswers['selfie'] = capturedPhotoDataUrl;
             saveAnswerToServer('selfie', 'Photo captured');
+            document.getElementById('photo-preview-wrapper')?.remove();
+            optionsContainer.innerHTML = '';
+            inputArea.style.display = 'none';
             endQuiz();
         }
+
+        function retakePhoto() {
+            addMessage('Retake', 'user');
+            document.getElementById('photo-preview-wrapper')?.remove();
+            optionsContainer.innerHTML = '';
+            inputArea.style.display = 'none';
+            handleCameraButtonClick(); // Re-opens camera
+        }
+
         function endQuiz() {
             inputArea.style.display = 'none';
             progressBar.style.width = '100%';
