@@ -22,10 +22,6 @@
             background-size: 400% 400%;
             animation: gradientAnimation 20s ease infinite;
             color: #e5e7eb;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem;
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { 
@@ -117,35 +113,38 @@
 </head>
 <body class="bg-slate-900 text-gray-200">
 
-    <!-- Main chat container -->
-    <div class="w-full h-full max-h-[850px] sm:max-w-2xl bg-slate-900/70 backdrop-blur-xl ring-1 ring-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden relative">
-        <div class="progress-container rounded-t-2xl">
-            <div class="progress-bar" id="progressBar"></div>
+    <!-- Centering Wrapper -->
+    <div class="w-full h-full flex items-center justify-center p-2 sm:p-4">
+        <!-- Main chat container -->
+        <div class="w-full h-full max-h-[850px] sm:max-w-2xl bg-slate-900/70 backdrop-blur-xl ring-1 ring-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden relative">
+            <div class="progress-container rounded-t-2xl">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <header class="p-4 border-b border-white/10 bg-slate-900/50 z-10 flex-shrink-0">
+                <h1 class="text-xl font-bold text-center text-indigo-400">AI WELLNESSCORE</h1>
+                <p class="text-sm text-center text-gray-400">Your path to a better you starts here</p>
+            </header>
+
+            <main id="chat-container" class="flex-1 p-4 sm:p-6 overflow-y-auto no-scrollbar">
+                <div id="chat-content" class="space-y-6">
+                </div>
+            </main>
+
+            <footer id="input-area" class="p-4 border-t border-white/10 bg-slate-800/60 flex-shrink-0">
+                <div id="options-container" class="flex flex-nowrap gap-2 mb-3 overflow-x-auto no-scrollbar pb-2 justify-center">
+                </div>
+                <div id="text-input-container" class="flex items-center gap-2" style="display: none;">
+                    <input type="text" id="user-input" class="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white placeholder-gray-400 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400" placeholder="Type your answer...">
+                    <button id="send-btn" class="bg-indigo-500 text-white p-2 rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform duration-200 transform active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" /></svg>
+                    </button>
+                </div>
+            </footer>
         </div>
-
-        <header class="p-4 border-b border-white/10 bg-slate-900/50 z-10 flex-shrink-0">
-            <h1 class="text-xl font-bold text-center text-indigo-400">AI WELLNESSCORE</h1>
-            <p class="text-sm text-center text-gray-400">Your path to a better you starts here</p>
-        </header>
-
-        <main id="chat-container" class="flex-1 p-4 sm:p-6 overflow-y-auto no-scrollbar">
-            <div id="chat-content" class="space-y-6">
-            </div>
-        </main>
-
-        <footer id="input-area" class="p-4 border-t border-white/10 bg-slate-800/60 flex-shrink-0">
-            <div id="options-container" class="flex flex-nowrap gap-2 mb-3 overflow-x-auto no-scrollbar pb-2 justify-center">
-            </div>
-            <div id="text-input-container" class="flex items-center gap-2" style="display: none;">
-                <input type="text" id="user-input" class="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white placeholder-gray-400 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400" placeholder="Type your answer...">
-                <button id="send-btn" class="bg-indigo-500 text-white p-2 rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform duration-200 transform active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" /></svg>
-                </button>
-            </div>
-        </footer>
     </div>
-
-    <!-- Fullscreen Camera Modal (hidden by default) -->
+    
+    <!-- Fullscreen Camera Modal (outside the centering wrapper) -->
     <div id="camera-modal" class="hidden">
         <button id="close-camera-btn" class="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2 z-10">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -245,7 +244,6 @@
         }
 
         // --- CHAT UI LOGIC ---
-        // Functions for getBotAvatar, getLargeLottieAvatar, showTypingIndicator, hideTypingIndicator, addWelcomeMessage, addMessage, updateProgressBar remain the same...
         function getBotAvatar() {
             const avatar = document.createElement('div');
             avatar.className = 'flex-shrink-0 w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center ring-1 ring-white/20';
@@ -419,7 +417,6 @@
             }
             cameraModal.classList.add('hidden');
             cameraModal.classList.remove('flex');
-            // Re-enable the input area if the user closes the camera without taking a picture
             inputArea.style.display = 'block';
             setupInput(quizQuestions[currentQuestionIndex]);
         }
