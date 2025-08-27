@@ -1,0 +1,15 @@
+{
+  "name": "ai-wellnesscore-project",
+  "version": "1.0.0",
+  "description": "Serverless functions for AI WELLNESSCORE",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "firebase-admin": "^12.1.1",
+    "stripe": "^15.12.0"
+  }
+}
