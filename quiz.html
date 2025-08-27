@@ -209,7 +209,7 @@
                 });
             } catch(e) {
                  console.error("Lottie animation failed to load", e);
-                 container.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-24 h-24 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/><path d="M12.2 19.5c-1.6 0-3.1-.4-4.5-1.2-.6-.3-1.2-.8-1.7-1.3-.5-.5-.9-1.1-1.2-1.8-.3-.6-.5-1.3-.5-2 0-1.4.6-2.8 1.5-3.8.5-.5 1-1 1.7-1.3 1.4-.8 2.9-1.2 4.5-1.2s3.1.4 4.5 1.2c.6.3 1.2.8 1.7 1.3.5.5.9 1.1 1.2 1.8.3.6.5 1.3.5 2 0 1.4-.6 2.8-1.5 3.8-.5.5-1 1-1.7 1.3-1.4.8-2.9 1.2-4.5 1.2z"/></svg>`;
+                 container.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-24 h-24 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/><path d="M12.2 19.5c-1.6 0-3.1-.4-4.5-1.2-.6-.3-1.2-.8-1.7-1.3-.5-.5-.9-1.1-1.2-1.8-.3-.6-.5-1.3-.5-2 0-1.4.6-2.8 1.5-3.8.5-.5 1-1 1.7-1.3 1.4-.8 2.9-1.2 4.5-1.2s3.1.4 4.5 1.2c.6.3 1.2.8 1.7 1.3.5.5.9 1.1 1.2 1.8.3.6.5 1.3.5 2 0 1.4-.6 2.8-1.5 3.8-.5.5-1 1-1.7 1.3-1.4-.8-2.9 1.2-4.5 1.2z"/></svg>`;
             }
             return container;
         }
@@ -246,7 +246,6 @@
             textDiv.innerHTML = text;
             
             welcomeContainer.appendChild(textDiv);
-            
             chatContent.appendChild(welcomeContainer);
             chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
         }
@@ -309,7 +308,12 @@
                 button.className = isSimpleAction 
                     ? "px-6 py-3 bg-indigo-500 border border-indigo-400 text-white rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200 font-semibold"
                     : "flex-shrink-0 px-4 py-2 bg-slate-700 border border-slate-600 text-gray-200 rounded-full hover:bg-indigo-500 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200";
-                button.onclick = () => handleAnswer(option);
+                
+                if (question.type === 'camera_button') {
+                    button.onclick = () => handleCameraButtonClick();
+                } else {
+                    button.onclick = () => handleAnswer(option);
+                }
                 optionsContainer.appendChild(button);
             });
 
@@ -348,9 +352,23 @@
         let detectionInterval;
 
         async function loadFaceApiModels() {
-            await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights');
-            faceApiLoaded = true;
-            console.log("FaceAPI models loaded.");
+            // Corrected and more robust model loading
+            const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
+            try {
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)
+                ]);
+                faceApiLoaded = true;
+                console.log("FaceAPI models loaded successfully.");
+            } catch (error) {
+                console.error("Error loading FaceAPI models:", error);
+                addMessage("Sorry, there was a problem preparing the camera analysis. Please try refreshing the page.");
+                const cameraButton = document.querySelector('button[onclick="handleCameraButtonClick()"]');
+                if (cameraButton) {
+                    cameraButton.disabled = true;
+                    cameraButton.textContent = "Analysis Unavailable";
+                }
+            }
         }
 
         async function initCamera() {
@@ -393,7 +411,16 @@
                 };
             } catch (err) {
                 console.error("Camera Error:", err);
-                addMessage("Oops, I couldn't access your camera. Please check your browser permissions.");
+                let errorMessage = "Oops, I couldn't access your camera. Please check your browser permissions.";
+                if (err.name === 'NotAllowedError') {
+                    errorMessage = "Camera access was denied. Please enable it in your browser settings to proceed.";
+                } else if (err.name === 'NotFoundError') {
+                    errorMessage = "No camera was found on your device. This step will be skipped.";
+                }
+                addMessage(errorMessage);
+                const camContainer = document.getElementById('camera-container');
+                if(camContainer) camContainer.parentElement.remove();
+                endQuiz(); 
             }
         }
         
