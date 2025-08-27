@@ -168,86 +168,87 @@
 
         // --- Полный список вопросов ---
         const quizQuestions = [
-            { text: "Hello! I'm your personal AI Wellness Coach. I'll be guiding you through this analysis to help you discover insights about your well-being.", type: 'welcome', options: ["Let's Begin!"] },
-            { text: "Before we begin, a quick heads-up: I'm an AI coach, not a medical doctor. This analysis is for educational purposes only and is not a substitute for professional medical advice. <b>All data, including your photo, is deleted immediately after you view the detailed report.</b><br><br>By continuing, you agree to our <a href='terms.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Terms of Service</a> and <a href='privacy.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Privacy Policy</a>.", type: 'disclaimer', options: ['I Understand & Agree'] },
+            { id: 'welcome', text: "Hello! I'm your personal AI Wellness Coach. I'll be guiding you through this analysis to help you discover insights about your well-being.", type: 'welcome', options: ["Let's Begin!"] },
+            { id: 'disclaimer', text: "Before we begin, a quick heads-up: I'm an AI coach, not a medical doctor. This analysis is for educational purposes only and is not a substitute for professional medical advice. <b>All data, including your photo, is deleted immediately after you view the detailed report.</b><br><br>By continuing, you agree to our <a href='terms.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Terms of Service</a> and <a href='privacy.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Privacy Policy</a>.", type: 'disclaimer', options: ['I Understand & Agree'] },
             // BODY
-            { text: "Great, let's begin! To start, what's your age?", reason: "Your age helps me calibrate your wellness metrics against demographic data, ensuring your results are relevant to your life stage.", type: 'chips_text', options: ['Under 18', '18-25', '26-35', '36-50', '50+'], placeholder: 'Or type your exact age...' },
-            { text: "Great start! Now, what's your biological sex?", reason: "This allows me to consider physiological differences that can influence wellness factors.", type: 'chips_text', options: ['Male', 'Female'], placeholder: 'Or prefer not to say...' },
-            { text: "Perfect. Let's talk about your height. (e.g., 5 ft 10 in)", reason: "Your height and weight are used to calculate your Body Mass Index (BMI), a basic indicator of physical health.", type: 'chips_text', options: ["Under 5'0\"", "5'0\" - 5'5\"", "5'6\" - 5'11\"", "6'0\"+"], placeholder: 'Or type your exact height...' },
-            { text: "Thanks! And your current weight in pounds?", reason: "This, along with your height, gives us a baseline for physical wellness metrics.", type: 'chips_text', options: ['Under 120 lbs', '120-150 lbs', '151-180 lbs', '181-220 lbs', '220+ lbs'], placeholder: 'Or type your exact weight...' },
-            { text: "Sleep is crucial. How many hours of <i>quality</i> sleep do you get on an average night?", reason: "Sleep is the foundation of recovery for both mind and body. The quality of your sleep reveals a lot about your overall well-being.", type: 'chips_text', options: ['Less than 5', '5-6 hours', '7-8 hours', 'More than 8'], placeholder: 'Or type a specific number...' },
-            { text: "Awesome. Movement is key! How often do you engage in moderate physical activity (like a brisk walk) per week?", reason: "Regular movement is vital for physical and mental health. This helps me understand your energy expenditure.", type: 'chips_text', options: ['Rarely', '1-2 times', '3-4 times', '5+ times'], placeholder: 'Or describe your routine...' },
+            { id: 'age', text: "Great, let's begin! To start, what's your age?", reason: "Your age helps me calibrate your wellness metrics against demographic data, ensuring your results are relevant to your life stage.", type: 'chips_text', options: ['Under 18', '18-25', '26-35', '36-50', '50+'], placeholder: 'Or type your exact age...' },
+            { id: 'gender', text: "Great start! Now, what's your biological sex?", reason: "This allows me to consider physiological differences that can influence wellness factors.", type: 'chips_text', options: ['Male', 'Female'], placeholder: 'Or prefer not to say...' },
+            { id: 'height', text: "Perfect. Let's talk about your height. (e.g., 5 ft 10 in)", reason: "Your height and weight are used to calculate your Body Mass Index (BMI), a basic indicator of physical health.", type: 'chips_text', options: ["Under 5'0\"", "5'0\" - 5'5\"", "5'6\" - 5'11\"", "6'0\"+"], placeholder: 'Or type your exact height...' },
+            { id: 'weight', text: "Thanks! And your current weight in pounds?", reason: "This, along with your height, gives us a baseline for physical wellness metrics.", type: 'chips_text', options: ['Under 120 lbs', '120-150 lbs', '151-180 lbs', '181-220 lbs', '220+ lbs'], placeholder: 'Or type your exact weight...' },
+            { id: 'sleep', text: "Sleep is crucial. How many hours of <i>quality</i> sleep do you get on an average night?", reason: "Sleep is the foundation of recovery for both mind and body. The quality of your sleep reveals a lot about your overall well-being.", type: 'chips_text', options: ['Less than 5', '5-6 hours', '7-8 hours', 'More than 8'], placeholder: 'Or type a specific number...' },
+            { id: 'activity', text: "Awesome. Movement is key! How often do you engage in moderate physical activity (like a brisk walk) per week?", reason: "Regular movement is vital for physical and mental health. This helps me understand your energy expenditure.", type: 'chips_text', options: ['Rarely', '1-2 times', '3-4 times', '5+ times'], placeholder: 'Or describe your routine...' },
             // NUTRITION
-            { text: "Let's dive into nutrition. How many servings of fruits or vegetables do you typically eat per day?", reason: "This is a key indicator of your micronutrient intake, which fuels your body and brain.", type: 'chips_text', options: ['0-1', '2-3', '4-5', 'More than 5'], placeholder: 'Or type a specific number...' },
-            { text: "Honesty is the best policy here. How often do you eat processed or fast food in a typical week?", reason: "Understanding this habit helps me assess potential inflammation and energy level factors.", type: 'chips_text', options: ['Daily', 'A few times a week', 'Once a week', 'Rarely/Never'], placeholder: 'Or describe your habits...' },
-            { text: "Hydration check! How many glasses of water (approx. 8 oz) do you drink per day?", reason: "Hydration impacts everything from cognitive function to physical performance. It's a simple but powerful wellness lever.", type: 'chips_text', options: ['1-2', '3-4', '5-6', '7+'], placeholder: 'Or type a specific amount...' },
+            { id: 'nutrition', text: "Let's dive into nutrition. How many servings of fruits or vegetables do you typically eat per day?", reason: "This is a key indicator of your micronutrient intake, which fuels your body and brain.", type: 'chips_text', options: ['0-1', '2-3', '4-5', 'More than 5'], placeholder: 'Or type a specific number...' },
+            { id: 'processed_food', text: "Honesty is the best policy here. How often do you eat processed or fast food in a typical week?", reason: "Understanding this habit helps me assess potential inflammation and energy level factors.", type: 'chips_text', options: ['Daily', 'A few times a week', 'Once a week', 'Rarely/Never'], placeholder: 'Or describe your habits...' },
+            { id: 'hydration', text: "Hydration check! How many glasses of water (approx. 8 oz) do you drink per day?", reason: "Hydration impacts everything from cognitive function to physical performance. It's a simple but powerful wellness lever.", type: 'chips_text', options: ['1-2', '3-4', '5-6', '7+'], placeholder: 'Or type a specific amount...' },
             // MIND
-            { text: "Now for the mind. On a scale of 1 to 10, how would you rate your typical stress level?", reason: "Chronic stress is a major factor in overall wellness. Your self-perception here is a crucial piece of the puzzle.", type: 'chips_text', options: ['1-3 (Low)', '4-6 (Moderate)', '7-8 (High)', '9-10 (Very High)'], placeholder: 'Or type an exact number...' },
-            { text: "Finding calm is a superpower. How often do you practice mindfulness, meditation, or deep breathing?", reason: "This tells me about the tools you use to manage stress and cultivate mental clarity.", type: 'chips_text', options: ['Daily', 'A few times a week', 'Occasionally', 'Never'], placeholder: 'Or describe your practice...' },
-            { text: "Let's check in with your emotions. How would you describe your overall mood on a typical day?", reason: "Your typical mood provides a snapshot of your emotional baseline and mental resilience.", type: 'chips_text', options: ['Energetic & Positive', 'Generally Content', 'Neutral', 'Often Fatigued or Low'], placeholder: 'Or describe in your own words...' },
+            { id: 'stress', text: "Now for the mind. On a scale of 1 to 10, how would you rate your typical stress level?", reason: "Chronic stress is a major factor in overall wellness. Your self-perception here is a crucial piece of the puzzle.", type: 'chips_text', options: ['1-3 (Low)', '4-6 (Moderate)', '7-8 (High)', '9-10 (Very High)'], placeholder: 'Or type an exact number...' },
+            { id: 'mindfulness', text: "Finding calm is a superpower. How often do you practice mindfulness, meditation, or deep breathing?", reason: "This tells me about the tools you use to manage stress and cultivate mental clarity.", type: 'chips_text', options: ['Daily', 'A few times a week', 'Occasionally', 'Never'], placeholder: 'Or describe your practice...' },
+            { id: 'mood', text: "Let's check in with your emotions. How would you describe your overall mood on a typical day?", reason: "Your typical mood provides a snapshot of your emotional baseline and mental resilience.", type: 'chips_text', options: ['Energetic & Positive', 'Generally Content', 'Neutral', 'Often Fatigued or Low'], placeholder: 'Or describe in your own words...' },
             // LIFESTYLE
-            { text: "Time for some lifestyle questions. How many alcoholic drinks do you have in a typical week?", reason: "Alcohol can significantly impact sleep quality, recovery, and mood. This helps me get a clearer picture.", type: 'chips_text', options: ['0', '1-3', '4-7', '8+'], placeholder: 'Or type a specific number...' },
-            { text: "This is a safe space. Do you smoke or use tobacco products?", reason: "This is an important lifestyle factor with significant health implications that I need to consider.", type: 'chips_text', options: ['Yes, daily', 'Yes, occasionally', 'I quit', 'Never'], placeholder: 'Or clarify your situation...' },
-            { text: "Last question before the final step! How much time do you spend on screens (phone, computer, TV) outside of work?", reason: "Excessive screen time can affect your sleep, eye health, and mental state. This helps me understand your digital habits.", type: 'chips_text', options: ['Less than 2 hours', '2-4 hours', '4-6 hours', 'More than 6 hours'], placeholder: 'Or estimate your screen time...' },
+            { id: 'alcohol', text: "Time for some lifestyle questions. How many alcoholic drinks do you have in a typical week?", reason: "Alcohol can significantly impact sleep quality, recovery, and mood. This helps me get a clearer picture.", type: 'chips_text', options: ['0', '1-3', '4-7', '8+'], placeholder: 'Or type a specific number...' },
+            { id: 'smoking', text: "This is a safe space. Do you smoke or use tobacco products?", reason: "This is an important lifestyle factor with significant health implications that I need to consider.", type: 'chips_text', options: ['Yes, daily', 'Yes, occasionally', 'I quit', 'Never'], placeholder: 'Or clarify your situation...' },
+            { id: 'screen_time', text: "Last question before the final step! How much time do you spend on screens (phone, computer, TV) outside of work?", reason: "Excessive screen time can affect your sleep, eye health, and mental state. This helps me understand your digital habits.", type: 'chips_text', options: ['Less than 2 hours', '2-4 hours', '4-6 hours', 'More than 6 hours'], placeholder: 'Or estimate your screen time...' },
             // FINAL STEP
-            { text: "You did it! That's all the questions. Now for the fun part: a quick selfie. This helps me analyze non-medical indicators of stress and fatigue. Your photo is processed on the fly and never stored. Please allow camera access and position your face within the frame.", type: 'camera_button', options: ['Open Camera'] }
+            { id: 'camera', text: "You did it! That's all the questions. Now for the fun part: a quick selfie. This helps me analyze non-medical indicators of stress and fatigue. Your photo is processed on the fly and never stored. Please allow camera access and position your face within the frame.", type: 'camera_button', options: ['Open Camera'] }
         ];
 
         let currentQuestionIndex = 0;
         const userAnswers = {};
-        const totalQuizQuestions = quizQuestions.length - 2; // Исключаем "welcome" и "disclaimer"
+        const totalQuizQuestions = quizQuestions.length - 2;
 
-        // --- Логика чата ---
+        // --- CHAT LOGIC ---
 
-        // Обновляем прогресс-бар на основе текущего вопроса
         function updateProgressBar() {
-            // Исключаем первые два экрана (welcome, disclaimer) из общего количества
             const answeredQuestions = Math.max(0, currentQuestionIndex - 2);
             const progress = (answeredQuestions / totalQuizQuestions) * 100;
             progressBar.style.width = `${progress}%`;
         }
         
-        // **Измененная функция для получения аватара бота**
         function getBotAvatar() {
             const avatar = document.createElement('div');
             avatar.className = 'flex-shrink-0 w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center ring-1 ring-white/20 breathing-avatar lottie-avatar-container';
             
-            // Создаем контейнер для Lottie-анимации
             const lottieContainer = document.createElement('div');
             lottieContainer.className = 'lottie-avatar';
             avatar.appendChild(lottieContainer);
 
-            // Загрузка Lottie-анимации
-            lottie.loadAnimation({
-                container: lottieContainer,
-                renderer: 'svg',
-                loop: true,
-                autoplay: true,
-                path: 'avatar.json' // **Путь к вашему файлу анимации**
-            });
+            try {
+                lottie.loadAnimation({
+                    container: lottieContainer,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: 'avatar.json'
+                });
+            } catch (error) {
+                console.error("Lottie animation could not be loaded.", error);
+                avatar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+            }
             return avatar;
         }
 
-        // Новая функция для создания Lottie-аватара
         function getLottieAvatar() {
             const container = document.createElement('div');
             container.id = 'lottie-avatar';
             container.className = 'w-24 h-24 rounded-full bg-slate-700 flex items-center justify-center ring-4 ring-indigo-500/50 breathing-avatar p-2';
             
-            // Загрузка Lottie-анимации
-            const lottieAnimation = lottie.loadAnimation({
-                container: container,
-                renderer: 'svg',
-                loop: true,
-                autoplay: true,
-                path: 'avatar.json'
-            });
-
-            // Проверка на ошибку загрузки анимации
-            lottieAnimation.addEventListener('data_failed', () => {
-                console.error("Lottie animation failed to load. Please check the path to 'avatar.json' file.");
+            try {
+                const lottieAnimation = lottie.loadAnimation({
+                    container: container,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: 'avatar.json'
+                });
+                lottieAnimation.addEventListener('data_failed', () => {
+                    console.error("Lottie animation failed to load.");
+                    container.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/><path d="M12.2 19.5c-1.6 0-3.1-.4-4.5-1.2-.6-.3-1.2-.8-1.7-1.3-.5-.5-.9-1.1-1.2-1.8-.3-.6-.5-1.3-.5-2 0-1.4.6-2.8 1.5-3.8.5-.5 1-1 1.7-1.3 1.4-.8 2.9-1.2 4.5-1.2s3.1.4 4.5 1.2c.6.3 1.2.8 1.7 1.3.5.5.9 1.1 1.2 1.8.3.6.5 1.3.5 2 0 1.4-.6 2.8-1.5 3.8-.5.5-1 1-1.7 1.3-1.4.8-2.9 1.2-4.5 1.2z"/></svg>`;
+                });
+            } catch (error) {
+                console.error("Lottie library not found or failed to execute.", error);
                 container.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/><path d="M12.2 19.5c-1.6 0-3.1-.4-4.5-1.2-.6-.3-1.2-.8-1.7-1.3-.5-.5-.9-1.1-1.2-1.8-.3-.6-.5-1.3-.5-2 0-1.4.6-2.8 1.5-3.8.5-.5 1-1 1.7-1.3 1.4-.8 2.9-1.2 4.5-1.2s3.1.4 4.5 1.2c.6.3 1.2.8 1.7 1.3.5.5.9 1.1 1.2 1.8.3.6.5 1.3.5 2 0 1.4-.6 2.8-1.5 3.8-.5.5-1 1-1.7 1.3-1.4.8-2.9 1.2-4.5 1.2z"/></svg>`;
-            });
+            }
 
             return container;
         }
@@ -279,7 +280,6 @@
             const welcomeContainer = document.createElement('div');
             welcomeContainer.className = 'fade-in flex flex-col items-center text-center space-y-4 py-4';
             
-            // Использование Lottie-аватара
             welcomeContainer.appendChild(getLottieAvatar());
             
             const textDiv = document.createElement('div');
@@ -340,49 +340,31 @@
             textInputContainer.style.display = 'none';
             inputArea.style.display = 'block';
 
-            const renderChips = () => {
+            const isSimpleAction = question.type === 'welcome' || question.type === 'disclaimer' || question.type === 'camera_button';
+
+            if (isSimpleAction) {
+                optionsContainer.classList.add('justify-center');
+                optionsContainer.classList.remove('flex-nowrap', 'overflow-x-auto');
+            } else {
                 optionsContainer.classList.remove('justify-center');
                 optionsContainer.classList.add('flex-nowrap', 'overflow-x-auto');
-                question.options.forEach(option => {
-                    const button = document.createElement('button');
-                    button.textContent = option;
-                    button.className = "flex-shrink-0 px-4 py-2 bg-slate-700 border border-slate-600 text-gray-200 rounded-full hover:bg-indigo-500 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200";
-                    button.onclick = () => handleAnswer(option);
-                    optionsContainer.appendChild(button);
-                });
             }
 
-            const renderTextInput = () => {
+            question.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = isSimpleAction 
+                    ? "px-6 py-3 bg-indigo-500 border border-indigo-400 text-white rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200 font-semibold"
+                    : "flex-shrink-0 px-4 py-2 bg-slate-700 border border-slate-600 text-gray-200 rounded-full hover:bg-indigo-500 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200";
+                button.onclick = () => handleAnswer(option);
+                optionsContainer.appendChild(button);
+            });
+
+            if (question.type === 'chips_text') {
                 textInputContainer.style.display = 'flex';
-                userInput.type = 'text';
                 userInput.placeholder = question.placeholder;
                 userInput.value = '';
                 userInput.focus();
-            }
-
-            if (question.type === 'welcome' || question.type === 'disclaimer') {
-                optionsContainer.classList.add('justify-center');
-                optionsContainer.classList.remove('flex-nowrap', 'overflow-x-auto');
-                question.options.forEach(option => {
-                    const button = document.createElement('button');
-                    button.textContent = option;
-                    button.className = "px-6 py-3 bg-indigo-500 border border-indigo-400 text-white rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200 font-semibold";
-                    button.onclick = () => handleAnswer(option);
-                    optionsContainer.appendChild(button);
-                });
-                textInputContainer.style.display = 'none';
-            } else if (question.type === 'chips_text') {
-                renderChips();
-                renderTextInput();
-            } else if (question.type === 'camera_button') {
-                inputArea.style.display = 'block';
-                optionsContainer.innerHTML = '';
-                const button = document.createElement('button');
-                button.textContent = 'Open Camera';
-                button.className = "px-6 py-3 bg-indigo-500 border border-indigo-400 text-white rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200 font-semibold";
-                button.onclick = handleCameraButtonClick;
-                optionsContainer.appendChild(button);
-                textInputContainer.style.display = 'none';
             }
         }
 
@@ -390,7 +372,7 @@
             if (!answer || !answer.trim()) return;
             
             const question = quizQuestions[currentQuestionIndex];
-            userAnswers[currentQuestionIndex] = answer;
+            userAnswers[question.id] = answer;
             
             if (question.type !== 'disclaimer' && question.type !== 'welcome') {
                 addMessage(answer, 'user');
@@ -408,7 +390,7 @@
             initCamera();
         }
 
-        // --- Логика камеры ---
+        // --- CAMERA LOGIC ---
         
         let faceApiLoaded = false;
         let detectionInterval;
@@ -547,7 +529,7 @@
 
         function endQuiz() {
             inputArea.style.display = 'none';
-            progressBar.style.width = '100%'; // Завершаем прогресс
+            progressBar.style.width = '100%';
             showTypingIndicator();
             setTimeout(() => {
                 hideTypingIndicator();
@@ -556,12 +538,12 @@
                 showTypingIndicator();
                 setTimeout(() => {
                     hideTypingIndicator();
-                    addMessage("Done! Your personalized free report is ready to blow your mind. 🚀 <a href='#' class='font-bold underline text-indigo-300 hover:text-indigo-200'>View my results</a>");
+                    addMessage("Done! Your personalized free report is ready to blow your mind. 🚀 <a href='result.html' class='font-bold underline text-indigo-300 hover:text-indigo-200'>View my results</a>");
                 }, 3000);
             }, 1500);
         }
 
-        // --- Инициализация ---
+        // --- INITIALIZATION ---
         sendBtn.addEventListener('click', () => handleAnswer(userInput.value));
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
