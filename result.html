@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your AI WELLNESSCORE Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @keyframes slow-pan {
+            0% { background-position: 0% 0%; }
+            25% { background-position: 100% 0%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        .gradient-bg-dark-animated {
+            background: linear-gradient(300deg, #0f172a, #1e1b4b, #312e81, #0f172a);
+            background-size: 200% 200%;
+            animation: slow-pan 25s ease infinite;
+        }
+        .score-circle-glow {
+            filter: drop-shadow(0 0 15px rgba(20, 227, 227, 0.6));
+        }
+        .score-circle-path {
+            transition: stroke-dashoffset 2s ease-out;
+        }
+        .blurry-text {
+            filter: blur(5px);
+            user-select: none;
+            pointer-events: none;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 220px;
+            background-color: #1e293b;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            pointer-events: none;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-gray-200">
+
+    <div class="gradient-bg-dark-animated">
+        <div class="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
+
+            <section class="fade-in-section text-center mb-16">
+                <span class="text-teal-300 text-sm font-medium px-4 py-1.5 rounded-full bg-teal-900/50 border border-teal-800">Your Wellness Archetype</span>
+                <h1 class="text-4xl sm:text-6xl font-black text-white mt-3 tracking-tight">Creative Owl</h1>
+                <p class="text-lg text-gray-400 mt-2 max-w-lg mx-auto">Your mind is most active when the world is quiet. You find clarity and inspiration in the late hours, but this powerful focus comes at a cost to your daily energy cycle.</p>
+            </section>
+
+            <section class="fade-in-section grid md:grid-cols-5 gap-8 items-center mb-16">
+                <div class="md:col-span-2 flex flex-col items-center justify-center">
+                    <div class="relative w-48 h-48 sm:w-56 sm:h-56">
+                        <svg class="w-full h-full" viewBox="0 0 36 36">
+                            <defs>
+                                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#14E3E3; stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#4F46E5; stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path class="text-slate-700"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                fill="none" stroke-width="2" />
+                            <path id="score-circle-path" class="score-circle-path score-circle-glow"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                fill="none"
+                                stroke-width="2"
+                                stroke="url(#scoreGradient)"
+                                stroke-dasharray="78, 100" 
+                                stroke-dashoffset="100"
+                                stroke-linecap="round" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-5xl font-bold text-white" id="score-text">0</span>
+                            <span class="text-sm text-gray-400">Wellness Score</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:col-span-3 space-y-3">
+                    <div class="text-center md:text-left">
+                         <p class="text-lg font-semibold text-white">Your score indicates a solid foundation with key areas for powerful improvement.</p>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium text-teal-400">Body Score</span>
+                        <div class="w-full bg-slate-700 rounded-full h-2.5 mt-1"><div class="bg-teal-400 h-2.5 rounded-full" style="width: 75%"></div></div>
+                    </div>
+                     <div>
+                        <span class="text-sm font-medium text-indigo-400">Mind Score</span>
+                        <div class="w-full bg-slate-700 rounded-full h-2.5 mt-1"><div class="bg-indigo-400 h-2.5 rounded-full" style="width: 60%"></div></div>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium text-emerald-400">Nutrition Score</span>
+                        <div class="w-full bg-slate-700 rounded-full h-2.5 mt-1"><div class="bg-emerald-400 h-2.5 rounded-full" style="width: 90%"></div></div>
+                    </div>
+                     <div>
+                        <span class="text-sm font-medium text-sky-400">Lifestyle Score</span>
+                        <div class="w-full bg-slate-700 rounded-full h-2.5 mt-1"><div class="bg-sky-400 h-2.5 rounded-full" style="width: 85%"></div></div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="fade-in-section glass-card p-6 rounded-xl mb-16">
+                 <h3 class="text-xl font-bold text-white text-center mb-6">Your Report at a Glance</h3>
+                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                     <div>
+                         <h4 class="font-semibold text-teal-400 mb-2">Highlights</h4>
+                         <ul class="space-y-2 text-sm">
+                             <li class="flex items-center"><svg class="h-5 w-5 text-teal-400 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Excellent Nutrition Habits</li>
+                             <li class="flex items-center"><svg class="h-5 w-5 text-teal-400 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Consistent Activity Level</li>
+                             <li class="flex items-center"><svg class="h-5 w-5 text-teal-400 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Strong Social Connections</li>
+                             <li class="flex items-center"><svg class="h-5 w-5 text-teal-400 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> <span class="font-semibold mr-1">Top 20%</span> in Activity vs Peers</li>
+                         </ul>
+                     </div>
+                     <div>
+                         <h4 class="font-semibold text-amber-400 mb-2">Growth Areas</h4>
+                         <ul class="space-y-2 text-sm">
+                             <li class="flex items-center"><svg class="h-5 w-5 text-amber-400 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Sleep Quality</li>
+                             <li class="flex items-center"><svg class="h-5 w-5 text-amber-400 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Work-Life Balance</li>
+                             <li class="flex items-center"><svg class="h-5 w-5 text-amber-400 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Stress Management</li>
+                         </ul>
+                     </div>
+                 </div>
+            </section>
+            
+            <section class="fade-in-section glass-card p-6 rounded-xl mb-16 text-center">
+                <h3 class="text-xl font-bold text-white">Your First Step to a Higher Score</h3>
+                <p class="text-teal-300 text-lg mt-2">
+                    Create a 15-minute "wind-down" ritual before bed tonight. No screens. Just tea, a book, or quiet music.
+                </p>
+                <div class="mt-4 pt-4 border-t border-slate-700/50">
+                    <p class="text-sm text-gray-400 italic">Motivation Trigger:</p>
+                    <p class="text-white font-semibold">"A single good night's sleep can redefine your entire next day."</p>
+                </div>
+            </section>
+
+            <section class="fade-in-section grid md:grid-cols-2 gap-8 items-center mb-16">
+                <div class="w-full h-full">
+                    <canvas id="wellnessWheel"></canvas>
+                </div>
+                <div class="space-y-6">
+                    <div class="text-center md:text-left">
+                        <p class="text-lg">Your chronological age: <span class="font-bold text-white">35</span></p>
+                        <p class="text-xl text-teal-400">Estimated Wellness Age: <span class="font-bold text-2xl text-white">32</span></p>
+                        <p class="text-sm text-gray-400 mt-1">Your healthy habits are paying off, effectively making your body younger than your chronological age!</p>
+                    </div>
+                    <div class="bg-indigo-900/50 border border-indigo-800 p-4 rounded-xl">
+                         <h3 class="text-md font-bold text-white">Key AI Insight: The Stress-Sleep Connection</h3>
+                         <p class="mt-2 text-sm text-gray-300">
+                             The AI identified a strong link: daytime stress from your work is the primary reason for your moderate 'Stress' score and is directly impacting your sleep quality, creating a cycle of fatigue.
+                         </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="fade-in-section mt-20">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-white">Unlock Your Full Potential</h2>
+                    <p class="text-gray-400 mt-2">Here's a preview of your complete personalized report.</p>
+                </div>
+
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <div class="glass-card p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="bg-slate-700 p-2 rounded-md"><svg class="h-6 w-6 text-teal-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M12 6V4m0 16v-2M8 8l1.414-1.414M14.586 14.586L16 16m-7.029-7.029L10.414 8M16 8l-1.414-1.414M8 16l1.414 1.414M12 12a4 4 0 110-8 4 4 0 010 8z"/></svg></div>
+                            <span class="ml-4 font-semibold text-white">Deep Dive Analysis</span>
+                            <div class="tooltip ml-2">
+                                 <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.546-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                 <span class="tooltiptext">Get a detailed breakdown of each score from your Wellness Wheel. Understand the 'why' behind your numbers.</span>
+                            </div>
+                        </div>
+                        <ul class="mt-3 text-sm space-y-2 pl-12">
+                            <li class="flex justify-between"><span>Sleep Quality Score:</span> <span class="font-mono text-teal-400 blurry-text">6/10</span></li>
+                            <li class="flex justify-between"><span>Stress Impact Score:</span> <span class="font-mono text-indigo-400 blurry-text">7/10</span></li>
+                            <li class="flex justify-between"><span>Body Mass Index (BMI):</span> <span class="font-mono text-emerald-400 blurry-text">22.5</span></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="glass-card p-4 rounded-lg row-span-2">
+                        <div class="flex items-center">
+                            <div class="bg-slate-700 p-2 rounded-md"><svg class="h-6 w-6 text-teal-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                            <span class="ml-4 font-semibold text-white">Your 7-Day Action Plan</span>
+                             <div class="tooltip ml-2">
+                                 <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.546-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                 <span class="tooltiptext">A step-by-step, personalized plan. Simple, actionable tasks for each day designed to significantly boost your score.</span>
+                             </div>
+                        </div>
+                         <div class="mt-4 pl-12 relative">
+                             <div class="absolute left-2 top-2 bottom-2 w-0.5 bg-slate-700"></div>
+                             <div class="space-y-4 text-sm">
+                                 <div class="relative pl-6"><div class="absolute -left-1.5 top-1.5 w-3 h-3 bg-teal-400 rounded-full"></div><span class="font-bold mr-2">Day 1:</span> <span class="blurry-text">Morning hydration & evening wind-down.</span></div>
+                                 <div class="relative pl-6"><div class="absolute -left-1.5 top-1.5 w-3 h-3 bg-slate-600 rounded-full"></div><span class="font-bold mr-2">Day 2:</span> <span class="blurry-text">Protein-rich snack & mindful eating.</span></div>
+                                 <div class="relative pl-6"><div class="absolute -left-1.5 top-1.5 w-3 h-3 bg-slate-600 rounded-full"></div><span class="font-bold mr-2">Day 3:</span> <span class="blurry-text">Midday walk & digital detox hour.</span></div>
+                                 <div class="relative pl-6"><div class="absolute -left-1.5 top-1.5 w-3 h-3 bg-slate-600 rounded-full"></div><span class="font-bold mr-2">Day 4:</span> <span class="blurry-text">Focus block & gratitude journaling.</span></div>
+                             </div>
+                         </div>
+                    </div>
+                    
+                    <div class="glass-card p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="bg-slate-700 p-2 rounded-md"><svg class="h-6 w-6 text-teal-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 003.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0120.25 6v1.5m0 9V18A2.25 2.25 0 0118 20.25h-1.5m-9 0H6A2.25 2.25 0 013.75 18v-1.5M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
+                            <span class="ml-4 font-semibold text-white">Long-Term Outlook</span>
+                             <div class="tooltip ml-2">
+                                 <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.546-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                 <span class="tooltiptext">AI-powered forecast of your potential healthspan and risks based on current data.</span>
+                            </div>
+                        </div>
+                        <ul class="mt-3 text-sm space-y-2 pl-12">
+                             <li class="flex justify-between items-center"><span>Est. Life Expectancy:</span> <span class="font-mono text-teal-400 blurry-text">84 years</span></li>
+                             <li class="flex justify-between items-center"><span>Key Risk Factor:</span> <span class="text-amber-400 blurry-text">Chronic Stress</span></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="glass-card p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="bg-slate-700 p-2 rounded-md"><svg class="h-6 w-6 text-teal-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.76 9.76 0 01-2.53-.388m-5.182-1.26a11.41 11.41 0 01-2.433-2.433 9.76 9.76 0 01-.388-2.53C3 7.444 7.03 3.75 12 3.75s9 3.694 9 8.25z" /></svg></div>
+                            <span class="ml-4 font-semibold text-white">AI Coach Notes</span>
+                             <div class="tooltip ml-2">
+                                 <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.546-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                 <span class="tooltiptext">Personalized encouragement and explanations from your AI wellness coach.</span>
+                            </div>
+                        </div>
+                        <p class="mt-3 text-sm pl-12 blurry-text">
+                           "I noticed your energy dips around 2 PM. Let's try a small adjustment to your lunch..."
+                        </p>
+                    </div>
+                    
+                     <div class="glass-card p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="bg-slate-700 p-2 rounded-md"><svg class="h-6 w-6 text-teal-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" /></svg></div>
+                            <span class="ml-4 font-semibold text-white">Recommendations Library</span>
+                             <div class="tooltip ml-2">
+                                 <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.546-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                 <span class="tooltiptext">Unlock access to a full library of recipes, workout plans, and meditation guides tailored to you.</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 pl-12">
+                             <ul class="text-sm space-y-1 blurry-text">
+                                 <li><span class="font-semibold text-teal-400">Recipes:</span> High-protein breakfast bowls...</li>
+                                 <li><span class="font-semibold text-indigo-400">Workouts:</span> 10-min stress relief yoga...</li>
+                                 <li><span class="font-semibold text-sky-400">Articles:</span> The science of the perfect nap...</li>
+                             </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="bg-slate-700 p-2 rounded-md"><svg class="h-6 w-6 text-teal-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.562L16.25 22.5l-.648-1.938a3.375 3.375 0 00-2.672-2.672L11.25 18l1.938-.648a3.375 3.375 0 002.672-2.672L16.25 13.5l.648 1.938a3.375 3.375 0 002.672 2.672L21.5 18l-1.938.648a3.375 3.375 0 00-2.672 2.672z" /></svg></div>
+                            <span class="ml-4 font-semibold text-white">Scenario Simulations</span>
+                             <div class="tooltip ml-2">
+                                 <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.546-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                 <span class="tooltiptext">See the potential impact of lifestyle changes on your score with our "What if..." simulator.</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 pl-12 text-sm blurry-text">
+                           <p>What if you walked 20 mins daily?</p>
+                           <p><span class="font-semibold text-teal-400">Score Impact:</span> <span class="font-mono">+5 points</span></p>
+                        </div>
+                    </div>
+
+                </div>
+
+                 <div class="mt-10 text-center">
+                      <button type="button" class="w-full md:w-auto inline-flex items-center justify-center px-10 py-4 border border-transparent text-base font-bold rounded-lg shadow-lg text-slate-900 bg-teal-400 hover:bg-teal-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-teal-500 transition-transform transform hover:scale-105 animate-pulse">
+                          Unlock Full Report for $9.99
+                      </button>
+                 </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Анимация круговой диаграммы
+            const circle = document.getElementById('score-circle-path');
+            const score = 78; // Пример значения
+            const radius = 15.9155;
+            const circumference = 2 * Math.PI * radius;
+            // Correct calculation for offset
+            const offset = circumference - (score / 100) * circumference;
+            
+            // Set initial dash array to full circumference to avoid initial jump
+            circle.style.strokeDasharray = `${circumference} ${circumference}`;
+            circle.style.strokeDashoffset = circumference;
+            
+            setTimeout(() => {
+                // Animate to the final score
+                circle.style.strokeDashoffset = offset;
+            }, 100);
+
+            // Анимация текста счета
+            const scoreText = document.getElementById('score-text');
+            let currentScore = 0;
+            const interval = setInterval(() => {
+                if (currentScore >= score) {
+                    clearInterval(interval);
+                    scoreText.textContent = score;
+                } else {
+                    currentScore++;
+                    scoreText.textContent = currentScore;
+                }
+            }, 20);
+
+            // Рендер "Колеса Велнеса"
+            const ctx = document.getElementById('wellnessWheel').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Energy', 'Stress', 'Nutrition', 'Activity', 'Sleep'], // Updated labels
+                    datasets: [{
+                        label: 'Your Score',
+                        data: [65, 55, 90, 75, 60], // Updated data
+                        backgroundColor: 'rgba(20, 227, 227, 0.2)',
+                        borderColor: 'rgba(20, 227, 227, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(20, 227, 227, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(20, 227, 227, 1)'
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                            pointLabels: {
+                                font: { size: 12, weight: '600' },
+                                color: '#cbd5e1' // slate-300
+                            },
+                            ticks: {
+                                backdropColor: 'transparent',
+                                color: '#94a3b8', // slate-400
+                                stepSize: 25,
+                                font: { size: 10 }
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.r !== null) {
+                                        label += context.parsed.r;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    maintainAspectRatio: true,
+                }
+            });
+
+            // Анимация при скролле
+            const sections = document.querySelectorAll('.fade-in-section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+
+</body>
+</html>

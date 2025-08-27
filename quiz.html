@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI WELLNESSCORE - Your Personalized Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Анимированный фон */
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #0c4a6e);
+            background-size: 400% 400%;
+            animation: gradientAnimation 20s ease infinite;
+            color: #e5e7eb;
+        }
+        
+        /* Стили для скрытия скроллбаров */
+        .no-scrollbar {
+            scrollbar-width: none; /* Для Firefox */
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none; /* Для Chrome, Safari, Opera */
+        }
+
+        /* Анимация появления */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Анимация печати (три точки) */
+        @keyframes typing-bubble {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            40% { opacity: 1; transform: scale(1); }
+        }
+        .typing-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            animation: typing-bubble 1.4s infinite ease-in-out;
+        }
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        /* Анимация "дыхания" аватара */
+        @keyframes breathing {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 5px rgba(129, 140, 248, 0); }
+            50% { transform: scale(1.05); box-shadow: 0 0 15px rgba(129, 140, 248, 0.5); }
+        }
+        .breathing-avatar {
+            animation: breathing 3s ease-in-out infinite;
+        }
+        .lottie-avatar {
+            width: 32px;
+            height: 32px;
+        }
+
+        /* Стили для камеры */
+        #camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            border: 4px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+        #camera-container.face-detected {
+            border-color: #22c55e;
+        }
+        #camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        #face-outline {
+            position: absolute;
+            border: 3px solid rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            transition: all 0.2s ease-in-out;
+            pointer-events: none;
+        }
+
+        /* Стили для прогресс-бара */
+        .progress-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.1);
+            z-index: 20;
+            overflow: hidden;
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #818cf8 0%, #34d399 100%);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-2xl h-[90vh] bg-slate-900/70 backdrop-blur-xl ring-1 ring-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden relative">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <header class="p-4 border-b border-white/10 bg-slate-900/50 z-10">
+            <h1 class="text-xl font-bold text-center text-indigo-400">AI WELLNESSCORE</h1>
+            <p class="text-sm text-center text-gray-400">Your path to a better you starts here</p>
+        </header>
+
+        <main id="chat-container" class="flex-1 p-6 overflow-y-auto no-scrollbar">
+            <div id="chat-content" class="space-y-6">
+            </div>
+        </main>
+
+        <footer id="input-area" class="p-4 border-t border-white/10 bg-slate-800/60">
+            <div id="options-container" class="flex flex-nowrap gap-2 mb-3 overflow-x-auto no-scrollbar pb-2 justify-center">
+            </div>
+            <div id="text-input-container" class="flex items-center gap-2" style="display: none;">
+                <input type="text" id="user-input" class="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white placeholder-gray-400 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400" placeholder="Type your answer...">
+                <button id="send-btn" class="bg-indigo-500 text-white p-2 rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform duration-200 transform active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    
+    <script>
+        // --- Элементы DOM ---
+        const chatContent = document.getElementById('chat-content');
+        const inputArea = document.getElementById('input-area');
+        const optionsContainer = document.getElementById('options-container');
+        const textInputContainer = document.getElementById('text-input-container');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const progressBar = document.getElementById('progressBar');
+
+        // --- Полный список вопросов ---
+        const quizQuestions = [
+            { text: "Hello! I'm your personal AI Wellness Coach. I'll be guiding you through this analysis to help you discover insights about your well-being.", type: 'welcome', options: ["Let's Begin!"] },
+            { text: "Before we begin, a quick heads-up: I'm an AI coach, not a medical doctor. This analysis is for educational purposes only and is not a substitute for professional medical advice. <b>All data, including your photo, is deleted immediately after you view the detailed report.</b><br><br>By continuing, you agree to our <a href='terms.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Terms of Service</a> and <a href='privacy.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Privacy Policy</a>.", type: 'disclaimer', options: ['I Understand & Agree'] },
+            // BODY
+            { text: "Great, let's begin! To start, what's your age?", reason: "Your age helps me calibrate your wellness metrics against demographic data, ensuring your results are relevant to your life stage.", type: 'chips_text', options: ['Under 18', '18-25', '26-35', '36-50', '50+'], placeholder: 'Or type your exact age...' },
+            { text: "Great start! Now, what's your biological sex?", reason: "This allows me to consider physiological differences that can influence wellness factors.", type: 'chips_text', options: ['Male', 'Female'], placeholder: 'Or prefer not to say...' },
+            { text: "Perfect. Let's talk about your height. (e.g., 5 ft 10 in)", reason: "Your height and weight are used to calculate your Body Mass Index (BMI), a basic indicator of physical health.", type: 'chips_text', options: ["Under 5'0\"", "5'0\" - 5'5\"", "5'6\" - 5'11\"", "6'0\"+"], placeholder: 'Or type your exact height...' },
+            { text: "Thanks! And your current weight in pounds?", reason: "This, along with your height, gives us a baseline for physical wellness metrics.", type: 'chips_text', options: ['Under 120 lbs', '120-150 lbs', '151-180 lbs', '181-220 lbs', '220+ lbs'], placeholder: 'Or type your exact weight...' },
+            { text: "Sleep is crucial. How many hours of <i>quality</i> sleep do you get on an average night?", reason: "Sleep is the foundation of recovery for both mind and body. The quality of your sleep reveals a lot about your overall well-being.", type: 'chips_text', options: ['Less than 5', '5-6 hours', '7-8 hours', 'More than 8'], placeholder: 'Or type a specific number...' },
+            { text: "Awesome. Movement is key! How often do you engage in moderate physical activity (like a brisk walk) per week?", reason: "Regular movement is vital for physical and mental health. This helps me understand your energy expenditure.", type: 'chips_text', options: ['Rarely', '1-2 times', '3-4 times', '5+ times'], placeholder: 'Or describe your routine...' },
+            // NUTRITION
+            { text: "Let's dive into nutrition. How many servings of fruits or vegetables do you typically eat per day?", reason: "This is a key indicator of your micronutrient intake, which fuels your body and brain.", type: 'chips_text', options: ['0-1', '2-3', '4-5', 'More than 5'], placeholder: 'Or type a specific number...' },
+            { text: "Honesty is the best policy here. How often do you eat processed or fast food in a typical week?", reason: "Understanding this habit helps me assess potential inflammation and energy level factors.", type: 'chips_text', options: ['Daily', 'A few times a week', 'Once a week', 'Rarely/Never'], placeholder: 'Or describe your habits...' },
+            { text: "Hydration check! How many glasses of water (approx. 8 oz) do you drink per day?", reason: "Hydration impacts everything from cognitive function to physical performance. It's a simple but powerful wellness lever.", type: 'chips_text', options: ['1-2', '3-4', '5-6', '7+'], placeholder: 'Or type a specific amount...' },
+            // MIND
+            { text: "Now for the mind. On a scale of 1 to 10, how would you rate your typical stress level?", reason: "Chronic stress is a major factor in overall wellness. Your self-perception here is a crucial piece of the puzzle.", type: 'chips_text', options: ['1-3 (Low)', '4-6 (Moderate)', '7-8 (High)', '9-10 (Very High)'], placeholder: 'Or type an exact number...' },
+            { text: "Finding calm is a superpower. How often do you practice mindfulness, meditation, or deep breathing?", reason: "This tells me about the tools you use to manage stress and cultivate mental clarity.", type: 'chips_text', options: ['Daily', 'A few times a week', 'Occasionally', 'Never'], placeholder: 'Or describe your practice...' },
+            { text: "Let's check in with your emotions. How would you describe your overall mood on a typical day?", reason: "Your typical mood provides a snapshot of your emotional baseline and mental resilience.", type: 'chips_text', options: ['Energetic & Positive', 'Generally Content', 'Neutral', 'Often Fatigued or Low'], placeholder: 'Or describe in your own words...' },
+            // LIFESTYLE
+            { text: "Time for some lifestyle questions. How many alcoholic drinks do you have in a typical week?", reason: "Alcohol can significantly impact sleep quality, recovery, and mood. This helps me get a clearer picture.", type: 'chips_text', options: ['0', '1-3', '4-7', '8+'], placeholder: 'Or type a specific number...' },
+            { text: "This is a safe space. Do you smoke or use tobacco products?", reason: "This is an important lifestyle factor with significant health implications that I need to consider.", type: 'chips_text', options: ['Yes, daily', 'Yes, occasionally', 'I quit', 'Never'], placeholder: 'Or clarify your situation...' },
+            { text: "Last question before the final step! How much time do you spend on screens (phone, computer, TV) outside of work?", reason: "Excessive screen time can affect your sleep, eye health, and mental state. This helps me understand your digital habits.", type: 'chips_text', options: ['Less than 2 hours', '2-4 hours', '4-6 hours', 'More than 6 hours'], placeholder: 'Or estimate your screen time...' },
+            // FINAL STEP
+            { text: "You did it! That's all the questions. Now for the fun part: a quick selfie. This helps me analyze non-medical indicators of stress and fatigue. Your photo is processed on the fly and never stored. Please allow camera access and position your face within the frame.", type: 'camera_button', options: ['Open Camera'] }
+        ];
+
+        let currentQuestionIndex = 0;
+        const userAnswers = {};
+        const totalQuizQuestions = quizQuestions.length - 2; // Исключаем "welcome" и "disclaimer"
+
+        // --- Логика чата ---
+
+        // Обновляем прогресс-бар на основе текущего вопроса
+        function updateProgressBar() {
+            // Исключаем первые два экрана (welcome, disclaimer) из общего количества
+            const answeredQuestions = Math.max(0, currentQuestionIndex - 2);
+            const progress = (answeredQuestions / totalQuizQuestions) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+        
+        // **Измененная функция для получения аватара бота**
+        function getBotAvatar() {
+            const avatar = document.createElement('div');
+            avatar.className = 'flex-shrink-0 w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center ring-1 ring-white/20 breathing-avatar lottie-avatar-container';
+            
+            // Создаем контейнер для Lottie-анимации
+            const lottieContainer = document.createElement('div');
+            lottieContainer.className = 'lottie-avatar';
+            avatar.appendChild(lottieContainer);
+
+            // Загрузка Lottie-анимации
+            lottie.loadAnimation({
+                container: lottieContainer,
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                path: 'avatar.json' // **Путь к вашему файлу анимации**
+            });
+            return avatar;
+        }
+
+        // Новая функция для создания Lottie-аватара
+        function getLottieAvatar() {
+            const container = document.createElement('div');
+            container.id = 'lottie-avatar';
+            container.className = 'w-24 h-24 rounded-full bg-slate-700 flex items-center justify-center ring-4 ring-indigo-500/50 breathing-avatar p-2';
+            
+            // Загрузка Lottie-анимации
+            const lottieAnimation = lottie.loadAnimation({
+                container: container,
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                path: 'avatar.json'
+            });
+
+            // Проверка на ошибку загрузки анимации
+            lottieAnimation.addEventListener('data_failed', () => {
+                console.error("Lottie animation failed to load. Please check the path to 'avatar.json' file.");
+                container.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/><path d="M12.2 19.5c-1.6 0-3.1-.4-4.5-1.2-.6-.3-1.2-.8-1.7-1.3-.5-.5-.9-1.1-1.2-1.8-.3-.6-.5-1.3-.5-2 0-1.4.6-2.8 1.5-3.8.5-.5 1-1 1.7-1.3 1.4-.8 2.9-1.2 4.5-1.2s3.1.4 4.5 1.2c.6.3 1.2.8 1.7 1.3.5.5.9 1.1 1.2 1.8.3.6.5 1.3.5 2 0 1.4-.6 2.8-1.5 3.8-.5.5-1 1-1.7 1.3-1.4.8-2.9 1.2-4.5 1.2z"/></svg>`;
+            });
+
+            return container;
+        }
+        
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'fade-in flex w-full items-end gap-3 justify-start';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'max-w-xs md:max-w-md p-3 rounded-2xl bg-indigo-600 text-white rounded-bl-lg flex items-center justify-center space-x-1';
+            bubble.innerHTML = `<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>`;
+            
+            typingDiv.appendChild(getBotAvatar());
+            typingDiv.appendChild(bubble);
+            
+            chatContent.appendChild(typingDiv);
+            chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+        
+        function addWelcomeMessage(text) {
+            const welcomeContainer = document.createElement('div');
+            welcomeContainer.className = 'fade-in flex flex-col items-center text-center space-y-4 py-4';
+            
+            // Использование Lottie-аватара
+            welcomeContainer.appendChild(getLottieAvatar());
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'text-lg text-gray-200 max-w-sm';
+            textDiv.innerHTML = text;
+            
+            welcomeContainer.appendChild(textDiv);
+            
+            chatContent.appendChild(welcomeContainer);
+            chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
+        }
+
+        function addMessage(htmlContent, sender = 'bot') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `max-w-xs md:max-w-md p-3 rounded-2xl ${sender === 'bot' ? 'bg-indigo-600 text-white rounded-bl-lg' : 'bg-slate-700 text-gray-200 rounded-br-lg'}`;
+            messageDiv.innerHTML = htmlContent;
+            
+            const wrapperDiv = document.createElement('div');
+            wrapperDiv.className = `fade-in flex w-full items-end gap-3 ${sender === 'bot' ? 'justify-start' : 'justify-end'}`;
+
+            if (sender === 'bot') {
+                wrapperDiv.appendChild(getBotAvatar());
+            }
+
+            wrapperDiv.appendChild(messageDiv);
+            chatContent.appendChild(wrapperDiv);
+            chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
+        }
+
+        function displayQuestion() {
+            if (currentQuestionIndex >= quizQuestions.length) {
+                endQuiz();
+                return;
+            }
+            
+            const question = quizQuestions[currentQuestionIndex];
+            showTypingIndicator();
+
+            setTimeout(() => {
+                hideTypingIndicator();
+                
+                if (question.type === 'welcome') {
+                    addWelcomeMessage(question.text);
+                } else {
+                    let messageHtml = question.text;
+                    if (question.reason) {
+                        messageHtml += `<br><span class='block mt-2 text-sm text-indigo-200 opacity-80'>${question.reason}</span>`;
+                    }
+                    addMessage(messageHtml);
+                }
+                
+                setupInput(question);
+            }, 1000 + Math.random() * 500);
+        }
+
+        function setupInput(question) {
+            optionsContainer.innerHTML = '';
+            textInputContainer.style.display = 'none';
+            inputArea.style.display = 'block';
+
+            const renderChips = () => {
+                optionsContainer.classList.remove('justify-center');
+                optionsContainer.classList.add('flex-nowrap', 'overflow-x-auto');
+                question.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.className = "flex-shrink-0 px-4 py-2 bg-slate-700 border border-slate-600 text-gray-200 rounded-full hover:bg-indigo-500 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200";
+                    button.onclick = () => handleAnswer(option);
+                    optionsContainer.appendChild(button);
+                });
+            }
+
+            const renderTextInput = () => {
+                textInputContainer.style.display = 'flex';
+                userInput.type = 'text';
+                userInput.placeholder = question.placeholder;
+                userInput.value = '';
+                userInput.focus();
+            }
+
+            if (question.type === 'welcome' || question.type === 'disclaimer') {
+                optionsContainer.classList.add('justify-center');
+                optionsContainer.classList.remove('flex-nowrap', 'overflow-x-auto');
+                question.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.className = "px-6 py-3 bg-indigo-500 border border-indigo-400 text-white rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200 font-semibold";
+                    button.onclick = () => handleAnswer(option);
+                    optionsContainer.appendChild(button);
+                });
+                textInputContainer.style.display = 'none';
+            } else if (question.type === 'chips_text') {
+                renderChips();
+                renderTextInput();
+            } else if (question.type === 'camera_button') {
+                inputArea.style.display = 'block';
+                optionsContainer.innerHTML = '';
+                const button = document.createElement('button');
+                button.textContent = 'Open Camera';
+                button.className = "px-6 py-3 bg-indigo-500 border border-indigo-400 text-white rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200 font-semibold";
+                button.onclick = handleCameraButtonClick;
+                optionsContainer.appendChild(button);
+                textInputContainer.style.display = 'none';
+            }
+        }
+
+        function handleAnswer(answer) {
+            if (!answer || !answer.trim()) return;
+            
+            const question = quizQuestions[currentQuestionIndex];
+            userAnswers[currentQuestionIndex] = answer;
+            
+            if (question.type !== 'disclaimer' && question.type !== 'welcome') {
+                addMessage(answer, 'user');
+                updateProgressBar();
+            }
+
+            currentQuestionIndex++;
+            displayQuestion();
+        }
+        
+        function handleCameraButtonClick() {
+            addMessage("Opening camera...", 'bot');
+            optionsContainer.innerHTML = '';
+            inputArea.style.display = 'none';
+            initCamera();
+        }
+
+        // --- Логика камеры ---
+        
+        let faceApiLoaded = false;
+        let detectionInterval;
+
+        async function loadFaceApiModels() {
+            await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights');
+            faceApiLoaded = true;
+            console.log("FaceAPI models loaded.");
+        }
+
+        async function initCamera() {
+            const cameraContainer = document.createElement('div');
+            cameraContainer.id = 'camera-container';
+            cameraContainer.className = 'fade-in';
+            
+            const video = document.createElement('video');
+            video.id = 'video';
+            video.autoplay = true;
+            video.muted = true;
+            video.playsInline = true;
+            video.className = 'w-full h-auto rounded-2xl scale-x-[-1]';
+
+            const overlay = document.createElement('div');
+            overlay.id = 'camera-overlay';
+            overlay.innerHTML = `<div id="face-outline"></div><p id="camera-status" class="mt-4 text-lg font-medium bg-black bg-opacity-50 px-3 py-1 rounded-full">Position your face</p>`;
+
+            cameraContainer.appendChild(video);
+            cameraContainer.appendChild(overlay);
+
+            const wrapperDiv = document.createElement('div');
+            wrapperDiv.className = 'fade-in flex justify-start items-end gap-3';
+            
+            wrapperDiv.appendChild(getBotAvatar());
+            wrapperDiv.appendChild(cameraContainer);
+            chatContent.appendChild(wrapperDiv);
+            chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
+
+            if (!faceApiLoaded) {
+                 await loadFaceApiModels();
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                video.srcObject = stream;
+                video.onloadedmetadata = () => {
+                    video.play();
+                    startFaceDetection(video);
+                };
+            } catch (err) {
+                console.error("Camera Error:", err);
+                addMessage("Oops, I couldn't access your camera. Please check your browser permissions. We can skip this step for now.");
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    updateProgressBar();
+                    displayQuestion();
+                }, 1000);
+            }
+        }
+        
+        function startFaceDetection(video) {
+            const cameraContainer = document.getElementById('camera-container');
+            const statusEl = document.getElementById('camera-status');
+            const faceOutline = document.getElementById('face-outline');
+            let captureTimeout;
+
+            detectionInterval = setInterval(async () => {
+                if (!faceApiLoaded) return;
+                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
+                
+                if (detections.length === 1) {
+                    const box = detections[0].box;
+                    const videoRect = video.getBoundingClientRect();
+                    const scaleX = videoRect.width / video.videoWidth;
+                    const scaleY = videoRect.height / video.videoHeight;
+                    
+                    faceOutline.style.width = `${box.width * scaleX * 1.2}px`;
+                    faceOutline.style.height = `${box.height * scaleY * 1.4}px`;
+                    faceOutline.style.left = `${videoRect.width - (box.x * scaleX) - (box.width * scaleX) + (box.width * scaleX * 0.1)}px`;
+                    faceOutline.style.top = `${box.y * scaleY - (box.height * scaleY * 0.2)}px`;
+
+                    const isCentered = (box.x + box.width / 2) > video.videoWidth * 0.3 && (box.x + box.width / 2) < video.videoWidth * 0.7;
+                    const isGoodSize = box.width > video.videoWidth * 0.4;
+
+                    if (isCentered && isGoodSize) {
+                        cameraContainer.classList.add('face-detected');
+                        statusEl.textContent = "Hold still...";
+                        if (!captureTimeout) {
+                            captureTimeout = setTimeout(() => takePicture(video), 1500);
+                        }
+                    } else {
+                        cameraContainer.classList.remove('face-detected');
+                        faceOutline.style.width = '0px';
+                        statusEl.textContent = detections.length > 1 ? "Please, only one person" : "Position your face";
+                        clearTimeout(captureTimeout);
+                        captureTimeout = null;
+                    }
+
+                } else {
+                    cameraContainer.classList.remove('face-detected');
+                    faceOutline.style.width = '0px';
+                    statusEl.textContent = detections.length > 1 ? "Please, only one person" : "Position your face";
+                    clearTimeout(captureTimeout);
+                    captureTimeout = null;
+                }
+            }, 300);
+        }
+
+        function takePicture(video) {
+            clearInterval(detectionInterval);
+            
+            const cameraContainer = document.getElementById('camera-container');
+            const statusEl = document.getElementById('camera-status');
+            statusEl.textContent = "Captured! Analyzing...";
+            
+            cameraContainer.style.transition = 'filter 0.1s';
+            cameraContainer.style.filter = 'brightness(2)';
+            setTimeout(() => cameraContainer.style.filter = 'brightness(1)', 100);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.translate(canvas.width, 0);
+            context.scale(-1, 1);
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            video.srcObject.getTracks().forEach(track => track.stop());
+            
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            userAnswers['selfie'] = dataUrl;
+
+            currentQuestionIndex++;
+            updateProgressBar();
+            displayQuestion();
+        }
+
+        function endQuiz() {
+            inputArea.style.display = 'none';
+            progressBar.style.width = '100%'; // Завершаем прогресс
+            showTypingIndicator();
+            setTimeout(() => {
+                hideTypingIndicator();
+                addMessage("Thank you for sharing! I'm firing up my neural networks to analyze your results... This is exciting!");
+                
+                showTypingIndicator();
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    addMessage("Done! Your personalized free report is ready to blow your mind. 🚀 <a href='#' class='font-bold underline text-indigo-300 hover:text-indigo-200'>View my results</a>");
+                }, 3000);
+            }, 1500);
+        }
+
+        // --- Инициализация ---
+        sendBtn.addEventListener('click', () => handleAnswer(userInput.value));
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleAnswer(userInput.value);
+            }
+        });
+
+        displayQuestion();
+    </script>
+
+</body>
+</html>
