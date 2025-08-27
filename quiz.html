@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>AI WELLNESSCORE - Your Personalized Analysis</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,9 +12,12 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
+        /* Critical styles for a stable full-height layout on all devices */
         html, body {
             height: 100%;
             overflow: hidden;
+            margin: 0;
+            padding: 0;
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -23,6 +26,34 @@
             animation: gradientAnimation 20s ease infinite;
             color: #e5e7eb;
         }
+        /* Main application container */
+        #app-container {
+            width: 100%;
+            height: 100%; /* Inherit full height from body */
+            display: flex;
+            flex-direction: column;
+            background-color: rgba(15, 23, 42, 0.7);
+        }
+        /* On larger screens (tablets/desktops), constrain it to a card-like view */
+        @media (min-width: 640px) {
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 2rem;
+            }
+            #app-container {
+                max-width: 672px;
+                height: 90vh;
+                max-height: 850px;
+                border-radius: 1rem;
+                box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+            }
+        }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { 
             -ms-overflow-style: none;
@@ -65,6 +96,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 1rem;
         }
         #camera-container {
             position: relative;
@@ -111,40 +143,37 @@
         }
     </style>
 </head>
-<body class="bg-slate-900 text-gray-200">
+<body>
 
-    <!-- Centering Wrapper -->
-    <div class="w-full h-full flex items-center justify-center p-2 sm:p-4">
-        <!-- Main chat container -->
-        <div class="w-full h-full max-h-[850px] sm:max-w-2xl bg-slate-900/70 backdrop-blur-xl ring-1 ring-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden relative">
-            <div class="progress-container rounded-t-2xl">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
-
-            <header class="p-4 border-b border-white/10 bg-slate-900/50 z-10 flex-shrink-0">
-                <h1 class="text-xl font-bold text-center text-indigo-400">AI WELLNESSCORE</h1>
-                <p class="text-sm text-center text-gray-400">Your path to a better you starts here</p>
-            </header>
-
-            <main id="chat-container" class="flex-1 p-4 sm:p-6 overflow-y-auto no-scrollbar">
-                <div id="chat-content" class="space-y-6">
-                </div>
-            </main>
-
-            <footer id="input-area" class="p-4 border-t border-white/10 bg-slate-800/60 flex-shrink-0">
-                <div id="options-container" class="flex flex-nowrap gap-2 mb-3 overflow-x-auto no-scrollbar pb-2 justify-center">
-                </div>
-                <div id="text-input-container" class="flex items-center gap-2" style="display: none;">
-                    <input type="text" id="user-input" class="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white placeholder-gray-400 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400" placeholder="Type your answer...">
-                    <button id="send-btn" class="bg-indigo-500 text-white p-2 rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform duration-200 transform active:scale-95">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" /></svg>
-                    </button>
-                </div>
-            </footer>
+    <!-- Main chat container -->
+    <div id="app-container">
+        <div class="progress-container sm:rounded-t-2xl">
+            <div class="progress-bar" id="progressBar"></div>
         </div>
+
+        <header class="p-4 border-b border-white/10 bg-slate-900/50 z-10 flex-shrink-0">
+            <h1 class="text-xl font-bold text-center text-indigo-400">AI WELLNESSCORE</h1>
+            <p class="text-sm text-center text-gray-400">Your path to a better you starts here</p>
+        </header>
+
+        <main id="chat-container" class="flex-1 p-4 sm:p-6 overflow-y-auto no-scrollbar">
+            <div id="chat-content" class="space-y-6">
+            </div>
+        </main>
+
+        <footer id="input-area" class="p-4 border-t border-white/10 bg-slate-800/60 flex-shrink-0">
+            <div id="options-container" class="flex flex-nowrap gap-2 mb-3 overflow-x-auto no-scrollbar pb-2 justify-center">
+            </div>
+            <div id="text-input-container" class="flex items-center gap-2" style="display: none;">
+                <input type="text" id="user-input" class="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white placeholder-gray-400 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400" placeholder="Type your answer...">
+                <button id="send-btn" class="bg-indigo-500 text-white p-2 rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform duration-200 transform active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+        </footer>
     </div>
     
-    <!-- Fullscreen Camera Modal (outside the centering wrapper) -->
+    <!-- Fullscreen Camera Modal (outside the main app structure) -->
     <div id="camera-modal" class="hidden">
         <button id="close-camera-btn" class="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2 z-10">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -203,44 +232,23 @@
 
         // --- SERVER COMMUNICATION ---
         const API_ENDPOINT = '/.netlify/functions/quiz';
-
         async function startQuizSession() {
             try {
-                const response = await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'startSession' })
-                });
-                if (!response.ok) throw new Error('Server error starting session');
+                const response = await fetch(API_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'startSession' }) });
+                if (!response.ok) throw new Error('Server error');
                 const data = await response.json();
                 sessionId = data.sessionId;
-                console.log('Session started:', sessionId);
             } catch (error) {
                 console.error('Failed to start session:', error);
-                addMessage("Sorry, I'm having trouble connecting to the server. Please try refreshing the page.");
+                addMessage("Sorry, I'm having trouble connecting. Please refresh.");
                 inputArea.style.display = 'none';
             }
         }
-        
         async function saveAnswerToServer(questionId, answer) {
-            if (!sessionId) {
-                console.error('No session ID available to save answer.');
-                return;
-            }
+            if (!sessionId) return;
             try {
-                await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'saveAnswer',
-                        sessionId: sessionId,
-                        questionId: questionId,
-                        answer: answer
-                    })
-                });
-            } catch (error) {
-                console.error('Failed to save answer:', error);
-            }
+                await fetch(API_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'saveAnswer', sessionId, questionId, answer }) });
+            } catch (error) { console.error('Failed to save answer:', error); }
         }
 
         // --- CHAT UI LOGIC ---
@@ -297,7 +305,6 @@
             const answeredQuestions = Object.keys(userAnswers).length;
             progressBar.style.width = `${(answeredQuestions / totalQuizQuestions) * 100}%`;
         }
-
         function displayQuestion() {
             if (currentQuestionIndex >= quizQuestions.length) {
                 endQuiz();
@@ -319,7 +326,6 @@
                 setupInput(question);
             }, 1000 + Math.random() * 500);
         }
-
         function setupInput(question) {
             optionsContainer.innerHTML = '';
             textInputContainer.style.display = 'none';
@@ -348,10 +354,8 @@
                 userInput.value = '';
             }
         }
-
         function handleAnswer(answer) {
             if (!answer || !answer.trim()) return;
-            
             const question = quizQuestions[currentQuestionIndex];
             if (question.type !== 'welcome' && question.type !== 'disclaimer') {
                 userAnswers[question.id] = answer;
@@ -359,11 +363,9 @@
                 addMessage(answer, 'user');
                 updateProgressBar();
             }
-
             currentQuestionIndex++;
             displayQuestion();
         }
-        
         function handleCameraButtonClick() {
             addMessage("Opening camera...", 'bot');
             optionsContainer.innerHTML = '';
@@ -375,7 +377,6 @@
         let faceApiLoaded = false;
         let detectionInterval;
         let videoStream;
-
         async function loadFaceApiModels() {
             const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
             try {
@@ -386,13 +387,10 @@
                 addMessage("Sorry, there was a problem preparing the camera analysis. Please try refreshing the page.");
             }
         }
-
         async function initCamera() {
             cameraModal.classList.remove('hidden');
             cameraModal.classList.add('flex');
-
             if (!faceApiLoaded) await loadFaceApiModels();
-
             try {
                 videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
                 videoEl.srcObject = videoStream;
@@ -409,7 +407,6 @@
                 closeCamera();
             }
         }
-
         function closeCamera() {
             clearInterval(detectionInterval);
             if (videoStream) {
@@ -420,31 +417,25 @@
             inputArea.style.display = 'block';
             setupInput(quizQuestions[currentQuestionIndex]);
         }
-        
         function startFaceDetection(video) {
             const cameraContainer = document.getElementById('camera-container');
             const statusEl = document.getElementById('camera-status');
             const faceOutline = document.getElementById('face-outline');
             let captureTimeout;
-
             detectionInterval = setInterval(async () => {
                 if (!faceApiLoaded) return;
                 const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
-                
                 if (detections.length === 1) {
                     const box = detections[0].box;
                     const videoRect = video.getBoundingClientRect();
                     const scaleX = videoRect.width / video.videoWidth;
                     const scaleY = videoRect.height / video.videoHeight;
-                    
                     faceOutline.style.width = `${box.width * scaleX * 1.2}px`;
                     faceOutline.style.height = `${box.height * scaleY * 1.4}px`;
                     faceOutline.style.left = `${videoRect.width - (box.x * scaleX) - (box.width * scaleX) + (box.width * scaleX * 0.1)}px`;
                     faceOutline.style.top = `${box.y * scaleY - (box.height * scaleY * 0.2)}px`;
-
                     const isCentered = (box.x + box.width / 2) > video.videoWidth * 0.3 && (box.x + box.width / 2) < video.videoWidth * 0.7;
                     const isGoodSize = box.width > video.videoWidth * 0.4;
-
                     if (isCentered && isGoodSize) {
                         cameraContainer.classList.add('face-detected');
                         statusEl.textContent = "Hold still...";
@@ -467,7 +458,6 @@
                 }
             }, 300);
         }
-
         function takePicture(video) {
             clearInterval(detectionInterval);
             document.getElementById('camera-status').textContent = "Captured! Analyzing...";
@@ -478,15 +468,12 @@
             context.translate(canvas.width, 0);
             context.scale(-1, 1);
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            closeCamera(); // Hide modal and stop stream
-
+            closeCamera();
             const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
             userAnswers['selfie'] = dataUrl;
             saveAnswerToServer('selfie', 'Photo captured');
             endQuiz();
         }
-
         function endQuiz() {
             inputArea.style.display = 'none';
             progressBar.style.width = '100%';
@@ -494,7 +481,6 @@
             setTimeout(() => {
                 hideTypingIndicator();
                 addMessage("Thank you for sharing! I'm firing up my neural networks to analyze your results... This is exciting!");
-                
                 showTypingIndicator();
                 setTimeout(() => {
                     hideTypingIndicator();
@@ -513,13 +499,11 @@
                 displayQuestion();
             }
         }
-
         sendBtn.addEventListener('click', () => handleAnswer(userInput.value));
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleAnswer(userInput.value);
         });
         closeCameraBtn.addEventListener('click', closeCamera);
-
         initQuiz();
     </script>
 
