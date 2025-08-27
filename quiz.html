@@ -92,7 +92,7 @@
             background-color: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(8px);
             z-index: 50;
-            display: flex;
+            /* display: flex; <-- THIS WAS THE PROBLEM. JS will handle this. */
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -172,7 +172,7 @@
             </div>
         </footer>
     </div>
-    
+   
     <!-- Fullscreen Camera Modal (outside the main app structure) -->
     <div id="camera-modal" class="hidden">
         <button id="close-camera-btn" class="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2 z-10">
@@ -189,7 +189,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
-    
+   
     <script>
         // --- STATE & DOM ELEMENTS ---
         const chatContent = document.getElementById('chat-content');
@@ -202,7 +202,7 @@
         const cameraModal = document.getElementById('camera-modal');
         const closeCameraBtn = document.getElementById('close-camera-btn');
         const videoEl = document.getElementById('video');
-        
+       
         let sessionId = null;
         let currentQuestionIndex = 0;
         const userAnswers = {};
@@ -332,14 +332,14 @@
             inputArea.style.display = 'block';
             const isSimpleAction = question.type === 'welcome' || question.type === 'disclaimer' || question.type === 'camera_button';
             optionsContainer.className = `flex gap-2 mb-3 pb-2 ${isSimpleAction ? 'justify-center' : 'flex-nowrap overflow-x-auto no-scrollbar'}`;
-            
+           
             question.options.forEach(option => {
                 const button = document.createElement('button');
                 button.textContent = option;
                 button.className = isSimpleAction 
                     ? "px-6 py-3 bg-indigo-500 border border-indigo-400 text-white rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200 font-semibold"
                     : "flex-shrink-0 px-4 py-2 bg-slate-700 border border-slate-600 text-gray-200 rounded-full hover:bg-indigo-500 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200";
-                
+               
                 if (question.type === 'camera_button') {
                     button.onclick = () => handleCameraButtonClick();
                 } else {
@@ -389,7 +389,7 @@
         }
         async function initCamera() {
             cameraModal.classList.remove('hidden');
-            cameraModal.classList.add('flex');
+            cameraModal.style.display = 'flex'; // Use style to show
             if (!faceApiLoaded) await loadFaceApiModels();
             try {
                 videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
@@ -413,7 +413,7 @@
                 videoStream.getTracks().forEach(track => track.stop());
             }
             cameraModal.classList.add('hidden');
-            cameraModal.classList.remove('flex');
+            cameraModal.style.display = 'none'; // Use style to hide
             inputArea.style.display = 'block';
             setupInput(quizQuestions[currentQuestionIndex]);
         }
