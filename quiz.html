@@ -205,7 +205,7 @@
                     renderer: 'svg',
                     loop: true,
                     autoplay: true,
-                    path: 'avatar.json'
+                    path: 'assistent.json'
                 });
             } catch(e) {
                  console.error("Lottie animation failed to load", e);
@@ -352,7 +352,6 @@
         let detectionInterval;
 
         async function loadFaceApiModels() {
-            // Corrected and more robust model loading
             const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
             try {
                 await Promise.all([
@@ -411,16 +410,17 @@
                 };
             } catch (err) {
                 console.error("Camera Error:", err);
-                let errorMessage = "Oops, I couldn't access your camera. Please check your browser permissions.";
+                let errorMessage = "Oops, I couldn't access your camera. Please check your browser permissions and refresh the page to try again.";
                 if (err.name === 'NotAllowedError') {
-                    errorMessage = "Camera access was denied. Please enable it in your browser settings to proceed.";
+                    errorMessage = "Camera access was denied. Please enable it in your browser settings and refresh the page to try again.";
                 } else if (err.name === 'NotFoundError') {
-                    errorMessage = "No camera was found on your device. This step will be skipped.";
+                    errorMessage = "No camera was found on your device. This analysis requires a camera. Please connect one and refresh the page to continue.";
                 }
                 addMessage(errorMessage);
                 const camContainer = document.getElementById('camera-container');
                 if(camContainer) camContainer.parentElement.remove();
-                endQuiz(); 
+                // Stop the quiz flow by not calling endQuiz() and hiding the input area.
+                inputArea.style.display = 'none';
             }
         }
         
@@ -528,4 +528,3 @@
 
 </body>
 </html>
-
