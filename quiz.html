@@ -22,11 +22,10 @@
             background-size: 400% 400%;
             animation: gradientAnimation 20s ease infinite;
             color: #e5e7eb;
-            /* Centering the main container */
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0.5rem; /* Small padding for screen edges */
+            padding: 0.5rem;
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { 
@@ -111,7 +110,6 @@
 </head>
 <body class="bg-slate-900 text-gray-200">
 
-    <!-- Main container with responsive height and layout -->
     <div class="w-full h-full max-h-[850px] sm:max-w-2xl bg-slate-900/70 backdrop-blur-xl ring-1 ring-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden relative">
         <div class="progress-container rounded-t-2xl">
             <div class="progress-bar" id="progressBar"></div>
@@ -143,7 +141,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     
     <script>
-        // --- DOM ELEMENTS ---
+        // --- STATE & DOM ELEMENTS ---
         const chatContent = document.getElementById('chat-content');
         const inputArea = document.getElementById('input-area');
         const optionsContainer = document.getElementById('options-container');
@@ -151,6 +149,11 @@
         const userInput = document.getElementById('user-input');
         const sendBtn = document.getElementById('send-btn');
         const progressBar = document.getElementById('progressBar');
+        
+        let sessionId = null; // Will hold the unique session ID from the server
+        let currentQuestionIndex = 0;
+        const userAnswers = {};
+        const totalQuizQuestions = 15; // Manually set total questions for progress bar
 
         // --- QUIZ DATA ---
         const quizQuestions = [
@@ -174,14 +177,53 @@
             { id: 'camera', text: "You did it! That's all the questions. Now for the fun part: a quick selfie. This helps me analyze non-medical indicators of stress and fatigue. Your photo is processed on the fly and never stored. Please allow camera access and position your face within the frame.", type: 'camera_button', options: ['Open Camera'] }
         ];
 
-        let currentQuestionIndex = 0;
-        const userAnswers = {};
-        const totalQuizQuestions = quizQuestions.length - 2;
+        // --- SERVER COMMUNICATION ---
+        const API_ENDPOINT = '/.netlify/functions/quiz';
 
-        // --- CHAT LOGIC ---
+        async function startQuizSession() {
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'startSession' })
+                });
+                if (!response.ok) throw new Error('Server error starting session');
+                const data = await response.json();
+                sessionId = data.sessionId;
+                console.log('Session started:', sessionId);
+            } catch (error) {
+                console.error('Failed to start session:', error);
+                addMessage("Sorry, I'm having trouble connecting to the server. Please try refreshing the page.");
+                inputArea.style.display = 'none';
+            }
+        }
+        
+        async function saveAnswerToServer(questionId, answer) {
+            if (!sessionId) {
+                console.error('No session ID available to save answer.');
+                return;
+            }
+            try {
+                await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'saveAnswer',
+                        sessionId: sessionId,
+                        questionId: questionId,
+                        answer: answer
+                    })
+                });
+            } catch (error) {
+                console.error('Failed to save answer:', error);
+                // Optionally, notify the user that the answer might not have been saved.
+            }
+        }
+
+        // --- CHAT UI LOGIC ---
 
         function updateProgressBar() {
-            const answeredQuestions = Math.max(0, currentQuestionIndex - 2);
+            const answeredQuestions = Object.keys(userAnswers).length;
             const progress = (answeredQuestions / totalQuizQuestions) * 100;
             progressBar.style.width = `${progress}%`;
         }
@@ -190,7 +232,6 @@
             const avatar = document.createElement('div');
             avatar.className = 'flex-shrink-0 w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center ring-1 ring-white/20';
             avatar.innerHTML = `<div class="lottie-avatar"></div>`;
-            
             try {
                 lottie.loadAnimation({
                     container: avatar.querySelector('.lottie-avatar'),
@@ -199,18 +240,14 @@
                     autoplay: true,
                     path: 'avatar.json'
                 });
-            } catch(e) {
-                console.error("Lottie animation failed to load", e);
-                avatar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
-            }
+            } catch(e) { console.error("Lottie failed:", e); }
             return avatar;
         }
 
         function getLargeLottieAvatar() {
             const container = document.createElement('div');
             container.id = 'lottie-avatar';
-            container.className = 'w-48 h-48'; // Increased size
-            
+            container.className = 'w-48 h-48';
             try {
                 lottie.loadAnimation({
                     container: container,
@@ -219,10 +256,7 @@
                     autoplay: true,
                     path: 'assistent.json'
                 });
-            } catch(e) {
-                 console.error("Lottie animation failed to load", e);
-                 container.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-24 h-24 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/><path d="M12.2 19.5c-1.6 0-3.1-.4-4.5-1.2-.6-.3-1.2-.8-1.7-1.3-.5-.5-.9-1.1-1.2-1.8-.3-.6-.5-1.3-.5-2 0-1.4.6-2.8 1.5-3.8.5-.5 1-1 1.7-1.3 1.4-.8 2.9-1.2 4.5-1.2s3.1.4 4.5 1.2c.6.3 1.2.8 1.7 1.3.5.5.9 1.1 1.2 1.8.3.6.5 1.3.5 2 0 1.4-.6 2.8-1.5 3.8-.5.5-1 1-1.7 1.3-1.4-.8-2.9 1.2-4.5 1.2z"/></svg>`;
-            }
+            } catch(e) { console.error("Lottie failed:", e); }
             return container;
         }
         
@@ -230,14 +264,11 @@
             const typingDiv = document.createElement('div');
             typingDiv.id = 'typing-indicator';
             typingDiv.className = 'fade-in flex w-full items-end gap-3 justify-start';
-            
             const bubble = document.createElement('div');
             bubble.className = 'max-w-xs md:max-w-md p-3 rounded-2xl bg-indigo-600 text-white rounded-bl-lg flex items-center justify-center space-x-1';
             bubble.innerHTML = `<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>`;
-            
             typingDiv.appendChild(getBotAvatar());
             typingDiv.appendChild(bubble);
-            
             chatContent.appendChild(typingDiv);
             chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
         }
@@ -250,13 +281,10 @@
         function addWelcomeMessage(text) {
             const welcomeContainer = document.createElement('div');
             welcomeContainer.className = 'fade-in flex flex-col items-center text-center space-y-4 py-4';
-            
             welcomeContainer.appendChild(getLargeLottieAvatar());
-            
             const textDiv = document.createElement('div');
             textDiv.className = 'text-lg text-gray-200 max-w-sm';
             textDiv.innerHTML = text;
-            
             welcomeContainer.appendChild(textDiv);
             chatContent.appendChild(welcomeContainer);
             chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
@@ -266,14 +294,11 @@
             const messageDiv = document.createElement('div');
             messageDiv.className = `max-w-xs md:max-w-md p-3 rounded-2xl ${sender === 'bot' ? 'bg-indigo-600 text-white rounded-bl-lg' : 'bg-slate-700 text-gray-200 rounded-br-lg'}`;
             messageDiv.innerHTML = htmlContent;
-            
             const wrapperDiv = document.createElement('div');
             wrapperDiv.className = `fade-in flex w-full items-end gap-3 ${sender === 'bot' ? 'justify-start' : 'justify-end'}`;
-
             if (sender === 'bot') {
                 wrapperDiv.appendChild(getBotAvatar());
             }
-
             wrapperDiv.appendChild(messageDiv);
             chatContent.appendChild(wrapperDiv);
             chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
@@ -284,13 +309,10 @@
                 endQuiz();
                 return;
             }
-            
             const question = quizQuestions[currentQuestionIndex];
             showTypingIndicator();
-
             setTimeout(() => {
                 hideTypingIndicator();
-                
                 if (question.type === 'welcome') {
                     addWelcomeMessage(question.text);
                 } else {
@@ -300,7 +322,6 @@
                     }
                     addMessage(messageHtml);
                 }
-                
                 setupInput(question);
             }, 1000 + Math.random() * 500);
         }
@@ -309,9 +330,7 @@
             optionsContainer.innerHTML = '';
             textInputContainer.style.display = 'none';
             inputArea.style.display = 'block';
-
             const isSimpleAction = question.type === 'welcome' || question.type === 'disclaimer' || question.type === 'camera_button';
-
             optionsContainer.className = `flex gap-2 mb-3 pb-2 ${isSimpleAction ? 'justify-center' : 'flex-nowrap overflow-x-auto no-scrollbar'}`;
             
             question.options.forEach(option => {
@@ -333,7 +352,6 @@
                 textInputContainer.style.display = 'flex';
                 userInput.placeholder = question.placeholder;
                 userInput.value = '';
-                // userInput.focus(); // Removed this line to prevent auto-keyboard
             }
         }
 
@@ -343,6 +361,7 @@
             const question = quizQuestions[currentQuestionIndex];
             if (question.type !== 'welcome' && question.type !== 'disclaimer') {
                 userAnswers[question.id] = answer;
+                saveAnswerToServer(question.id, answer);
                 addMessage(answer, 'user');
                 updateProgressBar();
             }
@@ -359,26 +378,17 @@
         }
 
         // --- CAMERA LOGIC ---
-        
         let faceApiLoaded = false;
         let detectionInterval;
 
         async function loadFaceApiModels() {
             const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
             try {
-                await Promise.all([
-                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)
-                ]);
+                await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)]);
                 faceApiLoaded = true;
-                console.log("FaceAPI models loaded successfully.");
             } catch (error) {
                 console.error("Error loading FaceAPI models:", error);
                 addMessage("Sorry, there was a problem preparing the camera analysis. Please try refreshing the page.");
-                const cameraButton = document.querySelector('button[onclick="handleCameraButtonClick()"]');
-                if (cameraButton) {
-                    cameraButton.disabled = true;
-                    cameraButton.textContent = "Analysis Unavailable";
-                }
             }
         }
 
@@ -386,32 +396,23 @@
             const cameraContainer = document.createElement('div');
             cameraContainer.id = 'camera-container';
             cameraContainer.className = 'fade-in';
-            
             const video = document.createElement('video');
             video.id = 'video';
             video.autoplay = true;
             video.muted = true;
             video.playsInline = true;
             video.className = 'w-full h-auto rounded-2xl scale-x-[-1]';
-
             const overlay = document.createElement('div');
             overlay.id = 'camera-overlay';
             overlay.innerHTML = `<div id="face-outline"></div><p id="camera-status" class="mt-4 text-lg font-medium bg-black bg-opacity-50 px-3 py-1 rounded-full">Position your face</p>`;
-
-            cameraContainer.appendChild(video);
-            cameraContainer.appendChild(overlay);
-
+            cameraContainer.append(video, overlay);
             const wrapperDiv = document.createElement('div');
             wrapperDiv.className = 'fade-in flex justify-start items-end gap-3';
-            
-            wrapperDiv.appendChild(getBotAvatar());
-            wrapperDiv.appendChild(cameraContainer);
+            wrapperDiv.append(getBotAvatar(), cameraContainer);
             chatContent.appendChild(wrapperDiv);
             chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
 
-            if (!faceApiLoaded) {
-                 await loadFaceApiModels();
-            }
+            if (!faceApiLoaded) await loadFaceApiModels();
 
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
@@ -422,16 +423,11 @@
                 };
             } catch (err) {
                 console.error("Camera Error:", err);
-                let errorMessage = "Oops, I couldn't access your camera. Please check your browser permissions and refresh the page to try again.";
-                if (err.name === 'NotAllowedError') {
-                    errorMessage = "Camera access was denied. Please enable it in your browser settings and refresh the page to try again.";
-                } else if (err.name === 'NotFoundError') {
-                    errorMessage = "No camera was found on your device. This analysis requires a camera. Please connect one and refresh the page to continue.";
-                }
+                let errorMessage = "Oops, I couldn't access your camera. Please check your browser permissions and refresh the page.";
+                if (err.name === 'NotAllowedError') errorMessage = "Camera access was denied. Please enable it in your browser settings and refresh.";
+                else if (err.name === 'NotFoundError') errorMessage = "No camera was found. Please connect one and refresh.";
                 addMessage(errorMessage);
-                const camContainer = document.getElementById('camera-container');
-                if(camContainer) camContainer.parentElement.remove();
-                // Stop the quiz flow by not calling endQuiz() and hiding the input area.
+                cameraContainer.parentElement.remove();
                 inputArea.style.display = 'none';
             }
         }
@@ -469,11 +465,10 @@
                     } else {
                         cameraContainer.classList.remove('face-detected');
                         faceOutline.style.width = '0px';
-                        statusEl.textContent = detections.length > 1 ? "Please, only one person" : "Position your face";
+                        statusEl.textContent = "Position your face";
                         clearTimeout(captureTimeout);
                         captureTimeout = null;
                     }
-
                 } else {
                     cameraContainer.classList.remove('face-detected');
                     faceOutline.style.width = '0px';
@@ -486,15 +481,7 @@
 
         function takePicture(video) {
             clearInterval(detectionInterval);
-            
-            const cameraContainer = document.getElementById('camera-container');
-            const statusEl = document.getElementById('camera-status');
-            statusEl.textContent = "Captured! Analyzing...";
-            
-            cameraContainer.style.transition = 'filter 0.1s';
-            cameraContainer.style.filter = 'brightness(2)';
-            setTimeout(() => cameraContainer.style.filter = 'brightness(1)', 100);
-
+            document.getElementById('camera-status').textContent = "Captured! Analyzing...";
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -502,12 +489,10 @@
             context.translate(canvas.width, 0);
             context.scale(-1, 1);
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
             video.srcObject.getTracks().forEach(track => track.stop());
-            
             const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
             userAnswers['selfie'] = dataUrl;
-
+            saveAnswerToServer('selfie', 'Photo captured');
             endQuiz();
         }
 
@@ -522,12 +507,24 @@
                 showTypingIndicator();
                 setTimeout(() => {
                     hideTypingIndicator();
-                    addMessage("Done! Your personalized free report is ready to blow your mind. 🚀 <a href='result.html' class='font-bold underline text-indigo-300 hover:text-indigo-200'>View my results</a>");
+                    // Redirect to the results page with the session ID
+                    const resultUrl = `result.html?sessionId=${sessionId}`;
+                    const message = `Done! Your personalized free report is ready. 🚀 <a href='${resultUrl}' class='font-bold underline text-indigo-300 hover:text-indigo-200'>View my results</a>`;
+                    addMessage(message);
+                    // Also save all answers to localStorage as a backup
+                    localStorage.setItem(`wellnessReport-${sessionId}`, JSON.stringify(userAnswers));
                 }, 3000);
             }, 1500);
         }
 
         // --- INITIALIZATION ---
+        async function initQuiz() {
+            await startQuizSession();
+            if (sessionId) {
+                displayQuestion();
+            }
+        }
+
         sendBtn.addEventListener('click', () => handleAnswer(userInput.value));
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -535,7 +532,7 @@
             }
         });
 
-        displayQuestion();
+        initQuiz();
     </script>
 
 </body>
