@@ -12,7 +12,6 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-        /* Critical styles for a stable full-height layout */
         html, body {
             height: 100%;
             overflow: hidden;
@@ -26,7 +25,6 @@
             animation: gradientAnimation 20s ease infinite;
             color: #e5e7eb;
         }
-        /* Main application container */
         #app-container {
             width: 100%;
             height: 100%;
@@ -34,7 +32,6 @@
             flex-direction: column;
             background-color: rgba(15, 23, 42, 0.7);
         }
-        /* On larger screens, constrain to a card-like view */
         @media (min-width: 640px) {
             body {
                 display: flex;
@@ -53,7 +50,6 @@
                 -webkit-backdrop-filter: blur(16px);
             }
         }
-
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { 
             -ms-overflow-style: none;
@@ -103,26 +99,30 @@
             max-width: 400px;
             border-radius: 1.5rem;
             overflow: hidden;
-            border: 4px solid transparent;
-            transition: border-color 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: #000;
         }
-        #camera-container.face-detected { border-color: #22c55e; }
+        #video, #overlay-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #video {
+            transform: scaleX(-1);
+        }
         #camera-overlay {
             position: absolute;
             inset: 0;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-end;
             align-items: center;
             color: white;
+            padding: 1rem;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-        #face-outline {
-            position: absolute;
-            border: 3px solid rgba(255, 255, 255, 0.7);
-            border-radius: 50%;
-            transition: all 0.2s ease-in-out;
-            pointer-events: none;
         }
         .progress-container {
             position: absolute;
@@ -144,8 +144,8 @@
 </head>
 <body>
 
-    <!-- Main chat container -->
     <div id="app-container">
+        <!-- ... existing app-container content ... -->
         <div class="progress-container sm:rounded-t-2xl">
             <div class="progress-bar" id="progressBar"></div>
         </div>
@@ -172,16 +172,15 @@
         </footer>
     </div>
    
-    <!-- Fullscreen Camera Modal (outside the main app structure) -->
     <div id="camera-modal" class="hidden">
         <button id="close-camera-btn" class="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2 z-10">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
         <div id="camera-container">
-            <video id="video" autoplay muted playsinline class="w-full h-auto rounded-2xl scale-x-[-1]"></video>
+            <video id="video" autoplay muted playsinline></video>
+            <canvas id="overlay-canvas"></canvas>
             <div id="camera-overlay">
-                <div id="face-outline"></div>
-                <p id="camera-status" class="mt-4 text-lg font-medium bg-black bg-opacity-50 px-3 py-1 rounded-full">Position your face</p>
+                <p id="camera-status" class="text-lg font-medium bg-black bg-opacity-50 px-3 py-1 rounded-full">Initializing scanner...</p>
             </div>
         </div>
     </div>
@@ -201,14 +200,16 @@
         const cameraModal = document.getElementById('camera-modal');
         const closeCameraBtn = document.getElementById('close-camera-btn');
         const videoEl = document.getElementById('video');
+        const overlayCanvas = document.getElementById('overlay-canvas');
+        const cameraStatus = document.getElementById('camera-status');
        
         let sessionId = null;
         let currentQuestionIndex = 0;
         const userAnswers = {};
         const totalQuizQuestions = 15;
-        let capturedPhotoDataUrl = null; // Temporary storage for photo
+        let capturedPhotoDataUrl = null;
 
-        // --- QUIZ DATA ---
+        // --- QUIZ DATA (abbreviated for brevity) ---
         const quizQuestions = [
             { id: 'welcome', text: "Hello! I'm your personal AI Wellness Coach. I'll be guiding you through this analysis to help you discover insights about your well-being.", type: 'welcome', options: ["Let's Begin!"] },
             { id: 'disclaimer', text: "Before we begin, a quick heads-up: I'm an AI coach, not a medical doctor. This analysis is for educational purposes only and is not a substitute for professional medical advice. <b>All data, including your photo, is deleted immediately after you view the detailed report.</b><br><br>By continuing, you agree to our <a href='terms.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Terms of Service</a> and <a href='privacy.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Privacy Policy</a>.", type: 'disclaimer', options: ['I Understand & Agree'] },
@@ -230,7 +231,7 @@
             { id: 'camera', text: "You did it! That's all the questions. Now for the fun part: a quick selfie. This helps me analyze non-medical indicators of stress and fatigue. Your photo is processed on the fly and never stored. Please allow camera access and position your face within the frame.", type: 'camera_button', options: ['Open Camera'] }
         ];
 
-        // --- SERVER COMMUNICATION ---
+        // --- SERVER COMMUNICATION (unchanged) ---
         const API_ENDPOINT = '/.netlify/functions/quiz';
         async function startQuizSession() {
             try {
@@ -251,7 +252,7 @@
             } catch (error) { console.error('Failed to save answer:', error); }
         }
 
-        // --- CHAT UI LOGIC ---
+        // --- CHAT UI LOGIC (unchanged) ---
         function getBotAvatar() {
             const avatar = document.createElement('div');
             avatar.className = 'flex-shrink-0 w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center ring-1 ring-white/20';
@@ -373,30 +374,45 @@
             initCamera();
         }
 
-        // --- CAMERA LOGIC ---
+        // --- NEW/UPDATED CAMERA LOGIC ---
         let faceApiLoaded = false;
         let detectionInterval;
         let videoStream;
+
         async function loadFaceApiModels() {
             const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
             try {
-                await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)]);
+                cameraStatus.textContent = 'Loading AI models...';
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
+                ]);
                 faceApiLoaded = true;
+                cameraStatus.textContent = 'Position your face';
             } catch (error) {
                 console.error("Error loading FaceAPI models:", error);
                 addMessage("Sorry, there was a problem preparing the camera analysis. Please try refreshing the page.");
+                closeCamera();
             }
         }
+
         async function initCamera() {
             cameraModal.classList.remove('hidden');
             cameraModal.style.display = 'flex';
-            if (!faceApiLoaded) await loadFaceApiModels();
+            if (!faceApiLoaded) {
+                await loadFaceApiModels();
+            }
+            if (!faceApiLoaded) return; // Don't proceed if models failed to load
+
             try {
                 videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
                 videoEl.srcObject = videoStream;
                 videoEl.onloadedmetadata = () => {
                     videoEl.play();
-                    startFaceDetection(videoEl);
+                    // Set canvas dimensions based on video
+                    const displaySize = { width: videoEl.clientWidth, height: videoEl.clientHeight };
+                    faceapi.matchDimensions(overlayCanvas, displaySize);
+                    startFaceDetection(videoEl, overlayCanvas);
                 };
             } catch (err) {
                 console.error("Camera Error:", err);
@@ -407,61 +423,112 @@
                 closeCamera();
             }
         }
+
         function closeCamera() {
             clearInterval(detectionInterval);
             if (videoStream) {
                 videoStream.getTracks().forEach(track => track.stop());
             }
+            const context = overlayCanvas.getContext('2d');
+            context.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             cameraModal.classList.add('hidden');
             cameraModal.style.display = 'none';
             inputArea.style.display = 'block';
-            setupInput(quizQuestions[currentQuestionIndex]);
+            if (currentQuestionIndex < quizQuestions.length) {
+                setupInput(quizQuestions[currentQuestionIndex]);
+            }
         }
-        function startFaceDetection(video) {
-            const cameraContainer = document.getElementById('camera-container');
-            const statusEl = document.getElementById('camera-status');
-            const faceOutline = document.getElementById('face-outline');
+
+        function startFaceDetection(video, canvas) {
+            const context = canvas.getContext('2d');
             let captureTimeout;
+            let scanY = 0;
+            let scanDirection = 1;
+
             detectionInterval = setInterval(async () => {
                 if (!faceApiLoaded) return;
-                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
-                if (detections.length === 1) {
-                    const box = detections[0].box;
-                    const videoRect = video.getBoundingClientRect();
-                    const scaleX = videoRect.width / video.videoWidth;
-                    const scaleY = videoRect.height / video.videoHeight;
-                    faceOutline.style.width = `${box.width * scaleX * 1.2}px`;
-                    faceOutline.style.height = `${box.height * scaleY * 1.4}px`;
-                    faceOutline.style.left = `${videoRect.width - (box.x * scaleX) - (box.width * scaleX) + (box.width * scaleX * 0.1)}px`;
-                    faceOutline.style.top = `${box.y * scaleY - (box.height * scaleY * 0.2)}px`;
-                    const isCentered = (box.x + box.width / 2) > video.videoWidth * 0.3 && (box.x + box.width / 2) < video.videoWidth * 0.7;
-                    const isGoodSize = box.width > video.videoWidth * 0.4;
-                    if (isCentered && isGoodSize) {
-                        cameraContainer.classList.add('face-detected');
-                        statusEl.textContent = "Hold still...";
+
+                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
+                const resizedDetections = faceapi.resizeResults(detections, { width: canvas.width, height: canvas.height });
+
+                // Clear canvas and flip it horizontally to match the video
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.save();
+                context.translate(canvas.width, 0);
+                context.scale(-1, 1);
+                
+                if (resizedDetections.length > 0) {
+                    const box = resizedDetections[0].detection.box;
+                    const landmarks = resizedDetections[0].landmarks;
+
+                    // Draw landmarks
+                    faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+                    
+                    // Draw scanning line
+                    scanY += 2 * scanDirection;
+                    if (scanY > box.height || scanY < 0) {
+                        scanDirection *= -1;
+                    }
+                    context.fillStyle = 'rgba(0, 255, 255, 0.4)';
+                    context.fillRect(box.x, box.y + scanY, box.width, 3);
+                    context.shadowColor = 'rgba(0, 255, 255, 1)';
+                    context.shadowBlur = 10;
+                    context.fillRect(box.x, box.y + scanY, box.width, 3);
+                    context.shadowBlur = 0;
+
+
+                    // Draw corner brackets
+                    context.strokeStyle = '#00FFFF';
+                    context.lineWidth = 3;
+                    const cornerLength = 20;
+                    // Top-left
+                    context.beginPath();
+                    context.moveTo(box.x, box.y + cornerLength);
+                    context.lineTo(box.x, box.y);
+                    context.lineTo(box.x + cornerLength, box.y);
+                    context.stroke();
+                    // Top-right
+                    context.beginPath();
+                    context.moveTo(box.x + box.width - cornerLength, box.y);
+                    context.lineTo(box.x + box.width, box.y);
+                    context.lineTo(box.x + box.width, box.y + cornerLength);
+                    context.stroke();
+                    // Bottom-left
+                    context.beginPath();
+                    context.moveTo(box.x, box.y + box.height - cornerLength);
+                    context.lineTo(box.x, box.y + box.height);
+                    context.lineTo(box.x + cornerLength, box.y + box.height);
+                    context.stroke();
+                    // Bottom-right
+                    context.beginPath();
+                    context.moveTo(box.x + box.width - cornerLength, box.y + box.height);
+                    context.lineTo(box.x + box.width, box.y + box.height);
+                    context.lineTo(box.x + box.width, box.y + box.height - cornerLength);
+                    context.stroke();
+                    
+                    const isGoodSize = box.width > canvas.width * 0.4;
+                    if (isGoodSize) {
+                        cameraStatus.textContent = "Hold still...";
                         if (!captureTimeout) {
-                            captureTimeout = setTimeout(() => takePicture(video), 1500);
+                            captureTimeout = setTimeout(() => takePicture(video), 2000);
                         }
                     } else {
-                        cameraContainer.classList.remove('face-detected');
-                        faceOutline.style.width = '0px';
-                        statusEl.textContent = "Position your face";
+                        cameraStatus.textContent = "Move closer";
                         clearTimeout(captureTimeout);
                         captureTimeout = null;
                     }
                 } else {
-                    cameraContainer.classList.remove('face-detected');
-                    faceOutline.style.width = '0px';
-                    statusEl.textContent = detections.length > 1 ? "Please, only one person" : "Position your face";
+                    cameraStatus.textContent = "Position your face";
                     clearTimeout(captureTimeout);
                     captureTimeout = null;
                 }
-            }, 300);
+                context.restore(); // Restore context to non-flipped state
+            }, 100);
         }
         
         function takePicture(video) {
             clearInterval(detectionInterval);
-            document.getElementById('camera-status').textContent = "Captured!";
+            cameraStatus.textContent = "Analysis complete!";
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -532,7 +599,7 @@
             document.getElementById('photo-preview-wrapper')?.remove();
             optionsContainer.innerHTML = '';
             inputArea.style.display = 'none';
-            handleCameraButtonClick(); // Re-opens camera
+            handleCameraButtonClick();
         }
 
         function endQuiz() {
