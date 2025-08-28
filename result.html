@@ -1,3 +1,6 @@
+File: /result.html
+---
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,35 +13,193 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; overflow-x: hidden; background-color: #0f172a; }
-        .gradient-bg-dark-animated { background: linear-gradient(300deg, #0f172a, #1e1b4b, #312e81, #0f172a); background-size: 200% 200%; animation: slow-pan 25s ease infinite; }
-        @keyframes slow-pan { 0% { background-position: 0% 0%; } 25% { background-position: 100% 0%; } 50% { background-position: 100% 100%; } 75% { background-position: 0% 100%; } 100% { background-position: 0% 0%; } }
-        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .score-circle-path { transition: stroke-dasharray 2s ease-out; }
+        /* Global styles and animations */
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background-color: #0f172a;
+        }
+        .gradient-bg-dark-animated {
+            background: linear-gradient(300deg, #0f172a, #1e1b4b, #312e81, #0f172a);
+            background-size: 200% 200%;
+            animation: slow-pan 25s ease infinite;
+        }
+        @keyframes slow-pan {
+            0% { background-position: 0% 0%; }
+            25% { background-position: 100% 0%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        @keyframes pulse-glow {
+            0% { filter: drop-shadow(0 0 5px rgba(20, 227, 227, 0.4)); }
+            50% { filter: drop-shadow(0 0 20px rgba(20, 227, 227, 0.8)); }
+            100% { filter: drop-shadow(0 0 5px rgba(20, 227, 227, 0.4)); }
+        }
+        @keyframes fill-bar {
+            from { width: 0%; }
+            to { width: var(--final-width); }
+        }
+        .score-circle-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        .score-circle-path {
+            /* Changed transition property */
+            transition: stroke-dasharray 2s ease-out;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .bar-animation {
+            animation: fill-bar 1.5s ease-out forwards;
+        }
+        .pulsate {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* New styles for blurring premium content */
+        .blurry-content {
+            filter: blur(5px);
+            user-select: none;
+            pointer-events: none;
+            transition: filter 0.5s ease-in-out;
+        }
+        
+        /* Styles for the premium content locking mechanism */
+        .premium-feature-lock .content-unlocked {
+            display: block; /* Keep it block to apply blur */
+        }
+        .premium-feature-lock .premium-feature-lock-overlay {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.2);
+            border-radius: 0.5rem;
+        }
+        
+        /* Styles for when content is unlocked */
+        .premium-feature-unlocked .blurry-content {
+            filter: blur(0);
+        }
+        .premium-feature-unlocked .premium-feature-lock-overlay {
+            display: none;
+        }
+
+        /* New Stripe-like payment form styles */
+        #payment-form-container {
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            background-color: #1e293b;
+            padding: 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+        #payment-form-container input {
+            background-color: transparent;
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            width: 100%;
+        }
+        #payment-form-container input:focus {
+            outline: none;
+            ring: 0;
+        }
+        #payment-form-container input::placeholder {
+            color: #64748b;
+        }
+        .card-number-wrapper {
+            flex-grow: 1;
+            min-width: 150px;
+        }
+        .card-details-wrapper {
+            display: flex;
+            flex-basis: 120px;
+            gap: 0.5rem;
+        }
+        .card-details-wrapper input {
+            text-align: center;
+        }
+
+        /* Custom Toast Notification for better UX than alert() */
+        #toast-notification {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            background-color: #10B981; /* Emerald 500 */
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: bottom 0.5s ease-in-out;
+            z-index: 50;
+        }
+        #toast-notification.show {
+            bottom: 20px;
+        }
+
+        /* Face Scan Animation */
+        @keyframes scan {
+            0% { transform: translateY(-10px); }
+            50% { transform: translateY(60px); }
+            100% { transform: translateY(-10px); }
+        }
+        .scan-line {
+            animation: scan 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-gray-200">
 
     <div class="gradient-bg-dark-animated min-h-screen py-8">
-        <div id="report-container" class="max-w-md mx-auto px-4 space-y-8">
+        <div class="max-w-md mx-auto px-4 space-y-12">
 
-            <section class="text-center">
+            <!-- Free Report -->
+            <section class="fade-in-section text-center">
                 <span class="text-teal-300 text-sm font-medium px-4 py-1.5 rounded-full bg-teal-900/50 border border-teal-800">Your Wellness Archetype</span>
-                <h1 data-report="archetype" class="text-4xl font-black text-white mt-3 tracking-tight">Loading...</h1>
-                <p data-report="archetypeDescription" class="text-base text-gray-400 mt-2 mx-auto max-w-sm">Analyzing your results...</p>
+                <h1 class="text-4xl font-black text-white mt-3 tracking-tight">Creative Owl</h1>
+                <p class="text-base text-gray-400 mt-2 mx-auto max-w-sm">Your mind is most active when the world is quiet. This powerful focus comes at a cost to your daily energy cycle.</p>
             </section>
 
-            <section class="text-center">
+            <section class="fade-in-section text-center">
                 <div class="relative w-56 h-56 mx-auto">
                     <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                         <defs>
                             <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" style="stop-color:#14E3E3;" />
-                                <stop offset="100%" style="stop-color:#4F46E5;" />
+                                <stop offset="0%" style="stop-color:#14E3E3; stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#4F46E5; stop-opacity:1" />
                             </linearGradient>
                         </defs>
-                        <path class="text-slate-700" d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="2" />
-                        <path id="score-circle-path" class="score-circle-path" d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="2" stroke="url(#scoreGradient)" stroke-linecap="round" />
+                        <path class="text-slate-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="2" />
+                        <path id="score-circle-path" class="score-circle-path score-circle-glow" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="2" stroke="url(#scoreGradient)" stroke-linecap="round" />
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
                         <span class="text-6xl font-black text-white" id="score-text">0</span>
@@ -46,93 +207,623 @@
                     </div>
                 </div>
             </section>
-            
-            <section class="glass-card p-6 rounded-xl text-center">
-                <h3 class="text-xl font-bold text-white mb-2">Key AI Insight</h3>
-                <p data-report="keyInsight" class="text-sm text-gray-300"></p>
+
+            <!-- Core Four Breakdown -->
+            <section id="score-breakdown-section" class="fade-in-section glass-card p-6 rounded-xl space-y-4">
+                <h3 class="text-xl font-bold text-white text-center">Core Four Breakdown</h3>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm font-medium text-teal-400">Body</span>
+                        <span class="text-teal-400 font-bold">75%</span>
+                    </div>
+                    <div class="w-full bg-slate-700 rounded-full h-2.5">
+                        <div id="body-bar" class="bg-teal-400 h-2.5 rounded-full" style="width: 0%; --final-width: 75%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm font-medium text-indigo-400">Mind</span>
+                        <span class="text-indigo-400 font-bold">60%</span>
+                    </div>
+                    <div class="w-full bg-slate-700 rounded-full h-2.5">
+                        <div id="mind-bar" class="bg-indigo-400 h-2.5 rounded-full" style="width: 0%; --final-width: 60%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm font-medium text-emerald-400">Nutrition</span>
+                        <span class="text-emerald-400 font-bold">90%</span>
+                    </div>
+                    <div class="w-full bg-slate-700 rounded-full h-2.5">
+                        <div id="nutrition-bar" class="bg-emerald-400 h-2.5 rounded-full" style="width: 0%; --final-width: 90%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm font-medium text-sky-400">Lifestyle</span>
+                        <span class="text-sky-400 font-bold">85%</span>
+                    </div>
+                    <div class="w-full bg-slate-700 rounded-full h-2.5">
+                        <div id="lifestyle-bar" class="bg-sky-400 h-2.5 rounded-full" style="width: 0%; --final-width: 85%"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Key AI Insight & Wellness Age Section -->
+            <section class="fade-in-section text-center space-y-6">
+                <div class="glass-card p-6 rounded-xl">
+                    <h3 class="text-xl font-bold text-white mb-2">Key AI Insight</h3>
+                    <p class="text-sm text-gray-300">
+                        Our AI saw something powerful in your data. It's a strong link: <strong>daytime work stress</strong> is the primary reason for your 'Stress' score and is directly impacting your sleep quality.
+                    </p>
+                </div>
+                <div class="glass-card p-6 rounded-xl">
+                    <h3 class="text-xl font-bold text-white mb-2">Wellness Age</h3>
+                    <p class="text-lg text-gray-400">Chronological age: <span class="font-bold text-white">35</span></p>
+                    <p class="text-2xl text-teal-400 font-bold mt-2">32</p>
+                    <p class="text-xs text-gray-400 mt-1">Your healthy habits are paying off, effectively making your body younger than your chronological age!</p>
+                </div>
+            </section>
+
+            <!-- Peer Comparison Section -->
+            <section class="fade-in-section glass-card p-6 rounded-xl text-center">
+                 <h3 class="text-xl font-bold text-white mb-2">Comparison to Peers</h3>
+                 <p class="text-sm text-gray-300">
+                     Your sleep metric is higher than <strong>65%</strong> of users in your age group. Great work!
+                 </p>
+            </section>
+
+            <!-- First Step Action -->
+            <section class="fade-in-section glass-card p-6 rounded-xl text-center">
+                <h3 class="text-xl font-bold text-white mb-2">Your First Step</h3>
+                <div class="flex flex-col items-center space-y-4">
+                    <div class="bg-indigo-900/50 border border-indigo-800 p-4 rounded-xl w-full">
+                        <p class="text-teal-300 text-lg font-semibold">Create a 15-minute "wind-down" ritual before bed tonight. Your future self will thank you!</p>
+                        <p class="text-sm text-gray-400 mt-2 italic">No screens. Just tea, a book, or quiet music.</p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-700/50 w-full">
+                        <p class="text-sm text-gray-400 italic">Motivation Trigger:</p>
+                        <p class="text-white font-semibold mt-1">"A single good night's sleep can redefine your entire next day."</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Wellness Wheel Section -->
+            <section class="fade-in-section">
+                <h3 class="text-xl font-bold text-white text-center mb-6">Report at a Glance</h3>
+                <div class="w-full h-80 relative">
+                    <canvas id="wellnessWheel"></canvas>
+                </div>
+            </section>
+
+            <!-- Premium Report Section (content blurred) -->
+            <section id="premium-report-section" class="fade-in-section text-center">
+                <h2 class="text-3xl font-bold text-white mb-2">Your Full Premium Report</h2>
+                <p class="text-gray-400 text-base">Unlock to see your complete, personalized report.</p>
+                
+                <div class="mt-8 space-y-4">
+                    <!-- Deep Dive Analysis -->
+                    <div class="glass-card p-4 rounded-lg flex flex-col premium-feature-lock relative">
+                        <div class="flex items-center space-x-3">
+                             <div class="bg-indigo-900/50 p-2 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                             <h3 class="font-semibold text-white text-lg text-left">Deep Dive Analysis</h3>
+                        </div>
+                        <div class="content-unlocked text-left mt-3">
+                            <div class="blurry-content">
+                                <div class="w-full h-24 bg-slate-800/50 rounded-lg p-2 border border-slate-700">
+                                    <canvas id="deepDiveChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="premium-feature-lock-overlay">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Full Photo Analysis Breakdown -->
+                    <div class="glass-card p-4 rounded-lg flex flex-col premium-feature-lock relative">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-900/50 p-2 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.896-1.792A2 2 0 0110.428 4h3.144a2 2 0 011.664.89l.896 1.792A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
+                            <h3 class="font-semibold text-white text-lg text-left">Full Photo Analysis</h3>
+                        </div>
+                        <div class="content-unlocked text-left mt-3">
+                             <div class="blurry-content">
+                                <div class="flex gap-4 items-center">
+                                    <div class="w-24 h-24 bg-slate-800/50 rounded-lg flex items-center justify-center text-center p-2 border border-slate-700 relative overflow-hidden">
+                                        <svg class="w-12 h-12 text-slate-600" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M25 2C12.3 2 2 12.3 2 25s10.3 23 23 23 23-10.3 23-23S37.7 2 25 2zm0 6c2.8 0 5 2.2 5 5s-2.2 5-5 5-5-2.2-5-5 2.2-5 5-5zm0 34c-5.5 0-10.5-2.4-14-6.2.5-4.6 9.3-7.1 14-7.1s13.5 2.5 14 7.1c-3.5 3.8-8.5 6.2-14 6.2z" fill="currentColor"/></svg>
+                                        <div class="scan-line absolute left-0 right-0 h-1 bg-teal-300/50"></div>
+                                    </div>
+                                    <p class="text-sm text-gray-300 flex-1">Our AI analyzes subtle facial cues to detect signs of stress and eye strain. See what your photo reveals about your inner wellness.</p>
+                                </div>
+                             </div>
+                        </div>
+                        <div class="premium-feature-lock-overlay">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                    </div>
+
+                    <!-- Personalized 7-Day Action Plan -->
+                    <div class="glass-card p-4 rounded-lg flex flex-col premium-feature-lock relative">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-900/50 p-2 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg></div>
+                            <h3 class="font-semibold text-white text-lg text-left">Personalized 7-Day Plan</h3>
+                        </div>
+                        <div class="content-unlocked text-left mt-3 text-sm text-gray-300">
+                            <div class="blurry-content">
+                                 <p>Get a step-by-step, daily plan tailored to your unique data. Day 1 starts with a simple change to your evening routine. Day 3 targets your afternoon energy slump...</p>
+                            </div>
+                        </div>
+                        <div class="premium-feature-lock-overlay">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Targeted Recommendations Library -->
+                    <div class="glass-card p-4 rounded-lg flex flex-col premium-feature-lock relative">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-900/50 p-2 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.467 9.5 5 8 5c-3.141 0-5 1.96-5 4s1.859 4 5 4c1.5 0 2.832-.467 4-1.253m0 0C13.168 18.253 14.5 19 16 19c3.141 0 5-1.96 5-4s-1.859-4-5-4c-1.5 0-2.832.467-4 1.253z" /></svg></div>
+                            <h3 class="font-semibold text-white text-lg text-left">Recommendations Library</h3>
+                        </div>
+                        <div class="content-unlocked text-left mt-3 text-sm text-gray-300">
+                            <div class="blurry-content">
+                                 <p>Access our exclusive library. Unlock recipes like 'Mind-Boosting Berry Smoothie' and guided meditations designed for your specific stress patterns.</p>
+                            </div>
+                        </div>
+                        <div class="premium-feature-lock-overlay">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                    </div>
+
+                    <!-- Long-Term Risks & Opportunities -->
+                    <div class="glass-card p-4 rounded-lg flex flex-col premium-feature-lock relative">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-900/50 p-2 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg></div>
+                            <h3 class="font-semibold text-white text-lg text-left">Risks & Opportunities</h3>
+                        </div>
+                        <div class="content-unlocked text-left mt-3 text-sm text-gray-300">
+                            <div class="blurry-content">
+                                 <p>Based on your trajectory, our AI identifies potential long-term health risks like burnout, and reveals key opportunities to increase your healthspan by up to 5 years.</p>
+                            </div>
+                        </div>
+                        <div class="premium-feature-lock-overlay">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                    </div>
+
+                    <!-- Habit Formation Index -->
+                    <div class="glass-card p-4 rounded-lg flex flex-col premium-feature-lock relative">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-900/50 p-2 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg></div>
+                            <h3 class="font-semibold text-white text-lg text-left">Habit Formation Index</h3>
+                        </div>
+                        <div class="content-unlocked text-left mt-3 text-sm text-gray-300">
+                            <div class="blurry-content">
+                                 <p>What's your unique Habit Formation Index? Discover if you're a 'Sprinter' or a 'Marathoner' and get the right strategy, like the '2-Minute Rule', to make new habits stick.</p>
+                            </div>
+                        </div>
+                        <div class="premium-feature-lock-overlay">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                    </div>
+
+                    <!-- AI Coach Notes -->
+                    <div class="glass-card p-4 rounded-lg flex flex-col premium-feature-lock relative">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-900/50 p-2 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg></div>
+                            <h3 class="font-semibold text-white text-lg text-left">AI Coach Notes</h3>
+                        </div>
+                        <div class="content-unlocked text-left mt-3 text-sm text-gray-300">
+                            <div class="blurry-content">
+                                 <p>Read a personal note from your AI coach. It noticed a critical pattern between your late-night productivity and morning energy levels and has a specific insight for you.</p>
+                            </div>
+                        </div>
+                        <div class="premium-feature-lock-overlay">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                    </div>
+
+                    <!-- Scenario Simulations -->
+                    <div class="glass-card p-4 rounded-lg flex flex-col premium-feature-lock relative">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-900/50 p-2 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.375 3.375 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg></div>
+                            <h3 class="font-semibold text-white text-lg text-left">Scenario Simulations</h3>
+                        </div>
+                        <div class="content-unlocked text-left mt-3 text-sm text-gray-300">
+                            <div class="blurry-content">
+                                 <p>Play out your wellness future. What if you added 15 minutes of cardio daily? (+3 points). What if you meditated for 10 minutes? See the simulated impact on your score.</p>
+                            </div>
+                        </div>
+                        <div class="premium-feature-lock-overlay">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                    </div>
+
+                    <!-- BMI (Body Mass Index) -->
+                    <div class="glass-card p-4 rounded-lg flex flex-col premium-feature-lock relative">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-900/50 p-2 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" /></svg></div>
+                            <h3 class="font-semibold text-white text-lg text-left">Body Mass Index (BMI)</h3>
+                        </div>
+                        <div class="content-unlocked text-left mt-3 text-sm text-gray-300">
+                            <div class="blurry-content">
+                                 <p>Your BMI is 22.5. See how this compares to your peer group and learn why this single number doesn't tell the whole story about your body composition.</p>
+                            </div>
+                        </div>
+                        <div class="premium-feature-lock-overlay">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Wellness Trajectory Forecast -->
+                    <div class="glass-card p-4 rounded-lg flex flex-col premium-feature-lock relative">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-900/50 p-2 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg></div>
+                            <h3 class="font-semibold text-white text-lg text-left">Wellness Trajectory Forecast</h3>
+                        </div>
+                        <div class="content-unlocked text-left mt-3 text-sm text-gray-300">
+                            <div class="blurry-content">
+                                 <p>A detailed breakdown of your score forecast, showing the specific impact of key habits on your future wellness.</p>
+                            </div>
+                        </div>
+                        <div class="premium-feature-lock-overlay">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                    </div>
+
+                    <!-- Micronutrient Deficiency Scan -->
+                    <div class="glass-card p-4 rounded-lg flex flex-col premium-feature-lock relative">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-900/50 p-2 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg></div>
+                            <h3 class="font-semibold text-white text-lg text-left">Micronutrient Scan</h3>
+                        </div>
+                        <div class="content-unlocked text-left mt-3 text-sm text-gray-300">
+                            <div class="blurry-content">
+                                 <p>AI scans your data for patterns suggesting potential vitamin or mineral deficiencies, like Vitamin D or Iron, and provides food-based solutions.</p>
+                            </div>
+                        </div>
+                        <div class="premium-feature-lock-overlay">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                    </div>
+
+                    <!-- Genetic Trait Insights -->
+                    <div class="glass-card p-4 rounded-lg flex flex-col premium-feature-lock relative">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-900/50 p-2 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 001.414 0l2.414-2.414a1 1 0 01.707-.293H21" /></svg></div>
+                            <h3 class="font-semibold text-white text-lg text-left">Genetic Trait Insights</h3>
+                        </div>
+                        <div class="content-unlocked text-left mt-3 text-sm text-gray-300">
+                            <div class="blurry-content">
+                                 <p>Discover how your wellness patterns might be linked to common genetic predispositions, such as caffeine metabolism or sleep chronotype.</p>
+                            </div>
+                        </div>
+                        <div class="premium-feature-lock-overlay">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                    </div>
+
+                </div>
             </section>
             
-            <section class="glass-card p-4 rounded-lg text-center">
-               <h3 class="font-semibold text-white text-lg">Full Photo Analysis</h3>
-               <p class="text-sm text-gray-400 mt-2" data-premium-id="fullPhotoAnalysis">Unlock the premium report to see this.</p>
+            <!-- Payment Section -->
+            <section id="payment-section" class="fade-in-section glass-card p-6 rounded-xl text-center">
+                <h3 class="text-xl font-bold text-white mb-4">Unlock Full Report</h3>
+                <p class="text-gray-400 text-sm mb-6">Start your journey to a better you for just $9.99.</p>
+                <form id="payment-form">
+                    <div id="payment-form-container">
+                        <div class="card-number-wrapper">
+                            <input type="text" id="card-number" placeholder="Card Number" required>
+                        </div>
+                        <div class="card-details-wrapper">
+                            <input type="text" id="expiry" placeholder="MM/YY" required>
+                            <input type="text" id="cvv" placeholder="CVC" required>
+                        </div>
+                    </div>
+                    <button type="submit" id="pay-button" class="mt-4 w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-bold rounded-lg shadow-lg text-slate-900 bg-teal-400 hover:bg-teal-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-teal-500 transition-transform transform hover:scale-105 pulsate">
+                        Pay $9.99
+                    </button>
+                </form>
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-400 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        Secure payment powered by Stripe.
+                    </p>
+                </div>
             </section>
 
         </div>
     </div>
-    
+
+    <!-- Toast Notification Element -->
+    <div id="toast-notification">Payment successful! Your report is unlocked.</div>
+
     <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        const scoreTextEl = document.getElementById('score-text');
-        const scoreCircleEl = document.getElementById('score-circle-path');
-
-        function animateValue(element, start, end, duration) {
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                element.textContent = Math.floor(progress * (end - start) + start);
-                if (progress < 1) window.requestAnimationFrame(step);
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- CONFIGURATION ---
+            const SCORE_CONFIG = {
+                total: 78,
+                breakdown: {
+                    body: 75,
+                    mind: 60,
+                    nutrition: 90,
+                    lifestyle: 85,
+                },
+                wheel: [65, 55, 90, 75, 60] // Energy, Stress, Nutrition, Activity, Sleep
             };
-            window.requestAnimationFrame(step);
-        }
 
-        function animateScoreCircle(totalScore) {
-            if (!scoreCircleEl) return;
-            const circumference = 2 * Math.PI * 15.9155;
-            const offset = (totalScore / 100) * circumference;
-            scoreCircleEl.style.strokeDasharray = `0 ${circumference}`;
-            setTimeout(() => {
-                scoreCircleEl.style.strokeDasharray = `${offset} ${circumference}`;
-            }, 100);
-        }
-        
-        async function fetchAndRenderReport() {
-            const params = new URLSearchParams(window.location.search);
-            const sessionId = params.get('sessionId');
+            // --- ELEMENT SELECTORS ---
+            const elements = {
+                scoreText: document.getElementById('score-text'),
+                scoreCircle: document.getElementById('score-circle-path'),
+                scoreBreakdownSection: document.getElementById('score-breakdown-section'),
+                wellnessWheelCanvas: document.getElementById('wellnessWheel'),
+                trajectoryChartCanvas: document.getElementById('trajectoryChart'),
+                deepDiveChartCanvas: document.getElementById('deepDiveChart'),
+                paymentForm: document.getElementById('payment-form'),
+                payButton: document.getElementById('pay-button'),
+                paymentSection: document.getElementById('payment-section'),
+                premiumReportSection: document.getElementById('premium-report-section'),
+                toast: document.getElementById('toast-notification'),
+                allFadeInSections: document.querySelectorAll('.fade-in-section'),
+                allPremiumFeatures: document.querySelectorAll('.premium-feature-lock')
+            };
 
-            if (!sessionId) {
-                document.body.innerHTML = `<div class="text-center p-8 text-red-400"><h1>Error</h1><p>Session ID not found.</p></div>`;
-                return;
+            // --- ANIMATION LOGIC ---
+
+            function animateScore() {
+                let currentScore = 0;
+                const interval = setInterval(() => {
+                    if (currentScore >= SCORE_CONFIG.total) {
+                        clearInterval(interval);
+                        elements.scoreText.textContent = SCORE_CONFIG.total;
+                    } else {
+                        currentScore++;
+                        elements.scoreText.textContent = currentScore;
+                    }
+                }, 20);
             }
 
-            try {
-                const response = await fetch('/.netlify/functions/result', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sessionId })
+            function animateScoreCircle() {
+                const score = SCORE_CONFIG.total;
+                const scoreCircle = elements.scoreCircle;
+                if (!scoreCircle) return;
+
+                const radius = parseFloat(scoreCircle.getAttribute('r')) || 15.9155;
+                const circumference = 2 * Math.PI * radius;
+                const offset = (score / 100) * circumference;
+
+                scoreCircle.style.strokeDasharray = `0 ${circumference}`;
+                
+                setTimeout(() => {
+                    scoreCircle.style.strokeDasharray = `${offset} ${circumference}`;
+                }, 100);
+            }
+
+            // --- CHART CREATION ---
+
+            function createWellnessWheel() {
+                if (!elements.wellnessWheelCanvas) return;
+                const ctx = elements.wellnessWheelCanvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Energy', 'Stress', 'Nutrition', 'Activity', 'Sleep'],
+                        datasets: [{
+                            label: 'Your Score',
+                            data: SCORE_CONFIG.wheel,
+                            backgroundColor: 'rgba(20, 227, 227, 0.2)',
+                            borderColor: 'rgba(20, 227, 227, 1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: 'rgba(20, 227, 227, 1)',
+                            pointBorderColor: '#fff',
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            r: {
+                                angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
+                                grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                                pointLabels: { font: { size: 12, weight: '600' }, color: '#cbd5e1' },
+                                ticks: { backdropColor: 'transparent', color: '#94a3b8', stepSize: 25 },
+                                suggestedMin: 0,
+                                suggestedMax: 100
+                            }
+                        },
+                        plugins: { legend: { display: false } },
+                        maintainAspectRatio: false,
+                        responsive: true
+                    }
+                });
+            }
+
+            function createTrajectoryChart() {
+                if (!elements.trajectoryChartCanvas) return;
+                const ctx = elements.trajectoryChartCanvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Now', 'Next Month', 'In 6 Months'],
+                        datasets: [{
+                            label: 'Forecast with Guidance',
+                            data: [78, 85, 93],
+                            borderColor: '#34D399',
+                            backgroundColor: 'rgba(52, 211, 153, 0.2)',
+                            fill: 'origin',
+                            tension: 0.4
+                        }, {
+                            label: 'Forecast with No Change',
+                            data: [78, 77, 76],
+                            borderColor: '#F87171',
+                            backgroundColor: 'rgba(248, 113, 113, 0.2)',
+                            fill: 'origin',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#cbd5e1' } },
+                            y: { suggestedMin: 70, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#cbd5e1' } }
+                        },
+                        plugins: { legend: { display: false } },
+                        maintainAspectRatio: false,
+                        responsive: true
+                    }
+                });
+            }
+            
+            function createDeepDiveChart() {
+                if (!elements.deepDiveChartCanvas) return;
+                const ctx = elements.deepDiveChartCanvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Stress Recovery', 'Muscle Mass'],
+                        datasets: [{
+                            label: 'Index Score',
+                            data: [68, 75],
+                            backgroundColor: ['rgba(129, 140, 248, 0.5)', 'rgba(52, 211, 153, 0.5)'],
+                            borderColor: ['#818cf8', '#34d399'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                             y: {
+                                grid: { display: false },
+                                ticks: { color: '#cbd5e1' }
+                            }
+                        },
+                        plugins: { legend: { display: false } },
+                        maintainAspectRatio: false,
+                        responsive: true
+                    }
+                });
+            }
+
+            // --- PAYMENT & UNLOCK LOGIC ---
+
+            function handlePayment(e) {
+                e.preventDefault();
+                const cardNumber = document.getElementById('card-number').value;
+                const expiry = document.getElementById('expiry').value;
+                const cvv = document.getElementById('cvv').value;
+
+                if (!cardNumber || !expiry || !cvv) {
+                    showToast("Please fill in all payment details.", true);
+                    return;
+                }
+
+                elements.payButton.disabled = true;
+                elements.payButton.innerHTML = `<svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...`;
+
+                setTimeout(() => {
+                    unlockPremiumContent();
+                    elements.payButton.disabled = false;
+                    elements.payButton.textContent = 'Pay $9.99';
+                }, 2000);
+            }
+
+            function unlockPremiumContent() {
+                if (elements.paymentSection) {
+                    elements.paymentSection.style.transition = 'opacity 0.5s, transform 0.5s';
+                    elements.paymentSection.style.opacity = '0';
+                    elements.paymentSection.style.transform = 'scale(0.95)';
+                    setTimeout(() => elements.paymentSection.remove(), 500);
+                }
+                
+                // Unblur and unlock
+                document.querySelectorAll('.premium-feature-lock').forEach((item, index) => {
+                    setTimeout(() => {
+                        item.classList.remove('premium-feature-lock');
+                        item.classList.add('premium-feature-unlocked');
+                        const blurredContent = item.querySelector('.blurry-content');
+                        if (blurredContent) {
+                            blurredContent.classList.remove('blurry-content');
+                        }
+                    }, index * 150);
                 });
                 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Server error: ${errorText}`);
-                }
-                
-                const reportData = await response.json();
-                const freeData = reportData.freeReport;
-
-                if (!freeData) {
-                    throw new Error("AI response is missing freeReport data.");
-                }
-
-                // Populate all available text fields from the report
-                document.querySelector('[data-report="archetype"]').textContent = freeData.archetype || 'N/A';
-                document.querySelector('[data-report="archetypeDescription"]').textContent = freeData.archetypeDescription || '...';
-                document.querySelector('[data-report="keyInsight"]').innerHTML = freeData.keyInsight || '...';
-                
-                const wellnessScore = freeData.wellnessScore || 0;
-                
-                // Initialize animations
-                animateValue(scoreTextEl, 0, wellnessScore, 1500);
-                animateScoreCircle(wellnessScore);
-
-            } catch (error) {
-                console.error('Failed to fetch or render report:', error);
-                document.body.innerHTML = `<div class="text-center p-8 text-red-400"><h1>Analysis Failed</h1><p>${error.message}</p></div>`;
+                showToast("Payment successful! Your report is unlocked.");
             }
-        }
 
-        fetchAndRenderReport();
-    });
+            function showToast(message, isError = false) {
+                elements.toast.textContent = message;
+                elements.toast.style.backgroundColor = isError ? '#EF4444' : '#10B981';
+                elements.toast.classList.add('show');
+                setTimeout(() => {
+                    elements.toast.classList.remove('show');
+                }, 3000);
+            }
+
+            // --- OBSERVERS FOR SCROLL-BASED ANIMATIONS ---
+
+            function setupObservers() {
+                const options = { threshold: 0.1 };
+
+                const sectionObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            sectionObserver.unobserve(entry.target);
+                        }
+                    });
+                }, options);
+                elements.allFadeInSections.forEach(section => sectionObserver.observe(section));
+                
+                const barObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            Object.entries(SCORE_CONFIG.breakdown).forEach(([key, value]) => {
+                                const barEl = document.getElementById(`${key}-bar`);
+                                if (barEl) {
+                                    barEl.style.setProperty('--final-width', `${value}%`);
+                                    barEl.classList.add('bar-animation');
+                                }
+                            });
+                            barObserver.unobserve(entry.target);
+                        }
+                    });
+                }, options);
+                if(elements.scoreBreakdownSection) barObserver.observe(elements.scoreBreakdownSection);
+
+                const chartObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            if (entry.target.id === 'wellnessWheel') createWellnessWheel();
+                            if (entry.target.id === 'trajectoryChart') createTrajectoryChart();
+                            if (entry.target.id === 'deepDiveChart') createDeepDiveChart();
+                            chartObserver.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.25 });
+                if(elements.wellnessWheelCanvas) chartObserver.observe(elements.wellnessWheelCanvas);
+                if(elements.trajectoryChartCanvas) chartObserver.observe(elements.trajectoryChartCanvas);
+                if(elements.deepDiveChartCanvas) chartObserver.observe(elements.deepDiveChartCanvas);
+            }
+
+            // --- INITIALIZATION ---
+
+            function init() {
+                animateScore();
+                animateScoreCircle();
+                setupObservers();
+                if (elements.paymentForm) {
+                    elements.paymentForm.addEventListener('submit', handlePayment);
+                }
+            }
+
+            init();
+        });
     </script>
 </body>
 </html>
