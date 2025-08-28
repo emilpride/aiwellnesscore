@@ -9,8 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@azure/cognitiveservices-face": "^5.0.0",
-    "@azure/ms-rest-js": "^2.7.0",
+    "axios": "^1.6.7",  // Добавляем axios
     "@google/generative-ai": "^0.2.1",
     "firebase-admin": "^12.1.1",
     "stripe": "^15.12.0"
