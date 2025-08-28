@@ -1,8 +1,10 @@
 const axios = require('axios');
 const querystring = require('querystring');
 
-const FACEPP_DETECT_URL = 'https://api-us.faceplusplus.com/facepp/v3/detect';
+// --- ЭТИ СТРОКИ, СКОРЕЕ ВСЕГО, ОТСУТСТВОВАЛИ ---
+const DETECT_URL = 'https://api-us.faceplusplus.com/facepp/v3/detect';
 const ANALYZE_URL = 'https://api-us.faceplusplus.com/facepp/v3/face/analyze';
+// ---------------------------------------------
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -17,6 +19,7 @@ exports.handler = async (event) => {
 
     const base64Image = photoDataUrl.split(';base64,').pop();
 
+    // --- STEP 1: DETECT FACE and GET face_token ---
     const detectFormData = {
       api_key: process.env.FACEPLUSPLUS_API_KEY,
       api_secret: process.env.FACEPLUSPLUS_API_SECRET,
@@ -31,11 +34,11 @@ exports.handler = async (event) => {
 
     const faceToken = detectResponse.data.faces[0].face_token;
 
+    // --- STEP 2: ANALYZE FACE using face_token ---
     const analyzeFormData = {
       api_key: process.env.FACEPLUSPLUS_API_KEY,
       api_secret: process.env.FACEPLUSPLUS_API_SECRET,
       face_tokens: faceToken,
-      // Corrected attributes list
       return_attributes: 'gender,age,smiling,emotion,glasses'
     };
 
@@ -50,7 +53,7 @@ exports.handler = async (event) => {
     const analysisResult = {
       age: faceAttributes.age.value,
       gender: faceAttributes.gender.value,
-      smile: faceAttributes.smiling.value > faceAttributes.smiling.threshold, // Use the correct 'smiling' attribute
+      smile: faceAttributes.smiling.value > faceAttributes.smiling.threshold,
       glasses: faceAttributes.glass.value,
       emotion: faceAttributes.emotion
     };
@@ -61,8 +64,8 @@ exports.handler = async (event) => {
     };
 
   } catch (error) {
-    console.error('Face++ API Error:', error.response ? error.response.data : error.message);
-    const errorMessage = error.response ? error.response.data.error_message : 'Could not analyze photo with Face++';
+    const errorMessage = error.response ? error.response.data : error.message;
+    console.error('Face++ API Error:', errorMessage);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: errorMessage }),
