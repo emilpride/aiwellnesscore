@@ -51,7 +51,7 @@
             }
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { 
+        .no-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
@@ -83,18 +83,17 @@
             height: 32px;
         }
         #camera-modal {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
-    z-index: 50;
-    /* Строка display: none; УДАЛЕНА. 
-       По умолчанию окно будет скрыто классом .hidden в HTML */
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-}
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 50;
+            /* display is controlled by the 'hidden' class */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
         #camera-container {
             position: relative;
             width: 100%;
@@ -213,7 +212,7 @@
 
         // --- QUIZ DATA ---
         const quizQuestions = [
-            { id: 'welcome', text: "Hello! I'm your personal AI Wellness Coach. I'll be guiding you through this analysis to help you discover insights about your well-being.", type: 'welcome', options: ["Let's Begin!"] },
+             { id: 'welcome', text: "Hello! I'm your personal AI Wellness Coach. I'll be guiding you through this analysis to help you discover insights about your well-being.", type: 'welcome', options: ["Let's Begin!"] },
             { id: 'disclaimer', text: "Before we begin, a quick heads-up: I'm an AI coach, not a medical doctor. This analysis is for educational purposes only and is not a substitute for professional medical advice. <b>All data, including your photo, is deleted immediately after you view the detailed report.</b><br><br>By continuing, you agree to our <a href='terms.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Terms of Service</a> and <a href='privacy.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Privacy Policy</a>.", type: 'disclaimer', options: ['I Understand & Agree'] },
             { id: 'age', text: "Great, let's begin! To start, what's your age?", reason: "Your age helps me calibrate your wellness metrics against demographic data, ensuring your results are relevant to your life stage.", type: 'chips_text', options: ['Under 18', '18-25', '26-35', '36-50', '50+'], placeholder: 'Or type your exact age...' },
             { id: 'gender', text: "Great start! Now, what's your biological sex?", reason: "This allows me to consider physiological differences that can influence wellness factors.", type: 'chips_text', options: ['Male', 'Female'], placeholder: 'Or prefer not to say...' },
@@ -400,28 +399,33 @@
 
         async function initCamera() {
             cameraModal.classList.remove('hidden');
-            if (!faceApiLoaded) {
-                await loadFaceApiModels();
-            }
-            if (!faceApiLoaded) return;
 
-            try {
-                videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-                videoEl.srcObject = videoStream;
-                videoEl.onloadedmetadata = () => {
-                    videoEl.play();
-                    const displaySize = { width: videoEl.clientWidth, height: videoEl.clientHeight };
-                    faceapi.matchDimensions(overlayCanvas, displaySize);
-                    startFaceDetection(videoEl, overlayCanvas);
-                };
-            } catch (err) {
-                console.error("Camera Error:", err);
-                let errorMessage = "Oops, I couldn't access your camera. Please check your browser permissions and refresh the page.";
-                if (err.name === 'NotAllowedError') errorMessage = "Camera access was denied. Please enable it in your browser settings and refresh.";
-                else if (err.name === 'NotFoundError') errorMessage = "No camera was found. Please connect one and refresh.";
-                addMessage(errorMessage);
-                closeCamera();
-            }
+            // FIX: Wait for the next browser paint cycle to ensure the modal has dimensions
+            requestAnimationFrame(async () => {
+                if (!faceApiLoaded) {
+                    await loadFaceApiModels();
+                }
+                if (!faceApiLoaded) return;
+
+                try {
+                    videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                    videoEl.srcObject = videoStream;
+                    videoEl.onloadedmetadata = () => {
+                        videoEl.play();
+                        // Now the dimensions will be correct
+                        const displaySize = { width: videoEl.clientWidth, height: videoEl.clientHeight };
+                        faceapi.matchDimensions(overlayCanvas, displaySize);
+                        startFaceDetection(videoEl, overlayCanvas);
+                    };
+                } catch (err) {
+                    console.error("Camera Error:", err);
+                    let errorMessage = "Oops, I couldn't access your camera. Please check your browser permissions and refresh the page.";
+                    if (err.name === 'NotAllowedError') errorMessage = "Camera access was denied. Please enable it in your browser settings and refresh.";
+                    else if (err.name === 'NotFoundError') errorMessage = "No camera was found. Please connect one and refresh.";
+                    addMessage(errorMessage);
+                    closeCamera();
+                }
+            });
         }
 
         function closeCamera() {
@@ -659,5 +663,3 @@
 
 </body>
 </html>
-
-
