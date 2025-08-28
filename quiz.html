@@ -51,7 +51,7 @@
             }
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar {
+        .no-scrollbar { 
             -ms-overflow-style: none;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
@@ -88,7 +88,6 @@
             background-color: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(8px);
             z-index: 50;
-            /* display is controlled by the 'hidden' class */
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -399,8 +398,7 @@
 
         async function initCamera() {
             cameraModal.classList.remove('hidden');
-
-            // FIX: Wait for the next browser paint cycle to ensure the modal has dimensions
+            // Wait for the next browser paint to ensure the modal has dimensions
             requestAnimationFrame(async () => {
                 if (!faceApiLoaded) {
                     await loadFaceApiModels();
@@ -412,7 +410,6 @@
                     videoEl.srcObject = videoStream;
                     videoEl.onloadedmetadata = () => {
                         videoEl.play();
-                        // Now the dimensions will be correct
                         const displaySize = { width: videoEl.clientWidth, height: videoEl.clientHeight };
                         faceapi.matchDimensions(overlayCanvas, displaySize);
                         startFaceDetection(videoEl, overlayCanvas);
@@ -461,13 +458,10 @@
                
                 if (resizedDetections.length > 0) {
                     const box = resizedDetections[0].detection.box;
-                   
                     faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
-                   
                     scanY += 2 * scanDirection;
-                    if (scanY > box.height || scanY < 0) {
-                        scanDirection *= -1;
-                    }
+                    if (scanY > box.height || scanY < 0) scanDirection *= -1;
+                    
                     context.fillStyle = 'rgba(0, 255, 255, 0.4)';
                     context.fillRect(box.x, box.y + scanY, box.width, 3);
                     context.shadowColor = 'rgba(0, 255, 255, 1)';
@@ -479,24 +473,16 @@
                     context.lineWidth = 3;
                     const cornerLength = 20;
                     context.beginPath();
-                    context.moveTo(box.x, box.y + cornerLength);
-                    context.lineTo(box.x, box.y);
-                    context.lineTo(box.x + cornerLength, box.y);
+                    context.moveTo(box.x, box.y + cornerLength); context.lineTo(box.x, box.y); context.lineTo(box.x + cornerLength, box.y);
                     context.stroke();
                     context.beginPath();
-                    context.moveTo(box.x + box.width - cornerLength, box.y);
-                    context.lineTo(box.x + box.width, box.y);
-                    context.lineTo(box.x + box.width, box.y + cornerLength);
+                    context.moveTo(box.x + box.width - cornerLength, box.y); context.lineTo(box.x + box.width, box.y); context.lineTo(box.x + box.width, box.y + cornerLength);
                     context.stroke();
                     context.beginPath();
-                    context.moveTo(box.x, box.y + box.height - cornerLength);
-                    context.lineTo(box.x, box.y + box.height);
-                    context.lineTo(box.x + cornerLength, box.y + box.height);
+                    context.moveTo(box.x, box.y + box.height - cornerLength); context.lineTo(box.x, box.y + box.height); context.lineTo(box.x + cornerLength, box.y + box.height);
                     context.stroke();
                     context.beginPath();
-                    context.moveTo(box.x + box.width - cornerLength, box.y + box.height);
-                    context.lineTo(box.x + box.width, box.y + box.height);
-                    context.lineTo(box.x + box.width, box.y + box.height - cornerLength);
+                    context.moveTo(box.x + box.width - cornerLength, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height - cornerLength);
                     context.stroke();
                    
                     const isGoodSize = box.width > canvas.width * 0.4;
@@ -547,31 +533,24 @@
            
             const contentWrapper = document.createElement('div');
             contentWrapper.className = 'p-3 rounded-2xl bg-indigo-600 text-white rounded-bl-lg';
-           
             const text = document.createElement('p');
             text.className = 'mb-2';
             text.textContent = "Here's the photo. Happy with it?";
-
             const image = new Image();
+            image.src = dataUrl;
             image.alt = "Your selfie";
             image.className = "rounded-lg max-w-full h-auto";
-           
-            image.onload = () => {
-                chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
-            };
-            image.src = dataUrl;
-
+            image.onload = () => { chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight; };
+            
             contentWrapper.appendChild(text);
             contentWrapper.appendChild(image);
-           
             messageWrapper.appendChild(getBotAvatar());
             messageWrapper.appendChild(contentWrapper);
             chatContent.appendChild(messageWrapper);
 
-            chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
-
             optionsContainer.innerHTML = '';
             const confirmBtn = document.createElement('button');
+            confirmBtn.id = 'confirm-photo-btn';
             confirmBtn.textContent = 'Looks Good!';
             confirmBtn.className = "px-6 py-3 bg-green-500 border border-green-400 text-white rounded-full hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-200 font-semibold";
             confirmBtn.onclick = confirmPhoto;
@@ -589,77 +568,4 @@
         }
 
         async function confirmPhoto() {
-            addMessage('Looks Good!', 'user');
-            
-            showTypingIndicator();
-            optionsContainer.innerHTML = '';
-            inputArea.style.display = 'none';
-            
-            try {
-                const analyzeResponse = await fetch('/.netlify/functions/analyzeFace', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ photoDataUrl: capturedPhotoDataUrl })
-                });
-
-                if (!analyzeResponse.ok) {
-                    const errorText = await analyzeResponse.text();
-                    throw new Error(`Face analysis server error: ${errorText}`);
-                }
-                
-                const faceData = await analyzeResponse.json();
-                await saveAnswerToServer('faceAnalysis', faceData);
-                document.getElementById('photo-preview-wrapper')?.remove();
-                endQuiz();
-
-            } catch (error) {
-                console.error('Error during photo analysis step:', error);
-                hideTypingIndicator();
-                addMessage("Sorry, I couldn't analyze the photo. Let's proceed without it.");
-                setTimeout(endQuiz, 1500);
-            }
-        }
-
-        function retakePhoto() {
-            addMessage('Retake', 'user');
-            document.getElementById('photo-preview-wrapper')?.remove();
-            optionsContainer.innerHTML = '';
-            inputArea.style.display = 'none';
-            handleCameraButtonClick();
-        }
-
-        function endQuiz() {
-            inputArea.style.display = 'none';
-            progressBar.style.width = '100%';
-            showTypingIndicator();
-            setTimeout(() => {
-                hideTypingIndicator();
-                addMessage("Thank you for sharing! I'm firing up my neural networks to analyze your results... This is exciting!");
-                showTypingIndicator();
-                setTimeout(() => {
-                    hideTypingIndicator();
-                    const resultUrl = `result.html?sessionId=${sessionId}`;
-                    const message = `Done! Your personalized free report is ready. 🚀<br><a href='${resultUrl}' class='inline-block mt-4 px-6 py-3 bg-indigo-500 text-white font-semibold rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200'>View My Results</a>`;
-                    addMessage(message);
-                    localStorage.setItem(`wellnessReport-${sessionId}`, JSON.stringify(userAnswers));
-                }, 3000);
-            }, 1500);
-        }
-
-        // --- INITIALIZATION ---
-        async function initQuiz() {
-            await startQuizSession();
-            if (sessionId) {
-                displayQuestion();
-            }
-        }
-        sendBtn.addEventListener('click', () => handleAnswer(userInput.value));
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleAnswer(userInput.value);
-        });
-        closeCameraBtn.addEventListener('click', closeCamera);
-        initQuiz();
-    </script>
-
-</body>
-</html>
+            const confirmButton = document.getElementById('confirm-photo-btn');
