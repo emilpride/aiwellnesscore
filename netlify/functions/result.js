@@ -70,7 +70,7 @@ exports.handler = async (event) => {
     const prompt = createPrompt(sessionData.answers, faceAnalysisData);
     
     // CORRECTED MODEL NAME
-    const modelName = "gemini-pro";
+    const modelName = "gemini-1.5-pro-latest";
     console.log(`Attempting to use Gemini model: ${modelName}`);
     const model = genAI.getGenerativeModel({ model: modelName });
     
