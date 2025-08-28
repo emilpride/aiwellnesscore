@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your AI WELLNESSCORE Report</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -14,31 +13,27 @@
         .gradient-bg-dark-animated { background: linear-gradient(300deg, #0f172a, #1e1b4b, #312e81, #0f172a); background-size: 200% 200%; animation: slow-pan 25s ease infinite; }
         @keyframes slow-pan { 0% { background-position: 0% 0%; } 25% { background-position: 100% 0%; } 50% { background-position: 100% 100%; } 75% { background-position: 0% 100%; } 100% { background-position: 0% 0%; } }
         .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .fade-in-section { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
-        .fade-in-section.is-visible { opacity: 1; transform: translateY(0); }
-        .bar-animation { animation: fill-bar 1.5s ease-out forwards; }
-        @keyframes fill-bar { from { width: 0%; } to { width: var(--final-width); } }
         .score-circle-path { transition: stroke-dasharray 2s ease-out; }
     </style>
 </head>
 <body class="bg-slate-900 text-gray-200">
 
     <div class="gradient-bg-dark-animated min-h-screen py-8">
-        <div class="max-w-md mx-auto px-4 space-y-8">
+        <div class="max-w-md mx-auto px-4 space-y-12">
 
-            <section class="fade-in-section text-center">
+            <section class="text-center">
                 <span class="text-teal-300 text-sm font-medium px-4 py-1.5 rounded-full bg-teal-900/50 border border-teal-800">Your Wellness Archetype</span>
                 <h1 data-report="archetype" class="text-4xl font-black text-white mt-3 tracking-tight">Loading...</h1>
                 <p data-report="archetypeDescription" class="text-base text-gray-400 mt-2 mx-auto max-w-sm">Analyzing your results...</p>
             </section>
 
-            <section class="fade-in-section text-center">
+            <section class="text-center">
                 <div class="relative w-56 h-56 mx-auto">
                     <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                         <defs>
                             <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" style="stop-color:#14E3E3;" />
-                                <stop offset="100%" style="stop-color:#4F46E5;" />
+                                <stop offset="0%" style="stop-color:#14E3E3; stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#4F46E5; stop-opacity:1" />
                             </linearGradient>
                         </defs>
                         <path class="text-slate-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="2" />
@@ -50,79 +45,45 @@
                     </div>
                 </div>
             </section>
-
-            <section id="score-breakdown-section" class="fade-in-section glass-card p-6 rounded-xl space-y-4">
-                <h3 class="text-xl font-bold text-white text-center">Core Four Breakdown</h3>
-                <div>
-                    <div class="flex items-center justify-between mb-1"><span class="text-sm font-medium text-teal-400">Body</span><span class="text-teal-400 font-bold" data-report="coreFour.body.score">%</span></div>
-                    <div class="w-full bg-slate-700 rounded-full h-2.5"><div id="body-bar" class="bg-teal-400 h-2.5 rounded-full" style="width: 0%;"></div></div>
-                </div>
-                <div>
-                    <div class="flex items-center justify-between mb-1"><span class="text-sm font-medium text-indigo-400">Mind</span><span class="text-indigo-400 font-bold" data-report="coreFour.mind.score">%</span></div>
-                    <div class="w-full bg-slate-700 rounded-full h-2.5"><div id="mind-bar" class="bg-indigo-400 h-2.5 rounded-full" style="width: 0%;"></div></div>
-                </div>
-                <div>
-                    <div class="flex items-center justify-between mb-1"><span class="text-sm font-medium text-emerald-400">Nutrition</span><span class="text-emerald-400 font-bold" data-report="coreFour.nutrition.score">%</span></div>
-                    <div class="w-full bg-slate-700 rounded-full h-2.5"><div id="nutrition-bar" class="bg-emerald-400 h-2.5 rounded-full" style="width: 0%;"></div></div>
-                </div>
-                <div>
-                    <div class="flex items-center justify-between mb-1"><span class="text-sm font-medium text-sky-400">Lifestyle</span><span class="text-sky-400 font-bold" data-report="coreFour.lifestyle.score">%</span></div>
-                    <div class="w-full bg-slate-700 rounded-full h-2.5"><div id="lifestyle-bar" class="bg-sky-400 h-2.5 rounded-full" style="width: 0%;"></div></div>
-                </div>
-            </section>
-
-            <section class="fade-in-section glass-card p-6 rounded-xl text-center">
+            
+            <section class="glass-card p-6 rounded-xl text-center">
                 <h3 class="text-xl font-bold text-white mb-2">Key AI Insight</h3>
-                <p data-report="keyInsight" class="text-sm text-gray-300"></p>
+                <p data-report="keyInsight" class="text-sm text-gray-300">Loading insight...</p>
             </section>
             
-            <section class="fade-in-section glass-card p-6 rounded-xl text-center">
-                <h3 class="text-xl font-bold text-white mb-2">Wellness Age</h3>
-                <p data-report="wellnessAge" class="text-2xl text-teal-400 font-bold mt-2"></p>
+            <section class="glass-card p-4 rounded-lg text-center">
+               <h3 class="font-semibold text-white text-lg">Full Photo Analysis</h3>
+               <p class="text-sm text-gray-400 mt-2" data-premium-id="fullPhotoAnalysis">Unlock the premium report to see this.</p>
             </section>
-
         </div>
     </div>
     
     <script>
     document.addEventListener('DOMContentLoaded', async () => {
-        let SCORE_CONFIG = {};
-        const elements = {
-            scoreText: document.getElementById('score-text'),
-            scoreCircle: document.getElementById('score-circle-path'),
-        };
+        const scoreTextEl = document.getElementById('score-text');
+        const scoreCircleEl = document.getElementById('score-circle-path');
 
-        function animateScore() {
+        function animateScore(totalScore) {
             let currentScore = 0;
             const interval = setInterval(() => {
-                if (currentScore >= SCORE_CONFIG.total) {
+                if (currentScore >= totalScore) {
                     clearInterval(interval);
-                    elements.scoreText.textContent = SCORE_CONFIG.total;
+                    scoreTextEl.textContent = totalScore;
                 } else {
                     currentScore++;
-                    elements.scoreText.textContent = currentScore;
+                    scoreTextEl.textContent = currentScore;
                 }
-            }, 20);
+            }, 25);
         }
 
-        function animateScoreCircle() {
-            const score = SCORE_CONFIG.total;
+        function animateScoreCircle(totalScore) {
+            if (!scoreCircleEl) return;
             const circumference = 2 * Math.PI * 15.9155;
-            const offset = (score / 100) * circumference;
-            elements.scoreCircle.style.strokeDasharray = `0 ${circumference}`;
+            const offset = (totalScore / 100) * circumference;
+            scoreCircleEl.style.strokeDasharray = `0 ${circumference}`;
             setTimeout(() => {
-                elements.scoreCircle.style.strokeDasharray = `${offset} ${circumference}`;
+                scoreCircleEl.style.strokeDasharray = `${offset} ${circumference}`;
             }, 100);
-        }
-        
-        function animateBars() {
-             Object.entries(SCORE_CONFIG.breakdown).forEach(([key, value]) => {
-                const barEl = document.getElementById(`${key}-bar`);
-                if(barEl) {
-                    barEl.style.setProperty('--final-width', `${value}%`);
-                    barEl.classList.add('bar-animation');
-                }
-             });
         }
 
         async function fetchAndRenderReport() {
@@ -140,6 +101,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sessionId })
                 });
+                
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`Server error: ${errorText}`);
@@ -148,48 +110,20 @@
                 const reportData = await response.json();
                 const freeData = reportData.freeReport;
 
-                if (!freeData || !freeData.coreFour) {
-                    throw new Error("AI response is missing critical data.");
+                if (!freeData) {
+                    throw new Error("AI response is missing freeReport data.");
                 }
-
-                SCORE_CONFIG = {
-                    total: freeData.wellnessScore || 0,
-                    breakdown: {
-                        body: freeData.coreFour.body.score || 0,
-                        mind: freeData.coreFour.mind.score || 0,
-                        nutrition: freeData.coreFour.nutrition.score || 0,
-                        lifestyle: freeData.coreFour.lifestyle.score || 0
-                    }
-                };
 
                 // Populate all text fields from the report
-                document.querySelector('[data-report="archetype"]').textContent = freeData.archetype;
-                document.querySelector('[data-report="archetypeDescription"]').textContent = freeData.archetypeDescription;
-                document.querySelector('[data-report="keyInsight"]').innerHTML = freeData.keyInsight;
-                document.querySelector('[data-report="wellnessAge"]').textContent = freeData.wellnessAge;
-                document.querySelector('[data-report="coreFour.body.score"]').textContent = `${freeData.coreFour.body.score}%`;
-                document.querySelector('[data-report="coreFour.mind.score"]').textContent = `${freeData.coreFour.mind.score}%`;
-                document.querySelector('[data-report="coreFour.nutrition.score"]').textContent = `${freeData.coreFour.nutrition.score}%`;
-                document.querySelector('[data-report="coreFour.lifestyle.score"]').textContent = `${freeData.coreFour.lifestyle.score}%`;
+                document.querySelector('[data-report="archetype"]').textContent = freeData.archetype || 'N/A';
+                document.querySelector('[data-report="archetypeDescription"]').textContent = freeData.archetypeDescription || '...';
+                document.querySelector('[data-report="keyInsight"]').innerHTML = freeData.keyInsight || '...';
+                
+                const wellnessScore = freeData.wellnessScore || 0;
                 
                 // Initialize animations
-                animateScore();
-                animateScoreCircle();
-                
-                // Use Intersection Observer to animate bars on scroll
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            animateBars();
-                            observer.unobserve(entry.target);
-                        }
-                    });
-                }, { threshold: 0.5 });
-                
-                const breakdownSection = document.getElementById('score-breakdown-section');
-                if (breakdownSection) {
-                    observer.observe(breakdownSection);
-                }
+                animateScore(wellnessScore);
+                animateScoreCircle(wellnessScore);
 
             } catch (error) {
                 console.error('Failed to fetch or render report:', error);
