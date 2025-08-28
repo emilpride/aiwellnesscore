@@ -2,7 +2,7 @@ const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Firebase Initialization
+// Инициализация Firebase
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
 let db;
 if (!global._firebaseApp) {
@@ -10,7 +10,7 @@ if (!global._firebaseApp) {
 }
 db = getFirestore();
 
-// Gemini API Initialization
+// Инициализация Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 function createPrompt(answers, faceAnalysis) {
@@ -69,8 +69,8 @@ exports.handler = async (event) => {
 
     const prompt = createPrompt(sessionData.answers, faceAnalysisData);
     
-    // CORRECTED MODEL NAME
-    const modelName = "gemini-1.5-pro-latest";
+    // ИСПОЛЬЗУЕМ НОВУЮ, БЫСТРУЮ МОДЕЛЬ
+    const modelName = "gemini-1.5-flash-latest";
     console.log(`Attempting to use Gemini model: ${modelName}`);
     const model = genAI.getGenerativeModel({ model: modelName });
     
