@@ -545,15 +545,29 @@
             
             const contentWrapper = document.createElement('div');
             contentWrapper.className = 'p-3 rounded-2xl bg-indigo-600 text-white rounded-bl-lg';
-            contentWrapper.innerHTML = `
-                <p class="mb-2">Here's the photo. Happy with it?</p>
-                <img src="${dataUrl}" alt="Your selfie" class="rounded-lg max-w-full h-auto">
-            `;
+            
+            const text = document.createElement('p');
+            text.className = 'mb-2';
+            text.textContent = "Here's the photo. Happy with it?";
+
+            const image = new Image();
+            image.alt = "Your selfie";
+            image.className = "rounded-lg max-w-full h-auto";
+            
+            // FIX: Scroll after the image has loaded to ensure correct scrollHeight
+            image.onload = () => {
+                chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
+            };
+            image.src = dataUrl; // Set src after defining onload
+
+            contentWrapper.appendChild(text);
+            contentWrapper.appendChild(image);
             
             messageWrapper.appendChild(getBotAvatar());
             messageWrapper.appendChild(contentWrapper);
             chatContent.appendChild(messageWrapper);
-            // FIX: Auto-scroll to the new message
+
+            // Scroll immediately for the text part, then again on image load
             chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
 
             optionsContainer.innerHTML = '';
