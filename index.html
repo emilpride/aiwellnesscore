@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,25 +27,6 @@
             50% { background-position: 100% 100%; }
             75% { background-position: 0% 100%; }
             100% { background-position: 0% 0%; }
-        }
-        
-        /* Cursor Glow Effect */
-        #cursor-glow {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(45, 212, 191, 0.15) 0%, rgba(45, 212, 191, 0) 60%);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            transition: width 0.3s, height 0.3s;
-            z-index: 9999;
-            opacity: 0;
-        }
-        body:hover #cursor-glow {
-            opacity: 1;
         }
         
         /* Glass Card Effect */
@@ -130,65 +111,51 @@
             z-index: 2;
         }
 
-        /* Cookie Consent Styles */
-        .cookie-toggle-label {
+        /* iPhone Mockup Styles */
+        .phone-mockup {
             position: relative;
-            display: inline-block;
-            width: 44px;
-            height: 24px;
+            margin: 1.5rem auto 0;
+            width: 100%;
+            max-width: 250px;
+            aspect-ratio: 9 / 19.5;
+            background: #1a1a1a;
+            border-radius: 36px;
+            border: 10px solid #000;
+            box-shadow: 0 20px 30px -10px rgba(0,0,0,0.4);
+            overflow: hidden;
         }
-        .cookie-toggle-label input {
-            opacity: 0;
-            width: 0;
-            height: 0;
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #0f172a;
+            overflow: hidden;
         }
-        .cookie-slider {
+        .phone-screen img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .phone-notch {
             position: absolute;
-            cursor: pointer;
             top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #334155;
-            transition: .4s;
-            border-radius: 24px;
-        }
-        .cookie-slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked + .cookie-slider {
-            background-color: #14e3e3;
-        }
-        input:checked + .cookie-slider:before {
-            transform: translateX(20px);
-        }
-        input:disabled + .cookie-slider {
-            cursor: not-allowed;
-            background-color: #475569;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 45%;
+            height: 18px;
+            background: #000;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            z-index: 2;
         }
     </style>
 </head>
 <body class="bg-slate-900 text-gray-200">
 
-    <div id="cursor-glow"></div>
-
     <div class="gradient-bg-dark-animated min-h-screen">
 
-        <!-- Navigation -->
         <header class="absolute top-0 left-0 right-0 z-30 p-4">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
-                <!-- Re-added original logo with a fallback text and placeholder image -->
-                <a href="/" class="flex items-center space-x-2">
-                    <img src="logo.png" alt="AI WELLNESSCORE Logo" class="h-16 w-auto" onerror="this.onerror=null;this.src='https://placehold.co/100x64/0f172a/e0e7ff?text=LOGO';">
-                </a>
+                <img src="logo.png" alt="AI WELLNESSCORE Logo" class="h-16 w-auto">
                 <div class="hidden md:flex items-center space-x-6">
                     <a href="#faq" class="text-gray-300 hover:text-white transition-colors">FAQ</a>
                     <a href="quiz.html" class="px-5 py-2 text-sm font-semibold bg-white/10 border border-white/20 rounded-full hover:bg-white/20 transition-all duration-300 transform hover:scale-105">Start Analysis</a>
@@ -200,7 +167,6 @@
             </div>
         </header>
 
-        <!-- Mobile Menu Panel -->
         <div id="mobile-menu" class="hidden md:hidden fixed inset-0 bg-slate-900/95 backdrop-blur-sm z-20">
             <div class="flex flex-col items-center justify-center h-full space-y-8 text-2xl font-semibold text-white">
                  <a href="quiz.html" class="hover:text-teal-300 transition-colors">Start Analysis</a>
@@ -212,7 +178,6 @@
         </div>
 
         <main class="relative overflow-hidden">
-            <!-- Hero Block -->
             <section class="min-h-screen flex items-center justify-center px-4 pt-20 pb-10">
                 <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-8 items-center">
                     <div class="hero-content text-center md:text-left space-y-6">
@@ -231,39 +196,46 @@
             </section>
 
             <div class="max-w-7xl mx-auto px-4 space-y-24 md:space-y-32 py-16">
-               
-                <!-- 2. How It Works - FIXED BLOCK -->
+                
                 <section class="fade-in-section text-center">
                     <h2 class="text-4xl font-bold text-white mb-12">Get Your Results in <span class="animated-gradient-text">3 Simple Steps</span></h2>
                     <div class="grid md:grid-cols-3 gap-8">
-                        <!-- Step 1 -->
-                        <div class="glass-card p-6 rounded-2xl text-center flex flex-col justify-center items-center" style="transition-delay: 0ms;">
-                            <div class="p-4 bg-indigo-900/50 rounded-full mb-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
+                        <div class="glass-card p-8 rounded-2xl text-center flex flex-col">
+                            <div class="text-5xl font-black text-indigo-400 mb-2">1</div>
                             <h3 class="text-xl font-bold text-teal-300 mb-2">Answer Questions</h3>
-                            <p class="text-gray-400 text-sm">Complete a short, conversational quiz about your lifestyle, habits, and goals.</p>
-                        </div>
-                        <!-- Step 2 -->
-                        <div class="glass-card p-6 rounded-2xl text-center flex flex-col justify-center items-center" style="transition-delay: 150ms;">
-                            <div class="p-4 bg-indigo-900/50 rounded-full mb-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.896-1.792A2 2 0 0110.428 4h3.144a2 2 0 011.664.89l.896 1.792A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            <p class="text-gray-400 text-sm flex-grow">Complete a short, conversational quiz about your lifestyle, habits, and goals.</p>
+                            <div class="phone-mockup">
+                                <div class="phone-notch"></div>
+                                <div class="phone-screen">
+                                    <img src="step1.jpeg" alt="Screenshot of quiz questions" onerror="this.onerror=null;this.src='https://placehold.co/270x585/0f172a/e0e7ff?text=Step+1';">
+                                </div>
                             </div>
+                        </div>
+                        <div class="glass-card p-8 rounded-2xl text-center flex flex-col" style="transition-delay: 150ms;">
+                            <div class="text-5xl font-black text-indigo-400 mb-2">2</div>
                             <h3 class="text-xl font-bold text-teal-300 mb-2">Snap a Photo</h3>
-                            <p class="text-gray-400 text-sm">Our AI analyzes facial cues for non-medical indicators of stress and fatigue. Never stored.</p>
-                        </div>
-                        <!-- Step 3 -->
-                        <div class="glass-card p-6 rounded-2xl text-center flex flex-col justify-center items-center" style="transition-delay: 300ms;">
-                            <div class="p-4 bg-indigo-900/50 rounded-full mb-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                             <p class="text-gray-400 text-sm flex-grow">Our AI analyzes facial cues for non-medical indicators of stress and fatigue. Never stored.</p>
+                            <div class="phone-mockup">
+                                <div class="phone-notch"></div>
+                                <div class="phone-screen">
+                                    <img src="step2.jpeg" alt="Screenshot of selfie camera view" onerror="this.onerror=null;this.src='https://placehold.co/270x585/0f172a/e0e7ff?text=Step+2';">
+                                </div>
                             </div>
+                        </div>
+                        <div class="glass-card p-8 rounded-2xl text-center flex flex-col" style="transition-delay: 300ms;">
+                            <div class="text-5xl font-black text-indigo-400 mb-2">3</div>
                             <h3 class="text-xl font-bold text-teal-300 mb-2">Receive Report</h3>
-                            <p class="text-gray-400 text-sm">Get an instant, free report with your Wellness Score, Archetype, and actionable first step.</p>
+                            <p class="text-gray-400 text-sm flex-grow">Get an instant, free report with your Wellness Score, Archetype, and actionable first step.</p>
+                            <div class="phone-mockup">
+                                <div class="phone-notch"></div>
+                                <div class="phone-screen">
+                                    <img src="step3.jpeg" alt="Screenshot of the final report" onerror="this.onerror=null;this.src='https://placehold.co/270x585/0f172a/e0e7ff?text=Step+3';">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- 3. Demo of Report -->
                 <section id="demo-report-section" class="fade-in-section text-center">
                     <h2 class="text-4xl font-bold text-white mb-2">This Isn't Just Another Health App</h2>
                     <p class="text-lg text-gray-400 mb-12 max-w-2xl mx-auto">Visualize your wellness like never before. See what our AI can reveal for you.</p>
@@ -300,47 +272,44 @@
                     </div>
                 </section>
 
-                <!-- 4. Why It's Important -->
                 <section class="fade-in-section text-center">
                     <h2 class="text-4xl font-bold text-white mb-2">Most People Don’t Know Their <span class="animated-gradient-text">True Wellness Age</span>.</h2>
-                    <p class="text-lg text-gray-400 mb-12 max-w-2xl mx-auto">Daily pressures from stress, poor sleep, and nutrition choices silently impact your long-term health. AI WELLNESSCORE helps you measure & improve what matters.</p>
+                     <p class="text-lg text-gray-400 mb-12 max-w-2xl mx-auto">Daily pressures from stress, poor sleep, and nutrition choices silently impact your long-term health. AI WELLNESSCORE helps you measure & improve what matters.</p>
                 </section>
                 
-                <!-- 5. Key Advantages -->
                 <section class="fade-in-section">
-                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        <div class="glass-card p-6 rounded-2xl flex items-start space-x-4">
-                            <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                            <div>
-                                <h3 class="font-semibold text-white text-lg">Personalized AI Report</h3>
-                                <p class="text-sm text-gray-400">Go beyond generic advice with an analysis tailored to your unique data.</p>
-                            </div>
-                        </div>
-                        <div class="glass-card p-6 rounded-2xl flex items-start space-x-4" style="transition-delay: 150ms;">
-                            <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.896-1.792A2 2 0 0110.428 4h3.144a2 2 0 011.664.89l.896 1.792A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
-                            <div>
-                                <h3 class="font-semibold text-white text-lg">Photo-based Insights</h3>
-                                <p class="text-sm text-gray-400">Our AI analyzes facial cues to provide a more holistic wellness picture.</p>
-                            </div>
-                        </div>
-                        <div class="glass-card p-6 rounded-2xl flex items-start space-x-4" style="transition-delay: 300ms;">
-                             <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg></div>
+                     <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                         <div class="glass-card p-6 rounded-2xl flex items-start space-x-4">
+                             <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
                              <div>
-                                <h3 class="font-semibold text-white text-lg">7-Day Action Plan</h3>
-                                <p class="text-sm text-gray-400">Unlock a step-by-step plan to measurably improve your score.</p>
+                                 <h3 class="font-semibold text-white text-lg">Personalized AI Report</h3>
+                                 <p class="text-sm text-gray-400">Go beyond generic advice with an analysis tailored to your unique data.</p>
                              </div>
-                        </div>
-                        <div class="glass-card p-6 rounded-2xl flex items-start space-x-4" style="transition-delay: 450ms;">
+                         </div>
+                          <div class="glass-card p-6 rounded-2xl flex items-start space-x-4" style="transition-delay: 150ms;">
+                             <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.896-1.792A2 2 0 0110.428 4h3.144a2 2 0 011.664.89l.896 1.792A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
+                             <div>
+                                 <h3 class="font-semibold text-white text-lg">Photo-based Insights</h3>
+                                 <p class="text-sm text-gray-400">Our AI analyzes subtle facial cues to provide a more holistic wellness picture.</p>
+                             </div>
+                         </div>
+                          <div class="glass-card p-6 rounded-2xl flex items-start space-x-4" style="transition-delay: 300ms;">
+                              <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg></div>
+                              <div>
+                                   <h3 class="font-semibold text-white text-lg">7-Day Action Plan</h3>
+                                   <p class="text-sm text-gray-400">Unlock a step-by-step plan to measurably improve your score.</p>
+                             </div>
+                         </div>
+                         <div class="glass-card p-6 rounded-2xl flex items-start space-x-4" style="transition-delay: 450ms;">
                              <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg></div>
                              <div>
-                                <h3 class="font-semibold text-white text-lg">Long-term Forecast</h3>
-                                <p class="text-sm text-gray-400">See the potential impact of your habits on your future wellness trajectory.</p>
+                                 <h3 class="font-semibold text-white text-lg">Long-term Forecast</h3>
+                                 <p class="text-sm text-gray-400">See the potential impact of your habits on your future wellness trajectory.</p>
                              </div>
-                        </div>
-                    </div>
+                         </div>
+                     </div>
                 </section>
 
-                <!-- 6. Cases and Reviews -->
                 <section class="fade-in-section">
                     <h2 class="text-4xl font-bold text-white text-center mb-12">Trusted by People Like You</h2>
                     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -364,7 +333,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="glass-card p-8 rounded-2xl md:col-span-2 lg:col-span-1" style="transition-delay: 300ms;">
+                         <div class="glass-card p-8 rounded-2xl md:col-span-2 lg:col-span-1" style="transition-delay: 300ms;">
                             <p class="text-gray-300 italic">"The photo analysis was fascinating. I had no idea my screen time was showing up as visible eye strain. This service connected the dots for me in a way nothing else has."</p>
                             <div class="flex items-center mt-6">
                                 <img src="https://placehold.co/48x48/1e293b/a5b4fc?text=SK" alt="Sarah K." class="w-12 h-12 rounded-full mr-4">
@@ -377,7 +346,6 @@
                     </div>
                 </section>
                 
-                <!-- 7. Behind the Scenes -->
                 <section class="fade-in-section text-center">
                     <h2 class="text-4xl font-bold text-white mb-12">Secure, Private, and <span class="animated-gradient-text">Powerful</span></h2>
                     <div class="glass-card p-8 rounded-2xl max-w-4xl mx-auto mb-8">
@@ -385,13 +353,12 @@
                     </div>
                     <div class="flex justify-center items-center space-x-8 text-gray-400">
                         <div class="text-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                             <p class="text-sm">Your photo is analyzed on the fly and never stored on our servers.</p>
                         </div>
                     </div>
                 </section>
 
-                <!-- 8. FAQ -->
                 <section id="faq" class="fade-in-section max-w-3xl mx-auto">
                     <h2 class="text-4xl font-bold text-white text-center mb-12">Frequently Asked Questions</h2>
                     <div class="space-y-4">
@@ -410,7 +377,6 @@
                     </div>
                 </section>
 
-                <!-- 9. Final CTA -->
                 <section class="fade-in-section text-center glass-card rounded-2xl p-10 md:p-16">
                     <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">Ready to Discover Your <span class="animated-gradient-text">Wellness Core?</span></h2>
                     <p class="text-lg text-gray-300 max-w-xl mx-auto mb-8">Get your free, personalized report in under 2 minutes. Your journey to a better you starts now.</p>
@@ -437,60 +403,55 @@
         </footer>
     </div>
 
-    <!-- Cookie Consent Banner -->
-    <div id="cookie-banner" class="fixed bottom-4 left-4 right-4 md:left-auto max-w-lg p-6 rounded-2xl glass-card z-50 hidden flex-col md:flex-row items-start md:items-center gap-4 transition-transform duration-300 transform translate-y-full">
-        <div>
-            <h3 class="font-bold text-white text-lg">Cookie Preferences</h3>
-            <p class="text-sm text-gray-300 mt-1">We use cookies to enhance your experience. By clicking "Accept", you agree to our use of cookies.</p>
-        </div>
-        <div class="flex gap-2 flex-shrink-0 w-full md:w-auto">
-            <button id="accept-cookies" class="w-full px-4 py-2 text-sm font-semibold bg-teal-400 text-slate-900 rounded-lg hover:bg-teal-300 transition">Accept</button>
-            <button id="decline-cookies" class="w-full px-4 py-2 text-sm font-semibold bg-white/10 text-white rounded-lg hover:bg-white/20 transition">Decline</button>
-            <button id="settings-cookies" class="p-2 text-sm font-semibold bg-white/10 text-white rounded-lg hover:bg-white/20 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.82 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.82 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.82-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.82-3.31 2.37-2.37.55-.337.95-.916 1.065-2.572z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+    <div id="cookie-consent-banner" class="fixed bottom-0 left-0 right-0 bg-slate-800/90 backdrop-blur-sm p-4 z-50 hidden transition-opacity duration-300">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-sm text-gray-300 text-center sm:text-left">
+                We use cookies to enhance your browsing experience and analyze our traffic. By clicking "Accept", you consent to our use of cookies.
+            </p>
+            <button id="accept-cookies-btn" class="px-5 py-2 text-sm font-semibold bg-teal-400 text-slate-900 rounded-lg hover:bg-teal-300 transition-colors whitespace-nowrap">
+                Accept
             </button>
-        </div>
-    </div>
-
-    <!-- Cookie Settings Modal -->
-    <div id="cookie-settings-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-        <div class="glass-card rounded-2xl p-8 max-w-md w-full relative transition-transform transform scale-95 opacity-0">
-            <button id="close-settings-modal" class="absolute top-4 right-4 text-gray-400 hover:text-white transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-            <h2 class="text-2xl font-bold text-white mb-6">Customize Consent</h2>
-            <div class="space-y-6">
-                <div class="p-4 border border-white/10 rounded-lg">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-semibold text-white">Necessary (Always Active)</h3>
-                        <label class="cookie-toggle-label">
-                            <input type="checkbox" checked disabled>
-                            <span class="cookie-slider"></span>
-                        </label>
-                    </div>
-                    <p class="text-sm text-gray-400 mt-2">Necessary cookies are required to enable the basic features of this site, such as adjusting your consent preferences. These cookies do not store any personally identifiable data.</p>
-                </div>
-                <div class="p-4 border border-white/10 rounded-lg">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-semibold text-white">Analytics</h3>
-                        <label class="cookie-toggle-label">
-                            <input type="checkbox" id="analytics-toggle" checked>
-                            <span class="cookie-slider"></span>
-                        </label>
-                    </div>
-                    <p class="text-sm text-gray-400 mt-2">Analytical cookies are used to understand how visitors interact with the website. These cookies help provide information on metrics such as the number of visitors, bounce rate, traffic source, etc.</p>
-                </div>
-            </div>
-            <button id="save-cookie-settings" class="w-full mt-8 px-6 py-3 text-md font-semibold bg-teal-400 text-slate-900 rounded-lg hover:bg-teal-300 transition">Save Settings</button>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- Cookie Consent Logic ---
+            const consentBanner = document.getElementById('cookie-consent-banner');
+            const acceptBtn = document.getElementById('accept-cookies-btn');
+
+            const setCookie = (name, value, days) => {
+                let expires = "";
+                if (days) {
+                    const date = new Date();
+                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                    expires = "; expires=" + date.toUTCString();
+                }
+                document.cookie = name + "=" + (value || "") + expires + "; path=/";
+            }
+
+            const getCookie = (name) => {
+                const nameEQ = name + "=";
+                const ca = document.cookie.split(';');
+                for (let i = 0; i < ca.length; i++) {
+                    let c = ca[i];
+                    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+                }
+                return null;
+            }
+
+            if (!getCookie('cookies_accepted')) {
+                consentBanner.classList.remove('hidden');
+            }
+
+            acceptBtn.addEventListener('click', () => {
+                setCookie('cookies_accepted', 'true', 365);
+                consentBanner.style.opacity = '0';
+                setTimeout(() => consentBanner.classList.add('hidden'), 300);
+            });
+
             // --- Lottie Hero Animation ---
             try {
                 lottie.loadAnimation({
@@ -501,16 +462,6 @@
                     path: 'assistent.json'
                 });
             } catch(e) { console.error("Lottie failed:", e); }
-
-            // --- Cursor Glow Effect ---
-            const cursorGlow = document.getElementById('cursor-glow');
-            if (window.matchMedia('(pointer: fine)').matches) {
-                // document.body.style.cursor = 'none'; // Re-enable if you want custom cursor
-                document.addEventListener('mousemove', (e) => {
-                    cursorGlow.style.left = `${e.clientX}px`;
-                    cursorGlow.style.top = `${e.clientY}px`;
-                });
-            }
 
             // --- Glass Card Mouse Follow Effect ---
             document.querySelectorAll('.glass-card').forEach(card => {
@@ -578,111 +529,6 @@
                     closeIcon.classList.add('hidden');
                     document.body.classList.remove('overflow-hidden');
                 });
-            });
-
-            // --- Cookie Consent Logic ---
-            const cookieBanner = document.getElementById('cookie-banner');
-            const acceptBtn = document.getElementById('accept-cookies');
-            const declineBtn = document.getElementById('decline-cookies');
-            const settingsBtn = document.getElementById('settings-cookies');
-            const settingsModal = document.getElementById('cookie-settings-modal');
-            const closeSettingsBtn = document.getElementById('close-settings-modal');
-            const saveSettingsBtn = document.getElementById('save-cookie-settings');
-            const analyticsToggle = document.getElementById('analytics-toggle');
-
-            const setCookie = (name, value, days) => {
-                let expires = "";
-                if (days) {
-                    const date = new Date();
-                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                    expires = "; expires=" + date.toUTCString();
-                }
-                const cookieString = `${name}=${value || ""}${expires}; path=/`;
-                document.cookie = cookieString;
-                console.log(`Cookie set: ${cookieString}`);
-            };
-
-            const getCookie = (name) => {
-                const nameEQ = name + "=";
-                const ca = document.cookie.split(';');
-                for(let i = 0; i < ca.length; i++) {
-                    let c = ca[i];
-                    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-                    if (c.indexOf(nameEQ) == 0) {
-                        const cookieValue = c.substring(nameEQ.length, c.length);
-                        console.log(`Cookie found: ${name} = ${cookieValue}`);
-                        return cookieValue;
-                    }
-                }
-                console.log(`Cookie not found: ${name}`);
-                return null;
-            };
-
-            const showBanner = () => {
-                console.log("Showing cookie banner.");
-                cookieBanner.classList.remove('hidden');
-                cookieBanner.classList.add('flex');
-                setTimeout(() => {
-                    cookieBanner.classList.remove('translate-y-full');
-                }, 100);
-            };
-
-            const hideBanner = () => {
-                console.log("Hiding cookie banner.");
-                cookieBanner.classList.add('translate-y-full');
-                setTimeout(() => {
-                    cookieBanner.classList.remove('flex');
-                    cookieBanner.classList.add('hidden');
-                }, 300);
-            };
-            
-            const showSettingsModal = () => {
-                console.log("Showing settings modal.");
-                settingsModal.classList.remove('hidden');
-                settingsModal.classList.add('flex');
-                 setTimeout(() => {
-                    settingsModal.querySelector('.glass-card').classList.remove('scale-95', 'opacity-0');
-                }, 10);
-            };
-
-            const hideSettingsModal = () => {
-                console.log("Hiding settings modal.");
-                settingsModal.querySelector('.glass-card').classList.add('scale-95', 'opacity-0');
-                setTimeout(() => {
-                    settingsModal.classList.add('hidden');
-                }, 300);
-            };
-
-            if (!getCookie('cookie_consent')) {
-                showBanner();
-            }
-
-            acceptBtn.addEventListener('click', () => {
-                setCookie('cookie_consent', 'accepted_all', 365);
-                hideBanner();
-            });
-
-            declineBtn.addEventListener('click', () => {
-                setCookie('cookie_consent', 'accepted_necessary', 365);
-                hideBanner();
-            });
-
-            settingsBtn.addEventListener('click', () => {
-                console.log("Settings button clicked.");
-                showSettingsModal();
-            });
-
-            closeSettingsBtn.addEventListener('click', hideSettingsModal);
-
-            saveSettingsBtn.addEventListener('click', () => {
-                console.log("Save settings button clicked.");
-                if (analyticsToggle.checked) {
-                    setCookie('cookie_consent', 'accepted_all', 365);
-                } else {
-                    setCookie('cookie_consent', 'accepted_necessary', 365);
-                }
-                hideSettingsModal();
-                hideBanner();
             });
         });
     </script>
