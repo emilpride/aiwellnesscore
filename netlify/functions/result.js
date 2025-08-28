@@ -55,59 +55,35 @@ function createPrompt(answers, faceAnalysis) {
 }
 
 exports.handler = async (event) => {
-  console.log('--- result.js function invoked ---');
-  
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   try {
     const { sessionId } = JSON.parse(event.body);
-    console.log(`Received sessionId: ${sessionId}`);
-    
-    if (!sessionId) {
-      console.error('Session ID is missing');
-      return { statusCode: 400, body: 'Session ID is required' };
-    }
-
     const sessionRef = db.collection('sessions').doc(sessionId);
     const doc = await sessionRef.get();
 
     if (!doc.exists) {
-      console.error(`Session not found for ID: ${sessionId}`);
       return { statusCode: 404, body: 'Session not found' };
     }
 
     const sessionData = doc.data();
-    console.log('Successfully fetched data from Firebase:', sessionData.answers);
-    
     const faceAnalysisData = sessionData.faceAnalysis || null;
-    console.log('Face analysis data:', faceAnalysisData ? 'Found' : 'Not found');
 
     const prompt = createPrompt(sessionData.answers, faceAnalysisData);
-    console.log('--- PROMPT FOR GEMINI ---');
-    console.log(prompt);
-    console.log('-------------------------');
-
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    
+    // ИСПРАВЛЕННАЯ СТРОКА:
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
+    
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const rawText = response.text();
     
-    console.log('--- RAW RESPONSE FROM GEMINI ---');
-    console.log(rawText);
-    console.log('------------------------------');
+    console.log('--- RAW RESPONSE FROM GEMINI ---', rawText);
 
-    let reportData;
-    try {
-        // Попытка очистить и распарсить JSON
-        const cleanedText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-        reportData = JSON.parse(cleanedText);
-        console.log('Successfully parsed Gemini response into JSON.');
-    } catch (parseError) {
-        console.error('Failed to parse Gemini response as JSON:', parseError);
-        throw new Error('Invalid JSON response from AI model.');
-    }
+    const cleanedText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+    const reportData = JSON.parse(cleanedText);
 
     return {
       statusCode: 200,
@@ -115,13 +91,10 @@ exports.handler = async (event) => {
     };
 
   } catch (error) {
-    console.error('--- ERROR in result.js handler ---');
-    console.error(error);
+    console.error('--- ERROR in result.js handler ---', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Internal Server Error', details: error.message }),
     };
   }
 };
-
-
