@@ -146,7 +146,6 @@
 <body>
 
     <div id="app-container">
-        <!-- ... existing app-container content ... -->
         <div class="progress-container sm:rounded-t-2xl">
             <div class="progress-bar" id="progressBar"></div>
         </div>
@@ -210,7 +209,7 @@
         const totalQuizQuestions = 15;
         let capturedPhotoDataUrl = null;
 
-        // --- QUIZ DATA (abbreviated for brevity) ---
+        // --- QUIZ DATA ---
         const quizQuestions = [
             { id: 'welcome', text: "Hello! I'm your personal AI Wellness Coach. I'll be guiding you through this analysis to help you discover insights about your well-being.", type: 'welcome', options: ["Let's Begin!"] },
             { id: 'disclaimer', text: "Before we begin, a quick heads-up: I'm an AI coach, not a medical doctor. This analysis is for educational purposes only and is not a substitute for professional medical advice. <b>All data, including your photo, is deleted immediately after you view the detailed report.</b><br><br>By continuing, you agree to our <a href='terms.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Terms of Service</a> and <a href='privacy.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Privacy Policy</a>.", type: 'disclaimer', options: ['I Understand & Agree'] },
@@ -232,7 +231,7 @@
             { id: 'camera', text: "You did it! That's all the questions. Now for the fun part: a quick selfie. This helps me analyze non-medical indicators of stress and fatigue. Your photo is processed on the fly and never stored. Please allow camera access and position your face within the frame.", type: 'camera_button', options: ['Open Camera'] }
         ];
 
-        // --- SERVER COMMUNICATION (unchanged) ---
+        // --- SERVER COMMUNICATION ---
         const API_ENDPOINT = '/.netlify/functions/quiz';
         async function startQuizSession() {
             try {
@@ -253,10 +252,9 @@
             } catch (error) { console.error('Failed to save answer:', error); }
         }
 
-        // --- CHAT UI LOGIC (Avatar background removed) ---
+        // --- CHAT UI LOGIC ---
         function getBotAvatar() {
             const avatar = document.createElement('div');
-            // FIX: Removed background and ring classes
             avatar.className = 'flex-shrink-0 w-8 h-8 flex items-center justify-center';
             avatar.innerHTML = `<div class="lottie-avatar"></div>`;
             try { lottie.loadAnimation({ container: avatar.querySelector('.lottie-avatar'), renderer: 'svg', loop: true, autoplay: true, path: 'avatar.json' }); } catch(e) { console.error("Lottie failed:", e); }
@@ -376,7 +374,7 @@
             initCamera();
         }
 
-        // --- CAMERA LOGIC (Unchanged from previous version) ---
+        // --- CAMERA LOGIC ---
         let faceApiLoaded = false;
         let detectionInterval;
         let videoStream;
@@ -555,6 +553,7 @@
             messageWrapper.appendChild(getBotAvatar());
             messageWrapper.appendChild(contentWrapper);
             chatContent.appendChild(messageWrapper);
+            // FIX: Auto-scroll to the new message
             chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
 
             optionsContainer.innerHTML = '';
