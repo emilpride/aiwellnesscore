@@ -106,119 +106,217 @@
     </div>
     
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            let SCORE_CONFIG = {};
-            let fullReportData = null; 
-            const elements = {
-                scoreText: document.getElementById('score-text'),
-                scoreCircle: document.getElementById('score-circle-path'),
-                paymentForm: document.getElementById('payment-form')
-            };
+    document.addEventListener('DOMContentLoaded', () => {
 
-            function animateScore() {
-                let currentScore = 0;
-                const interval = setInterval(() => {
-                    if (currentScore >= SCORE_CONFIG.total) {
-                        clearInterval(interval);
-                        elements.scoreText.textContent = SCORE_CONFIG.total;
-                    } else {
-                        currentScore++;
-                        elements.scoreText.textContent = currentScore;
+        // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
+        let SCORE_CONFIG = {};
+        let fullReportData = null; 
+        const elements = {
+            scoreText: document.getElementById('score-text'),
+            scoreCircle: document.getElementById('score-circle-path'),
+            paymentForm: document.getElementById('payment-form'),
+            scoreBreakdownSection: document.getElementById('score-breakdown-section'),
+            wellnessWheelCanvas: document.getElementById('wellnessWheel')
+        };
+
+        // --- ФУНКЦИИ АНИМАЦИИ И ГРАФИКОВ ---
+        function animateScore() {
+            let currentScore = 0;
+            const interval = setInterval(() => {
+                if (currentScore >= SCORE_CONFIG.total) {
+                    clearInterval(interval);
+                    elements.scoreText.textContent = SCORE_CONFIG.total;
+                } else {
+                    currentScore++;
+                    elements.scoreText.textContent = currentScore;
+                }
+            }, 20);
+        }
+
+        function animateScoreCircle() {
+            const score = SCORE_CONFIG.total;
+            const scoreCircle = elements.scoreCircle;
+            if (!scoreCircle) return;
+            const circumference = 2 * Math.PI * 15.9155;
+            const offset = (score / 100) * circumference;
+            scoreCircle.style.strokeDasharray = `0 ${circumference}`;
+            setTimeout(() => {
+                scoreCircle.style.strokeDasharray = `${offset} ${circumference}`;
+            }, 100);
+        }
+
+        function createWellnessWheel() {
+            if (!elements.wellnessWheelCanvas) return;
+            const ctx = elements.wellnessWheelCanvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Energy', 'Stress', 'Nutrition', 'Activity', 'Sleep'],
+                    datasets: [{
+                        label: 'Your Score',
+                        data: SCORE_CONFIG.wheel,
+                        backgroundColor: 'rgba(20, 227, 227, 0.2)',
+                        borderColor: 'rgba(20, 227, 227, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(20, 227, 227, 1)',
+                        pointBorderColor: '#fff',
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                            pointLabels: { font: { size: 12, weight: '600' }, color: '#cbd5e1' },
+                            ticks: { backdropColor: 'transparent', color: '#94a3b8', stepSize: 25 },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: { legend: { display: false } },
+                    maintainAspectRatio: false,
+                    responsive: true
+                }
+            });
+        }
+        
+        // --- ЛОГИКА ОТОБРАЖЕНИЯ И ОПЛАТЫ ---
+        function populatePremiumContent(premiumData) {
+            if (!premiumData) return;
+            // Динамическое заполнение премиум полей по data-атрибутам
+            Object.keys(premiumData).forEach(key => {
+                const element = document.querySelector(`[data-premium-id="${key}"]`);
+                if (element) {
+                    if (Array.isArray(premiumData[key])) { // Для списков, как 7-day plan
+                        element.innerHTML = premiumData[key].map(item => 
+                            `<div class="p-2 border-b border-slate-700/50 text-left"><strong>${item.day ? `Day ${item.day}` : item.type}:</strong> ${item.task || item.title} - <em>${item.description || ''}</em></div>`
+                        ).join('');
+                    } else if (typeof premiumData[key] === 'object' && premiumData[key] !== null) { // для BMI
+                         element.innerHTML = `Value: ${premiumData[key].value} <br> <span class="text-xs text-gray-400">${premiumData[key].interpretation}</span>`;
                     }
-                }, 20);
+                    else { // для простого текста
+                        element.innerHTML = premiumData[key];
+                    }
+                }
+            });
+        }
+
+        function unlockPremiumContent() {
+            document.querySelectorAll('.premium-feature-lock').forEach(item => {
+                item.classList.remove('premium-feature-lock');
+                item.classList.add('premium-feature-unlocked');
+            });
+
+            if (fullReportData && fullReportData.premiumReport) {
+                populatePremiumContent(fullReportData.premiumReport);
+            }
+            
+            const paymentSection = document.getElementById('payment-section');
+            if (paymentSection) {
+                paymentSection.style.display = 'none';
+            }
+        }
+
+        function handlePayment(e) {
+            e.preventDefault();
+            // Здесь будет ваша логика вызова Stripe
+            // Для теста симулируем успешную оплату
+            setTimeout(() => {
+                unlockPremiumContent();
+            }, 1500);
+        }
+
+        // --- ГЛАВНАЯ ФУНКЦИЯ ЗАГРУЗКИ И ОТОБРАЖЕНИЯ ---
+        async function fetchAndRenderReport() {
+            const params = new URLSearchParams(window.location.search);
+            const sessionId = params.get('sessionId');
+
+            if (!sessionId) {
+                document.body.innerHTML = `<div class="text-center p-8 text-red-400"><h1>Error</h1><p>Session ID not found.</p></div>`;
+                return;
             }
 
-            function animateScoreCircle() {
-                const score = SCORE_CONFIG.total;
-                const scoreCircle = elements.scoreCircle;
-                if (!scoreCircle) return;
-                const circumference = 2 * Math.PI * 15.9155;
-                const offset = (score / 100) * circumference;
-                scoreCircle.style.strokeDasharray = `0 ${circumference}`;
-                setTimeout(() => {
-                    scoreCircle.style.strokeDasharray = `${offset} ${circumference}`;
-                }, 100);
-            }
-
-            function populatePremiumContent(premiumData) {
-                if (!premiumData) return;
-                const photoAnalysisEl = document.querySelector('[data-premium-id="fullPhotoAnalysis"]');
-                if (photoAnalysisEl) photoAnalysisEl.textContent = premiumData.fullPhotoAnalysis;
-                // ... и так далее для всех премиум полей
-            }
-
-            function unlockPremiumContent() {
-                document.querySelectorAll('.premium-feature-lock').forEach((item) => {
-                    item.classList.remove('premium-feature-lock');
-                    item.classList.add('premium-feature-unlocked');
-                    const blurredContent = item.querySelector('.blurry-content');
-                    if (blurredContent) blurredContent.classList.remove('blurry-content');
+            try {
+                const response = await fetch('/.netlify/functions/result', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: sessionId })
                 });
-
-                if (fullReportData && fullReportData.premiumReport) {
-                    populatePremiumContent(fullReportData.premiumReport);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server error: ${errorText}`);
                 }
                 
-                const paymentSection = document.getElementById('payment-section');
-                if (paymentSection) {
-                    paymentSection.style.display = 'none';
-                }
-            }
+                fullReportData = await response.json();
+                const freeData = fullReportData.freeReport;
 
-            function handlePayment(e) {
-                e.preventDefault();
-                // Симуляция успешной оплаты
-                setTimeout(() => {
-                    unlockPremiumContent();
-                }, 1500);
-            }
-
-            async function fetchAndRenderReport() {
-                const params = new URLSearchParams(window.location.search);
-                const sessionId = params.get('sessionId');
-
-                if (!sessionId) {
-                    document.body.innerHTML = `<div class="text-center p-8 text-red-400"><h1>Error</h1><p>Session ID not found.</p></div>`;
-                    return;
+                if (!freeData || !freeData.coreFour) { // Добавили проверку на coreFour
+                    throw new Error("AI response is missing critical data (freeReport or coreFour).");
                 }
 
-                try {
-                    const response = await fetch('/.netlify/functions/result', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ sessionId: sessionId })
-                    });
-                    const responseText = await response.text();
-                    if (!response.ok) throw new Error(`Server error: ${responseText}`);
-                    
-                    fullReportData = JSON.parse(responseText);
-                    const freeData = fullReportData.freeReport;
+                // Обновляем SCORE_CONFIG с ИСПРАВЛЕННЫМИ путями
+                SCORE_CONFIG = {
+                    total: freeData.wellnessScore || 0,
+                    breakdown: {
+                        body: freeData.coreFour.body.score || 0,
+                        mind: freeData.coreFour.mind.score || 0,
+                        nutrition: freeData.coreFour.nutrition.score || 0,
+                        lifestyle: freeData.coreFour.lifestyle.score || 0
+                    },
+                    wheel: [
+                        freeData.coreFour.body.score,
+                        100 - (freeData.coreFour.mind.score || 0), // Stress инвертирован
+                        freeData.coreFour.nutrition.score,
+                        freeData.coreFour.lifestyle.score, // Lifestyle вместо второй Activity
+                        60 // Placeholder для Sleep
+                    ]
+                };
 
-                    if (!freeData) throw new Error("Free report data is missing.");
+                // Заполнение HTML
+                document.querySelector('[data-report="archetype"]').textContent = freeData.archetype;
+                document.querySelector('[data-report="archetypeDescription"]').textContent = freeData.archetypeDescription;
+                document.querySelector('[data-report="keyInsight"]').innerHTML = freeData.keyInsight;
+                // ...добавьте data-report атрибуты в HTML для остальных полей и они заполнятся здесь...
+                
+                init();
 
-                    // Заполняем все элементы бесплатного отчета
-                    document.querySelector('[data-report="archetype"]').textContent = freeData.archetype;
-                    document.querySelector('[data-report="archetypeDescription"]').textContent = freeData.archetypeDescription;
-                    document.querySelector('[data-report="keyInsight"]').textContent = freeData.keyInsight;
-                    // ... и так далее для всех элементов с data-report атрибутом ...
-
-                    SCORE_CONFIG.total = freeData.wellnessScore || 0;
-                    
-                    animateScore();
-                    animateScoreCircle();
-
-                } catch (error) {
-                    console.error('Failed to fetch or render report:', error);
-                    document.body.innerHTML = `<div class="text-center p-8 text-red-400"><h1>Analysis Failed</h1><p>${error.message}</p></div>`;
-                }
+            } catch (error) {
+                console.error('Failed to fetch or render report:', error);
+                document.body.innerHTML = `<div class="text-center p-8 text-red-400"><h1>Analysis Failed</h1><p>${error.message}</p></div>`;
             }
+        }
 
+        function init() {
+            animateScore();
+            animateScoreCircle();
+            // Запускаем Intersection Observers для анимаций
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        if (entry.target.id === 'score-breakdown-section') {
+                             Object.keys(SCORE_CONFIG.breakdown).forEach(key => {
+                                const barEl = document.getElementById(`${key}-bar`);
+                                if(barEl) barEl.classList.add('bar-animation');
+                             });
+                        }
+                        if (entry.target.id === 'wellnessWheel') createWellnessWheel();
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.fade-in-section').forEach(section => observer.observe(section));
+            if (elements.wellnessWheelCanvas) observer.observe(elements.wellnessWheelCanvas);
+            
             if (elements.paymentForm) {
                 elements.paymentForm.addEventListener('submit', handlePayment);
             }
+        }
 
-            fetchAndRenderReport();
-        });
-    </script>
+        fetchAndRenderReport();
+    });
+</script>
 </body>
 </html>
+
