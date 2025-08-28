@@ -29,7 +29,7 @@
             75% { background-position: 0% 100%; }
             100% { background-position: 0% 0%; }
         }
-        
+       
         /* NEW: Cursor Glow Effect */
         #cursor-glow {
             position: fixed;
@@ -47,7 +47,7 @@
         body:hover #cursor-glow {
             opacity: 1;
         }
-        
+       
         /* Enhanced Glass Card with Hover Effect */
         .glass-card {
             background: rgba(15, 23, 42, 0.6); /* Darker for better contrast */
@@ -95,7 +95,7 @@
             0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(20, 227, 227, 0.7); }
             50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(20, 227, 227, 0); }
         }
-        
+       
         /* NEW: Text Gradient Animation */
         .animated-gradient-text {
             background: linear-gradient(90deg, #e0e7ff, #a5b4fc, #6366f1, #14e3e3);
@@ -124,7 +124,7 @@
             transition: transform 0.3s ease-in-out;
         }
         details[open] summary:after { transform: translateY(-50%) rotate(135deg); }
-        
+       
         .hero-content {
             position: relative;
             z-index: 2;
@@ -138,12 +138,40 @@
     <div class="gradient-bg-dark-animated min-h-screen">
 
         <!-- Navigation -->
-        <header class="absolute top-0 left-0 right-0 z-10 p-4">
+        <header class="absolute top-0 left-0 right-0 z-30 p-4">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
-                <img src="logo.png" alt="AI WELLNESSCORE Logo" class="h-8 w-auto">
-                <a href="quiz.html" class="hidden md:inline-block px-5 py-2 text-sm font-semibold bg-white/10 border border-white/20 rounded-full hover:bg-white/20 transition-all duration-300 transform hover:scale-105">Start Analysis</a>
+                <!-- Logo (Increased Size) -->
+                <img src="https://placehold.co/200x64/0f172a/a5b4fc?text=LOGO" alt="AI WELLNESSCORE Logo" class="h-16 w-auto" onerror="this.onerror=null;this.src='https://placehold.co/200x64/0f172a/a5b4fc?text=Logo';">
+                
+                <!-- Desktop Menu Items -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#faq" class="text-gray-300 hover:text-white transition-colors">FAQ</a>
+                    <a href="quiz.html" class="px-5 py-2 text-sm font-semibold bg-white/10 border border-white/20 rounded-full hover:bg-white/20 transition-all duration-300 transform hover:scale-105">Start Analysis</a>
+                </div>
+
+                <!-- Burger Menu Button -->
+                <button id="menu-btn" class="md:hidden z-40 text-white">
+                    <svg id="menu-open-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                    <svg id="menu-close-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
         </header>
+
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="hidden md:hidden fixed inset-0 bg-slate-900/95 backdrop-blur-sm z-20">
+            <div class="flex flex-col items-center justify-center h-full space-y-8 text-2xl font-semibold text-white">
+                 <a href="quiz.html" class="hover:text-teal-300 transition-colors">Start Analysis</a>
+                 <a href="#faq" class="hover:text-teal-300 transition-colors">FAQ</a>
+                 <a href="#" class="hover:text-teal-300 transition-colors">Terms of Service</a>
+                 <a href="#" class="hover:text-teal-300 transition-colors">Privacy Policy</a>
+                 <a href="#" class="hover:text-teal-300 transition-colors">Contact</a>
+            </div>
+        </div>
+
 
         <main class="relative overflow-hidden">
             <!-- 1. Hero Block -->
@@ -227,39 +255,39 @@
                     <h2 class="text-4xl font-bold text-white mb-2">Most People Don’t Know Their <span class="animated-gradient-text">True Wellness Age</span>.</h2>
                      <p class="text-lg text-gray-400 mb-12 max-w-2xl mx-auto">Daily pressures from stress, poor sleep, and nutrition choices silently impact your long-term health. AI WELLNESSCORE helps you measure & improve what matters.</p>
                 </section>
-                
+               
                 <!-- 5. Key Advantages -->
                 <section class="fade-in-section">
                      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        <div class="glass-card p-6 rounded-2xl flex items-start space-x-4">
-                            <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                            <div>
-                                <h3 class="font-semibold text-white text-lg">Personalized AI Report</h3>
-                                <p class="text-sm text-gray-400">Go beyond generic advice with an analysis tailored to your unique data.</p>
-                            </div>
-                        </div>
-                         <div class="glass-card p-6 rounded-2xl flex items-start space-x-4" style="transition-delay: 150ms;">
-                            <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.896-1.792A2 2 0 0110.428 4h3.144a2 2 0 011.664.89l.896 1.792A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
-                            <div>
-                                <h3 class="font-semibold text-white text-lg">Photo-based Insights</h3>
-                                <p class="text-sm text-gray-400">Our AI analyzes subtle facial cues to provide a more holistic wellness picture.</p>
-                            </div>
-                        </div>
-                         <div class="glass-card p-6 rounded-2xl flex items-start space-x-4" style="transition-delay: 300ms;">
-                             <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg></div>
+                         <div class="glass-card p-6 rounded-2xl flex items-start space-x-4">
+                             <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
                              <div>
-                                 <h3 class="font-semibold text-white text-lg">7-Day Action Plan</h3>
-                                 <p class="text-sm text-gray-400">Unlock a step-by-step plan to measurably improve your score.</p>
-                            </div>
-                        </div>
-                        <div class="glass-card p-6 rounded-2xl flex items-start space-x-4" style="transition-delay: 450ms;">
-                            <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg></div>
-                            <div>
-                                <h3 class="font-semibold text-white text-lg">Long-term Forecast</h3>
-                                <p class="text-sm text-gray-400">See the potential impact of your habits on your future wellness trajectory.</p>
-                            </div>
-                        </div>
-                    </div>
+                                 <h3 class="font-semibold text-white text-lg">Personalized AI Report</h3>
+                                 <p class="text-sm text-gray-400">Go beyond generic advice with an analysis tailored to your unique data.</p>
+                             </div>
+                         </div>
+                          <div class="glass-card p-6 rounded-2xl flex items-start space-x-4" style="transition-delay: 150ms;">
+                             <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.896-1.792A2 2 0 0110.428 4h3.144a2 2 0 011.664.89l.896 1.792A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
+                             <div>
+                                 <h3 class="font-semibold text-white text-lg">Photo-based Insights</h3>
+                                 <p class="text-sm text-gray-400">Our AI analyzes subtle facial cues to provide a more holistic wellness picture.</p>
+                             </div>
+                         </div>
+                          <div class="glass-card p-6 rounded-2xl flex items-start space-x-4" style="transition-delay: 300ms;">
+                              <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg></div>
+                              <div>
+                                   <h3 class="font-semibold text-white text-lg">7-Day Action Plan</h3>
+                                   <p class="text-sm text-gray-400">Unlock a step-by-step plan to measurably improve your score.</p>
+                             </div>
+                         </div>
+                         <div class="glass-card p-6 rounded-2xl flex items-start space-x-4" style="transition-delay: 450ms;">
+                             <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg></div>
+                             <div>
+                                 <h3 class="font-semibold text-white text-lg">Long-term Forecast</h3>
+                                 <p class="text-sm text-gray-400">See the potential impact of your habits on your future wellness trajectory.</p>
+                             </div>
+                         </div>
+                     </div>
                 </section>
 
                 <!-- 6. Cases and Reviews -->
@@ -298,7 +326,7 @@
                         </div>
                     </div>
                 </section>
-                
+               
                 <!-- 7. Behind the Scenes -->
                 <section class="fade-in-section text-center">
                     <h2 class="text-4xl font-bold text-white mb-12">Secure, Private, and <span class="animated-gradient-text">Powerful</span></h2>
@@ -314,7 +342,7 @@
                 </section>
 
                 <!-- 8. FAQ -->
-                <section class="fade-in-section max-w-3xl mx-auto">
+                <section id="faq" class="fade-in-section max-w-3xl mx-auto">
                     <h2 class="text-4xl font-bold text-white text-center mb-12">Frequently Asked Questions</h2>
                     <div class="space-y-4">
                         <details class="glass-card rounded-xl p-6 cursor-pointer">
@@ -340,10 +368,10 @@
                         Start My Free Analysis
                     </a>
                 </section>
-                
+               
             </div>
         </main>
-        
+       
         <!-- 10 & 11. Disclaimer & Footer -->
         <footer class="text-center p-8 border-t border-white/10">
             <div class="max-w-7xl mx-auto text-gray-400">
@@ -385,12 +413,12 @@
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('is-visible');
-                        
+                       
                         // *** FIXED: Animation logic for Overall Score ***
                         if (entry.target.id === 'demo-report-section') {
                             const scoreText = entry.target.querySelector('#score-text');
                             const scorePath = entry.target.querySelector('#score-path');
-                            
+                           
                             // Check if elements exist and if animation has not run yet
                             if (scoreText && scorePath && !scoreText.dataset.animated) {
                                 scoreText.dataset.animated = 'true'; // Prevent re-running animation
@@ -406,14 +434,14 @@
                                         scoreText.textContent = currentScore;
                                     }
                                 }, 25);
-                                
+                               
                                 // Animate the circular progress bar
                                 setTimeout(() => {
                                    scorePath.style.strokeDasharray = `${score}, 100`;
                                 }, 100); // Small delay to ensure CSS transition is applied
                             }
                         }
-                        
+                       
                         observer.unobserve(entry.target);
                     }
                 });
@@ -421,6 +449,29 @@
 
             document.querySelectorAll('.fade-in-section').forEach(section => {
                 observer.observe(section);
+            });
+
+            // --- Burger Menu Logic ---
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const openIcon = document.getElementById('menu-open-icon');
+            const closeIcon = document.getElementById('menu-close-icon');
+
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                openIcon.classList.toggle('hidden');
+                closeIcon.classList.toggle('hidden');
+                document.body.classList.toggle('overflow-hidden'); // Prevent scrolling when menu is open
+            });
+            
+            // Close menu if a link is clicked
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                    openIcon.classList.remove('hidden');
+                    closeIcon.classList.add('hidden');
+                    document.body.classList.remove('overflow-hidden');
+                });
             });
         });
     </script>
