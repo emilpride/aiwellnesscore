@@ -70,7 +70,7 @@ exports.handler = async (event) => {
     const prompt = createPrompt(sessionData.answers, faceAnalysisData);
     
     // ИСПОЛЬЗУЕМ НОВУЮ, БЫСТРУЮ МОДЕЛЬ
-    const modelName = "gemini-1.5-flash-latest";
+    const modelName = "gemini-2.5-flash";
     console.log(`Attempting to use Gemini model: ${modelName}`);
     const model = genAI.getGenerativeModel({ model: modelName });
     
@@ -96,3 +96,4 @@ exports.handler = async (event) => {
     };
   }
 };
+
