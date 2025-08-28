@@ -2,7 +2,7 @@ const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Инициализация Firebase
+// Firebase Initialization
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
 let db;
 if (!global._firebaseApp) {
@@ -10,7 +10,7 @@ if (!global._firebaseApp) {
 }
 db = getFirestore();
 
-// Инициализация Gemini API
+// Gemini API Initialization
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 function createPrompt(answers, faceAnalysis) {
@@ -27,14 +27,10 @@ function createPrompt(answers, faceAnalysis) {
 
   return `
     You are AI WELLNESSCORE, an AI wellness coach. Your goal is to provide a personalized, encouraging, and educational wellness report based on user data. This is NOT medical advice.
-
     User Data:
     ${quizData}
-
     ${faceData}
-
     Task: Generate a JSON object for the user's report with the following structure. Be creative and empathetic in your text descriptions.
-
     {
       "archetype": "A creative, metaphorical title for the user (e.g., 'Creative Owl', 'Urban Explorer').",
       "archetypeDescription": "A short, positive description of this archetype.",
@@ -73,8 +69,10 @@ exports.handler = async (event) => {
 
     const prompt = createPrompt(sessionData.answers, faceAnalysisData);
     
-    // ИСПРАВЛЕННАЯ СТРОКА:
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
+    // CORRECTED MODEL NAME
+    const modelName = "gemini-pro";
+    console.log(`Attempting to use Gemini model: ${modelName}`);
+    const model = genAI.getGenerativeModel({ model: modelName });
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
