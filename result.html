@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your AI WELLNESSCORE Report</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -15,26 +15,17 @@
         @keyframes slow-pan { 0% { background-position: 0% 0%; } 25% { background-position: 100% 0%; } 50% { background-position: 100% 100%; } 75% { background-position: 0% 100%; } 100% { background-position: 0% 0%; } }
         .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .score-circle-path { transition: stroke-dasharray 2s ease-out; }
-        #loading-overlay { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #0f172a; transition: opacity 0.5s ease-out; }
-        #lottie-loader { width: 200px; height: 200px; }
-        #loading-overlay.hidden { opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body class="bg-slate-900 text-gray-200">
 
-    <div id="loading-overlay">
-        <div id="lottie-loader"></div>
-        <p class="text-lg text-gray-300 font-semibold animate-pulse">Analyzing your results...</p>
-        <p class="text-sm text-gray-500 mt-2">This may take a moment</p>
-    </div>
-
     <div class="gradient-bg-dark-animated min-h-screen py-8">
-        <div id="report-container" class="max-w-md mx-auto px-4 space-y-12 opacity-0 transition-opacity duration-500">
+        <div id="report-container" class="max-w-md mx-auto px-4 space-y-8">
 
             <section class="text-center">
                 <span class="text-teal-300 text-sm font-medium px-4 py-1.5 rounded-full bg-teal-900/50 border border-teal-800">Your Wellness Archetype</span>
-                <h1 data-report="archetype" class="text-4xl font-black text-white mt-3 tracking-tight"></h1>
-                <p data-report="archetypeDescription" class="text-base text-gray-400 mt-2 mx-auto max-w-sm"></p>
+                <h1 data-report="archetype" class="text-4xl font-black text-white mt-3 tracking-tight">Loading...</h1>
+                <p data-report="archetypeDescription" class="text-base text-gray-400 mt-2 mx-auto max-w-sm">Analyzing your results...</p>
             </section>
 
             <section class="text-center">
@@ -70,20 +61,9 @@
     </div>
     
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const loaderOverlay = document.getElementById('loading-overlay');
-        const reportContainer = document.getElementById('report-container');
-
-        // Start Lottie Loader Animation
-        try {
-            lottie.loadAnimation({
-                container: document.getElementById('lottie-loader'),
-                renderer: 'svg',
-                loop: true,
-                autoplay: true,
-                path: 'loader-animation.json'
-            });
-        } catch(e) { console.error("Lottie loader failed:", e); }
+    document.addEventListener('DOMContentLoaded', async () => {
+        const scoreTextEl = document.getElementById('score-text');
+        const scoreCircleEl = document.getElementById('score-circle-path');
 
         function animateValue(element, start, end, duration) {
             let startTimestamp = null;
@@ -97,23 +77,21 @@
         }
 
         function animateScoreCircle(totalScore) {
-            const scoreCircle = document.getElementById('score-circle-path');
-            if (!scoreCircle) return;
+            if (!scoreCircleEl) return;
             const circumference = 2 * Math.PI * 15.9155;
             const offset = (totalScore / 100) * circumference;
-            scoreCircle.style.strokeDasharray = `0 ${circumference}`;
+            scoreCircleEl.style.strokeDasharray = `0 ${circumference}`;
             setTimeout(() => {
-                scoreCircle.style.strokeDasharray = `${offset} ${circumference}`;
-            }, 300); // Slight delay to sync with number animation
+                scoreCircleEl.style.strokeDasharray = `${offset} ${circumference}`;
+            }, 100);
         }
-
+        
         async function fetchAndRenderReport() {
             const params = new URLSearchParams(window.location.search);
             const sessionId = params.get('sessionId');
 
             if (!sessionId) {
                 document.body.innerHTML = `<div class="text-center p-8 text-red-400"><h1>Error</h1><p>Session ID not found.</p></div>`;
-                loaderOverlay.classList.add('hidden');
                 return;
             }
 
@@ -141,31 +119,15 @@
                 document.querySelector('[data-report="archetypeDescription"]').textContent = freeData.archetypeDescription || '...';
                 document.querySelector('[data-report="keyInsight"]').innerHTML = freeData.keyInsight || '...';
                 
-                // Populate premium placeholder from premium data if it exists
-                if (reportData.premiumReport && reportData.premiumReport.fullPhotoAnalysis) {
-                   const photoAnalysisEl = document.querySelector('[data-premium-id="fullPhotoAnalysis"]');
-                   if (photoAnalysisEl) {
-                       // Initially, we just show that there is content to unlock
-                       photoAnalysisEl.textContent = "Detailed analysis is available. Unlock to view.";
-                   }
-                }
-
                 const wellnessScore = freeData.wellnessScore || 0;
                 
-                // Start animations
-                const scoreTextEl = document.getElementById('score-text');
+                // Initialize animations
                 animateValue(scoreTextEl, 0, wellnessScore, 1500);
                 animateScoreCircle(wellnessScore);
 
             } catch (error) {
                 console.error('Failed to fetch or render report:', error);
-                reportContainer.innerHTML = `<div class="text-center p-8 text-red-400"><h1>Analysis Failed</h1><p>${error.message}</p></div>`;
-            } finally {
-                // Hide loader and show report container
-                setTimeout(() => {
-                    loaderOverlay.classList.add('hidden');
-                    reportContainer.style.opacity = 1;
-                }, 500);
+                document.body.innerHTML = `<div class="text-center p-8 text-red-400"><h1>Analysis Failed</h1><p>${error.message}</p></div>`;
             }
         }
 
