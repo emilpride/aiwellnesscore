@@ -554,11 +554,10 @@
             image.alt = "Your selfie";
             image.className = "rounded-lg max-w-full h-auto";
             
-            // FIX: Scroll after the image has loaded to ensure correct scrollHeight
             image.onload = () => {
                 chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
             };
-            image.src = dataUrl; // Set src after defining onload
+            image.src = dataUrl;
 
             contentWrapper.appendChild(text);
             contentWrapper.appendChild(image);
@@ -567,7 +566,6 @@
             messageWrapper.appendChild(contentWrapper);
             chatContent.appendChild(messageWrapper);
 
-            // Scroll immediately for the text part, then again on image load
             chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
 
             optionsContainer.innerHTML = '';
@@ -617,7 +615,8 @@
                 setTimeout(() => {
                     hideTypingIndicator();
                     const resultUrl = `result.html?sessionId=${sessionId}`;
-                    const message = `Done! Your personalized free report is ready. 🚀 <a href='${resultUrl}' class='font-bold underline text-indigo-300 hover:text-indigo-200'>View my results</a>`;
+                    // FIX: Changed link to a styled button
+                    const message = `Done! Your personalized free report is ready. 🚀<br><a href='${resultUrl}' class='inline-block mt-4 px-6 py-3 bg-indigo-500 text-white font-semibold rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200'>View My Results</a>`;
                     addMessage(message);
                     localStorage.setItem(`wellnessReport-${sessionId}`, JSON.stringify(userAnswers));
                 }, 3000);
