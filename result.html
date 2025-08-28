@@ -537,14 +537,137 @@
     <div id="toast-notification">Payment successful! Your report is unlocked.</div>
 
    <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        // --- CONFIGURATION ---
-        const SCORE_CONFIG = {
-            total: 0, // Будет загружено с сервера
-            // ... (остальной конфиг)
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- CONFIGURATION & ELEMENT SELECTORS (будут заполнены после загрузки) ---
+        let SCORE_CONFIG = {};
+        const elements = {
+            scoreText: document.getElementById('score-text'),
+            scoreCircle: document.getElementById('score-circle-path'),
+            scoreBreakdownSection: document.getElementById('score-breakdown-section'),
+            wellnessWheelCanvas: document.getElementById('wellnessWheel'),
+            deepDiveChartCanvas: document.getElementById('deepDiveChart'),
+            paymentForm: document.getElementById('payment-form'),
+            payButton: document.getElementById('pay-button'),
+            paymentSection: document.getElementById('payment-section'),
+            premiumReportSection: document.getElementById('premium-report-section'),
+            toast: document.getElementById('toast-notification'),
+            allFadeInSections: document.querySelectorAll('.fade-in-section'),
+            allPremiumFeatures: document.querySelectorAll('.premium-feature-lock')
         };
+
+        // --- ANIMATION LOGIC ---
+        function animateScore() {
+            let currentScore = 0;
+            const interval = setInterval(() => {
+                if (currentScore >= SCORE_CONFIG.total) {
+                    clearInterval(interval);
+                    elements.scoreText.textContent = SCORE_CONFIG.total;
+                } else {
+                    currentScore++;
+                    elements.scoreText.textContent = currentScore;
+                }
+            }, 20);
+        }
+
+        function animateScoreCircle() {
+            const score = SCORE_CONFIG.total;
+            const scoreCircle = elements.scoreCircle;
+            if (!scoreCircle) return;
+            const circumference = 2 * Math.PI * 15.9155;
+            const offset = (score / 100) * circumference;
+            scoreCircle.style.strokeDasharray = `0 ${circumference}`;
+            setTimeout(() => {
+                scoreCircle.style.strokeDasharray = `${offset} ${circumference}`;
+            }, 100);
+        }
+
+        // --- CHART CREATION ---
+        function createWellnessWheel() {
+            if (!elements.wellnessWheelCanvas) return;
+            const ctx = elements.wellnessWheelCanvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Energy', 'Stress', 'Nutrition', 'Activity', 'Sleep'],
+                    datasets: [{
+                        label: 'Your Score',
+                        data: SCORE_CONFIG.wheel,
+                        backgroundColor: 'rgba(20, 227, 227, 0.2)',
+                        borderColor: 'rgba(20, 227, 227, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(20, 227, 227, 1)',
+                        pointBorderColor: '#fff',
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                            pointLabels: { font: { size: 12, weight: '600' }, color: '#cbd5e1' },
+                            ticks: { backdropColor: 'transparent', color: '#94a3b8', stepSize: 25 },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: { legend: { display: false } },
+                    maintainAspectRatio: false,
+                    responsive: true
+                }
+            });
+        }
         
-        // ... (остальная часть вашего скрипта до функции init) ...
+        function createDeepDiveChart() {
+            // Эта функция будет работать после разблокировки премиум-отчёта
+            if (!elements.deepDiveChartCanvas) return;
+            // ... (логика для премиум-графика)
+        }
+
+        // --- PAYMENT & UNLOCK LOGIC ---
+        function handlePayment(e) { /* ...Ваша логика оплаты... */ }
+        function unlockPremiumContent() { /* ...Ваша логика разблокировки... */ }
+        function showToast(message, isError = false) { /* ...Ваша логика уведомлений... */ }
+
+        // --- OBSERVERS FOR SCROLL-BASED ANIMATIONS ---
+        function setupObservers() {
+            const options = { threshold: 0.1 };
+            const sectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        sectionObserver.unobserve(entry.target);
+                    }
+                });
+            }, options);
+            elements.allFadeInSections.forEach(section => sectionObserver.observe(section));
+
+            const barObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        Object.entries(SCORE_CONFIG.breakdown).forEach(([key, value]) => {
+                            const barEl = document.getElementById(`${key}-bar`);
+                            if (barEl) {
+                                barEl.style.setProperty('--final-width', `${value}%`);
+                                barEl.classList.add('bar-animation');
+                            }
+                        });
+                        barObserver.unobserve(entry.target);
+                    }
+                });
+            }, options);
+            if (elements.scoreBreakdownSection) barObserver.observe(elements.scoreBreakdownSection);
+            
+            const chartObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        if (entry.target.id === 'wellnessWheel') createWellnessWheel();
+                        chartObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.25 });
+            if (elements.wellnessWheelCanvas) chartObserver.observe(elements.wellnessWheelCanvas);
+        }
 
         // --- FETCH AND RENDER LOGIC ---
         async function fetchAndRenderReport() {
@@ -557,46 +680,43 @@
             }
 
             try {
-                console.log(`Fetching report for sessionId: ${sessionId}`);
                 const response = await fetch('/.netlify/functions/result', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sessionId: sessionId })
                 });
 
-                // Получаем текстовый ответ, чтобы увидеть его даже если это не JSON
                 const responseText = await response.text();
-                console.log("Raw response text from server:", responseText);
-
                 if (!response.ok) {
                     throw new Error(`Server returned an error: ${response.status}. Body: ${responseText}`);
                 }
                 
-                const reportData = JSON.parse(responseText); // Парсим текст
-                console.log("Parsed report data:", reportData);
+                const reportData = JSON.parse(responseText);
                 
-                // Обновляем SCORE_CONFIG
-                SCORE_CONFIG.total = reportData.wellnessScore || 0;
-                SCORE_CONFIG.breakdown = {
-                    body: reportData.coreFour.body.score || 0,
-                    mind: reportData.coreFour.mind.score || 0,
-                    nutrition: reportData.coreFour.nutrition.score || 0,
-                    lifestyle: reportData.coreFour.lifestyle.score || 0
+                SCORE_CONFIG = {
+                    total: reportData.wellnessScore || 0,
+                    breakdown: {
+                        body: reportData.coreFour.body.score || 0,
+                        mind: reportData.coreFour.mind.score || 0,
+                        nutrition: reportData.coreFour.nutrition.score || 0,
+                        lifestyle: reportData.coreFour.lifestyle.score || 0
+                    },
+                    // Примечание: Energy и Sleep пока не генерируются Gemini. Используем заглушки или баллы из других категорий.
+                    wheel: [
+                        reportData.coreFour.body.score || 0, // Energy (используем Body)
+                        reportData.coreFour.mind.score || 0, // Stress (используем Mind)
+                        reportData.coreFour.nutrition.score || 0,
+                        reportData.coreFour.body.score || 0, // Activity (используем Body)
+                        60  // Sleep (пока заглушка)
+                    ]
                 };
-                SCORE_CONFIG.wheel = [
-                    70, // Placeholder for Energy
-                    reportData.coreFour.mind.score || 0, 
-                    reportData.coreFour.nutrition.score || 0,
-                    reportData.coreFour.body.score || 0,
-                    60  // Placeholder for Sleep
-                ];
 
-                // Обновляем HTML элементы
-                document.querySelector('h1').textContent = reportData.archetype;
-                document.querySelector('h1 + p').textContent = reportData.archetypeDescription;
-                document.querySelector('#score-breakdown-section').style.opacity = 1; // Показываем скрытые секции
+                // Заполнение HTML
+                document.querySelector('h1.text-4xl').textContent = reportData.archetype;
+                document.querySelector('h1.text-4xl + p').textContent = reportData.archetypeDescription;
+                document.querySelector('#score-breakdown-section').style.opacity = 1;
+                // ... (здесь можно добавить заполнение и других полей, например, Key AI Insight) ...
                 
-                // Запускаем все анимации и отрисовку с реальными данными
                 init(); 
 
             } catch (error) {
@@ -604,8 +724,6 @@
                 document.body.innerHTML = `<div class="text-center p-8 text-red-400"><h1>Analysis Failed</h1><p>We couldn't generate your report at this time. Please try again later. Details: ${error.message}</p></div>`;
             }
         }
-        
-        // ... (остальная часть вашего скрипта, включая init() и другие функции) ...
 
         // --- INITIALIZATION ---
         function init() {
@@ -616,11 +734,11 @@
                 elements.paymentForm.addEventListener('submit', handlePayment);
             }
         }
-        
-        // Запускаем получение данных
+
         fetchAndRenderReport();
     });
 </script>
 </body>
 </html>
+
 
