@@ -97,6 +97,7 @@
             position: relative;
             width: 100%;
             max-width: 400px;
+            aspect-ratio: 3 / 4; /* FIX: Prevents container collapse */
             border-radius: 1.5rem;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -252,10 +253,11 @@
             } catch (error) { console.error('Failed to save answer:', error); }
         }
 
-        // --- CHAT UI LOGIC (unchanged) ---
+        // --- CHAT UI LOGIC (Avatar background removed) ---
         function getBotAvatar() {
             const avatar = document.createElement('div');
-            avatar.className = 'flex-shrink-0 w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center ring-1 ring-white/20';
+            // FIX: Removed background and ring classes
+            avatar.className = 'flex-shrink-0 w-8 h-8 flex items-center justify-center';
             avatar.innerHTML = `<div class="lottie-avatar"></div>`;
             try { lottie.loadAnimation({ container: avatar.querySelector('.lottie-avatar'), renderer: 'svg', loop: true, autoplay: true, path: 'avatar.json' }); } catch(e) { console.error("Lottie failed:", e); }
             return avatar;
@@ -374,7 +376,7 @@
             initCamera();
         }
 
-        // --- NEW/UPDATED CAMERA LOGIC ---
+        // --- CAMERA LOGIC (Unchanged from previous version) ---
         let faceApiLoaded = false;
         let detectionInterval;
         let videoStream;
@@ -402,14 +404,13 @@
             if (!faceApiLoaded) {
                 await loadFaceApiModels();
             }
-            if (!faceApiLoaded) return; // Don't proceed if models failed to load
+            if (!faceApiLoaded) return;
 
             try {
                 videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
                 videoEl.srcObject = videoStream;
                 videoEl.onloadedmetadata = () => {
                     videoEl.play();
-                    // Set canvas dimensions based on video
                     const displaySize = { width: videoEl.clientWidth, height: videoEl.clientHeight };
                     faceapi.matchDimensions(overlayCanvas, displaySize);
                     startFaceDetection(videoEl, overlayCanvas);
@@ -451,7 +452,6 @@
                 const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
                 const resizedDetections = faceapi.resizeResults(detections, { width: canvas.width, height: canvas.height });
 
-                // Clear canvas and flip it horizontally to match the video
                 context.clearRect(0, 0, canvas.width, canvas.height);
                 context.save();
                 context.translate(canvas.width, 0);
@@ -459,12 +459,9 @@
                 
                 if (resizedDetections.length > 0) {
                     const box = resizedDetections[0].detection.box;
-                    const landmarks = resizedDetections[0].landmarks;
-
-                    // Draw landmarks
+                    
                     faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
                     
-                    // Draw scanning line
                     scanY += 2 * scanDirection;
                     if (scanY > box.height || scanY < 0) {
                         scanDirection *= -1;
@@ -476,30 +473,24 @@
                     context.fillRect(box.x, box.y + scanY, box.width, 3);
                     context.shadowBlur = 0;
 
-
-                    // Draw corner brackets
                     context.strokeStyle = '#00FFFF';
                     context.lineWidth = 3;
                     const cornerLength = 20;
-                    // Top-left
                     context.beginPath();
                     context.moveTo(box.x, box.y + cornerLength);
                     context.lineTo(box.x, box.y);
                     context.lineTo(box.x + cornerLength, box.y);
                     context.stroke();
-                    // Top-right
                     context.beginPath();
                     context.moveTo(box.x + box.width - cornerLength, box.y);
                     context.lineTo(box.x + box.width, box.y);
                     context.lineTo(box.x + box.width, box.y + cornerLength);
                     context.stroke();
-                    // Bottom-left
                     context.beginPath();
                     context.moveTo(box.x, box.y + box.height - cornerLength);
                     context.lineTo(box.x, box.y + box.height);
                     context.lineTo(box.x + cornerLength, box.y + box.height);
                     context.stroke();
-                    // Bottom-right
                     context.beginPath();
                     context.moveTo(box.x + box.width - cornerLength, box.y + box.height);
                     context.lineTo(box.x + box.width, box.y + box.height);
@@ -522,7 +513,7 @@
                     clearTimeout(captureTimeout);
                     captureTimeout = null;
                 }
-                context.restore(); // Restore context to non-flipped state
+                context.restore();
             }, 100);
         }
         
