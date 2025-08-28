@@ -88,6 +88,7 @@
             background-color: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(8px);
             z-index: 50;
+            /* display УДАЛЕНО. Видимость управляется классом 'hidden' */
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -172,7 +173,7 @@
         </footer>
     </div>
    
-    <div id="camera-modal" class="hidden">
+    <div id="camera-modal" class="hidden flex">
         <button id="close-camera-btn" class="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2 z-10">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
@@ -211,7 +212,7 @@
 
         // --- QUIZ DATA ---
         const quizQuestions = [
-             { id: 'welcome', text: "Hello! I'm your personal AI Wellness Coach. I'll be guiding you through this analysis to help you discover insights about your well-being.", type: 'welcome', options: ["Let's Begin!"] },
+            { id: 'welcome', text: "Hello! I'm your personal AI Wellness Coach. I'll be guiding you through this analysis to help you discover insights about your well-being.", type: 'welcome', options: ["Let's Begin!"] },
             { id: 'disclaimer', text: "Before we begin, a quick heads-up: I'm an AI coach, not a medical doctor. This analysis is for educational purposes only and is not a substitute for professional medical advice. <b>All data, including your photo, is deleted immediately after you view the detailed report.</b><br><br>By continuing, you agree to our <a href='terms.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Terms of Service</a> and <a href='privacy.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Privacy Policy</a>.", type: 'disclaimer', options: ['I Understand & Agree'] },
             { id: 'age', text: "Great, let's begin! To start, what's your age?", reason: "Your age helps me calibrate your wellness metrics against demographic data, ensuring your results are relevant to your life stage.", type: 'chips_text', options: ['Under 18', '18-25', '26-35', '36-50', '50+'], placeholder: 'Or type your exact age...' },
             { id: 'gender', text: "Great start! Now, what's your biological sex?", reason: "This allows me to consider physiological differences that can influence wellness factors.", type: 'chips_text', options: ['Male', 'Female'], placeholder: 'Or prefer not to say...' },
@@ -398,7 +399,8 @@
 
         async function initCamera() {
             cameraModal.classList.remove('hidden');
-            // Wait for the next browser paint to ensure the modal has dimensions
+            cameraModal.classList.add('flex'); // Explicitly make it a flex container
+            
             requestAnimationFrame(async () => {
                 if (!faceApiLoaded) {
                     await loadFaceApiModels();
@@ -433,6 +435,7 @@
             const context = overlayCanvas.getContext('2d');
             context.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             cameraModal.classList.add('hidden');
+            cameraModal.classList.remove('flex');
             inputArea.style.display = 'block';
             if (currentQuestionIndex < quizQuestions.length) {
                 setupInput(quizQuestions[currentQuestionIndex]);
@@ -520,6 +523,8 @@
                 videoStream.getTracks().forEach(track => track.stop());
             }
             cameraModal.classList.add('hidden');
+            cameraModal.classList.remove('flex');
+
 
             const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
             showPhotoForConfirmation(dataUrl);
@@ -569,3 +574,86 @@
 
         async function confirmPhoto() {
             const confirmButton = document.getElementById('confirm-photo-btn');
+            if (confirmButton) {
+                confirmButton.disabled = true;
+                confirmButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Analyzing...`;
+            }
+
+            addMessage('Looks Good!', 'user');
+            showTypingIndicator();
+            optionsContainer.innerHTML = '';
+            inputArea.style.display = 'none';
+            
+            try {
+                const analyzeResponse = await fetch('/.netlify/functions/analyzeFace', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ photoDataUrl: capturedPhotoDataUrl })
+                });
+
+                if (!analyzeResponse.ok) {
+                    const errorText = await analyzeResponse.text();
+                    throw new Error(`Face analysis server error: ${errorText}`);
+                }
+                
+                const faceData = await analyzeResponse.json();
+                await saveAnswerToServer('faceAnalysis', faceData);
+                document.getElementById('photo-preview-wrapper')?.remove();
+                endQuiz();
+
+            } catch (error) {
+                console.error('Error during photo analysis step:', error);
+                hideTypingIndicator();
+                addMessage("Sorry, I couldn't analyze the photo. Let's proceed without it.");
+                setTimeout(endQuiz, 1500);
+            } finally {
+                if (confirmButton) {
+                    confirmButton.disabled = false;
+                    confirmButton.innerHTML = 'Looks Good!';
+                }
+            }
+        }
+
+        function retakePhoto() {
+            addMessage('Retake', 'user');
+            document.getElementById('photo-preview-wrapper')?.remove();
+            optionsContainer.innerHTML = '';
+            inputArea.style.display = 'none';
+            handleCameraButtonClick();
+        }
+
+        function endQuiz() {
+            inputArea.style.display = 'none';
+            progressBar.style.width = '100%';
+            showTypingIndicator();
+            setTimeout(() => {
+                hideTypingIndicator();
+                addMessage("Thank you for sharing! I'm firing up my neural networks to analyze your results... This is exciting!");
+                showTypingIndicator();
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    const resultUrl = `result.html?sessionId=${sessionId}`;
+                    const message = `Done! Your personalized free report is ready. 🚀<br><a href='${resultUrl}' class='inline-block mt-4 px-6 py-3 bg-indigo-500 text-white font-semibold rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200'>View My Results</a>`;
+                    addMessage(message);
+                    localStorage.setItem(`wellnessReport-${sessionId}`, JSON.stringify(userAnswers));
+                }, 3000);
+            }, 1500);
+        }
+
+        // --- INITIALIZATION ---
+        async function initQuiz() {
+            await startQuizSession();
+            if (sessionId) {
+                displayQuestion();
+            }
+        }
+        sendBtn.addEventListener('click', () => handleAnswer(userInput.value));
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleAnswer(userInput.value);
+        });
+        closeCameraBtn.addEventListener('click', closeCamera);
+        initQuiz();
+    </script>
+
+</body>
+</html>
