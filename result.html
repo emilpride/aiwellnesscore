@@ -536,291 +536,91 @@
     <!-- Toast Notification Element -->
     <div id="toast-notification">Payment successful! Your report is unlocked.</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            
-            // --- CONFIGURATION ---
-            const SCORE_CONFIG = {
-                total: 78,
-                breakdown: {
-                    body: 75,
-                    mind: 60,
-                    nutrition: 90,
-                    lifestyle: 85,
-                },
-                wheel: [65, 55, 90, 75, 60] // Energy, Stress, Nutrition, Activity, Sleep
-            };
+   <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // --- CONFIGURATION ---
+        const SCORE_CONFIG = {
+            total: 0, // Будет загружено с сервера
+            // ... (остальной конфиг)
+        };
+        
+        // ... (остальная часть вашего скрипта до функции init) ...
 
-            // --- ELEMENT SELECTORS ---
-            const elements = {
-                scoreText: document.getElementById('score-text'),
-                scoreCircle: document.getElementById('score-circle-path'),
-                scoreBreakdownSection: document.getElementById('score-breakdown-section'),
-                wellnessWheelCanvas: document.getElementById('wellnessWheel'),
-                trajectoryChartCanvas: document.getElementById('trajectoryChart'),
-                deepDiveChartCanvas: document.getElementById('deepDiveChart'),
-                paymentForm: document.getElementById('payment-form'),
-                payButton: document.getElementById('pay-button'),
-                paymentSection: document.getElementById('payment-section'),
-                premiumReportSection: document.getElementById('premium-report-section'),
-                toast: document.getElementById('toast-notification'),
-                allFadeInSections: document.querySelectorAll('.fade-in-section'),
-                allPremiumFeatures: document.querySelectorAll('.premium-feature-lock')
-            };
+        // --- FETCH AND RENDER LOGIC ---
+        async function fetchAndRenderReport() {
+            const params = new URLSearchParams(window.location.search);
+            const sessionId = params.get('sessionId');
 
-            // --- ANIMATION LOGIC ---
-
-            function animateScore() {
-                let currentScore = 0;
-                const interval = setInterval(() => {
-                    if (currentScore >= SCORE_CONFIG.total) {
-                        clearInterval(interval);
-                        elements.scoreText.textContent = SCORE_CONFIG.total;
-                    } else {
-                        currentScore++;
-                        elements.scoreText.textContent = currentScore;
-                    }
-                }, 20);
+            if (!sessionId) {
+                document.body.innerHTML = `<div class="text-center p-8 text-red-400"><h1>Error</h1><p>Session ID not found. Please start the quiz again.</p></div>`;
+                return;
             }
 
-            function animateScoreCircle() {
-                const score = SCORE_CONFIG.total;
-                const scoreCircle = elements.scoreCircle;
-                if (!scoreCircle) return;
-
-                const radius = parseFloat(scoreCircle.getAttribute('r')) || 15.9155;
-                const circumference = 2 * Math.PI * radius;
-                const offset = (score / 100) * circumference;
-
-                scoreCircle.style.strokeDasharray = `0 ${circumference}`;
-                
-                setTimeout(() => {
-                    scoreCircle.style.strokeDasharray = `${offset} ${circumference}`;
-                }, 100);
-            }
-
-            // --- CHART CREATION ---
-
-            function createWellnessWheel() {
-                if (!elements.wellnessWheelCanvas) return;
-                const ctx = elements.wellnessWheelCanvas.getContext('2d');
-                new Chart(ctx, {
-                    type: 'radar',
-                    data: {
-                        labels: ['Energy', 'Stress', 'Nutrition', 'Activity', 'Sleep'],
-                        datasets: [{
-                            label: 'Your Score',
-                            data: SCORE_CONFIG.wheel,
-                            backgroundColor: 'rgba(20, 227, 227, 0.2)',
-                            borderColor: 'rgba(20, 227, 227, 1)',
-                            borderWidth: 2,
-                            pointBackgroundColor: 'rgba(20, 227, 227, 1)',
-                            pointBorderColor: '#fff',
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            r: {
-                                angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
-                                grid: { color: 'rgba(255, 255, 255, 0.2)' },
-                                pointLabels: { font: { size: 12, weight: '600' }, color: '#cbd5e1' },
-                                ticks: { backdropColor: 'transparent', color: '#94a3b8', stepSize: 25 },
-                                suggestedMin: 0,
-                                suggestedMax: 100
-                            }
-                        },
-                        plugins: { legend: { display: false } },
-                        maintainAspectRatio: false,
-                        responsive: true
-                    }
+            try {
+                console.log(`Fetching report for sessionId: ${sessionId}`);
+                const response = await fetch('/.netlify/functions/result', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: sessionId })
                 });
-            }
 
-            function createTrajectoryChart() {
-                if (!elements.trajectoryChartCanvas) return;
-                const ctx = elements.trajectoryChartCanvas.getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Now', 'Next Month', 'In 6 Months'],
-                        datasets: [{
-                            label: 'Forecast with Guidance',
-                            data: [78, 85, 93],
-                            borderColor: '#34D399',
-                            backgroundColor: 'rgba(52, 211, 153, 0.2)',
-                            fill: 'origin',
-                            tension: 0.4
-                        }, {
-                            label: 'Forecast with No Change',
-                            data: [78, 77, 76],
-                            borderColor: '#F87171',
-                            backgroundColor: 'rgba(248, 113, 113, 0.2)',
-                            fill: 'origin',
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            x: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#cbd5e1' } },
-                            y: { suggestedMin: 70, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#cbd5e1' } }
-                        },
-                        plugins: { legend: { display: false } },
-                        maintainAspectRatio: false,
-                        responsive: true
-                    }
-                });
-            }
-            
-            function createDeepDiveChart() {
-                if (!elements.deepDiveChartCanvas) return;
-                const ctx = elements.deepDiveChartCanvas.getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Stress Recovery', 'Muscle Mass'],
-                        datasets: [{
-                            label: 'Index Score',
-                            data: [68, 75],
-                            backgroundColor: ['rgba(129, 140, 248, 0.5)', 'rgba(52, 211, 153, 0.5)'],
-                            borderColor: ['#818cf8', '#34d399'],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        scales: {
-                            x: {
-                                beginAtZero: true,
-                                max: 100,
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                                ticks: { color: '#94a3b8' }
-                            },
-                             y: {
-                                grid: { display: false },
-                                ticks: { color: '#cbd5e1' }
-                            }
-                        },
-                        plugins: { legend: { display: false } },
-                        maintainAspectRatio: false,
-                        responsive: true
-                    }
-                });
-            }
+                // Получаем текстовый ответ, чтобы увидеть его даже если это не JSON
+                const responseText = await response.text();
+                console.log("Raw response text from server:", responseText);
 
-            // --- PAYMENT & UNLOCK LOGIC ---
-
-            function handlePayment(e) {
-                e.preventDefault();
-                const cardNumber = document.getElementById('card-number').value;
-                const expiry = document.getElementById('expiry').value;
-                const cvv = document.getElementById('cvv').value;
-
-                if (!cardNumber || !expiry || !cvv) {
-                    showToast("Please fill in all payment details.", true);
-                    return;
-                }
-
-                elements.payButton.disabled = true;
-                elements.payButton.innerHTML = `<svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...`;
-
-                setTimeout(() => {
-                    unlockPremiumContent();
-                    elements.payButton.disabled = false;
-                    elements.payButton.textContent = 'Pay $9.99';
-                }, 2000);
-            }
-
-            function unlockPremiumContent() {
-                if (elements.paymentSection) {
-                    elements.paymentSection.style.transition = 'opacity 0.5s, transform 0.5s';
-                    elements.paymentSection.style.opacity = '0';
-                    elements.paymentSection.style.transform = 'scale(0.95)';
-                    setTimeout(() => elements.paymentSection.remove(), 500);
+                if (!response.ok) {
+                    throw new Error(`Server returned an error: ${response.status}. Body: ${responseText}`);
                 }
                 
-                // Unblur and unlock
-                document.querySelectorAll('.premium-feature-lock').forEach((item, index) => {
-                    setTimeout(() => {
-                        item.classList.remove('premium-feature-lock');
-                        item.classList.add('premium-feature-unlocked');
-                        const blurredContent = item.querySelector('.blurry-content');
-                        if (blurredContent) {
-                            blurredContent.classList.remove('blurry-content');
-                        }
-                    }, index * 150);
-                });
+                const reportData = JSON.parse(responseText); // Парсим текст
+                console.log("Parsed report data:", reportData);
                 
-                showToast("Payment successful! Your report is unlocked.");
-            }
+                // Обновляем SCORE_CONFIG
+                SCORE_CONFIG.total = reportData.wellnessScore || 0;
+                SCORE_CONFIG.breakdown = {
+                    body: reportData.coreFour.body.score || 0,
+                    mind: reportData.coreFour.mind.score || 0,
+                    nutrition: reportData.coreFour.nutrition.score || 0,
+                    lifestyle: reportData.coreFour.lifestyle.score || 0
+                };
+                SCORE_CONFIG.wheel = [
+                    70, // Placeholder for Energy
+                    reportData.coreFour.mind.score || 0, 
+                    reportData.coreFour.nutrition.score || 0,
+                    reportData.coreFour.body.score || 0,
+                    60  // Placeholder for Sleep
+                ];
 
-            function showToast(message, isError = false) {
-                elements.toast.textContent = message;
-                elements.toast.style.backgroundColor = isError ? '#EF4444' : '#10B981';
-                elements.toast.classList.add('show');
-                setTimeout(() => {
-                    elements.toast.classList.remove('show');
-                }, 3000);
-            }
-
-            // --- OBSERVERS FOR SCROLL-BASED ANIMATIONS ---
-
-            function setupObservers() {
-                const options = { threshold: 0.1 };
-
-                const sectionObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('is-visible');
-                            sectionObserver.unobserve(entry.target);
-                        }
-                    });
-                }, options);
-                elements.allFadeInSections.forEach(section => sectionObserver.observe(section));
+                // Обновляем HTML элементы
+                document.querySelector('h1').textContent = reportData.archetype;
+                document.querySelector('h1 + p').textContent = reportData.archetypeDescription;
+                document.querySelector('#score-breakdown-section').style.opacity = 1; // Показываем скрытые секции
                 
-                const barObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            Object.entries(SCORE_CONFIG.breakdown).forEach(([key, value]) => {
-                                const barEl = document.getElementById(`${key}-bar`);
-                                if (barEl) {
-                                    barEl.style.setProperty('--final-width', `${value}%`);
-                                    barEl.classList.add('bar-animation');
-                                }
-                            });
-                            barObserver.unobserve(entry.target);
-                        }
-                    });
-                }, options);
-                if(elements.scoreBreakdownSection) barObserver.observe(elements.scoreBreakdownSection);
+                // Запускаем все анимации и отрисовку с реальными данными
+                init(); 
 
-                const chartObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            if (entry.target.id === 'wellnessWheel') createWellnessWheel();
-                            if (entry.target.id === 'trajectoryChart') createTrajectoryChart();
-                            if (entry.target.id === 'deepDiveChart') createDeepDiveChart();
-                            chartObserver.unobserve(entry.target);
-                        }
-                    });
-                }, { threshold: 0.25 });
-                if(elements.wellnessWheelCanvas) chartObserver.observe(elements.wellnessWheelCanvas);
-                if(elements.trajectoryChartCanvas) chartObserver.observe(elements.trajectoryChartCanvas);
-                if(elements.deepDiveChartCanvas) chartObserver.observe(elements.deepDiveChartCanvas);
+            } catch (error) {
+                console.error('Failed to fetch or render report:', error);
+                document.body.innerHTML = `<div class="text-center p-8 text-red-400"><h1>Analysis Failed</h1><p>We couldn't generate your report at this time. Please try again later. Details: ${error.message}</p></div>`;
             }
+        }
+        
+        // ... (остальная часть вашего скрипта, включая init() и другие функции) ...
 
-            // --- INITIALIZATION ---
-
-            function init() {
-                animateScore();
-                animateScoreCircle();
-                setupObservers();
-                if (elements.paymentForm) {
-                    elements.paymentForm.addEventListener('submit', handlePayment);
-                }
+        // --- INITIALIZATION ---
+        function init() {
+            animateScore();
+            animateScoreCircle();
+            setupObservers();
+            if (elements.paymentForm) {
+                elements.paymentForm.addEventListener('submit', handlePayment);
             }
-
-            init();
-        });
-    </script>
+        }
+        
+        // Запускаем получение данных
+        fetchAndRenderReport();
+    });
+</script>
 </body>
 </html>
+
