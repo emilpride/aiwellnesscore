@@ -598,10 +598,24 @@
                     throw new Error(`Face analysis server error: ${errorText}`);
                 }
                 
-                const faceData = await analyzeResponse.json();
-                await saveAnswerToServer('faceAnalysis', faceData);
-                document.getElementById('photo-preview-wrapper')?.remove();
-                endQuiz();
+                // ...
+const faceData = await analyzeResponse.json();
+await saveAnswerToServer('faceAnalysis', faceData);
+
+// >>>>> НАЧАЛО ИЗМЕНЕНИЙ <<<<<
+
+// Запускаем генерацию отчета в фоне, НЕ дожидаясь ответа
+fetch('/.netlify/functions/result-background', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId: sessionId })
+});
+
+// >>>>> КОНЕЦ ИЗМЕНЕНИЙ <<<<<
+
+document.getElementById('photo-preview-wrapper')?.remove();
+endQuiz(); // endQuiz теперь просто перенаправляет на страницу с результатами
+// ...
 
             } catch (error) {
                 console.error('Error during photo analysis step:', error);
@@ -659,4 +673,5 @@
 
 </body>
 </html>
+
 
