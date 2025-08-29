@@ -143,8 +143,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function pollForResult(sessionId, retries = 30) {
+    console.log(`Poll attempt ${31 - retries}/30 for session: ${sessionId}`);
+    
     if (retries <= 0) {
-        showError("Failed to generate the report in the allotted time. Please try again later.");
+        showError("Report generation timed out. Please try refreshing the page.");
         return;
     }
 
@@ -153,22 +155,31 @@ function pollForResult(sessionId, retries = 30) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId })
     })
-    .then(res => res.json())
+    .then(res => {
+        console.log('checkResult response status:', res.status);
+        return res.json();
+    })
     .then(result => {
+        console.log('checkResult result:', result);
+        
         if (result.status === 'complete') {
+            console.log('Report complete, rendering...');
             $('loading-state')?.remove();
             $('report-content').classList.remove('hidden');
             reportData = result.data;
             renderReport(result.data);
         } else if (result.status === 'error') {
+            console.error('Report generation error:', result.message);
             showError(result.message || "An error occurred while generating your report.");
         } else {
+            console.log('Report pending, retrying in 3s...');
             setTimeout(() => pollForResult(sessionId, retries - 1), 3000);
         }
     })
     .catch(err => {
-        console.error(err);
-        showError("An error occurred while communicating with the server.");
+        console.error('Poll error:', err);
+        // Retry даже при ошибке сети
+        setTimeout(() => pollForResult(sessionId, retries - 1), 5000);
     });
 }
 
