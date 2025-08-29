@@ -82,9 +82,11 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 fade-in-up" style="animation-delay: 0.3s;">
             <div class="glass-card rounded-2xl p-4 sm:p-6">
-                <h3 class="text-lg font-semibold text-white mb-2 text-center">Core Four Balance</h3>
-                <canvas id="coreRadar" height="250"></canvas>
-            </div>
+    <h3 class="text-lg font-semibold text-white mb-2 text-center">Core Four Balance</h3>
+    <div style="position: relative; height: 250px; width: 100%;">
+        <canvas id="coreRadar"></canvas>
+    </div>
+</div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="glass-card rounded-xl p-4"><p class="muted text-sm">Mind</p><p id="mindScore" class="text-2xl font-semibold text-white">0</p><p id="mindSummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
                 <div class="glass-card rounded-xl p-4"><p class="muted text-sm">Body</p><p id="bodyScore" class="text-2xl font-semibold text-white">0</p><p id="bodySummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
@@ -264,7 +266,11 @@ function renderRadarChart(coreFour) {
     const ctx = $('coreRadar');
     if (!ctx) return;
     
-    if (coreRadarChart) coreRadarChart.destroy();
+    // Уничтожаем старый график если есть
+    if (coreRadarChart) {
+        coreRadarChart.destroy();
+        coreRadarChart = null;
+    }
     
     const scores = [
         coreFour.mind?.score || 0,
@@ -291,7 +297,7 @@ function renderRadarChart(coreFour) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: false, // ВАЖНО: добавить эту строку
             scales: {
                 r: {
                     beginAtZero: true,
