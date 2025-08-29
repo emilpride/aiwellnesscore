@@ -85,7 +85,7 @@ exports.handler = async (event) => {
 
     const prompt = createPrompt(sessionData.answers, faceAnalysisData);
     
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
@@ -113,3 +113,4 @@ exports.handler = async (event) => {
     };
   }
 };
+
