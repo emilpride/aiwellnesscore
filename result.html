@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>AI WELLNESSCORE — Report</title>
+  <title>AI WELLNESSCORE — Your Report</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -19,13 +19,7 @@
         background-size: 200% 200%;
         animation: slow-pan 25s ease infinite;
     }
-    @keyframes slow-pan {
-        0% { background-position: 0% 0%; }
-        25% { background-position: 100% 0%; }
-        50% { background-position: 100% 100%; }
-        75% { background-position: 0% 100%; }
-        100% { background-position: 0% 0%; }
-    }
+    @keyframes slow-pan { 0% { background-position: 0% 0%; } 25% { background-position: 100% 0%; } 50% { background-position: 100% 100%; } 75% { background-position: 0% 100%; } 100% { background-position: 0% 0%; } }
     .glass-card {
         background: rgba(15, 23, 42, 0.6);
         backdrop-filter: blur(16px);
@@ -36,60 +30,46 @@
         overflow: hidden;
     }
     .glass-card:before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.06), transparent 40%);
-        opacity: 0;
-        transition: opacity 0.5s;
+        opacity: 0; transition: opacity 0.5s;
     }
-    .glass-card:hover:before {
-        opacity: 1;
-    }
-    .glass-card:hover {
-        border-color: rgba(255, 255, 255, 0.2);
-        transform: translateY(-5px);
-        box-shadow: 0 20px 30px rgba(0,0,0,0.2);
-    }
+    .glass-card:hover:before { opacity: 1; }
+    .glass-card:hover { border-color: rgba(255, 255, 255, 0.2); transform: translateY(-5px); box-shadow: 0 20px 30px rgba(0,0,0,0.2); }
     .animated-gradient-text {
         background: linear-gradient(90deg, #e0e7ff, #a5b4fc, #6366f1, #14e3e3);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-size: 200% auto;
-        animation: text-shine 5s linear infinite;
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-size: 200% auto; animation: text-shine 5s linear infinite;
     }
     @keyframes text-shine { to { background-position: 200% center; } }
     .muted { color: #94a3b8; }
-    .accent { color: #14e3e3; }
     .cta { 
-        background-color: #14e3e3; 
-        color: #0f172a; 
-        transition: all 0.2s ease;
-        transform: scale(1);
+        background-color: #14e3e3; color: #0f172a; 
+        transition: all 0.2s ease; transform: scale(1);
     }
     .cta:hover { 
         background-color: #67e8f9;
         box-shadow: 0 4px 12px rgba(20, 227, 227, 0.3);
         transform: scale(1.05);
     }
-     .pulsate {
-        animation: pulse 2s infinite;
-    }
+     .pulsate { animation: pulse 2s infinite; }
     @keyframes pulse {
         0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(20, 227, 227, 0.7); }
         50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(20, 227, 227, 0); }
     }
-    .locked { filter: blur(6px); pointer-events: none; user-select: none; position: relative; }
+    .locked { filter: blur(8px); pointer-events: none; user-select: none; position: relative; }
     .lock-overlay {
       position: absolute; inset: 0; display:flex; align-items:center; justify-content:center;
       background: linear-gradient(180deg, rgba(15,23,42,0.4), rgba(15,23,42,0.8));
-      border-radius: 12px;
+      border-radius: 1rem;
     }
-    .gauge { width: 240px; height: 120px; }
     .small { font-size: 0.85rem; }
+    .fade-in-up {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -99,7 +79,7 @@
 <body>
 <div class="gradient-bg-dark-animated">
   <div class="max-w-6xl mx-auto p-4 sm:p-6">
-    <header class="flex items-center justify-between mb-6">
+    <header class="fade-in-up flex items-center justify-between mb-6" style="animation-delay: 0.1s;">
       <div class="flex items-center gap-4">
         <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500 to-teal-500 grid place-items-center text-white font-black text-2xl">W</div>
         <div>
@@ -107,258 +87,92 @@
           <div class="muted text-sm">Personalized Wellness Intelligence</div>
         </div>
       </div>
-      <div class="hidden sm:flex items-center gap-4 muted small">
+      <div class="hidden sm:flex items-center gap-2 muted small">
         <div class="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-xs">SSL Secured</div>
         <div class="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-xs">PCI-ready</div>
-        <div class="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-xs">GDPR friendly</div>
       </div>
     </header>
 
-    <section class="glass-card rounded-2xl p-6 grid lg:grid-cols-2 gap-8 mb-6">
+    <section class="fade-in-up glass-card rounded-2xl p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6" style="animation-delay: 0.2s;">
       <div class="flex flex-col items-center justify-center">
         <div class="text-sm muted">Your Wellness Archetype</div>
         <div id="archetype" class="text-3xl font-bold animated-gradient-text mt-1">—</div>
 
-        <div class="mt-6 flex items-center gap-10">
-          <canvas id="gauge" class="gauge" width="240" height="120"></canvas>
-          <div class="space-y-3 text-left">
-            <div><div class="muted small">Biological Age</div><div id="biologicalAge" class="text-lg font-semibold">—</div></div>
-            <div><div class="muted small">Energy Index</div><div id="energyIndex" class="text-lg font-semibold">—</div></div>
-            <div><div class="muted small">Stress Level</div><div id="stressLevel" class="text-lg font-semibold">—</div></div>
+        <div class="mt-6 flex flex-col sm:flex-row items-center gap-6 sm:gap-10">
+          <canvas id="gauge" class="w-[240px] h-[120px]"></canvas>
+          <div class="space-y-4 text-center sm:text-left">
+            <div><div class="muted small">Biological Age</div><div id="biologicalAge" class="text-2xl font-semibold">0</div></div>
+            <div><div class="muted small">Energy Index</div><div id="energyIndex" class="text-2xl font-semibold">0</div></div>
+            <div><div class="muted small">Stress Level</div><div id="stressLevel" class="text-2xl font-semibold">0</div></div>
           </div>
         </div>
       </div>
 
-      <div>
-        <h2 class="text-lg font-semibold text-white">Quick Insights</h2>
-        <div class="mt-4 grid grid-cols-1 gap-3">
-          <div class="p-4 rounded-lg border border-white/10 bg-white/5">
-            <div class="muted small">Main Barrier</div>
-            <div id="mainBarrier" class="font-medium text-white">—</div>
-          </div>
-          <div class="p-4 rounded-lg border border-white/10 bg-white/5">
-            <div class="muted small">Quick Win</div>
-            <div id="quickWin" class="font-medium text-white">—</div>
-          </div>
-          <div class="p-4 rounded-lg border border-white/10 bg-white/5">
-            <div class="muted small">Comparison</div>
-            <div id="comparison" class="font-medium text-white">—</div>
-          </div>
-        </div>
-
-        <div class="mt-6">
-          <h3 class="text-sm muted mb-2">Core Four Overview</h3>
-          <canvas id="coreRadar" height="200"></canvas>
+      <div class="border-t border-white/10 lg:border-none pt-6 lg:pt-0">
+        <h2 class="text-lg font-semibold text-white text-center lg:text-left">Quick Insights</h2>
+        <div class="mt-4 grid grid-cols-1 gap-4">
+          <div class="p-4 rounded-lg border border-white/10 bg-white/5"><div class="muted small">Main Barrier</div><div id="mainBarrier" class="font-medium text-white">—</div></div>
+          <div class="p-4 rounded-lg border border-white/10 bg-white/5"><div class="muted small">Quick Win</div><div id="quickWin" class="font-medium text-white">—</div></div>
+          <div class="p-4 rounded-lg border border-white/10 bg-white/5"><div class="muted small">Comparison</div><div id="comparison" class="font-medium text-white">—</div></div>
         </div>
       </div>
     </section>
 
-    <section class="glass-card rounded-2xl p-6 mb-6">
-      <h2 class="text-lg font-semibold text-white mb-4">Free Report — Metrics & Core Four</h2>
+    <section class="fade-in-up glass-card rounded-2xl p-4 sm:p-6 mb-6" style="animation-delay: 0.3s;">
+      <h2 class="text-xl font-semibold text-white mb-4">Free Report — Metrics & Core Four</h2>
 
-      <div class="grid md:grid-cols-2 gap-4">
-        <div class="space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-4">
           <div class="p-4 rounded-lg border border-white/10 bg-white/5">
             <div class="muted small">Wellness Score</div>
-            <div id="wellnessScore" class="text-5xl font-black animated-gradient-text">—</div>
+            <div id="wellnessScore" class="text-5xl font-black animated-gradient-text">0</div>
           </div>
-
-          <div class="p-4 rounded-lg border border-white/10 bg-white/5">
-            <div class="muted small">Biological Age</div>
-            <div id="bioAge2" class="font-semibold text-white">—</div>
-          </div>
-
-          <div class="p-4 rounded-lg border border-white/10 bg-white/5">
-            <div class="muted small">Energy Index</div>
-            <div id="energyIndex2" class="font-semibold text-white">—</div>
-          </div>
-
-          <div class="p-4 rounded-lg border border-white/10 bg-white/5">
-            <div class="muted small">Stress Level</div>
-            <div id="stressLevel2" class="font-semibold text-white">—</div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+               <div class="p-3 rounded-lg border border-white/10 bg-white/5"><div class="muted small">Biological Age</div><div id="bioAge2" class="font-semibold text-white text-lg">0</div></div>
+               <div class="p-3 rounded-lg border border-white/10 bg-white/5"><div class="muted small">Energy Index</div><div id="energyIndex2" class="font-semibold text-white text-lg">0</div></div>
+               <div class="p-3 rounded-lg border border-white/10 bg-white/5"><div class="muted small">Stress Level</div><div id="stressLevel2" class="font-semibold text-white text-lg">0</div></div>
           </div>
         </div>
 
-        <div class="space-y-3">
-          <div class="p-4 rounded-lg border border-white/10 bg-white/5">
-            <div class="muted small">Mind</div>
-            <div class="flex items-center justify-between">
-              <div>
-                <div id="mindScore" class="text-xl font-semibold text-white">—</div>
-                <div id="mindSummary" class="muted small">—</div>
-              </div>
-              <div class="text-sm muted">Stress & mindfulness</div>
-            </div>
-          </div>
-
-          <div class="p-4 rounded-lg border border-white/10 bg-white/5">
-            <div class="muted small">Body</div>
-            <div class="flex items-center justify-between">
-              <div>
-                <div id="bodyScore" class="text-xl font-semibold text-white">—</div>
-                <div id="bodySummary" class="muted small">—</div>
-                <div id="bodyBMI" class="muted small mt-1">BMI: —</div>
-              </div>
-              <div class="text-sm muted">Activity & BMI</div>
-            </div>
-          </div>
-
-          <div class="p-4 rounded-lg border border-white/10 bg-white/5">
-            <div class="muted small">Nutrition</div>
-            <div id="nutritionScore" class="text-xl font-semibold text-white">—</div>
-            <div id="nutritionSummary" class="muted small">—</div>
-            <div class="mt-2 muted small">F/V per day: <span id="fruitsVeg">—</span> • Processed: <span id="processedLevel">—</span> • Water (L): <span id="waterL">—</span></div>
-          </div>
-
-          <div class="p-4 rounded-lg border border-white/10 bg-white/5">
-            <div class="muted small">Sleep</div>
-            <div id="sleepScore" class="text-xl font-semibold text-white">—</div>
-            <div id="sleepSummary" class="muted small">—</div>
-            <div class="mt-2 muted small">Hours: <span id="sleepHours">—</span> • Visual: <span id="sleepVisual">—</span></div>
-          </div>
+        <div>
+            <h3 class="text-base font-semibold text-white mb-2 text-center">Core Four Balance</h3>
+            <canvas id="coreRadar" height="250"></canvas>
         </div>
       </div>
     </section>
+    
+    <section class="fade-in-up mb-6" style="animation-delay: 0.4s;">
+         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="glass-card rounded-xl p-4"><div class="muted small">Mind</div><div id="mindScore" class="text-xl font-semibold text-white">0</div><div id="mindSummary" class="muted small leading-relaxed mt-1">—</div></div>
+            <div class="glass-card rounded-xl p-4"><div class="muted small">Body</div><div id="bodyScore" class="text-xl font-semibold text-white">0</div><div id="bodySummary" class="muted small leading-relaxed mt-1">—</div><div id="bodyBMI" class="muted small mt-1">BMI: —</div></div>
+            <div class="glass-card rounded-xl p-4"><div class="muted small">Nutrition</div><div id="nutritionScore" class="text-xl font-semibold text-white">0</div><div id="nutritionSummary" class="muted small leading-relaxed mt-1">—</div></div>
+            <div class="glass-card rounded-xl p-4"><div class="muted small">Sleep</div><div id="sleepScore" class="text-xl font-semibold text-white">0</div><div id="sleepSummary" class="muted small leading-relaxed mt-1">—</div></div>
+        </div>
+    </section>
 
-    <section>
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3">
-        <h2 class="text-xl font-semibold text-white">Premium Report — Advanced Analytics (Locked)</h2>
-        <div class="text-sm muted mt-1 sm:mt-0">Unlock for full insights</div>
+    <section class="fade-in-up" style="animation-delay: 0.5s;">
+      <div class="text-center mb-6">
+        <h2 class="text-2xl font-bold text-white">Unlock Your Premium Report</h2>
+        <p class="muted max-w-2xl mx-auto mt-2">Go deeper with advanced analytics, personalized recommendations, and future wellness forecasts.</p>
       </div>
 
       <div id="premiumWrap" class="grid md:grid-cols-2 gap-6">
-        <div class="glass-card rounded-xl p-4 relative">
-          <h3 class="font-semibold text-white">Detailed Analytics</h3>
-          <div class="mt-3 lockable" data-key="detailedAnalytics">
-            <div class="grid grid-cols-2 gap-2">
-              <div class="p-3 rounded bg-white/5 border border-white/10">
-                <div class="muted small">Metabolic Age</div>
-                <div id="metabolicAge" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border border-white/10">
-                <div class="muted small">Recovery Score</div>
-                <div id="recoveryScore" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border border-white/10">
-                <div class="muted small">Inflammation Risk</div>
-                <div id="inflammationRisk" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border border-white/10">
-                <div class="muted small">Digital Wellness</div>
-                <div id="digitalWellness" class="font-semibold">—</div>
-              </div>
-            </div>
-            <canvas id="premiumBar" class="mt-4" height="140"></canvas>
-          </div>
-          <div class="lock-overlay hidden" aria-hidden="true"><button class="cta px-4 py-2 rounded-lg font-semibold">Unlock Premium</button></div>
         </div>
-
-        <div class="glass-card rounded-xl p-4 relative">
-          <h3 class="font-semibold text-white">Face Analysis (Face++)</h3>
-          <div class="mt-3 lockable" data-key="faceAnalysis">
-            <div class="grid grid-cols-2 gap-2">
-              <div class="p-3 rounded bg-white/5 border border-white/10">
-                <div class="muted small">Skin Health Score</div>
-                <div id="skinHealthScore" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border border-white/10">
-                <div class="muted small">Hydration Assessment</div>
-                <div id="hydrationAssessment" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border border-white/10 col-span-2">
-                <div class="muted small">Sleep Debt Visualization</div>
-                <div id="sleepDebtVisualization" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border border-white/10 col-span-2">
-                <div class="muted small">Stress Markers</div>
-                <div id="stressMarkers" class="font-semibold">—</div>
-              </div>
-            </div>
-          </div>
-          <div class="lock-overlay hidden" aria-hidden="true"><button class="cta px-4 py-2 rounded-lg font-semibold">Unlock Premium</button></div>
-        </div>
-
-        <div class="glass-card rounded-xl p-4 relative">
-          <h3 class="font-semibold text-white">Personalized Recommendations</h3>
-          <div class="mt-3 lockable" data-key="recommendations">
-            <div class="grid gap-2">
-              <div class="p-3 rounded bg-white/5 border border-white/10">
-                <div class="muted small">Circadian Reset Protocol</div>
-                <div id="circadianReset" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border border-white/10">
-                <div class="muted small">Nutrition Gaps</div>
-                <div id="nutritionGaps" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border border-white/10">
-                <div class="muted small">Exercise Prescription</div>
-                <div id="exercisePrescription" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border border-white/10">
-                <div class="muted small">Stress Management Toolkit</div>
-                <div id="stressToolkit" class="font-semibold">—</div>
-              </div>
-            </div>
-          </div>
-          <div class="lock-overlay hidden" aria-hidden="true"><button class="cta px-4 py-2 rounded-lg font-semibold">Unlock Premium</button></div>
-        </div>
-
-        <div class="glass-card rounded-xl p-4 relative">
-          <h3 class="font-semibold text-white">Forecasts</h3>
-          <div class="mt-3 lockable" data-key="forecasts">
-            <div class="p-3 rounded bg-white/5 border border-white/10">
-              <div class="muted small">30-Day Potential</div>
-              <div id="thirtyDayPotential" class="font-semibold">—</div>
-            </div>
-            <div class="p-3 rounded bg-white/5 border border-white/10 mt-2">
-              <div class="muted small">Risk Timeline</div>
-              <div id="riskTimeline" class="font-semibold">—</div>
-            </div>
-            <div class="p-3 rounded bg-white/5 border border-white/10 mt-2">
-              <div class="muted small">Habit Stacking Plan</div>
-              <div id="habitStackingPlan" class="font-semibold">—</div>
-            </div>
-          </div>
-          <div class="lock-overlay hidden" aria-hidden="true"><button class="cta px-4 py-2 rounded-lg font-semibold">Unlock Premium</button></div>
-        </div>
-        
-        <div class="glass-card rounded-xl p-4 relative">
-          <h3 class="font-semibold text-white">Unique Features</h3>
-          <div class="mt-3 lockable" data-key="uniqueFeatures">
-            <div class="grid gap-2">
-              <div class="p-3 rounded bg-white/5 border border-white/10"><div class="muted small">Wellness Weather (7d)</div><div id="wellnessWeather" class="font-semibold small">—</div></div>
-              <div class="p-3 rounded bg-white/5 border border-white/10"><div class="muted small">Energy Management Matrix</div><div id="energyMatrix" class="font-semibold small">—</div></div>
-              <div class="p-3 rounded bg-white/5 border border-white/10"><div class="muted small">Social Health Score</div><div id="socialHealthScore" class="font-semibold">—</div></div>
-              <div class="p-3 rounded bg-white/5 border border-white/10"><div class="muted small">Personalized Supplement Stack</div><div id="supplementStack" class="font-semibold small">—</div><div class="muted small mt-2">*Not medical advice — consult a physician</div></div>
-            </div>
-          </div>
-          <div class="lock-overlay hidden" aria-hidden="true"><button class="cta px-4 py-2 rounded-lg font-semibold">Unlock Premium</button></div>
-        </div>
-
-        <div class="glass-card rounded-xl p-4 relative md:col-span-2">
-          <h3 class="font-semibold text-white">AI Coach Notes</h3>
-          <div class="mt-3 lockable" data-key="aiCoachNotes">
-            <div id="aiCoachNotes" class="muted leading-relaxed">—</div>
-          </div>
-          <div class="lock-overlay hidden" aria-hidden="true"><button class="cta px-4 py-2 rounded-lg font-semibold">Unlock Premium</button></div>
-        </div>
-      </div>
     </section>
 
-    <footer class="mt-6 glass-card rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 grid place-items-center font-bold text-white text-2xl">★</div>
+    <footer class="fade-in-up mt-8 glass-card rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4" style="animation-delay: 0.6s;">
+      <div class="flex items-center gap-4 text-center md:text-left">
+        <div class="hidden sm:grid w-12 h-12 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 place-items-center font-bold text-white text-2xl flex-shrink-0">★</div>
         <div>
-          <div class="text-sm muted">Limited Time Offer</div>
-          <div class="font-semibold text-white">Premium Unlock — <span class="text-teal-400">30% Off</span></div>
-          <div class="muted small">Offer expires in <span id="timer" class="font-bold text-white">15:00</span></div>
+          <div class="font-semibold text-white">Limited Time Offer — <span class="text-teal-400">30% Off</span></div>
+          <div class="muted small">Unlock your full potential. Offer expires in <span id="timer" class="font-bold text-white">15:00</span></div>
         </div>
       </div>
 
       <div class="flex items-center gap-3">
         <div class="text-right mr-2">
           <div class="muted small line-through">$49</div>
-          <div class="text-xl font-bold text-white">$34.30</div>
+          <div class="text-2xl font-bold text-white">$34.30</div>
         </div>
         <button id="unlockBtn" class="cta px-5 py-3 rounded-lg font-bold pulsate">Unlock Premium</button>
         <button id="downloadPDFBtn" class="hidden px-4 py-2 rounded-lg border border-white/20 bg-white/10 text-white hover:bg-white/20">Download PDF</button>
@@ -367,7 +181,7 @@
   </div>
 </div>
 
-  <div id="paymentModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+  <div id="paymentModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
     <div class="glass-card rounded-xl p-6 w-full max-w-md border-teal-400/50">
       <h3 class="font-semibold text-lg text-white">Payment Success</h3>
       <p class="muted small mt-2">Your premium report has been unlocked. You can now view all details and download a PDF.</p>
@@ -377,296 +191,240 @@
 
 <script>
 /* =========================
-   Utilities & Mock fallback
+   SETUP & MOCK DATA
    ========================= */
 const $ = id => document.getElementById(id);
-function fmt(v, def = '—') { return (v === null || v === undefined || v === '') ? def : v; }
 
-async function fetchReportFromServer(sessionId) {
-  try {
-    const res = await fetch('/.netlify/functions/generateReport', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId })
-    });
-    const json = await res.json();
-    if (!json || !json.data) throw new Error('Invalid server response');
-    return json.data;
-  } catch (e) {
-    console.warn('Server fetch failed, using mock data.', e);
-    return localMockReport();
-  }
-}
+const premiumSections = {
+    "Detailed Analytics": {
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>`,
+        data: ["metabolicAge", "recoveryScore", "inflammationRisk", "digitalWellness"]
+    },
+    "Face Analysis (Face++)": {
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
+        data: ["skinHealthScore", "hydrationAssessment", "sleepDebtVisualization", "stressMarkers"]
+    },
+    "Personalized Recommendations": {
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>`,
+        data: ["circadianReset", "nutritionGaps", "exercisePrescription", "stressToolkit"]
+    },
+    "Forecasts": {
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>`,
+        data: ["thirtyDayPotential", "riskTimeline", "habitStackingPlan"]
+    },
+    "AI Coach Notes": {
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>`,
+        data: ["aiCoachNotes"]
+    },
+};
 
 function localMockReport() {
  return {
   freeReport: {
    metrics: { wellnessScore: 78, biologicalAge: 33, energyIndex: 66, stressLevel: 44 },
-   coreFour: {
-    mind: { score: 68, summary: "Moderate stress; benefit from daily breathwork" },
-    body: { score: 75, summary: "Active but inconsistent; increase weekly strength", bmi: 24.1 },
-    nutrition: { score: 62, summary: "Low veg intake, some processed food", fruitsVegPerDay: 2, processedFoodLevel: "Moderate", waterLiters: 1.8 },
-    sleep: { score: 55, summary: "Short sleep windows; accumulate sleep debt", hours: 6, visualSigns: "Under-eye shadows" }
-   },
-   insights: { mainBarrier: "Erratic sleep schedule", quickWin: "Establish consistent bedtime", comparison: "Your sleep is lower than ~70% of peers" }
+   coreFour: { mind: { score: 68, summary: "Moderate stress levels detected. Daily breathwork or mindfulness could significantly improve focus." }, body: { score: 75, summary: "Good activity levels, but consistency is key. Adding 2 weekly strength sessions would be beneficial." }, nutrition: { score: 62, summary: "Low vegetable intake and moderate processed food consumption are holding back your score." }, sleep: { score: 55, summary: "Short sleep windows are leading to accumulated sleep debt, impacting daily energy." }, bmi: 24.1 },
+   insights: { mainBarrier: "Erratic sleep schedule disrupting circadian rhythm.", quickWin: "Establish a consistent bedtime, even on weekends.", comparison: "Your sleep score is lower than ~70% of your peers." }
   },
   premiumReport: {
-   detailedAnalytics: { metabolicAge: 36, recoveryScore: 58, inflammationRiskIndex: 35, digitalWellnessScore: 52 },
-   faceAnalysis: { skinHealthScore: 64, hydrationAssessment: "Slight dehydration signs", sleepDebtVisualization: "Mild under-eye bags", stressMarkers: "Forehead lines present" },
-   recommendations: {
-    circadianReset: { bedtime: "22:30", wakeTime: "06:30", steps: ["Dim screens after 21:00", "Morning sunlight for 10 min", "Consistent bedtime schedule"] },
-    nutritionGaps: [{ nutrient: "Vitamin D", why: "Low sun exposure" }, { nutrient: "Iron", why: "Low red meat/leafy greens" }],
-    exercisePrescription: { type: "Brisk walking + resistance twice/week", durationMin: 30, timeOfDay: "Morning" },
-    stressToolkit: ["4-4-8 breathing", "Daily 10-min mindfulness", "Walk breaks every 90 minutes"]
-   },
-   forecasts: {
-    thirtyDayPotential: { expectedWellnessScoreIncrease: 6, notes: "With consistent sleep and one nutrition change" },
-    riskTimeline: [{ yearsFromNow: 3, risk: "Worsening sleep may impact metabolic health" }],
-    habitStackingPlan: [{ week: 1, habit: "Set bedtime" }, { week: 2, habit: "Morning walk" }]
-   },
-   uniqueFeatures: {
-    wellnessWeather: [ { day: "Mon", forecast: "Good", scoreModifier: 1 }, { day: "Tue", forecast: "Moderate", scoreModifier: 0 }, { day: "Wed", forecast: "Good", scoreModifier: 1 }, { day: "Thu", forecast: "Low", scoreModifier: -1 }, { day: "Fri", forecast: "Moderate", scoreModifier: 0 }, { day: "Sat", forecast: "Good", scoreModifier: 1 }, { day: "Sun", forecast: "Rest", scoreModifier: 2 } ],
-    energyMatrix: [ { timeRange: "06:00-09:00", recommendedTask: "Deep Work", intensity: "High" }, { timeRange: "12:00-14:00", recommendedTask: "Light tasks / walk", intensity: "Low" }, { timeRange: "18:00-20:00", recommendedTask: "Social / family time", intensity: "Medium" } ],
-    socialHealthScore: 68,
-    personalizedSupplementStack: [ { name: "Vitamin D", reason: "Low exposure", dose: "1000 IU" }, { name: "Omega-3", reason: "Inflammation support", dose: "1000 mg" } ]
-   },
-   aiCoachNotes: "Based on your inputs, the primary lever for improving your Wellness Score is sleep consistency. An erratic schedule is currently impacting your energy levels and recovery scores. The 'Quick Win' of setting a consistent bedtime is crucial. We recommend targeting 10:30 PM. This single change has the potential to raise your score by 5-7 points within the first two weeks. Your nutrition shows a solid foundation, but increasing vegetable intake to 4+ servings daily could further reduce inflammation risk. The AI has identified a potential Vitamin D deficiency based on your lifestyle inputs; consider discussing this with a healthcare provider."
+   metabolicAge: {label: "Metabolic Age", value: 36}, 
+   recoveryScore: {label: "Recovery Score", value: 58}, 
+   inflammationRisk: {label: "Inflammation Risk", value: "35 (Low)"}, 
+   digitalWellness: {label: "Digital Wellness", value: "52 (Fair)"},
+   skinHealthScore: {label: "Skin Health Score", value: 64}, 
+   hydrationAssessment: {label: "Hydration Assessment", value: "Slight dehydration signs"}, 
+   sleepDebtVisualization: {label: "Sleep Debt Visualization", value: "Mild under-eye bags"}, 
+   stressMarkers: {label: "Stress Markers", value: "Forehead lines present"},
+   circadianReset: {label: "Circadian Reset Protocol", value: "Bedtime: 22:30, Wake: 06:30. Dim screens after 21:00."}, 
+   nutritionGaps: {label: "Nutrition Gaps", value: "Vitamin D (low sun exposure), Iron (low red meat/leafy greens)."}, 
+   exercisePrescription: {label: "Exercise Prescription", value: "Brisk walking (30 min) + 2x weekly resistance training."}, 
+   stressToolkit: {label: "Stress Management Toolkit", value: "4-4-8 breathing, 10-min daily mindfulness, walk breaks."},
+   thirtyDayPotential: {label: "30-Day Potential", value: "+6 score points with consistent sleep and nutrition changes."},
+   riskTimeline: {label: "Risk Timeline", value: "In 3 years, worsening sleep may impact metabolic health."},
+   habitStackingPlan: {label: "Habit Stacking Plan", value: "Week 1: Set bedtime. Week 2: Add morning walk after waking up."},
+   aiCoachNotes: {label: "AI Coach Notes", value: "Your primary lever for improvement is sleep consistency. An erratic schedule is impacting energy and recovery. We recommend targeting 10:30 PM nightly. This single change can raise your score by 5-7 points in two weeks. Your nutrition is solid, but increasing vegetable intake to 4+ servings daily will reduce inflammation risk."}
   }
  };
 }
 
 /* =========================
-   Rendering functions
+   ANIMATION & RENDERING
    ========================= */
+function animateValue(element, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        element.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) { window.requestAnimationFrame(step); }
+    };
+    window.requestAnimationFrame(step);
+}
 
-let gaugeChart, coreRadar, premiumBar;
+let gaugeChart, coreRadar;
 
 function renderGauge(score) {
-  const ctx = document.getElementById('gauge').getContext('d');
+  const ctx = $('gauge').getContext('2d');
   if (gaugeChart) gaugeChart.destroy();
   gaugeChart = new Chart(ctx, {
     type: 'doughnut',
     data: { datasets: [{ data: [score, 100 - score], backgroundColor: ['#14e3e3', 'rgba(255, 255, 255, 0.1)'], borderWidth: 0, borderRadius: 20 }] },
-    options: {
-      rotation: -90 * (Math.PI/180),
-      circumference: 180 * (Math.PI/180),
-      cutout: '70%',
-      plugins: { legend: { display: false }, tooltip: { enabled: false } },
-      animation: { animateRotate: true, duration: 1000 }
-    }
+    options: { rotation: -90 * (Math.PI/180), circumference: 180 * (Math.PI/180), cutout: '70%', plugins: { legend: { display: false }, tooltip: { enabled: false } }, animation: { animateRotate: true, duration: 1500 } }
   });
-  $('wellnessScore').textContent = score;
 }
 
 function renderCoreRadar(coreFour) {
-  const ctx = document.getElementById('coreRadar').getContext('d');
+  const ctx = $('coreRadar').getContext('2d');
   const lightColor = 'rgba(255, 255, 255, 0.25)';
   if (coreRadar) coreRadar.destroy();
-  const data = [ coreFour.mind.score || 0, coreFour.body.score || 0, coreFour.nutrition.score || 0, coreFour.sleep.score || 0 ];
+  const data = [ coreFour.mind.score, coreFour.body.score, coreFour.nutrition.score, coreFour.sleep.score ];
+  const labels = ['Mind','Body','Nutrition','Sleep'];
   coreRadar = new Chart(ctx, {
     type: 'radar',
-    data: { 
-        labels: ['Mind','Body','Nutrition','Sleep'], 
-        datasets: [{ data, fill: true, backgroundColor: 'rgba(20, 227, 227, 0.2)', borderColor: '#14e3e3', pointBackgroundColor: '#14e3e3' }] 
-    },
-    options: { 
-        scales: { 
-            r: { 
-                min: 0, 
-                max: 100,
-                grid: { color: lightColor },
-                angleLines: { color: lightColor },
-                pointLabels: { color: '#e2e8f0', font: { size: 12 } },
-                ticks: {
-                    backdropColor: 'rgba(15, 23, 42, 0.6)',
-                    color: '#94a3b8'
+    data: { labels, datasets: [{ data, fill: true, backgroundColor: 'rgba(20, 227, 227, 0.2)', borderColor: '#14e3e3', pointBackgroundColor: '#14e3e3' }] },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { r: { min: 0, max: 100, grid: { color: lightColor }, angleLines: { color: lightColor }, pointLabels: { color: '#e2e8f0', font: { size: 12 } }, ticks: { display: false } } }, 
+        plugins: { legend: { display: false } } 
+    }
+  });
+}
+
+function populatePremiumCards(premiumData) {
+    const container = $('premiumWrap');
+    container.innerHTML = ''; // Clear previous content
+    Object.entries(premiumSections).forEach(([title, section]) => {
+        const isCoachNotes = title === "AI Coach Notes";
+        const card = document.createElement('div');
+        card.className = `glass-card rounded-xl p-4 relative ${isCoachNotes ? 'md:col-span-2' : ''}`;
+        
+        let contentHTML = `<div class="flex items-center gap-3 mb-3"><div class="text-teal-400">${section.icon}</div><h3 class="font-semibold text-white">${title}</h3></div>`;
+        contentHTML += `<div class="mt-3 space-y-3 lockable" data-key="${title.toLowerCase().replace(/\s/g, '')}">`;
+
+        if (isCoachNotes) {
+            const item = premiumData.aiCoachNotes;
+            contentHTML += `<p class="muted small leading-relaxed">${item.value}</p>`;
+        } else {
+             section.data.forEach(key => {
+                const item = premiumData[key];
+                if(item) {
+                    contentHTML += `<div class="p-3 rounded-lg bg-white/5 border border-white/10"><div class="muted small">${item.label}</div><div class="font-semibold text-white break-words">${item.value}</div></div>`;
                 }
-            } 
-        }, 
-        plugins: { legend: { display: false } } 
-    }
-  });
+            });
+        }
+        
+        contentHTML += `</div>`;
+        contentHTML += `<div class="lock-overlay hidden" aria-hidden="true"><button class="cta px-4 py-2 rounded-lg font-semibold">Unlock Premium</button></div>`;
+        card.innerHTML = contentHTML;
+        container.appendChild(card);
+    });
 }
 
-function renderPremiumBar(metrics) {
-  const ctx = document.getElementById('premiumBar').getContext('d');
-  if (premiumBar) premiumBar.destroy();
-  premiumBar = new Chart(ctx, {
-    type: 'bar',
-    data: { 
-        labels: ['Metabolic Age','Recovery','Inflammation','Digital'], 
-        datasets: [{ 
-            data: [metrics.metabolicAge || 0, metrics.recoveryScore || 0, metrics.inflammationRiskIndex || 0, metrics.digitalWellnessScore || 0], 
-            backgroundColor: ['#14e3e3','#6366f1','#a5b4fc', '#e0e7ff'],
-            borderRadius: 4
-        }] 
-    },
-    options: { 
-        scales: { 
-            y: { 
-                beginAtZero: true,
-                grid: { color: 'rgba(255,255,255,0.1)' },
-                ticks: { color: '#94a3b8' }
-            },
-            x: {
-                grid: { display: false },
-                ticks: { color: '#94a3b8' }
-            }
-        }, 
-        plugins: { legend: { display: false } } 
-    }
-  });
-}
 
-function fillFree(free) {
-  $('archetype').textContent = fmt(free.archetype || 'Wellness Explorer');
-  renderGauge(Number(free.metrics.wellnessScore || 0));
-  $('biologicalAge').textContent = fmt(free.metrics.biologicalAge);
-  $('energyIndex').textContent = fmt(free.metrics.energyIndex);
-  $('stressLevel').textContent = fmt(free.metrics.stressLevel);
-  $('wellnessScore').textContent = fmt(free.metrics.wellnessScore);
-  $('bioAge2').textContent = fmt(free.metrics.biologicalAge);
-  $('energyIndex2').textContent = fmt(free.metrics.energyIndex);
-  $('stressLevel2').textContent = fmt(free.metrics.stressLevel);
-  $('mindScore').textContent = fmt(free.coreFour.mind.score);
-  $('mindSummary').textContent = fmt(free.coreFour.mind.summary);
-  $('bodyScore').textContent = fmt(free.coreFour.body.score);
-  $('bodySummary').textContent = fmt(free.coreFour.body.summary);
-  $('bodyBMI').textContent = 'BMI: ' + fmt(free.coreFour.body.bmi || '—');
-  $('nutritionScore').textContent = fmt(free.coreFour.nutrition.score);
-  $('nutritionSummary').textContent = fmt(free.coreFour.nutrition.summary);
-  $('fruitsVeg').textContent = fmt(free.coreFour.nutrition.fruitsVegPerDay);
-  $('processedLevel').textContent = fmt(free.coreFour.nutrition.processedFoodLevel);
-  $('waterL').textContent = fmt(free.coreFour.nutrition.waterLiters);
-  $('sleepScore').textContent = fmt(free.coreFour.sleep.score);
-  $('sleepSummary').textContent = fmt(free.coreFour.sleep.summary);
-  $('sleepHours').textContent = fmt(free.coreFour.sleep.hours);
-  $('sleepVisual').textContent = fmt(free.coreFour.sleep.visualSigns);
-  $('mainBarrier').textContent = fmt(free.insights.mainBarrier);
-  $('quickWin').textContent = fmt(free.insights.quickWin);
-  $('comparison').textContent = fmt(free.insights.comparison);
-  renderCoreRadar(free.coreFour);
-}
-
-function fillPremium(premium) {
-  $('metabolicAge').textContent = fmt(premium.detailedAnalytics.metabolicAge);
-  $('recoveryScore').textContent = fmt(premium.detailedAnalytics.recoveryScore);
-  $('inflammationRisk').textContent = fmt(premium.detailedAnalytics.inflammationRiskIndex);
-  $('digitalWellness').textContent = fmt(premium.detailedAnalytics.digitalWellnessScore);
-  renderPremiumBar(premium.detailedAnalytics);
-  $('skinHealthScore').textContent = fmt(premium.faceAnalysis.skinHealthScore);
-  $('hydrationAssessment').textContent = fmt(premium.faceAnalysis.hydrationAssessment);
-  $('sleepDebtVisualization').textContent = fmt(premium.faceAnalysis.sleepDebtVisualization);
-  $('stressMarkers').textContent = fmt(premium.faceAnalysis.stressMarkers);
-  $('circadianReset').textContent = premium.recommendations.circadianReset ? `${premium.recommendations.circadianReset.bedtime} → ${premium.recommendations.circadianReset.wakeTime} • ${premium.recommendations.circadianReset.steps.join('; ')}` : '—';
-  $('nutritionGaps').textContent = (premium.recommendations.nutritionGaps || []).map(n => `${n.nutrient}: ${n.why}`).join('; ');
-  $('exercisePrescription').textContent = premium.recommendations.exercisePrescription ? `${premium.recommendations.exercisePrescription.type} • ${premium.recommendations.exercisePrescription.durationMin} min • ${premium.recommendations.exercisePrescription.timeOfDay}` : '—';
-  $('stressToolkit').textContent = (premium.recommendations.stressToolkit || []).join('; ');
-  $('thirtyDayPotential').textContent = premium.forecasts.thirtyDayPotential ? `${premium.forecasts.thirtyDayPotential.expectedWellnessScoreIncrease} points • ${premium.forecasts.thirtyDayPotential.notes}` : '—';
-  $('riskTimeline').textContent = (premium.forecasts.riskTimeline || []).map(r => `${r.yearsFromNow}y: ${r.risk}`).join('; ');
-  $('habitStackingPlan').textContent = (premium.forecasts.habitStackingPlan || []).map(h => `W${h.week}: ${h.habit}`).join('; ');
-  $('wellnessWeather').textContent = (premium.uniqueFeatures.wellnessWeather || []).map(d => `${d.day}: ${d.forecast} (${d.scoreModifier>=0? '+'+d.scoreModifier:d.scoreModifier})`).join(' • ');
-  $('energyMatrix').textContent = (premium.uniqueFeatures.energyMatrix || []).map(e => `${e.timeRange}: ${e.recommendedTask}`).join(' • ');
-  $('socialHealthScore').textContent = fmt(premium.uniqueFeatures.socialHealthScore);
-  $('supplementStack').textContent = (premium.uniqueFeatures.personalizedSupplementStack || []).map(s => `${s.name}: ${s.reason} (${s.dose})`).join('; ');
-  $('aiCoachNotes').textContent = fmt(premium.aiCoachNotes);
-}
-
-function unlockPremiumUI() {
-  document.querySelectorAll('.lockable').forEach(el => el.classList.remove('locked'));
-  document.querySelectorAll('.lock-overlay').forEach(o => o.classList.add('hidden'));
-  $('downloadPDFBtn').classList.remove('hidden');
-}
-
-async function downloadPDF() {
-  const { jsPDF } = window.jspdf;
-  const el = document.querySelector('.max-w-6xl') || document.body;
-  // Temporarily set background to a solid color for PDF generation for better results
-  document.body.style.backgroundColor = '#0f172a';
-  document.querySelector('.gradient-bg-dark-animated').style.background = 'none';
-
-  const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#0f172a' });
-  const img = canvas.toDataURL('image/png');
-  const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: 'a4' });
+/* =========================
+   MAIN APP LOGIC
+   ========================= */
+(async function init() {
+  const report = localMockReport(); // Using mock data directly
+  const { freeReport, premiumReport } = report;
   
-  // Re-enable animated background
-  document.body.style.backgroundColor = '';
-  document.querySelector('.gradient-bg-dark-animated').style.background = '';
+  // -- Populate Free Report --
+  $('archetype').textContent = freeReport.insights.archetype || 'Wellness Explorer';
+  $('mainBarrier').textContent = freeReport.insights.mainBarrier;
+  $('quickWin').textContent = freeReport.insights.quickWin;
+  $('comparison').textContent = freeReport.insights.comparison;
   
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const imgWidth = canvas.width;
-  const imgHeight = canvas.height;
-  const ratio = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
-  const canvasWidth = imgWidth * ratio;
-  const canvasHeight = imgHeight * ratio;
+  // Animate values
+  const DURATION = 1500;
+  animateValue($('wellnessScore'), 0, freeReport.metrics.wellnessScore, DURATION);
+  animateValue($('biologicalAge'), 0, freeReport.metrics.biologicalAge, DURATION);
+  animateValue($('energyIndex'), 0, freeReport.metrics.energyIndex, DURATION);
+  animateValue($('stressLevel'), 0, freeReport.metrics.stressLevel, DURATION);
+  animateValue($('bioAge2'), 0, freeReport.metrics.biologicalAge, DURATION);
+  animateValue($('energyIndex2'), 0, freeReport.metrics.energyIndex, DURATION);
+  animateValue($('stressLevel2'), 0, freeReport.metrics.stressLevel, DURATION);
+  animateValue($('mindScore'), 0, freeReport.coreFour.mind.score, DURATION);
+  animateValue($('bodyScore'), 0, freeReport.coreFour.body.score, DURATION);
+  animateValue($('nutritionScore'), 0, freeReport.coreFour.nutrition.score, DURATION);
+  animateValue($('sleepScore'), 0, freeReport.coreFour.sleep.score, DURATION);
 
-  pdf.addImage(img, 'PNG', 0, 0, canvasWidth, canvasHeight);
-  pdf.save('AI-WELLNESSCORE-Report.pdf');
-}
+  $('mindSummary').textContent = freeReport.coreFour.mind.summary;
+  $('bodySummary').textContent = freeReport.coreFour.body.summary;
+  $('bodyBMI').textContent = 'BMI: ' + freeReport.coreFour.bmi;
+  $('nutritionSummary').textContent = freeReport.coreFour.nutrition.summary;
+  $('sleepSummary').textContent = freeReport.coreFour.sleep.summary;
 
-function startCountdown(seconds = 15*60) {
-  let left = seconds;
-  const t = setInterval(()=> {
-    left--;
-    if (left < 0) { clearInterval(t); $('timer').textContent = '00:00'; return; }
-    const m = String(Math.floor(left/60)).padStart(2,'0'), s = String(left%60).padStart(2,'0');
-    $('timer').textContent = `${m}:${s}`;
-  },1000);
-}
+  // Render charts after a small delay for animation
+  setTimeout(() => {
+      renderGauge(freeReport.metrics.wellnessScore);
+      renderCoreRadar(freeReport.coreFour);
+  }, 300);
 
-function setInitialLockedState() {
+  // -- Populate Premium Section --
+  populatePremiumCards(premiumReport);
+
+  // -- Event Listeners & Initial State --
+  startCountdown(15*60);
+  
   document.querySelectorAll('.lockable').forEach(el => {
     el.classList.add('locked');
-    const parent = el.closest('.glass-card') || el.parentElement;
+    const parent = el.closest('.glass-card');
     const overlay = parent.querySelector('.lock-overlay');
     if (overlay) overlay.classList.remove('hidden');
-    
-    // Add mouse move listener for glass effect
-    parent.addEventListener('mousemove', e => {
-      const rect = parent.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      parent.style.setProperty('--mouse-x', `${x}px`);
-      parent.style.setProperty('--mouse-y', `${y}px`);
-    });
   });
-}
 
-(async function init() {
-  startCountdown(15*60);
-  setInitialLockedState();
-
-  ['unlockBtn', ...document.querySelectorAll('.lock-overlay button')].forEach(idOrEl => {
-    const el = typeof idOrEl === 'string' ? $(idOrEl) : idOrEl;
-    el.addEventListener('click', () => {
-        $('paymentModal').classList.remove('hidden');
-        $('paymentModal').classList.add('flex');
-    });
+  document.body.addEventListener('click', (e) => {
+      if (e.target.closest('#unlockBtn') || e.target.closest('.lock-overlay button')) {
+          $('paymentModal').classList.remove('hidden');
+          $('paymentModal').classList.add('flex');
+      }
   });
 
   $('closeModal').addEventListener('click', () => {
     $('paymentModal').classList.add('hidden');
     $('paymentModal').classList.remove('flex');
-    // Simulate payment processing delay then unlock
-     setTimeout(()=> {
-       unlockPremiumUI();
+     setTimeout(() => {
+        document.querySelectorAll('.lockable').forEach(el => { el.style.transition = 'filter 0.5s ease'; el.classList.remove('locked'); });
+        document.querySelectorAll('.lock-overlay').forEach(o => { o.style.transition = 'opacity 0.5s ease'; o.style.opacity = '0'; setTimeout(() => o.classList.add('hidden'), 500); });
+        $('downloadPDFBtn').classList.remove('hidden');
      }, 300);
   });
   
-  $('downloadPDFBtn').addEventListener('click', downloadPDF);
+  $('downloadPDFBtn').addEventListener('click', async () => {
+      const el = document.querySelector('.max-w-6xl');
+      document.body.style.backgroundColor = '#0f172a';
+      document.querySelector('.gradient-bg-dark-animated').style.background = '#0f172a';
+      const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#0f172a' });
+      document.body.style.backgroundColor = '';
+      document.querySelector('.gradient-bg-dark-animated').style.background = '';
+      const img = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: 'a4' });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const ratio = Math.min(pageWidth / canvas.width, pageHeight / canvas.height);
+      pdf.addImage(img, 'PNG', 0, 0, canvas.width * ratio, canvas.height * ratio);
+      pdf.save('AI-WELLNESSCORE-Report.pdf');
+  });
 
-  const params = new URLSearchParams(window.location.search);
-  const sessionId = params.get('sessionId') || 'demo-session';
-  const report = await fetchReportFromServer(sessionId);
-  if (!report.freeReport) report.freeReport = localMockReport().freeReport;
-  if (!report.premiumReport) report.premiumReport = localMockReport().premiumReport;
-  if (!report.freeReport.archetype && report.freeReport.metrics && report.freeReport.metrics.wellnessScore) {
-    report.freeReport.archetype = "Wellness Explorer";
+  document.querySelectorAll('.glass-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+    });
+  });
+
+  function startCountdown(seconds = 15*60) {
+    let left = seconds;
+    const t = setInterval(()=> {
+        left--;
+        if (left < 0) { clearInterval(t); $('timer').textContent = '00:00'; return; }
+        const m = String(Math.floor(left/60)).padStart(2,'0'), s = String(left%60).padStart(2,'0');
+        $('timer').textContent = `${m}:${s}`;
+    },1000);
   }
-
-  fillFree(report.freeReport);
-  fillPremium(report.premiumReport);
 })();
 </script>
 </body>
