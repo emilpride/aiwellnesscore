@@ -19,30 +19,21 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .premium-blur {
-            filter: blur(10px);
+        .premium-content-blur {
+            filter: blur(8px);
             user-select: none;
             pointer-events: none;
         }
-        .premium-section {
+        .premium-locked {
             position: relative;
         }
-        .lock-overlay {
+        .lock-icon-overlay {
             position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(2px);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
             z-index: 10;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .float-animation {
-            animation: float 3s ease-in-out infinite;
         }
         .score-ring {
             transform: rotate(-90deg);
@@ -61,12 +52,25 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .pulse-glow {
-            animation: pulseGlow 2s ease-in-out infinite;
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
         }
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 20px rgba(20, 227, 227, 0.5); }
-            50% { box-shadow: 0 0 40px rgba(20, 227, 227, 0.8); }
+        .pulse-animation {
+            animation: pulse 3s infinite;
+        }
+        .card-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .card-input:focus {
+            outline: none;
+            border-color: #14e3e3;
+            box-shadow: 0 0 0 2px rgba(20, 227, 227, 0.2);
+        }
+        .card-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
     </style>
 </head>
@@ -82,6 +86,9 @@ const STRIPE_PUBLIC_KEY = 'pk_test_YOUR_KEY_HERE';
 let globalReportData = null;
 let sessionId = null;
 let isPremiumUnlocked = false;
+let stripe = null;
+let elements = null;
+let cardElement = null;
 
 function showLoadingState() {
     document.getElementById('report-container').innerHTML = `
@@ -150,23 +157,21 @@ function generateFullHTML(data, unlocked = false) {
             <div class="glass-card rounded-2xl p-8">
                 <h3 class="text-2xl font-bold text-white mb-6">Core Four Breakdown</h3>
                 <div class="space-y-6">
-                    ${['mind', 'body', 'nutrition', 'lifestyle'].map(key => {
-                        const item = free.coreFour[key];
+                    ${Object.entries(free.coreFour).map(([key, item]) => {
                         const colors = {
                             mind: 'indigo',
                             body: 'teal',
                             nutrition: 'emerald',
                             lifestyle: 'purple'
                         };
-                        const color = colors[key];
                         return `
                             <div>
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="text-lg font-semibold text-${color}-400 capitalize">${key}</span>
+                                    <span class="text-lg font-semibold text-${colors[key]}-400 capitalize">${key}</span>
                                     <span class="text-xl font-bold text-white">${item.score}%</span>
                                 </div>
                                 <div class="w-full bg-gray-700 rounded-full h-3">
-                                    <div class="bg-${color}-500 h-3 rounded-full transition-all duration-1000" 
+                                    <div class="bg-${colors[key]}-500 h-3 rounded-full transition-all duration-1000" 
                                          style="width: ${item.score}%"></div>
                                 </div>
                                 <p class="text-sm text-gray-400 mt-2">${item.summary}</p>
@@ -196,114 +201,190 @@ function generateFullHTML(data, unlocked = false) {
                 <p class="text-sm text-gray-400 italic">"${free.motivationTrigger}"</p>
             </div>
 
-            <!-- Premium Section -->
-            <div class="glass-card rounded-2xl p-8 ${!unlocked ? 'premium-section' : ''}">
-                ${!unlocked ? '<div class="lock-overlay"><span class="text-6xl">🔒</span></div>' : ''}
-                
-                <div class="${!unlocked ? 'premium-blur' : ''}">
-                    <h2 class="text-3xl font-bold text-center gradient-text mb-8">Premium Wellness Report</h2>
-                    
+            <!-- Premium Section Header -->
+            <div class="text-center py-8">
+                <h2 class="text-3xl font-bold gradient-text mb-2">🔒 Premium Wellness Report</h2>
+                <p class="text-gray-400">Unlock deep insights and your personalized 7-day action plan</p>
+            </div>
+
+            <!-- Premium Content -->
+            ${!unlocked ? `
+                <!-- Locked Premium Content -->
+                <div class="space-y-6">
                     <!-- Deep Dive Analysis -->
-                    <div class="mb-8">
+                    <div class="glass-card rounded-xl p-6">
                         <h3 class="text-xl font-bold text-white mb-4">📊 Deep Dive Analysis</h3>
                         <div class="grid md:grid-cols-2 gap-4">
-                            <div class="bg-slate-800/50 rounded-lg p-4">
-                                <h4 class="text-teal-400 font-semibold">Sleep Efficiency</h4>
-                                <p class="text-gray-300 text-sm mt-1">${premium.deepDive?.sleepEfficiency || 'Detailed sleep pattern analysis...'}</p>
+                            <div class="bg-slate-800/50 rounded-lg p-4 premium-locked">
+                                <h4 class="text-teal-400 font-semibold mb-2">Sleep Efficiency</h4>
+                                <p class="text-gray-300 text-sm premium-content-blur">Advanced sleep pattern analysis with REM cycle optimization recommendations...</p>
+                                <span class="lock-icon-overlay">🔒</span>
                             </div>
-                            <div class="bg-slate-800/50 rounded-lg p-4">
-                                <h4 class="text-indigo-400 font-semibold">Stress Recovery Index</h4>
-                                <p class="text-gray-300 text-sm mt-1">${premium.deepDive?.stressRecovery || 'Your body\'s stress response metrics...'}</p>
+                            <div class="bg-slate-800/50 rounded-lg p-4 premium-locked">
+                                <h4 class="text-indigo-400 font-semibold mb-2">Stress Recovery Index</h4>
+                                <p class="text-gray-300 text-sm premium-content-blur">Your body's unique stress response pattern and recovery timeline...</p>
+                                <span class="lock-icon-overlay">🔒</span>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Photo Analysis -->
-                    <div class="mb-8">
-                        <h3 class="text-xl font-bold text-white mb-4">📸 Full Photo Analysis</h3>
-                        <div class="bg-slate-800/50 rounded-lg p-4">
-                            <p class="text-gray-300">${premium.fullPhotoAnalysis || 'Detailed facial analysis revealing stress markers, energy levels, and wellness indicators...'}</p>
                         </div>
                     </div>
 
                     <!-- 7-Day Action Plan -->
-                    <div class="mb-8">
-                        <h3 class="text-xl font-bold text-white mb-4">📅 Your 7-Day Action Plan</h3>
+                    <div class="glass-card rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-white mb-4">📅 Your Personalized 7-Day Action Plan</h3>
                         <div class="space-y-3">
-                            ${premium.sevenDayActionPlan ? premium.sevenDayActionPlan.map(day => `
-                                <div class="bg-slate-800/50 rounded-lg p-4 flex justify-between items-center">
+                            ${[1,2,3,4,5,6,7].map(day => `
+                                <div class="bg-slate-800/50 rounded-lg p-4 flex justify-between items-center premium-locked">
                                     <div>
-                                        <span class="text-teal-400 font-bold">Day ${day.day}</span>
-                                        <p class="text-gray-300 text-sm mt-1">${day.task}</p>
+                                        <span class="text-teal-400 font-bold">Day ${day}</span>
+                                        <p class="text-gray-300 text-sm mt-1 premium-content-blur">Specific task tailored to your wellness needs...</p>
                                     </div>
-                                    <span class="px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full text-xs">${day.focus}</span>
+                                    <span class="lock-icon-overlay">🔒</span>
                                 </div>
-                            `).join('') : '<p class="text-gray-400">Personalized daily tasks will appear here...</p>'}
+                            `).join('')}
                         </div>
                     </div>
 
-                    <!-- BMI Calculation -->
-                    <div class="mb-8">
-                        <h3 class="text-xl font-bold text-white mb-4">📏 BMI Analysis</h3>
-                        <div class="bg-slate-800/50 rounded-lg p-4">
-                            <p class="text-gray-300">${premium.bmiAnalysis || 'Your Body Mass Index calculation and health implications...'}</p>
+                    <!-- More Premium Features -->
+                    <div class="glass-card rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-white mb-4">📈 5-Year Wellness Trajectory</h3>
+                        <div class="bg-slate-800/50 rounded-lg p-4 premium-locked">
+                            <p class="text-gray-300 premium-content-blur">Your personalized health forecast showing potential outcomes with and without intervention...</p>
+                            <span class="lock-icon-overlay">🔒</span>
                         </div>
                     </div>
 
-                    <!-- Wellness Trajectory -->
-                    <div class="mb-8">
-                        <h3 class="text-xl font-bold text-white mb-4">📈 5-Year Wellness Forecast</h3>
-                        <div class="bg-slate-800/50 rounded-lg p-4">
-                            <p class="text-gray-300">${premium.trajectoryForecast || 'Your wellness trajectory based on current habits vs. recommended changes...'}</p>
+                    <!-- Payment Form -->
+                    <div class="glass-card rounded-2xl p-8 pulse-animation">
+                        <h3 class="text-2xl font-bold text-white text-center mb-6">Unlock Your Complete Report</h3>
+                        
+                        <div class="max-w-md mx-auto">
+                            <div class="text-center mb-6">
+                                <div class="text-4xl font-bold gradient-text">$9.99</div>
+                                <p class="text-sm text-gray-400 mt-2">One-time payment • Instant access • PDF download</p>
+                            </div>
+
+                            <form id="payment-form" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Card Information</label>
+                                    <div id="card-element" class="card-input rounded-lg p-3"></div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                                        <input type="email" id="email" class="card-input w-full rounded-lg px-3 py-2" placeholder="you@example.com" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">Name</label>
+                                        <input type="text" id="name" class="card-input w-full rounded-lg px-3 py-2" placeholder="John Doe" required>
+                                    </div>
+                                </div>
+
+                                <div id="card-errors" class="text-red-400 text-sm"></div>
+
+                                <button type="submit" id="submit-payment" class="w-full py-4 bg-gradient-to-r from-teal-500 to-indigo-500 text-white font-bold rounded-xl hover:from-teal-400 hover:to-indigo-400 transition-all">
+                                    Unlock Premium Report Now
+                                </button>
+                            </form>
+
+                            <div class="mt-4 text-center">
+                                <p class="text-xs text-gray-500">🔒 Secure payment powered by Stripe</p>
+                            </div>
                         </div>
                     </div>
-
-                    <!-- AI Coach Notes -->
-                    <div class="mb-8">
-                        <h3 class="text-xl font-bold text-white mb-4">💬 Personal AI Coach Notes</h3>
-                        <div class="bg-gradient-to-r from-teal-500/10 to-indigo-500/10 rounded-lg p-6">
-                            <p class="text-gray-300 italic">"${premium.aiCoachNotes || 'Your personalized coaching insights and encouragement...'}"</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Payment/Download Section -->
-            ${!unlocked ? `
-                <div class="glass-card rounded-2xl p-8 text-center">
-                    <h3 class="text-2xl font-bold text-white mb-4">Unlock Your Complete Wellness Blueprint</h3>
-                    <p class="text-gray-400 mb-6">Get instant access to your premium report with personalized action plans</p>
-                    
-                    <div class="bg-gradient-to-r from-teal-500/20 to-indigo-500/20 rounded-xl p-6 mb-6">
-                        <div class="text-3xl font-bold text-white mb-2">$9.99</div>
-                        <p class="text-sm text-gray-400">One-time payment • Instant access • Download as PDF</p>
-                    </div>
-                    
-                    <button id="unlock-btn" class="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-teal-500 to-indigo-500 text-white font-bold rounded-xl hover:from-teal-400 hover:to-indigo-400 transition-all transform hover:scale-105 pulse-glow">
-                        🔓 Unlock Premium Report Now
-                    </button>
                 </div>
             ` : `
-                <div class="glass-card rounded-2xl p-8 text-center">
-                    <div class="mb-6">
-                        <span class="text-4xl">✅</span>
-                        <h3 class="text-2xl font-bold text-green-400 mt-2">Premium Report Unlocked!</h3>
+                <!-- Unlocked Premium Content -->
+                <div class="space-y-6">
+                    ${generateUnlockedPremiumContent(premium)}
+                    
+                    <div class="glass-card rounded-2xl p-8 text-center">
+                        <div class="mb-6">
+                            <span class="text-4xl">✅</span>
+                            <h3 class="text-2xl font-bold text-green-400 mt-2">Premium Report Unlocked!</h3>
+                        </div>
+                        <button id="download-pdf" class="px-8 py-3 bg-gradient-to-r from-teal-500 to-indigo-500 text-white font-bold rounded-xl hover:from-teal-400 hover:to-indigo-400 transition-all">
+                            📥 Download PDF Report
+                        </button>
                     </div>
-                    <button id="download-pdf" class="px-8 py-3 bg-gradient-to-r from-teal-500 to-indigo-500 text-white font-bold rounded-xl hover:from-teal-400 hover:to-indigo-400 transition-all">
-                        📥 Download PDF Report
-                    </button>
                 </div>
             `}
         </div>
     `;
 }
 
-async function handlePayment() {
-    const btn = document.getElementById('unlock-btn');
-    btn.disabled = true;
-    btn.textContent = 'Processing...';
+function generateUnlockedPremiumContent(premium) {
+    return `
+        <!-- Actual premium content here when unlocked -->
+        <div class="glass-card rounded-xl p-6">
+            <h3 class="text-xl font-bold text-white mb-4">📊 Deep Dive Analysis</h3>
+            <div class="space-y-4">
+                ${premium.deepDive ? Object.entries(premium.deepDive).map(([key, value]) => `
+                    <div class="bg-slate-800/50 rounded-lg p-4">
+                        <h4 class="text-teal-400 font-semibold capitalize">${key.replace(/([A-Z])/g, ' $1').trim()}</h4>
+                        <p class="text-gray-300 text-sm mt-1">${value}</p>
+                    </div>
+                `).join('') : ''}
+            </div>
+        </div>
+        <!-- Add all other premium sections here -->
+    `;
+}
 
+function initializeStripe() {
+    if (!isPremiumUnlocked && STRIPE_PUBLIC_KEY !== 'pk_test_YOUR_KEY_HERE') {
+        stripe = Stripe(STRIPE_PUBLIC_KEY);
+        elements = stripe.elements();
+        
+        const style = {
+            base: {
+                color: '#ffffff',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '16px',
+                '::placeholder': {
+                    color: 'rgba(255, 255, 255, 0.5)'
+                }
+            },
+            invalid: {
+                color: '#ef4444',
+                iconColor: '#ef4444'
+            }
+        };
+        
+        cardElement = elements.create('card', { style });
+        
+        setTimeout(() => {
+            const cardElementDiv = document.getElementById('card-element');
+            if (cardElementDiv) {
+                cardElement.mount('#card-element');
+                
+                cardElement.on('change', (event) => {
+                    const displayError = document.getElementById('card-errors');
+                    if (event.error) {
+                        displayError.textContent = event.error.message;
+                    } else {
+                        displayError.textContent = '';
+                    }
+                });
+                
+                document.getElementById('payment-form').addEventListener('submit', handlePaymentSubmit);
+            }
+        }, 100);
+    }
+}
+
+async function handlePaymentSubmit(event) {
+    event.preventDefault();
+    
+    const submitButton = document.getElementById('submit-payment');
+    submitButton.disabled = true;
+    submitButton.textContent = 'Processing...';
+    
     try {
+        // Here you would normally create a payment intent on your server
+        // and confirm the payment with Stripe
+        
+        // For now, just redirect to Stripe Checkout
         const response = await fetch('/.netlify/functions/payment', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -311,30 +392,14 @@ async function handlePayment() {
         });
 
         const session = await response.json();
-        const stripe = Stripe(STRIPE_PUBLIC_KEY);
-        
         await stripe.redirectToCheckout({ sessionId: session.id });
+        
     } catch (error) {
         console.error('Payment error:', error);
-        btn.disabled = false;
-        btn.textContent = '🔓 Unlock Premium Report Now';
+        document.getElementById('card-errors').textContent = 'Payment failed. Please try again.';
+        submitButton.disabled = false;
+        submitButton.textContent = 'Unlock Premium Report Now';
     }
-}
-
-function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    doc.setFontSize(20);
-    doc.text('AI WELLNESSCORE Report', 20, 20);
-    
-    // Add report content to PDF
-    doc.setFontSize(12);
-    doc.text(`Archetype: ${globalReportData.freeReport.archetype}`, 20, 40);
-    doc.text(`Wellness Score: ${globalReportData.freeReport.wellnessScore}`, 20, 50);
-    doc.text(`Wellness Age: ${globalReportData.freeReport.wellnessAge}`, 20, 60);
-    
-    doc.save('wellness-report.pdf');
 }
 
 async function init() {
@@ -363,14 +428,28 @@ async function init() {
             document.getElementById('report-container').innerHTML = generateFullHTML(result.data, isPremiumUnlocked);
             
             if (!isPremiumUnlocked) {
-                document.getElementById('unlock-btn').addEventListener('click', handlePayment);
+                initializeStripe();
             } else {
-                document.getElementById('download-pdf').addEventListener('click', downloadPDF);
+                document.getElementById('download-pdf')?.addEventListener('click', downloadPDF);
             }
         }
     } catch (error) {
         console.error('Error:', error);
+        document.getElementById('report-container').innerHTML = '<div class="text-center text-red-400">Failed to load report</div>';
     }
+}
+
+function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    doc.setFontSize(20);
+    doc.text('AI WELLNESSCORE Report', 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Archetype: ${globalReportData.freeReport.archetype}`, 20, 40);
+    doc.text(`Wellness Score: ${globalReportData.freeReport.wellnessScore}`, 20, 50);
+    
+    doc.save('wellness-report.pdf');
 }
 
 init();
