@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>AI WELLNESSCORE — Ваш персональный отчет</title>
+  <title>AI WELLNESSCORE — Your Personal Report</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -44,15 +44,18 @@
         <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500 to-teal-500 grid place-items-center text-white font-black text-2xl">W</div>
         <div>
           <h1 class="text-xl font-semibold text-white">AI WELLNESSCORE</h1>
-          <p class="muted text-sm">Ваш персональный отчет</p>
+          <p class="muted text-sm">Your Personal Report</p>
         </div>
       </div>
+      <button id="download-pdf-btn" class="hidden px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors">
+        Download PDF
+      </button>
     </header>
 
     <section id="free-report-view">
         <div class="glass-card rounded-2xl p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-6 fade-in-up" style="animation-delay: 0.2s;">
             <div class="lg:col-span-2">
-                <h2 class="text-lg font-semibold text-white text-center lg:text-left">Ваш Wellness Дашборд</h2>
+                <h2 class="text-lg font-semibold text-white text-center lg:text-left">Your Wellness Dashboard</h2>
                 <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                     <div>
                         <div class="p-4 rounded-lg border border-white/10 bg-white/5 text-center">
@@ -61,32 +64,32 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 text-center">
-                        <div class="p-3 rounded-lg border border-white/10 bg-white/5"><p class="muted text-sm">Био-возраст</p><p id="biologicalAge" class="font-semibold text-white text-2xl">0</p></div>
-                        <div class="p-3 rounded-lg border border-white/10 bg-white/5"><p class="muted text-sm">Энергия</p><p id="energyIndex" class="font-semibold text-white text-2xl">0</p></div>
-                        <div class="p-3 rounded-lg border border-white/10 bg-white/5 col-span-2"><p class="muted text-sm">Уровень стресса</p><p id="stressLevel" class="font-semibold text-white text-2xl">0</p></div>
+                        <div class="p-3 rounded-lg border border-white/10 bg-white/5"><p class="muted text-sm">Bio Age</p><p id="biologicalAge" class="font-semibold text-white text-2xl">0</p></div>
+                        <div class="p-3 rounded-lg border border-white/10 bg-white/5"><p class="muted text-sm">Energy</p><p id="energyIndex" class="font-semibold text-white text-2xl">0</p></div>
+                        <div class="p-3 rounded-lg border border-white/10 bg-white/5 col-span-2"><p class="muted text-sm">Stress Level</p><p id="stressLevel" class="font-semibold text-white text-2xl">0</p></div>
                     </div>
                 </div>
             </div>
             <div class="border-t border-white/10 lg:border-t-0 lg:border-l lg:pl-8 pt-6 lg:pt-0">
-                <h2 class="text-lg font-semibold text-white mb-4 text-center lg:text-left">Ключевые инсайты</h2>
+                <h2 class="text-lg font-semibold text-white mb-4 text-center lg:text-left">Key Insights</h2>
                 <div class="space-y-3">
-                    <div class="p-3 rounded-lg bg-white/5"><p class="muted text-sm">Главный барьер</p><p id="mainBarrier" class="font-medium text-white">—</p></div>
-                    <div class="p-3 rounded-lg bg-white/5"><p class="muted text-sm">Быстрая победа</p><p id="quickWin" class="font-medium text-white">—</p></div>
-                    <div class="p-3 rounded-lg bg-white/5"><p class="muted text-sm">Сравнение</p><p id="comparison" class="font-medium text-white">—</p></div>
+                    <div class="p-3 rounded-lg bg-white/5"><p class="muted text-sm">Main Barrier</p><p id="mainBarrier" class="font-medium text-white">—</p></div>
+                    <div class="p-3 rounded-lg bg-white/5"><p class="muted text-sm">Quick Win</p><p id="quickWin" class="font-medium text-white">—</p></div>
+                    <div class="p-3 rounded-lg bg-white/5"><p class="muted text-sm">Comparison</p><p id="comparison" class="font-medium text-white">—</p></div>
                 </div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 fade-in-up" style="animation-delay: 0.3s;">
             <div class="glass-card rounded-2xl p-4 sm:p-6">
-                <h3 class="text-lg font-semibold text-white mb-2 text-center">Баланс "Core Four"</h3>
+                <h3 class="text-lg font-semibold text-white mb-2 text-center">Core Four Balance</h3>
                 <canvas id="coreRadar" height="250"></canvas>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="glass-card rounded-xl p-4"><p class="muted text-sm">Разум</p><p id="mindScore" class="text-2xl font-semibold text-white">0</p><p id="mindSummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
-                <div class="glass-card rounded-xl p-4"><p class="muted text-sm">Тело</p><p id="bodyScore" class="text-2xl font-semibold text-white">0</p><p id="bodySummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
-                <div class="glass-card rounded-xl p-4"><p class="muted text-sm">Питание</p><p id="nutritionScore" class="text-2xl font-semibold text-white">0</p><p id="nutritionSummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
-                <div class="glass-card rounded-xl p-4"><p class="muted text-sm">Сон</p><p id="sleepScore" class="text-2xl font-semibold text-white">0</p><p id="sleepSummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
+                <div class="glass-card rounded-xl p-4"><p class="muted text-sm">Mind</p><p id="mindScore" class="text-2xl font-semibold text-white">0</p><p id="mindSummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
+                <div class="glass-card rounded-xl p-4"><p class="muted text-sm">Body</p><p id="bodyScore" class="text-2xl font-semibold text-white">0</p><p id="bodySummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
+                <div class="glass-card rounded-xl p-4"><p class="muted text-sm">Nutrition</p><p id="nutritionScore" class="text-2xl font-semibold text-white">0</p><p id="nutritionSummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
+                <div class="glass-card rounded-xl p-4"><p class="muted text-sm">Sleep</p><p id="sleepScore" class="text-2xl font-semibold text-white">0</p><p id="sleepSummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
             </div>
         </div>
     </section>
@@ -99,12 +102,11 @@
 
 <div id="payment-success-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
   <div class="glass-card rounded-xl p-6 w-full max-w-md border-teal-400/50 text-center">
-    <h3 class="font-semibold text-2xl text-white">Оплата прошла успешно!</h3>
-    <p class="muted mt-2">Ваш премиум-отчет разблокирован. Теперь вы можете просмотреть все детали и скачать PDF-версию.</p>
-    <div class="mt-6"><button id="close-modal-btn" class="cta px-5 py-2.5 rounded-lg text-sm font-semibold">Отлично!</button></div>
+    <h3 class="font-semibold text-2xl text-white">Payment Successful!</h3>
+    <p class="muted mt-2">Your premium report is unlocked. You can now view all details and download the PDF version.</p>
+    <div class="mt-6"><button id="close-modal-btn" class="cta px-5 py-2.5 rounded-lg text-sm font-semibold">Great!</button></div>
   </div>
 </div>
-
 
 <script>
 /* =========================
@@ -114,18 +116,22 @@ const $ = id => document.getElementById(id);
 let coreRadarChart, gaugeChart;
 let sessionId = null;
 let isPaid = false;
+let reportData = null;
 
 /* =========================
    INITIALIZATION & DATA FETCHING
    ========================= */
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
-    sessionId = urlParams.get('sessionId');
+    sessionId = urlParams.get('sessionId') || urlParams.get('session_id');
     isPaid = urlParams.get('payment') === 'success';
 
     if (isPaid) {
         $('payment-success-modal').classList.remove('hidden');
         $('payment-success-modal').classList.add('flex');
+        $('close-modal-btn').onclick = () => {
+            $('payment-success-modal').classList.add('hidden');
+        };
     }
 
     if (!sessionId) {
@@ -136,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pollForResult(sessionId);
 });
 
-function pollForResult(sessionId, retries = 30) { // Увеличил кол-во попыток на всякий случай
+function pollForResult(sessionId, retries = 30) {
     if (retries <= 0) {
         showError("Failed to generate the report in the allotted time. Please try again later.");
         return;
@@ -152,11 +158,12 @@ function pollForResult(sessionId, retries = 30) { // Увеличил кол-в�
         if (result.status === 'complete') {
             $('loading-state')?.remove();
             $('report-content').classList.remove('hidden');
+            reportData = result.data;
             renderReport(result.data);
         } else if (result.status === 'error') {
-            showError(result.message);
+            showError(result.message || "An error occurred while generating your report.");
         } else {
-            setTimeout(() => pollForResult(sessionId, retries - 1), 3000); // 30 retries * 3s = 90s
+            setTimeout(() => pollForResult(sessionId, retries - 1), 3000);
         }
     })
     .catch(err => {
@@ -179,10 +186,129 @@ function showError(message) {
 /* =========================
    RENDERING LOGIC
    ========================= */
-// ... (Вся остальная часть скрипта, которую я предоставлял ранее, уже была на английском и не требует изменений в логике)
-// Важно убедиться, что тексты в функциях `renderUnpaidView`, `renderPaidView` и `createTeaserCard` тоже на английском.
+function renderReport(data) {
+    if (!data || !data.freeReport) {
+        showError("Invalid report data received");
+        return;
+    }
+    
+    // Update metrics
+    const metrics = data.freeReport.metrics || {};
+    animateValue('wellnessScore', 0, metrics.wellnessScore || 0, 2000);
+    animateValue('biologicalAge', 0, metrics.biologicalAge || 0, 1500);
+    animateValue('energyIndex', 0, metrics.energyIndex || 0, 1500);
+    animateValue('stressLevel', 0, metrics.stressLevel || 0, 1500);
+    
+    // Update insights
+    const insights = data.freeReport.insights || {};
+    $('mainBarrier').textContent = insights.mainBarrier || '—';
+    $('quickWin').textContent = insights.quickWin || '—';
+    $('comparison').textContent = insights.comparison || '—';
+    
+    // Update Core Four
+    const coreFour = data.freeReport.coreFour || {};
+    ['mind', 'body', 'nutrition', 'sleep'].forEach(category => {
+        const categoryData = coreFour[category] || {};
+        const scoreEl = $(`${category}Score`);
+        const summaryEl = $(`${category}Summary`);
+        if (scoreEl) animateValue(`${category}Score`, 0, categoryData.score || 0, 1500);
+        if (summaryEl) summaryEl.textContent = categoryData.summary || '—';
+    });
+    
+    // Render radar chart
+    renderRadarChart(coreFour);
+    
+    // Render premium section based on payment status
+    if (isPaid) {
+        renderPaidView(data);
+        $('download-pdf-btn').classList.remove('hidden');
+        $('download-pdf-btn').onclick = downloadPDF;
+    } else {
+        renderUnpaidView();
+    }
+}
 
-// Пример возвращения текста на английский в `renderUnpaidView`
+function animateValue(id, start, end, duration) {
+    const element = $(id);
+    if (!element) return;
+    
+    const range = end - start;
+    const startTime = performance.now();
+    
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const current = Math.floor(start + range * progress);
+        element.textContent = current;
+        
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        }
+    }
+    
+    requestAnimationFrame(update);
+}
+
+function renderRadarChart(coreFour) {
+    const ctx = $('coreRadar');
+    if (!ctx) return;
+    
+    if (coreRadarChart) coreRadarChart.destroy();
+    
+    const scores = [
+        coreFour.mind?.score || 0,
+        coreFour.body?.score || 0,
+        coreFour.nutrition?.score || 0,
+        coreFour.sleep?.score || 0
+    ];
+    
+    coreRadarChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Mind', 'Body', 'Nutrition', 'Sleep'],
+            datasets: [{
+                label: 'Your Score',
+                data: scores,
+                backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                borderColor: 'rgba(99, 102, 241, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(99, 102, 241, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        color: '#94a3b8',
+                        backdropColor: 'transparent'
+                    },
+                    grid: {
+                        color: 'rgba(148, 163, 184, 0.2)'
+                    },
+                    pointLabels: {
+                        color: '#e2e8f0',
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
 function renderUnpaidView() {
     $('premium-section').innerHTML = `
         <div class="text-center mb-6">
@@ -198,20 +324,189 @@ function renderUnpaidView() {
             ${createTeaserCard('AI Coach Notes', 'A personal and motivational summary from your AI mentor.')}
         </div>
     `;
+    
     $('footer-cta').innerHTML = `
       <div class="glass-card rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="text-center md:text-left">
-          <p class="font-semibold text-white">Special Offer — <span class="text-teal-400">30% Off</span></p>
+          <p class="font-semibold text-white">Special Offer — <span class="text-teal-400">Limited Time</span></p>
           <p class="muted text-sm">Offer expires in: <span id="timer" class="font-bold text-white">15:00</span></p>
         </div>
-        <button id="unlock-btn" class="cta px-6 py-3 rounded-lg font-bold pulsate w-full md:w-auto">Unlock for $34.30</button>
+        <button id="unlock-btn" class="cta px-6 py-3 rounded-lg font-bold pulsate w-full md:w-auto">Unlock for $9.99</button>
       </div>
     `;
+    
     startCountdown(15 * 60);
+    $('unlock-btn').onclick = handlePayment;
 }
 
-// И так далее для всех остальных текстовых блоков в JS.
-// Весь остальной JS-код для рендеринга и обработки событий остается прежним.
+function renderPaidView(data) {
+    const premium = data.premiumReport || {};
+    const analytics = premium.detailedAnalytics || {};
+    const face = premium.faceAnalysis || {};
+    const recommendations = premium.recommendations || {};
+    const forecasts = premium.forecasts || {};
+    
+    $('premium-section').innerHTML = `
+        <div class="text-center mb-6">
+            <h2 class="text-3xl font-bold text-white">Your <span class="animated-gradient-text">Premium Analysis</span></h2>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Detailed Analytics</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between"><span class="muted">Metabolic Age</span><span class="text-white font-semibold">${analytics.metabolicAge || '—'} years</span></div>
+                    <div class="flex justify-between"><span class="muted">Recovery Score</span><span class="text-white font-semibold">${analytics.recoveryScore || '—'}%</span></div>
+                    <div class="flex justify-between"><span class="muted">Inflammation Risk</span><span class="text-white font-semibold">${analytics.inflammationRiskIndex || '—'}%</span></div>
+                    <div class="flex justify-between"><span class="muted">Digital Wellness</span><span class="text-white font-semibold">${analytics.digitalWellnessScore || '—'}%</span></div>
+                </div>
+            </div>
+            
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Face Analysis Results</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between"><span class="muted">Skin Health</span><span class="text-white font-semibold">${face.skinHealthScore || '—'}%</span></div>
+                    <div><span class="muted">Hydration</span><p class="text-white text-sm mt-1">${face.hydrationAssessment || '—'}</p></div>
+                    <div><span class="muted">Sleep Indicators</span><p class="text-white text-sm mt-1">${face.sleepDebtVisualization || '—'}</p></div>
+                    <div><span class="muted">Stress Markers</span><p class="text-white text-sm mt-1">${face.stressMarkers || '—'}</p></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="glass-card rounded-2xl p-6 mb-6">
+            <h3 class="text-lg font-semibold text-white mb-4">Personalized Recommendations</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold text-teal-400 mb-2">Circadian Reset Protocol</h4>
+                    <p class="muted text-sm">Bedtime: ${recommendations.circadianReset?.bedtime || '—'}</p>
+                    <p class="muted text-sm">Wake time: ${recommendations.circadianReset?.wakeTime || '—'}</p>
+                    <ul class="mt-2 space-y-1">
+                        ${(recommendations.circadianReset?.steps || []).map(step => `<li class="text-sm text-gray-300">• ${step}</li>`).join('')}
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-teal-400 mb-2">Exercise Prescription</h4>
+                    <p class="text-white">${recommendations.exercisePrescription?.type || '—'}</p>
+                    <p class="muted text-sm">${recommendations.exercisePrescription?.durationMin || '—'} minutes, ${recommendations.exercisePrescription?.timeOfDay || '—'}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="glass-card rounded-2xl p-6">
+            <h3 class="text-lg font-semibold text-white mb-4">AI Coach Notes</h3>
+            <p class="text-gray-300 italic">${premium.aiCoachNotes || 'Keep up the great work!'}</p>
+        </div>
+    `;
+}
+
+function createTeaserCard(title, description) {
+    return `
+        <div class="glass-card rounded-xl p-4 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-teal-500/10"></div>
+            <div class="relative">
+                <h4 class="font-semibold text-white mb-2">${title}</h4>
+                <p class="muted text-sm">${description}</p>
+                <div class="mt-3 flex items-center text-teal-400 text-sm">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
+                    Premium Only
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function startCountdown(seconds) {
+    const timerEl = $('timer');
+    if (!timerEl) return;
+    
+    const interval = setInterval(() => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        timerEl.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
+        
+        if (seconds <= 0) {
+            clearInterval(interval);
+            timerEl.textContent = 'Expired';
+        }
+        seconds--;
+    }, 1000);
+}
+
+async function handlePayment() {
+    const unlockBtn = $('unlock-btn');
+    if (!unlockBtn) return;
+    
+    unlockBtn.disabled = true;
+    unlockBtn.innerHTML = 'Processing...';
+    
+    try {
+        const response = await fetch('/.netlify/functions/payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId })
+        });
+        
+        if (!response.ok) throw new Error('Payment initialization failed');
+        
+        const session = await response.json();
+        const stripe = Stripe(session.publishableKey || 'pk_test_51PrN1cRsiqzmaVhJJy3x0OZ1jCiPFSNZ2h0yFI7vdRLQaBLb0r0f0U5EO2sA0KVhh5VQNNaDxONekLpT1zJvTa9T00Hd8BExrZ');
+        
+        const { error } = await stripe.redirectToCheckout({
+            sessionId: session.id
+        });
+        
+        if (error) {
+            throw error;
+        }
+    } catch (error) {
+        console.error('Payment error:', error);
+        unlockBtn.disabled = false;
+        unlockBtn.innerHTML = 'Unlock for $9.99';
+        alert('Payment initialization failed. Please try again.');
+    }
+}
+
+async function downloadPDF() {
+    if (!reportData) return;
+    
+    const btn = $('download-pdf-btn');
+    btn.disabled = true;
+    btn.textContent = 'Generating PDF...';
+    
+    try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+        
+        // Add title
+        pdf.setFontSize(20);
+        pdf.text('AI WELLNESSCORE Report', 20, 20);
+        
+        // Add basic metrics
+        pdf.setFontSize(12);
+        const metrics = reportData.freeReport.metrics;
+        pdf.text(`Wellness Score: ${metrics.wellnessScore}`, 20, 40);
+        pdf.text(`Biological Age: ${metrics.biologicalAge}`, 20, 50);
+        pdf.text(`Energy Index: ${metrics.energyIndex}`, 20, 60);
+        pdf.text(`Stress Level: ${metrics.stressLevel}`, 20, 70);
+        
+        // Add insights
+        pdf.setFontSize(14);
+        pdf.text('Key Insights', 20, 90);
+        pdf.setFontSize(10);
+        const insights = reportData.freeReport.insights;
+        pdf.text(`Main Barrier: ${insights.mainBarrier}`, 20, 100);
+        pdf.text(`Quick Win: ${insights.quickWin}`, 20, 110);
+        
+        // Save PDF
+        pdf.save(`wellness-report-${sessionId}.pdf`);
+    } catch (error) {
+        console.error('PDF generation error:', error);
+        alert('Failed to generate PDF. Please try again.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Download PDF';
+    }
+}
 </script>
 
 </body>
