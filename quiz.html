@@ -575,60 +575,77 @@
         }
 
         async function confirmPhoto() {
-            const confirmButton = document.getElementById('confirm-photo-btn');
-            if (confirmButton) {
-                confirmButton.disabled = true;
-                confirmButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Analyzing...`;
-            }
+    const confirmButton = document.getElementById('confirm-photo-btn');
+    if (confirmButton) {
+        confirmButton.disabled = true;
+        confirmButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Analyzing...`;
+    }
 
-            addMessage('Looks Good!', 'user');
-            showTypingIndicator();
-            optionsContainer.innerHTML = '';
-            inputArea.style.display = 'none';
-            
-            try {
-                const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ photoDataUrl: capturedPhotoDataUrl })
-                });
+    addMessage('Looks Good!', 'user');
+    showTypingIndicator();
+    optionsContainer.innerHTML = '';
+    inputArea.style.display = 'none';
+    
+    try {
+        // Пытаемся анализировать фото
+        const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ photoDataUrl: capturedPhotoDataUrl })
+        });
 
-                if (!analyzeResponse.ok) {
-                    const errorText = await analyzeResponse.text();
-                    throw new Error(`Face analysis server error: ${errorText}`);
-                }
-                
-                // ...
-const faceData = await analyzeResponse.json();
-await saveAnswerToServer('faceAnalysis', faceData);
-
-// >>>>> НАЧАЛО ИЗМЕНЕНИЙ <<<<<
-
-// Запускаем генерацию отчета в фоне, НЕ дожидаясь ответа
-fetch('/.netlify/functions/result-background', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sessionId: sessionId })
-});
-
-// >>>>> КОНЕЦ ИЗМЕНЕНИЙ <<<<<
-
-document.getElementById('photo-preview-wrapper')?.remove();
-endQuiz(); // endQuiz теперь просто перенаправляет на страницу с результатами
-// ...
-
-            } catch (error) {
-                console.error('Error during photo analysis step:', error);
-                hideTypingIndicator();
-                addMessage("Sorry, I couldn't analyze the photo. Let's proceed without it.");
-                setTimeout(endQuiz, 1500);
-            } finally {
-                if (confirmButton) {
-                    confirmButton.disabled = false;
-                    confirmButton.innerHTML = 'Looks Good!';
-                }
-            }
+        let faceData = null;
+        if (!analyzeResponse.ok) {
+            // Если анализ не удался, логируем ошибку но продолжаем
+            console.error('Face analysis failed, continuing without it');
+            faceData = { error: 'Analysis failed', timestamp: new Date().toISOString() };
+        } else {
+            faceData = await analyzeResponse.json();
         }
+        
+        // Сохраняем результат (или ошибку)
+        await saveAnswerToServer('faceAnalysis', faceData);
+
+        // Запускаем генерацию отчета в фоне, НЕ дожидаясь ответа
+        fetch('/.netlify/functions/result-background', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: sessionId })
+        }).catch(err => {
+            console.error('Background generation request failed:', err);
+        });
+
+        // Удаляем превью фото
+        document.getElementById('photo-preview-wrapper')?.remove();
+        
+        // Переходим к завершению
+        endQuiz();
+
+    } catch (error) {
+        console.error('Error during photo analysis step:', error);
+        hideTypingIndicator();
+        addMessage("I couldn't analyze the photo, but that's okay! Let's continue with your report.");
+        
+        // Сохраняем информацию об ошибке
+        await saveAnswerToServer('faceAnalysis', { error: error.message });
+        
+        // Всё равно запускаем генерацию отчета
+        fetch('/.netlify/functions/result-background', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: sessionId })
+        }).catch(err => {
+            console.error('Background generation request failed:', err);
+        });
+        
+        setTimeout(endQuiz, 1500);
+    } finally {
+        if (confirmButton) {
+            confirmButton.disabled = false;
+            confirmButton.innerHTML = 'Looks Good!';
+        }
+    }
+}
 
         function retakePhoto() {
             addMessage('Retake', 'user');
@@ -673,5 +690,6 @@ endQuiz(); // endQuiz теперь просто перенаправляет н�
 
 </body>
 </html>
+
 
 
