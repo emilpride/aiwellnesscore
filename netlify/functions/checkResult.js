@@ -1,14 +1,13 @@
-const { initializeApp, cert } = require('firebase-admin/app');
+// /netlify/functions/checkResult.js - УЛУЧШЕННАЯ ВЕРСИЯ
+
+const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 
-// Инициализация Firebase Admin SDK (убедитесь, что он не инициализируется повторно)
-try {
-  if (!global._firebaseApp) {
+if (!getApps().length) {
+  try {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-    global._firebaseApp = initializeApp({ credential: cert(serviceAccount) });
-  }
-} catch (e) {
-  console.error("Firebase initialization error in checkResult.js:", e);
+    initializeApp({ credential: cert(serviceAccount) });
+  } catch (e) { console.error("Firebase init error in checkResult.js:", e); }
 }
 
 const db = getFirestore();
@@ -20,9 +19,7 @@ exports.handler = async (event) => {
 
   try {
     const { sessionId } = JSON.parse(event.body);
-    if (!sessionId) {
-      return { statusCode: 400, body: 'Session ID is required' };
-    }
+    if (!sessionId) { return { statusCode: 400, body: 'Session ID is required' }; }
 
     const sessionRef = db.collection('sessions').doc(sessionId);
     const doc = await sessionRef.get();
@@ -33,14 +30,22 @@ exports.handler = async (event) => {
 
     const sessionData = doc.data();
 
-    // Проверяем, есть ли в документе поле с готовым отчетом
+    // 1. Проверяем готовый отчет
     if (sessionData.reportData) {
       return {
         statusCode: 200,
         body: JSON.stringify({ status: 'complete', data: sessionData.reportData }),
       };
-    } else {
-      // Если отчета еще нет, сообщаем, что он в процессе подготовки
+    } 
+    // 2. Проверяем, не записала ли фоновая функция ошибку
+    else if (sessionData.reportError) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ status: 'error', message: sessionData.reportError }),
+      };
+    } 
+    // 3. Если ничего нет, продолжаем ждать
+    else {
       return {
         statusCode: 200,
         body: JSON.stringify({ status: 'pending' }),
