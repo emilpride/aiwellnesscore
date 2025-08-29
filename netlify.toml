@@ -1,3 +1,5 @@
+# /netlify.toml
+
 # Этот файл указывает Netlify, где находятся ваши серверные функции.
 [functions]
   directory = "netlify/functions/"
@@ -7,6 +9,7 @@
 [build]
   command = "" # Команда сборки не нужна
   publish = "/" # Публикуем корень проекта
-# Увеличиваем время ожидания для функции result до 30 секунд
-[functions."result"]
-  timeout = 90
+
+# Увеличиваем время ожидания для нашей ФОНОВОЙ функции
+[functions."result-background"]
+  timeout = 90 # Теперь это правило применяется к правильной функции
