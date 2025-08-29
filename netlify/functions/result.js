@@ -2,20 +2,25 @@ const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-let db;
-if (!global._firebaseApp) {
-  global._firebaseApp = initializeApp({ credential: cert(serviceAccount) });
+// Инициализация Firebase
+try {
+  if (!global._firebaseApp) {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    global._firebaseApp = initializeApp({ credential: cert(serviceAccount) });
+  }
+} catch (e) {
+  console.error("Firebase initialization error in result.js:", e);
 }
-db = getFirestore();
 
+const db = getFirestore();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+// Функция createPrompt остается без изменений
 function createPrompt(answers, faceAnalysis) {
   const quizData = Object.entries(answers)
     .map(([key, value]) => {
-        if (key === 'selfie' || key === 'faceAnalysis') return null;
-        return `- ${key}: ${value}`;
+      if (key === 'selfie' || key === 'faceAnalysis' || key === 'skinAnalysis' || key === 'reportData') return null;
+      return `- ${key}: ${value}`;
     }).filter(Boolean).join('\n');
 
   const faceData = faceAnalysis ? `
@@ -27,6 +32,7 @@ function createPrompt(answers, faceAnalysis) {
   - Emotions detected: ${JSON.stringify(faceAnalysis.emotion)}
   ` : 'Face analysis was skipped.';
 
+  // ... (остальной код createPrompt как был)
   return `
     You are AI WELLNESSCORE, an expert AI wellness coach.
     Based on the User Data below, generate a complete and valid JSON object for their wellness report.
@@ -66,6 +72,7 @@ function createPrompt(answers, faceAnalysis) {
   `;
 }
 
+// Главная функция-обработчик
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -80,29 +87,13 @@ exports.handler = async (event) => {
       return { statusCode: 404, body: 'Session not found' };
     }
 
-    const sessionData = doc.data();
-    const faceAnalysisData = sessionData.faceAnalysis || null;
+    // Запускаем генерацию в фоновом режиме и НЕ ждем ее завершения
+    generateAndSaveReport(sessionRef, doc.data());
 
-    const prompt = createPrompt(sessionData.answers, faceAnalysisData);
-    
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
-    
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const rawText = response.text();
-    
-    console.log('--- RAW RESPONSE FROM GEMINI ---', rawText);
-
-    const cleanedText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-    const reportData = JSON.parse(cleanedText);
-
-    if (!reportData.freeReport || !reportData.freeReport.coreFour) {
-        throw new Error("AI response is missing critical data (freeReport or coreFour).");
-    }
-
+    // Немедленно возвращаем ответ, что процесс запущен
     return {
       statusCode: 200,
-      body: JSON.stringify(reportData),
+      body: JSON.stringify({ status: 'processing' }),
     };
 
   } catch (error) {
@@ -114,3 +105,31 @@ exports.handler = async (event) => {
   }
 };
 
+// Асинхронная функция для долгой работы
+async function generateAndSaveReport(sessionRef, sessionData) {
+  try {
+    const faceAnalysisData = sessionData.faceAnalysis || sessionData.skinAnalysis || null;
+    const prompt = createPrompt(sessionData.answers, faceAnalysisData);
+    
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const rawText = response.text();
+    
+    const cleanedText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+    const reportData = JSON.parse(cleanedText);
+
+    if (!reportData.freeReport || !reportData.freeReport.coreFour) {
+        throw new Error("AI response is missing critical data (freeReport or coreFour).");
+    }
+
+    // Сохраняем готовый отчет в Firestore
+    await sessionRef.update({ reportData: reportData });
+    console.log(`Report successfully generated and saved for sessionId: ${sessionRef.id}`);
+
+  } catch (error) {
+    console.error(`--- ERROR in background report generation for sessionId: ${sessionRef.id} ---`, error);
+    // Можно также записать ошибку в Firestore, чтобы клиент о ней узнал
+    await sessionRef.update({ reportError: error.message });
+  }
+}
