@@ -1,569 +1,458 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>AI WELLNESSCORE — Your Personal Report</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: Inter, system-ui, sans-serif; background-color: #0f172a; color: #e2e8f0; overflow-x: hidden; }
-    .gradient-bg { background: linear-gradient(300deg, #0f172a, #1e1b4b, #312e81, #0f172a); background-size: 200% 200%; animation: slow-pan 25s ease infinite; }
-    @keyframes slow-pan { 0%{background-position:0% 0%} 25%{background-position:100% 0%} 50%{background-position:100% 100%} 75%{background-position:0% 100%} 100%{background-position:0% 0%} }
-    .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
-    .animated-gradient-text { background: linear-gradient(90deg, #e0e7ff, #a5b4fc, #6366f1, #14e3e3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% auto; animation: text-shine 5s linear infinite; }
-    @keyframes text-shine { to { background-position: 200% center; } }
-    .muted { color: #94a3b8; }
-    .cta { background-color: #14e3e3; color: #0f172a; transition: all 0.2s ease; transform: scale(1); }
-    .cta:hover { background-color: #67e8f9; box-shadow: 0 4px 12px rgba(20, 227, 227, 0.3); transform: scale(1.05); }
-    .pulsate { animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(20,227,227,.7)} 50%{transform:scale(1.05);box-shadow:0 0 20px 10px rgba(20,227,227,0)} }
-    .fade-in-up { opacity: 0; transform: translateY(30px); animation: fadeInUp 0.8s ease-out forwards; }
-    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    /* Новые анимации */
-    @keyframes slideInUp {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-slide-up { animation: slideInUp 0.6s ease-out forwards; opacity: 0; }
-    .stagger-1 { animation-delay: 0.1s; }
-    .stagger-2 { animation-delay: 0.2s; }
-    .stagger-3 { animation-delay: 0.3s; }
-    .stagger-4 { animation-delay: 0.4s; }
+    <title>Your AI WELLNESSCORE Report</title>
+    <meta name="description" content="Your personalized AI-powered wellness report, including your Wellness Age, detailed metrics, skin analysis, and a 7-day improvement plan.">
+    <meta name="robots" content="noindex, nofollow">
+
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    @keyframes pulse-glow {
-        0%, 100% { box-shadow: 0 0 20px rgba(20, 227, 227, 0.5); }
-        50% { box-shadow: 0 0 40px rgba(20, 227, 227, 0.8); }
-    }
-    .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    /* Блюр для премиум контента */
-    .blur-content {
-        filter: blur(8px);
-        user-select: none;
-        pointer-events: none;
-        position: relative;
-    }
-    .blur-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to bottom, transparent 0%, rgba(15, 23, 42, 0.9) 50%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-    }
-    .unlock-prompt {
-        text-align: center;
-        padding: 2rem;
-        background: rgba(15, 23, 42, 0.95);
-        border-radius: 1rem;
-        border: 1px solid rgba(20, 227, 227, 0.5);
-    }
-  </style>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-</head>
-<body class="gradient-bg">
-
-<div id="loading-state" class="min-h-screen flex flex-col items-center justify-center text-center p-10">
-  <h2 class="text-2xl font-bold animated-gradient-text">Analyzing your data...</h2>
-  <p class="muted mt-2 max-w-sm">Our neural networks are generating your personalized report. This may take up to 90 seconds.</p>
-  <div class="w-16 h-16 mx-auto mt-6 animate-spin rounded-full border-4 border-slate-600 border-t-teal-400"></div>
-</div>
-
-<main id="report-content" class="max-w-6xl mx-auto p-4 sm:p-6 hidden">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧘</text></svg>">
     
-    <header class="flex items-center justify-between mb-6 fade-in-up">
-      <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500 to-teal-500 grid place-items-center text-white font-black text-2xl">W</div>
-        <div>
-          <h1 class="text-xl font-semibold text-white">AI WELLNESSCORE</h1>
-          <p class="muted text-sm">Your Personal Report</p>
-        </div>
-      </div>
-      <button id="download-pdf-btn" class="hidden px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors">
-        Download PDF
-      </button>
-    </header>
+    <!-- PDF Generation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <section id="free-report-view">
-        <div class="glass-card rounded-2xl p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-6 animate-slide-up stagger-1">
-            <div class="lg:col-span-2">
-                <h2 class="text-lg font-semibold text-white text-center lg:text-left">Your Wellness Dashboard</h2>
-                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                    <div>
-                        <div class="p-4 rounded-lg border border-white/10 bg-white/5 text-center">
-                            <p class="muted text-sm">Wellness Score</p>
-                            <p id="wellnessScore" class="text-6xl font-black animated-gradient-text" style="transition: font-size 0.5s ease-out;">0</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 text-center">
-                        <div class="p-3 rounded-lg border border-white/10 bg-white/5"><p class="muted text-sm">Bio Age</p><p id="biologicalAge" class="font-semibold text-white text-2xl">0</p></div>
-                        <div class="p-3 rounded-lg border border-white/10 bg-white/5"><p class="muted text-sm">Energy</p><p id="energyIndex" class="font-semibold text-white text-2xl">0</p></div>
-                        <div class="p-3 rounded-lg border border-white/10 bg-white/5 col-span-2"><p class="muted text-sm">Stress Level</p><p id="stressLevel" class="font-semibold text-white text-2xl">0</p></div>
-                    </div>
-                </div>
-            </div>
-            <div class="border-t border-white/10 lg:border-t-0 lg:border-l lg:pl-8 pt-6 lg:pt-0">
-                <h2 class="text-lg font-semibold text-white mb-4 text-center lg:text-left">Key Insights</h2>
-                <div class="space-y-3">
-                    <div class="p-3 rounded-lg bg-white/5"><p class="muted text-sm">Main Barrier</p><p id="mainBarrier" class="font-medium text-white">—</p></div>
-                    <div class="p-3 rounded-lg bg-white/5"><p class="muted text-sm">Quick Win</p><p id="quickWin" class="font-medium text-white">—</p></div>
-                    <div class="p-3 rounded-lg bg-white/5"><p class="muted text-sm">Comparison</p><p id="comparison" class="font-medium text-white">—</p></div>
-                </div>
-            </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div class="glass-card rounded-2xl p-4 sm:p-6 animate-slide-up stagger-2">
-                <h3 class="text-lg font-semibold text-white mb-2 text-center">Core Four Balance</h3>
-                <div style="position: relative; height: 250px; width: 100%;">
-                    <canvas id="coreRadar"></canvas>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="glass-card rounded-xl p-4 animate-slide-up stagger-2"><p class="muted text-sm">Mind</p><p id="mindScore" class="text-2xl font-semibold text-white">0</p><p id="mindSummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
-                <div class="glass-card rounded-xl p-4 animate-slide-up stagger-3"><p class="muted text-sm">Body</p><p id="bodyScore" class="text-2xl font-semibold text-white">0</p><p id="bodySummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
-                <div class="glass-card rounded-xl p-4 animate-slide-up stagger-3"><p class="muted text-sm">Nutrition</p><p id="nutritionScore" class="text-2xl font-semibold text-white">0</p><p id="nutritionSummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
-                <div class="glass-card rounded-xl p-4 animate-slide-up stagger-4"><p class="muted text-sm">Sleep</p><p id="sleepScore" class="text-2xl font-semibold text-white">0</p><p id="sleepSummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
-            </div>
-        </div>
-    </section>
-    
-    <section id="premium-section" class="animate-slide-up stagger-4"></section>
-
-    <footer id="footer-cta" class="animate-slide-up stagger-4 mt-8"></footer>
-
-</main>
-
-<div id="payment-success-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
-  <div class="glass-card rounded-xl p-6 w-full max-w-md border-teal-400/50 text-center">
-    <h3 class="font-semibold text-2xl text-white">Payment Successful!</h3>
-    <p class="muted mt-2">Your premium report is unlocked. You can now view all details and download the PDF version.</p>
-    <div class="mt-6"><button id="close-modal-btn" class="cta px-5 py-2.5 rounded-lg text-sm font-semibold">Great!</button></div>
-  </div>
-</div>
-
-<script>
-/* =========================
-   GLOBAL VARIABLES
-   ========================= */
-const $ = id => document.getElementById(id);
-let coreRadarChart;
-let sessionId = null;
-let isPaid = false;
-let reportData = null;
-
-/* =========================
-   INITIALIZATION
-   ========================= */
-document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    sessionId = urlParams.get('sessionId') || urlParams.get('session_id');
-    isPaid = urlParams.get('payment') === 'success';
-
-    if (isPaid) {
-        $('payment-success-modal').classList.remove('hidden');
-        $('payment-success-modal').classList.add('flex');
-        $('close-modal-btn').onclick = () => {
-            $('payment-success-modal').classList.add('hidden');
-        };
-    }
-
-    if (!sessionId) {
-        showError("Error: Session ID not found. Please start the analysis again.");
-        return;
-    }
-    
-    pollForResult(sessionId);
-});
-
-/* =========================
-   DATA FETCHING
-   ========================= */
-function pollForResult(sessionId, retries = 30) {
-    console.log(`Poll attempt ${31 - retries}/30 for session: ${sessionId}`);
-    
-    if (retries <= 0) {
-        showError("Report generation timed out. Please try refreshing the page.");
-        return;
-    }
-
-    fetch('/.netlify/functions/checkResult', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId })
-    })
-    .then(res => {
-        console.log('checkResult response status:', res.status);
-        return res.json();
-    })
-    .then(result => {
-        console.log('checkResult result:', result);
-        
-        if (result.status === 'complete') {
-            console.log('Report complete, rendering...');
-            $('loading-state')?.remove();
-            $('report-content').classList.remove('hidden');
-            reportData = result.data;
-            renderReport(result.data);
-        } else if (result.status === 'error') {
-            console.error('Report generation error:', result.message);
-            showError(result.message || "An error occurred while generating your report.");
-        } else {
-            console.log('Report pending, retrying in 3s...');
-            setTimeout(() => pollForResult(sessionId, retries - 1), 3000);
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
-    })
-    .catch(err => {
-        console.error('Poll error:', err);
-        setTimeout(() => pollForResult(sessionId, retries - 1), 5000);
-    });
-}
+        .reveal.active { opacity: 1; transform: translateY(0); }
 
-function showError(message) {
-    const loadingState = $('loading-state');
-    if (loadingState) {
-        loadingState.innerHTML = `
-            <h2 class="text-2xl font-bold text-red-400">An Error Occurred</h2>
-            <p class="muted mt-2">${message}</p>
-            <a href="quiz.html" class="cta inline-block mt-6 px-5 py-3 rounded-lg font-bold">Start Over</a>
-        `;
-    }
-}
-
-/* =========================
-   RENDERING
-   ========================= */
-function renderReport(data) {
-    if (!data || !data.freeReport) {
-        showError("Invalid report data received");
-        return;
-    }
-    
-    // Update metrics with animation
-    const metrics = data.freeReport.metrics || {};
-    animateValue('wellnessScore', 0, metrics.wellnessScore || 0, 2000);
-    animateValue('biologicalAge', 0, metrics.biologicalAge || 0, 1500);
-    animateValue('energyIndex', 0, metrics.energyIndex || 0, 1500);
-    animateValue('stressLevel', 0, metrics.stressLevel || 0, 1500);
-    
-    // Add glow effect for high wellness score
-    if (metrics.wellnessScore > 75) {
-        setTimeout(() => {
-            $('wellnessScore').parentElement.classList.add('pulse-glow');
-        }, 2000);
-    }
-    
-    // Update insights
-    const insights = data.freeReport.insights || {};
-    $('mainBarrier').textContent = insights.mainBarrier || '—';
-    $('quickWin').textContent = insights.quickWin || '—';
-    $('comparison').textContent = insights.comparison || '—';
-    
-    // Update Core Four
-    const coreFour = data.freeReport.coreFour || {};
-    ['mind', 'body', 'nutrition', 'sleep'].forEach(category => {
-        const categoryData = coreFour[category] || {};
-        const scoreEl = $(`${category}Score`);
-        const summaryEl = $(`${category}Summary`);
-        if (scoreEl) animateValue(`${category}Score`, 0, categoryData.score || 0, 1500);
-        if (summaryEl) summaryEl.textContent = categoryData.summary || '—';
-    });
-    
-    // Render radar chart
-    renderRadarChart(coreFour);
-    
-    // Render premium section
-    if (isPaid) {
-        renderPaidView(data);
-        $('download-pdf-btn').classList.remove('hidden');
-        $('download-pdf-btn').onclick = downloadPDF;
-    } else {
-        renderUnpaidView();
-    }
-}
-
-function animateValue(id, start, end, duration) {
-    const element = $(id);
-    if (!element) return;
-    
-    // Special animation for Wellness Score
-    if (id === 'wellnessScore') {
-        element.style.fontSize = '0';
-        setTimeout(() => {
-            element.style.fontSize = '3.75rem';
-        }, 100);
-    }
-    
-    const range = end - start;
-    const startTime = performance.now();
-    
-    function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-        const current = Math.floor(start + range * easeOutQuart);
-        element.textContent = current;
-        
-        if (progress < 1) {
-            requestAnimationFrame(update);
-        }
-    }
-    
-    requestAnimationFrame(update);
-}
-
-function renderRadarChart(coreFour) {
-    const ctx = $('coreRadar');
-    if (!ctx) return;
-    
-    if (coreRadarChart) {
-        coreRadarChart.destroy();
-        coreRadarChart = null;
-    }
-    
-    const scores = [
-        coreFour.mind?.score || 0,
-        coreFour.body?.score || 0,
-        coreFour.nutrition?.score || 0,
-        coreFour.sleep?.score || 0
-    ];
-    
-    coreRadarChart = new Chart(ctx, {
-        type: 'radar',
-        data: {
-            labels: ['Mind', 'Body', 'Nutrition', 'Sleep'],
-            datasets: [{
-                label: 'Your Score',
-                data: scores,
-                backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                borderColor: 'rgba(99, 102, 241, 1)',
-                borderWidth: 2,
-                pointBackgroundColor: 'rgba(99, 102, 241, 1)',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgba(99, 102, 241, 1)'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                r: {
-                    beginAtZero: true,
-                    max: 100,
-                    ticks: {
-                        color: '#94a3b8',
-                        backdropColor: 'transparent'
-                    },
-                    grid: {
-                        color: 'rgba(148, 163, 184, 0.2)'
-                    },
-                    pointLabels: {
-                        color: '#e2e8f0',
-                        font: {
-                            size: 12
-                        }
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
+        /* Styles for PDF output */
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .no-print { display: none; }
+            .report-container {
+                box-shadow: none !important;
+                border: none !important;
             }
         }
-    });
-}
-
-function generatePremiumHTML(premium) {
-    const analytics = premium.detailedAnalytics || {};
-    const face = premium.faceAnalysis || {};
-    const recommendations = premium.recommendations || {};
-    const forecasts = premium.forecasts || {};
-    
-    return `
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div class="glass-card rounded-2xl p-6">
-                <h3 class="text-lg font-semibold text-white mb-4">Detailed Analytics</h3>
-                <div class="space-y-3">
-                    <div class="flex justify-between"><span class="muted">Metabolic Age</span><span class="text-white font-semibold">${analytics.metabolicAge || '—'} years</span></div>
-                    <div class="flex justify-between"><span class="muted">Recovery Score</span><span class="text-white font-semibold">${analytics.recoveryScore || '—'}%</span></div>
-                    <div class="flex justify-between"><span class="muted">Inflammation Risk</span><span class="text-white font-semibold">${analytics.inflammationRiskIndex || '—'}%</span></div>
-                    <div class="flex justify-between"><span class="muted">Digital Wellness</span><span class="text-white font-semibold">${analytics.digitalWellnessScore || '—'}%</span></div>
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+    <div class="relative overflow-hidden">
+        <!-- Background Gradient Blobs -->
+        <div class="fixed -top-1/4 -left-32 w-[60rem] h-[60rem] bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 z-[-1] animate-pulse"></div>
+        <div class="fixed -bottom-1/4 -right-32 w-[55rem] h-[55rem] bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 z-[-1] animate-pulse" style="animation-delay: 2s;"></div>
+        
+        <header class="sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-white/20 no-print">
+            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <a href="index.html" class="flex items-center">
+                    <img src="logo.png" alt="AI WELLNESSCORE Logo" class="h-10">
+                </a>
+                <div class="flex items-center gap-4">
+                    <button class="download-pdf-btn bg-purple-600 text-white font-semibold px-5 py-2 rounded-full text-sm sm:text-base hover:bg-purple-700 transition-colors">
+                        Download PDF
+                    </button>
                 </div>
             </div>
+        </header>
+
+        <main class="relative z-10">
+            <div id="report-content" class="container mx-auto px-6 py-12 md:py-20">
+                
+                <!-- Main Result Section -->
+                <section class="text-center report-container bg-white p-8 md:p-12 rounded-3xl shadow-2xl border border-gray-200 reveal">
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Your Personalized Wellness Report</h1>
+                    <p class="text-lg text-gray-600 mt-4">Hi <span id="user-name"></span>, here are the results from your analysis.</p>
+
+                    <div class="grid md:grid-cols-2 gap-8 items-center mt-8 text-left">
+                        <div class="bg-gray-50 p-6 rounded-2xl text-center">
+                            <p class="text-lg text-gray-600">Your chronological age is</p>
+                            <p class="text-6xl md:text-7xl font-extrabold text-gray-800" id="chrono-age"></p>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl text-center">
+                             <p class="text-lg text-purple-800">Your wellness age is</p>
+                            <p class="text-6xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500" id="wellness-age"></p>
+                        </div>
+                    </div>
+                     <div class="mt-8 bg-green-50 border border-green-200 text-green-800 p-5 rounded-xl text-center">
+                        <p>By implementing the recommended habits, you could lower your biological age by another <strong id="age-reduction-prediction"></strong> in just one month.</p>
+                    </div>
+                </section>
+                
+                <!-- Main Score Gauge -->
+                <section id="gauge-section" class="mt-12 text-center bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-gray-200 reveal">
+                    <h2 class="text-3xl font-bold text-center">Overall Wellness Score</h2>
+                    <div class="relative w-full max-w-[280px] mx-auto mt-4">
+                        <canvas id="wellnessGauge"></canvas>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                             <div class="text-center">
+                                <span id="gauge-score" class="text-5xl font-extrabold">0</span>
+                                <p class="font-semibold text-gray-600">out of 100</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="wellness-score-desc" class="mt-4 text-gray-600 max-w-xl mx-auto"></p>
+                </section>
+
+
+                <!-- Age Factors Section -->
+                <section class="mt-12 grid md:grid-cols-2 gap-8 reveal" style="transition-delay: 0.2s;">
+                    <div class="bg-white p-8 rounded-2xl border border-gray-200">
+                        <div class="flex items-center gap-3">
+                            <svg class="h-8 w-8 text-red-500"  fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
+                            </svg>
+                            <h3 class="text-2xl font-bold text-red-600">What's Increasing Your Age?</h3>
+                        </div>
+                        <ul id="increasing-factors" class="mt-4 space-y-3 text-gray-700">
+                        </ul>
+                    </div>
+                     <div class="bg-white p-8 rounded-2xl border border-gray-200">
+                         <div class="flex items-center gap-3">
+                            <svg class="h-8 w-8 text-green-500"  fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                            </svg>
+                            <h3 class="text-2xl font-bold text-green-600">What's Decreasing Your Age?</h3>
+                        </div>
+                         <ul id="decreasing-factors" class="mt-4 space-y-3 text-gray-700">
+                         </ul>
+                    </div>
+                </section>
+
+                <!-- Detailed Metrics -->
+                <section id="charts-section" class="mt-12 bg-white p-8 md:p-12 rounded-3xl border border-gray-200 reveal" style="transition-delay: 0.4s;">
+                    <h2 class="text-3xl font-bold text-center">Detailed Metrics Breakdown</h2>
+                    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Chart Card -->
+                        <div class="text-center p-6 bg-gray-50 rounded-2xl">
+                            <h4 class="text-lg font-bold">Energy</h4>
+                            <div class="relative h-36 w-36 mx-auto mt-2">
+                                <canvas id="energyChart"></canvas>
+                            </div>
+                            <p id="energy-desc" class="mt-3 text-sm text-gray-600"></p>
+                        </div>
+                         <!-- Chart Card -->
+                        <div class="text-center p-6 bg-gray-50 rounded-2xl">
+                             <h4 class="text-lg font-bold">Stress</h4>
+                             <div class="relative h-36 w-36 mx-auto mt-2">
+                                <canvas id="stressChart"></canvas>
+                             </div>
+                             <p id="stress-desc" class="mt-3 text-sm text-gray-600"></p>
+                        </div>
+                         <!-- Chart Card -->
+                        <div class="text-center p-6 bg-gray-50 rounded-2xl">
+                            <h4 class="text-lg font-bold">Skin Quality</h4>
+                            <div class="relative h-36 w-36 mx-auto mt-2">
+                                <canvas id="skinChart"></canvas>
+                            </div>
+                            <p id="skin-quality-desc" class="mt-3 text-sm text-gray-600"></p>
+                        </div>
+                        <!-- More Metrics with Icons -->
+                        <div class="p-6 bg-gray-50 rounded-2xl flex items-center gap-4"><div class="text-3xl">⚖️</div><div><h4 id="bmi-value" class="font-bold"></h4><p id="bmi-desc" class="text-sm text-gray-600"></p></div></div>
+                        <div class="p-6 bg-gray-50 rounded-2xl flex items-center gap-4"><div class="text-3xl">🥗</div><div><h4 id="nutrition-value" class="font-bold"></h4><p id="nutrition-desc" class="text-sm text-gray-600"></p></div></div>
+                        <div class="p-6 bg-gray-50 rounded-2xl flex items-center gap-4"><div class="text-3xl">🏃‍♀️</div><div><h4 id="habits-value" class="font-bold"></h4><p id="habits-desc" class="text-sm text-gray-600"></p></div></div>
+                    </div>
+                </section>
+                
+                <!-- Skin Analysis -->
+                <section class="mt-12 bg-white p-8 md:p-12 rounded-3xl border border-gray-200 reveal">
+                    <h2 class="text-3xl font-bold text-center">Skin Analysis</h2>
+                    <div class="mt-8 max-w-4xl mx-auto">
+                        <div id="skin-analysis-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Skin analysis results will be dynamically inserted here -->
+                        </div>
+                        <div class="mt-8 bg-purple-50 p-6 rounded-xl border border-purple-200">
+                            <h4 class="font-bold text-lg text-purple-800">Skin Condition Conclusion:</h4>
+                            <p id="skin-conclusion" class="mt-2 text-gray-700"></p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 7-Day Plan -->
+                <section class="mt-12 bg-gradient-to-br from-purple-600 to-indigo-700 text-white p-8 md:p-12 rounded-3xl reveal">
+                    <h2 class="text-3xl font-bold text-center">Your 7-Day Improvement Plan</h2>
+                    <p class="text-center mt-2 text-purple-200">Start with these small, actionable steps.</p>
+                    <div id="seven-day-plan-grid" class="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- 7-day plan will be dynamically inserted here -->
+                    </div>
+                </section>
+
+                <!-- CTA Download Section -->
+                <section class="mt-16 text-center reveal no-print">
+                    <button class="download-pdf-btn bg-purple-600 text-white font-semibold px-8 py-4 rounded-full text-lg hover:bg-purple-700 transition-colors transform hover:scale-105">
+                        Download Your Report as PDF
+                    </button>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async function() {
+
+            // --- MOCK API DATA ---
+            // This object simulates the data received from the Gemini API.
+            const mockApiData = {
+                userName: "Jessica",
+                chronoAge: 35,
+                wellnessAge: 32,
+                ageReductionPrediction: "2-3 years",
+                increasingFactors: [
+                    "High stress levels from work are impacting sleep quality.",
+                    "Occasional lack of hydration affects skin elasticity.",
+                    "Limited variety in vegetable intake."
+                ],
+                decreasingFactors: [
+                    "Consistent weekly exercise routine.",
+                    "Healthy BMI and regular physical activity.",
+                    "Strong social connections and positive mindset."
+                ],
+                metrics: {
+                    wellnessScore: { value: 78, description: "This score provides a holistic measure of your current well-being, combining all lifestyle, physical, and skin health factors." },
+                    energy: { value: 65, description: "Reflects your vitality based on sleep, nutrition, and activity." },
+                    stress: { value: 75, description: "Your body's response to daily pressures. A lower score is better." },
+                    skinQuality: { value: 85, description: "Based on visual analysis of hydration, texture, and tone." },
+                    bmi: { value: "22.5 (Healthy)", description: "Your Body Mass Index is optimal." },
+                    nutrition: { value: "70/100", description: "Assessment of your dietary balance." },
+                    healthyHabits: { value: "80/100", description: "Consistency in positive lifestyle choices." }
+                },
+                skinAnalysis: {
+                    dark_circle: 1, eye_pouch: 0, forehead_wrinkle: 0, glabella_wrinkle: 0,
+                    nasolabial_fold: 0, eye_finelines: 1, crows_feet: 0,
+                    skin_type: 3, // 0: oily, 1: dry, 2: normal, 3: mixed
+                    skin_spot: 0, acne: 0, blackhead: 0, 
+                    pores: 1, // Simplified for this example
+                    mole: 0,
+                    conclusion: "Your skin is generally in good condition, showing good elasticity. Key areas for improvement are hydration to reduce fine lines and targeted care for the T-zone to manage mixed skin characteristics. Better sleep will also help reduce dark circles."
+                },
+                sevenDayPlan: [
+                    { day: 1, title: "Hydration", task: "Drink 8 glasses of water.", icon: "💧" },
+                    { day: 2, title: "Mindfulness", task: "5-minute morning meditation.", icon: "🧘" },
+                    { day: 3, title: "Digital Detox", task: "No screens 1 hour before bed.", icon: "🌙" },
+                    { day: 4, title: "Green Boost", task: "Add a large leafy green salad.", icon: "🥬" },
+                    { day: 5, title: "Active Break", task: "Take a 15-minute brisk walk.", icon: "👟" },
+                    { day: 6, title: "Skin Care", task: "Apply a hydrating face mask.", icon: "🧖‍♀️" },
+                    { day: 7, title: "Reflect & Plan", task: "Review your week and continue one new habit.", icon: "🗓️" },
+                ]
+            };
             
-            <div class="glass-card rounded-2xl p-6">
-                <h3 class="text-lg font-semibold text-white mb-4">Face Analysis Results</h3>
-                <div class="space-y-3">
-                    <div class="flex justify-between"><span class="muted">Skin Health</span><span class="text-white font-semibold">${face.skinHealthScore || '—'}%</span></div>
-                    <div><span class="muted">Hydration</span><p class="text-white text-sm mt-1">${face.hydrationAssessment || '—'}</p></div>
-                    <div><span class="muted">Sleep Indicators</span><p class="text-white text-sm mt-1">${face.sleepDebtVisualization || '—'}</p></div>
-                    <div><span class="muted">Stress Markers</span><p class="text-white text-sm mt-1">${face.stressMarkers || '—'}</p></div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="glass-card rounded-2xl p-6 mb-6">
-            <h3 class="text-lg font-semibold text-white mb-4">Personalized Recommendations</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h4 class="font-semibold text-teal-400 mb-2">Circadian Reset Protocol</h4>
-                    <p class="muted text-sm">Bedtime: ${recommendations.circadianReset?.bedtime || '—'}</p>
-                    <p class="muted text-sm">Wake time: ${recommendations.circadianReset?.wakeTime || '—'}</p>
-                    <ul class="mt-2 space-y-1">
-                        ${(recommendations.circadianReset?.steps || []).map(step => `<li class="text-sm text-gray-300">• ${step}</li>`).join('')}
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-semibold text-teal-400 mb-2">Exercise Prescription</h4>
-                    <p class="text-white">${recommendations.exercisePrescription?.type || '—'}</p>
-                    <p class="muted text-sm">${recommendations.exercisePrescription?.durationMin || '—'} minutes, ${recommendations.exercisePrescription?.timeOfDay || '—'}</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="glass-card rounded-2xl p-6">
-            <h3 class="text-lg font-semibold text-white mb-4">AI Coach Notes</h3>
-            <p class="text-gray-300 italic">${premium.aiCoachNotes || 'Keep up the great work!'}</p>
-        </div>
-    `;
-}
+            // --- API FETCH FUNCTION ---
+            // In a real application, this function would make a `fetch` call to your API.
+            async function fetchWellnessData() {
+                console.log("Fetching wellness data...");
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 500));
+                console.log("Data received:", mockApiData);
+                return mockApiData;
+            }
 
-function renderUnpaidView() {
-    const premium = reportData?.premiumReport || {};
-    
-    $('premium-section').innerHTML = `
-        <div class="text-center mb-6">
-            <h2 class="text-3xl font-bold text-white">Your <span class="animated-gradient-text">Premium Analysis</span></h2>
-            <p class="muted mt-2">Unlock to see your complete personalized insights</p>
-        </div>
-        
-        <div class="relative">
-            <div class="blur-content">
-                ${generatePremiumHTML(premium)}
-            </div>
+            // --- RENDER FUNCTIONS ---
+
+            // Main function to populate the entire report
+            function populateReport(data) {
+                // Populate simple text fields
+                document.getElementById('user-name').textContent = data.userName;
+                document.getElementById('chrono-age').textContent = data.chronoAge;
+                document.getElementById('wellness-age').textContent = data.wellnessAge;
+                document.getElementById('age-reduction-prediction').textContent = data.ageReductionPrediction;
+                document.getElementById('wellness-score-desc').textContent = data.metrics.wellnessScore.description;
+
+                // Populate lists
+                const populateList = (elementId, items) => {
+                    const list = document.getElementById(elementId);
+                    list.innerHTML = ''; // Clear existing items
+                    items.forEach(item => {
+                        const li = document.createElement('li');
+                        const icon = elementId === 'increasing-factors' ? '→' : '→';
+                        const iconColor = elementId === 'increasing-factors' ? 'text-red-500' : 'text-green-500';
+                        li.className = 'flex items-start';
+                        li.innerHTML = `<span class="mr-2 ${iconColor}">${icon}</span><span>${item}</span>`;
+                        list.appendChild(li);
+                    });
+                };
+                populateList('increasing-factors', data.increasingFactors);
+                populateList('decreasing-factors', data.decreasingFactors);
+
+                // Populate detailed metrics
+                document.getElementById('energy-desc').textContent = data.metrics.energy.description;
+                document.getElementById('stress-desc').textContent = data.metrics.stress.description;
+                document.getElementById('skin-quality-desc').textContent = data.metrics.skinQuality.description;
+                document.getElementById('bmi-value').textContent = `BMI: ${data.metrics.bmi.value}`;
+                document.getElementById('bmi-desc').textContent = data.metrics.bmi.description;
+                document.getElementById('nutrition-value').textContent = `Nutrition: ${data.metrics.nutrition.value}`;
+                document.getElementById('nutrition-desc').textContent = data.metrics.nutrition.description;
+                document.getElementById('habits-value').textContent = `Healthy Habits: ${data.metrics.healthyHabits.value}`;
+                document.getElementById('habits-desc').textContent = data.metrics.healthyHabits.description;
+                
+                // Populate Skin Analysis
+                populateSkinAnalysis(data.skinAnalysis);
+                document.getElementById('skin-conclusion').textContent = data.skinAnalysis.conclusion;
+
+                // Populate 7-Day Plan
+                populateSevenDayPlan(data.sevenDayPlan);
+            }
             
-            <div class="blur-overlay">
-                <div class="unlock-prompt">
-                    <svg class="w-16 h-16 mx-auto mb-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
-                    <h3 class="text-xl font-bold text-white mb-2">Premium Content Locked</h3>
-                    <p class="muted text-sm mb-4">Unlock full access to see all your personalized recommendations</p>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    $('footer-cta').innerHTML = `
-      <div class="glass-card rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="text-center md:text-left">
-          <p class="font-semibold text-white">Special Offer — <span class="text-teal-400">Limited Time</span></p>
-          <p class="muted text-sm">Offer expires in: <span id="timer" class="font-bold text-white">15:00</span></p>
-        </div>
-        <button id="unlock-btn" class="cta px-6 py-3 rounded-lg font-bold pulsate w-full md:w-auto">Unlock for $9.99</button>
-      </div>
-    `;
-    
-    startCountdown(15 * 60);
-    $('unlock-btn').onclick = handlePayment;
-}
+            function populateSkinAnalysis(skinData) {
+                const grid = document.getElementById('skin-analysis-grid');
+                grid.innerHTML = ''; // Clear previous data
+                
+                const skinMap = {
+                    dark_circle: { icon: '👁️', title: 'Dark Circles', desc: 'A sign of fatigue or stress.' },
+                    eye_pouch: { icon: '👜', title: 'Under-Eye Bags', desc: 'Reflects tiredness or fluid retention.' },
+                    forehead_wrinkle: { icon: '〰️', title: 'Forehead Wrinkles', desc: 'Linked to expressions and aging.' },
+                    glabella_wrinkle: { icon: '😠', title: 'Frown Lines', desc: 'Can appear from tension or stress.' },
+                    nasolabial_fold: { icon: '😊', title: 'Smile Lines', desc: 'A natural result of smiling and aging.' },
+                    eye_finelines: { icon: '✨', title: 'Fine Lines', desc: 'Often from squinting or dehydration.' },
+                    crows_feet: { icon: '🐦', title: 'Crow\'s Feet', desc: 'Linked to smiling and sun exposure.' },
+                    skin_spot: { icon: '🟤', title: 'Skin Spots', desc: 'Caused by sun exposure or hormones.' },
+                    acne: { icon: '🔴', title: 'Acne', desc: 'Influenced by hormones, diet, or stress.' },
+                    blackhead: { icon: '⚫', title: 'Blackheads', desc: 'Clogged pores with oil and skin cells.' },
+                    pores: { icon: '🕳️', title: 'Visible Pores', desc: 'Result from excess oil or genetics.' },
+                    mole: { icon: '⚫', title: 'Moles', desc: 'Typically harmless pigmented spots.' }
+                };
 
-function renderPaidView(data) {
-    const premium = data.premiumReport || {};
-    $('premium-section').innerHTML = `
-        <div class="text-center mb-6">
-            <h2 class="text-3xl font-bold text-white">Your <span class="animated-gradient-text">Premium Analysis</span></h2>
-        </div>
-        ${generatePremiumHTML(premium)}
-    `;
-    $('footer-cta').style.display = 'none';
-}
+                for (const key in skinData) {
+                    if (skinData[key] === 1 && skinMap[key]) {
+                        const item = skinMap[key];
+                        const div = document.createElement('div');
+                        div.className = 'flex items-start space-x-3 p-4 bg-gray-50 rounded-lg';
+                        div.innerHTML = `<span class="text-xl">${item.icon}</span><div><h4 class="font-bold">${item.title}</h4><p class="text-sm text-gray-600">${item.desc}</p></div>`;
+                        grid.appendChild(div);
+                    }
+                }
 
-function startCountdown(seconds) {
-    const timerEl = $('timer');
-    if (!timerEl) return;
-    
-    const interval = setInterval(() => {
-        const minutes = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        timerEl.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
-        
-        if (seconds <= 0) {
-            clearInterval(interval);
-            timerEl.textContent = 'Expired';
-        }
-        seconds--;
-    }, 1000);
-}
+                // Handle skin type separately
+                const skinTypes = ['Oily Skin', 'Dry Skin', 'Normal Skin', 'Mixed Skin'];
+                const skinTypeDescriptions = ['Oily T-zone, shiny appearance.', 'Can feel tight, flaky, or rough.', 'Balanced with minimal imperfections.', 'Oily T-zone and dry cheeks.'];
+                const typeIndex = skinData.skin_type;
+                if (typeIndex !== undefined && skinTypes[typeIndex]) {
+                     const div = document.createElement('div');
+                     div.className = 'flex items-start space-x-3 p-4 bg-gray-50 rounded-lg';
+                     div.innerHTML = `<span class="text-xl">🎭</span><div><h4 class="font-bold">Skin Type: ${skinTypes[typeIndex]}</h4><p class="text-sm text-gray-600">${skinTypeDescriptions[typeIndex]}</p></div>`;
+                     grid.appendChild(div);
+                }
+            }
 
-async function handlePayment() {
-    const unlockBtn = $('unlock-btn');
-    if (!unlockBtn) return;
-    
-    unlockBtn.disabled = true;
-    unlockBtn.innerHTML = 'Processing...';
-    
-    // TEMPORARY TEST MODE
-    setTimeout(() => {
-        isPaid = true;
-        
-        $('payment-success-modal').classList.remove('hidden');
-        $('payment-success-modal').classList.add('flex');
-        $('close-modal-btn').onclick = () => {
-            $('payment-success-modal').classList.add('hidden');
-            $('payment-success-modal').classList.remove('flex');
-        };
-        
-        if (reportData) {
-            renderPaidView(reportData);
-        }
-        
-        $('footer-cta').style.display = 'none';
-        $('download-pdf-btn').classList.remove('hidden');
-        
-    }, 2000);
-}
+            function populateSevenDayPlan(planData) {
+                const grid = document.getElementById('seven-day-plan-grid');
+                grid.innerHTML = '';
+                planData.forEach(day => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-white/10 p-5 rounded-lg flex items-start gap-4';
+                    div.innerHTML = `<div class="text-3xl mt-1">${day.icon}</div><div><b class="block text-lg">Day ${day.day}: ${day.title}</b><p class="text-sm opacity-80">${day.task}</p></div>`;
+                    grid.appendChild(div);
+                });
+            }
 
-async function downloadPDF() {
-    if (!reportData) return;
-    
-    const btn = $('download-pdf-btn');
-    btn.disabled = true;
-    btn.textContent = 'Generating PDF...';
-    
-    try {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF();
-        
-        pdf.setFontSize(20);
-        pdf.text('AI WELLNESSCORE Report', 20, 20);
-        
-        pdf.setFontSize(12);
-        const metrics = reportData.freeReport.metrics;
-        pdf.text(`Wellness Score: ${metrics.wellnessScore}`, 20, 40);
-        pdf.text(`Biological Age: ${metrics.biologicalAge}`, 20, 50);
-        pdf.text(`Energy Index: ${metrics.energyIndex}`, 20, 60);
-        pdf.text(`Stress Level: ${metrics.stressLevel}`, 20, 70);
-        
-        pdf.save(`wellness-report-${sessionId}.pdf`);
-    } catch (error) {
-        console.error('PDF generation error:', error);
-        alert('Failed to generate PDF. Please try again.');
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Download PDF';
-    }
-}
-</script>
+            // --- CHART RENDERING ---
+            let chartData = {};
 
+            function getScoreColor(value) {
+                if (value >= 75) return '#22c55e';
+                if (value >= 50) return '#f59e0b';
+                return '#ef4444';
+            }
+            
+            function animateValue(obj, start, end, duration) {
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    obj.innerHTML = Math.floor(progress * (end - start) + start);
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    } else {
+                        obj.innerHTML = end;
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+
+            const donutChartOptions = (data, color) => ({
+                type: 'doughnut',
+                data: { datasets: [{ data: [data, 100 - data], backgroundColor: [color, '#e5e7eb'], borderColor: ['#ffffff'], borderWidth: 2, circumference: 180, rotation: 270, }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: false }, }, animation: { duration: 1500, easing: 'easeOutQuart' } }
+            });
+            
+            const createTextPlugin = (text) => ({
+                id: 'centerText',
+                beforeDraw: function(chart) {
+                    const {width, height, ctx} = chart;
+                    ctx.restore();
+                    const fontSize = (height / 80).toFixed(2);
+                    ctx.font = `bold ${fontSize}em Inter, sans-serif`;
+                    ctx.textBaseline = "middle";
+                    const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                    const textY = height / 1.5;
+                    ctx.fillStyle = '#1f2937';
+                    ctx.fillText(text, textX, textY);
+                    ctx.save();
+                }
+            });
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        if (entry.target.id === 'gauge-section') renderGaugeChart();
+                        if (entry.target.id === 'charts-section') renderDetailedCharts();
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.3 });
+
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+            function renderGaugeChart() {
+                const wellnessGaugeCtx = document.getElementById('wellnessGauge')?.getContext('2d');
+                if (wellnessGaugeCtx) {
+                    const score = chartData.metrics.wellnessScore.value;
+                    const scoreColor = getScoreColor(score);
+                    new Chart(wellnessGaugeCtx, donutChartOptions(score, scoreColor));
+                    const gaugeScoreEl = document.getElementById('gauge-score');
+                    gaugeScoreEl.style.color = scoreColor;
+                    animateValue(gaugeScoreEl, 0, score, 1500);
+                }
+            }
+
+            function renderDetailedCharts() {
+                const energyCtx = document.getElementById('energyChart')?.getContext('2d');
+                if(energyCtx) new Chart(energyCtx, { ...donutChartOptions(chartData.metrics.energy.value, getScoreColor(chartData.metrics.energy.value)), plugins: [createTextPlugin(`${chartData.metrics.energy.value}%`)] });
+
+                const stressScore = chartData.metrics.stress.value;
+                const stressColor = stressScore > 70 ? '#ef4444' : stressScore > 50 ? '#f59e0b' : '#22c55e';
+                const stressCtx = document.getElementById('stressChart')?.getContext('2d');
+                if(stressCtx) new Chart(stressCtx, { ...donutChartOptions(stressScore, stressColor), plugins: [createTextPlugin(`${stressScore}%`)] });
+
+                const skinCtx = document.getElementById('skinChart')?.getContext('2d');
+                if(skinCtx) new Chart(skinCtx, { ...donutChartOptions(chartData.metrics.skinQuality.value, getScoreColor(chartData.metrics.skinQuality.value)), plugins: [createTextPlugin(`${chartData.metrics.skinQuality.value}%`)] });
+            }
+
+            // PDF Download
+            const downloadButtons = document.querySelectorAll('.download-pdf-btn');
+            downloadButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const element = document.getElementById('report-content');
+                    const opt = { margin: 0.5, filename: 'AI-WELLNESSCORE-Report.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas:  { scale: 2, useCORS: true }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
+                    html2pdf().set(opt).from(element).save();
+                });
+            });
+
+            // --- INITIALIZATION ---
+            async function initializeReport() {
+                const reportData = await fetchWellnessData();
+                chartData = reportData; // Make data available for charts
+                populateReport(reportData);
+            }
+
+            initializeReport();
+        });
+    </script>
 </body>
 </html>
+
