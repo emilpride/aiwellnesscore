@@ -1,19 +1,22 @@
-const { initializeApp, cert } = require('firebase-admin/app');
+// /netlify/functions/quiz.js - ИСПРАВЛЕННЫЙ КОД
+
+const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-
-let db;
-try {
-  initializeApp({
-    credential: cert(serviceAccount)
-  });
-  db = getFirestore();
-} catch (e) {
-  if (!db) {
-    db = getFirestore();
+// Правильная и безопасная инициализация Firebase
+// Проверяем, есть ли уже запущенные приложения
+if (!getApps().length) {
+  try {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    initializeApp({
+      credential: cert(serviceAccount)
+    });
+  } catch (e) {
+    console.error('Firebase initialization error in quiz.js:', e);
   }
 }
+
+const db = getFirestore();
 
 exports.handler = async (event, context) => {
   if (event.httpMethod !== 'POST') {
@@ -63,7 +66,7 @@ exports.handler = async (event, context) => {
     return { statusCode: 400, body: 'Invalid action' };
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in quiz.js handler:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Internal Server Error' }),
