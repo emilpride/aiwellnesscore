@@ -1,695 +1,522 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>AI WELLNESSCORE - Your Personalized Analysis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Wellness Quiz</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Face Recognition Script -->
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <!-- Confetti Animation Script -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <style>
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        body { font-family: 'Inter', sans-serif; }
+        .chat-container { 
+            scroll-behavior: smooth; 
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
-        html, body {
-            height: 100%;
-            overflow: hidden;
-            margin: 0;
-            padding: 0;
+        .chat-container::-webkit-scrollbar { 
+            display: none; /* Chrome, Safari, Opera*/
         }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #0c4a6e);
-            background-size: 400% 400%;
-            animation: gradientAnimation 20s ease infinite;
-            color: #e5e7eb;
+        .chat-bubble { animation: slide-up 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+        @keyframes slide-up {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
         }
-        #app-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            background-color: rgba(15, 23, 42, 0.7);
+        .options-container::-webkit-scrollbar { display: none; }
+        .options-container { -ms-overflow-style: none; scrollbar-width: none; }
+        .option-btn { transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out; }
+        .option-btn:hover { transform: translateY(-2px); }
+        .typing-indicator span {
+            height: 8px; width: 8px; background-color: #9ca3af; border-radius: 50%; display: inline-block;
+            animation: bounce 1.4s infinite ease-in-out both;
         }
-        @media (min-width: 640px) {
-            body {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 2rem;
-            }
-            #app-container {
-                max-width: 672px;
-                height: 90vh;
-                max-height: 850px;
-                border-radius: 1rem;
-                box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                backdrop-filter: blur(16px);
-                -webkit-backdrop-filter: blur(16px);
-            }
+        .typing-indicator span:nth-of-type(2) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-of-type(3) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+
+        /* Avatar Animation */
+        .bot-avatar { animation: avatar-float 3s ease-in-out infinite; }
+        @keyframes avatar-float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+            100% { transform: translateY(0); }
         }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { 
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        @keyframes typing-bubble {
-            0%, 100% { opacity: 0.2; transform: scale(0.8); }
-            40% { opacity: 1; transform: scale(1); }
-        }
-        .typing-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: white;
-            border-radius: 50%;
-            animation: typing-bubble 1.4s infinite ease-in-out;
-        }
-        .typing-dot:nth-child(1) { animation-delay: 0s; }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        .lottie-avatar {
-            width: 32px;
-            height: 32px;
-        }
+
+        /* Camera Modal Styles */
         #camera-modal {
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            z-index: 50;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.8); z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
-        #camera-container {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-            aspect-ratio: 3 / 4;
-            border-radius: 1.5rem;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background-color: #000;
-        }
-        #video, #overlay-canvas {
+        #camera-modal.active { opacity: 1; pointer-events: all; }
+        #camera-container { position: relative; width: 90%; max-width: 640px; aspect-ratio: 3/4; overflow: hidden; border-radius: 1.5rem; background: #111; }
+        #camera-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        #camera-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #camera-loader p { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        
+        #face-outline {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            transition: all 0.2s ease-out;
+            box-shadow: 0 0 20px rgba(76, 201, 240, 0.7);
+            opacity: 0;
         }
-        #video {
-            transform: scaleX(-1);
+        #face-outline.detected {
+             border-color: #4ade80; /* green-400 */
+             box-shadow: 0 0 30px rgba(74, 222, 128, 0.9);
+             opacity: 1;
         }
-        #camera-overlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            color: white;
-            padding: 1rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+
+        /* New Animations */
+        #progress-bar {
+            animation: glow 2s ease-in-out infinite alternate;
         }
-        .progress-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 6px;
-            background: rgba(0, 0, 0, 0.1);
-            z-index: 20;
-            overflow: hidden;
+        @keyframes glow {
+            from { box-shadow: 0 0 2px #a855f7, 0 0 4px #a855f7; }
+            to { box-shadow: 0 0 6px #6366f1, 0 0 8px #6366f1; }
         }
-        .progress-bar {
-            height: 100%;
-            width: 0;
-            background: linear-gradient(90deg, #818cf8 0%, #34d399 100%);
-            transition: width 0.3s ease;
+        .pulse-btn {
+            animation: pulse-animation 2s infinite;
         }
+        @keyframes pulse-animation {
+            0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
+        }
+
     </style>
 </head>
-<body>
-
-    <div id="app-container">
-        <div class="progress-container sm:rounded-t-2xl">
-            <div class="progress-bar" id="progressBar"></div>
+<body class="bg-gradient-to-br from-purple-50 to-indigo-100 md:flex md:items-center md:justify-center min-h-screen">
+    <div class="w-full h-screen md:h-[90vh] md:max-w-lg flex flex-col bg-white md:shadow-2xl md:rounded-2xl overflow-hidden">
+        <!-- Progress Bar -->
+        <div class="w-full bg-gray-200">
+            <div id="progress-bar" class="h-2 bg-gradient-to-r from-purple-500 to-indigo-500" style="width: 0%; transition: width 0.5s ease-in-out;"></div>
         </div>
-
-        <header class="p-4 border-b border-white/10 bg-slate-900/50 z-10 flex-shrink-0">
-            <h1 class="text-xl font-bold text-center text-indigo-400">AI WELLNESSCORE</h1>
-            <p class="text-sm text-center text-gray-400">Your path to a better you starts here</p>
-        </header>
-
-        <main id="chat-container" class="flex-1 p-4 sm:p-6 overflow-y-auto no-scrollbar">
-            <div id="chat-content" class="space-y-6">
-            </div>
-        </main>
-
-        <footer id="input-area" class="p-4 border-t border-white/10 bg-slate-800/60 flex-shrink-0">
-            <div id="options-container" class="flex flex-nowrap gap-2 mb-3 overflow-x-auto no-scrollbar pb-2 justify-center">
-            </div>
-            <div id="text-input-container" class="flex items-center gap-2" style="display: none;">
-                <input type="text" id="user-input" class="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white placeholder-gray-400 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400" placeholder="Type your answer...">
-                <button id="send-btn" class="bg-indigo-500 text-white p-2 rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform duration-200 transform active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" /></svg>
+        
+        <!-- Chat Area -->
+        <div id="chat-container" class="flex-1 p-6 overflow-y-auto chat-container"></div>
+        
+        <!-- Options Area -->
+        <div id="options-container-wrapper" class="px-4">
+             <div id="options-container" class="flex gap-2 overflow-x-auto py-3 options-container"></div>
+        </div>
+        
+        <!-- Input Area -->
+        <div id="input-area" class="p-4 border-t border-gray-200">
+            <div class="flex items-center gap-2">
+                <input type="text" id="user-input" placeholder="Type your answer..." class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <button id="send-btn" class="bg-purple-600 text-white rounded-full p-3 hover:bg-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
                 </button>
             </div>
-        </footer>
+        </div>
     </div>
-   
-    <div id="camera-modal" class="hidden flex">
-        <button id="close-camera-btn" class="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2 z-10">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
+
+    <!-- Camera Modal -->
+    <div id="camera-modal">
         <div id="camera-container">
-            <video id="video" autoplay muted playsinline></video>
-            <canvas id="overlay-canvas"></canvas>
-            <div id="camera-overlay">
-                <p id="camera-status" class="text-lg font-medium bg-black bg-opacity-50 px-3 py-1 rounded-full">Initializing scanner...</p>
+            <video id="camera-video" autoplay muted playsinline></video>
+            <canvas id="camera-canvas"></canvas>
+            <div id="face-outline"></div>
+            <div id="camera-loader" class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4">
+                <svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p id="loader-text" class="text-lg font-semibold">Initializing AI models...</p>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
-   
     <script>
-        // --- STATE & DOM ELEMENTS ---
-        const chatContent = document.getElementById('chat-content');
-        const inputArea = document.getElementById('input-area');
-        const optionsContainer = document.getElementById('options-container');
-        const textInputContainer = document.getElementById('text-input-container');
+        // --- DOM Elements ---
+        const chatContainer = document.getElementById('chat-container');
         const userInput = document.getElementById('user-input');
         const sendBtn = document.getElementById('send-btn');
-        const progressBar = document.getElementById('progressBar');
+        const optionsContainer = document.getElementById('options-container');
+        const optionsContainerWrapper = document.getElementById('options-container-wrapper');
+        const inputArea = document.getElementById('input-area');
+        const progressBar = document.getElementById('progress-bar');
         const cameraModal = document.getElementById('camera-modal');
-        const closeCameraBtn = document.getElementById('close-camera-btn');
-        const videoEl = document.getElementById('video');
-        const overlayCanvas = document.getElementById('overlay-canvas');
-        const cameraStatus = document.getElementById('camera-status');
-       
-        let sessionId = null;
-        let currentQuestionIndex = 0;
-        const userAnswers = {};
-        const totalQuizQuestions = 15;
-        let capturedPhotoDataUrl = null;
+        const video = document.getElementById('camera-video');
+        const canvas = document.getElementById('camera-canvas');
+        const cameraLoader = document.getElementById('camera-loader');
+        const loaderText = document.getElementById('loader-text');
 
-        // --- QUIZ DATA ---
+        // --- State ---
+        let sessionId = null;
+        const userAnswers = {};
+        let currentQuestionIndex = 0;
+        let detectionInterval;
+        let stream;
+
+        // --- Quiz Data ---
         const quizQuestions = [
-            { id: 'welcome', text: "Hello! I'm your personal AI Wellness Coach. I'll be guiding you through this analysis to help you discover insights about your well-being.", type: 'welcome', options: ["Let's Begin!"] },
-            { id: 'disclaimer', text: "Before we begin, a quick heads-up: I'm an AI coach, not a medical doctor. This analysis is for educational purposes only and is not a substitute for professional medical advice. <b>All data, including your photo, is deleted immediately after you view the detailed report.</b><br><br>By continuing, you agree to our <a href='terms.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Terms of Service</a> and <a href='privacy.html' target='_blank' class='underline text-indigo-300 hover:text-indigo-200'>Privacy Policy</a>.", type: 'disclaimer', options: ['I Understand & Agree'] },
-            { id: 'age', text: "Great, let's begin! To start, what's your age?", reason: "Your age helps me calibrate your wellness metrics against demographic data, ensuring your results are relevant to your life stage.", type: 'chips_text', options: ['Under 18', '18-25', '26-35', '36-50', '50+'], placeholder: 'Or type your exact age...' },
-            { id: 'gender', text: "Great start! Now, what's your biological sex?", reason: "This allows me to consider physiological differences that can influence wellness factors.", type: 'chips_text', options: ['Male', 'Female'], placeholder: 'Or prefer not to say...' },
-            { id: 'height', text: "Perfect. Let's talk about your height. (e.g., 5 ft 10 in)", reason: "Your height and weight are used to calculate your Body Mass Index (BMI), a basic indicator of physical health.", type: 'chips_text', options: ["Under 5'0\"", "5'0\" - 5'5\"", "5'6\" - 5'11\"", "6'0\"+"], placeholder: 'Or type your exact height...' },
-            { id: 'weight', text: "Thanks! And your current weight in pounds?", reason: "This, along with your height, gives us a baseline for physical wellness metrics.", type: 'chips_text', options: ['Under 120 lbs', '120-150 lbs', '151-180 lbs', '181-220 lbs', '220+ lbs'], placeholder: 'Or type your exact weight...' },
-            { id: 'sleep', text: "Sleep is crucial. How many hours of <i>quality</i> sleep do you get on an average night?", reason: "Sleep is the foundation of recovery for both mind and body. The quality of your sleep reveals a lot about your overall well-being.", type: 'chips_text', options: ['Less than 5', '5-6 hours', '7-8 hours', 'More than 8'], placeholder: 'Or type a specific number...' },
-            { id: 'activity', text: "Awesome. Movement is key! How often do you engage in moderate physical activity (like a brisk walk) per week?", reason: "Regular movement is vital for physical and mental health. This helps me understand your energy expenditure.", type: 'chips_text', options: ['Rarely', '1-2 times', '3-4 times', '5+ times'], placeholder: 'Or describe your routine...' },
-            { id: 'nutrition', text: "Let's dive into nutrition. How many servings of fruits or vegetables do you typically eat per day?", reason: "This is a key indicator of your micronutrient intake, which fuels your body and brain.", type: 'chips_text', options: ['0-1', '2-3', '4-5', 'More than 5'], placeholder: 'Or type a specific number...' },
-            { id: 'processed_food', text: "Honesty is the best policy here. How often do you eat processed or fast food in a typical week?", reason: "Understanding this habit helps me assess potential inflammation and energy level factors.", type: 'chips_text', options: ['Daily', 'A few times a week', 'Once a week', 'Rarely/Never'], placeholder: 'Or describe your habits...' },
-            { id: 'hydration', text: "Hydration check! How many glasses of water (approx. 8 oz) do you drink per day?", reason: "Hydration impacts everything from cognitive function to physical performance. It's a simple but powerful wellness lever.", type: 'chips_text', options: ['1-2', '3-4', '5-6', '7+'], placeholder: 'Or type a specific amount...' },
-            { id: 'stress', text: "Now for the mind. On a scale of 1 to 10, how would you rate your typical stress level?", reason: "Chronic stress is a major factor in overall wellness. Your self-perception here is a crucial piece of the puzzle.", type: 'chips_text', options: ['1-3 (Low)', '4-6 (Moderate)', '7-8 (High)', '9-10 (Very High)'], placeholder: 'Or type an exact number...' },
-            { id: 'mindfulness', text: "Finding calm is a superpower. How often do you practice mindfulness, meditation, or deep breathing?", reason: "This tells me about the tools you use to manage stress and cultivate mental clarity.", type: 'chips_text', options: ['Daily', 'A few times a week', 'Occasionally', 'Never'], placeholder: 'Or describe your practice...' },
-            { id: 'mood', text: "Let's check in with your emotions. How would you describe your overall mood on a typical day?", reason: "Your typical mood provides a snapshot of your emotional baseline and mental resilience.", type: 'chips_text', options: ['Energetic & Positive', 'Generally Content', 'Neutral', 'Often Fatigued or Low'], placeholder: 'Or describe in your own words...' },
-            { id: 'alcohol', text: "Time for some lifestyle questions. How many alcoholic drinks do you have in a typical week?", reason: "Alcohol can significantly impact sleep quality, recovery, and mood. This helps me get a clearer picture.", type: 'chips_text', options: ['0', '1-3', '4-7', '8+'], placeholder: 'Or type a specific number...' },
-            { id: 'smoking', text: "This is a safe space. Do you smoke or use tobacco products?", reason: "This is an important lifestyle factor with significant health implications that I need to consider.", type: 'chips_text', options: ['Yes, daily', 'Yes, occasionally', 'I quit', 'Never'], placeholder: 'Or clarify your situation...' },
-            { id: 'screen_time', text: "Last question before the final step! How much time do you spend on screens (phone, computer, TV) outside of work?", reason: "Excessive screen time can affect your sleep, eye health, and mental state. This helps me understand your digital habits.", type: 'chips_text', options: ['Less than 2 hours', '2-4 hours', '4-6 hours', 'More than 6 hours'], placeholder: 'Or estimate your screen time...' },
-            { id: 'camera', text: "You did it! That's all the questions. Now for the fun part: a quick selfie. This helps me analyze non-medical indicators of stress and fatigue. Your photo is processed on the fly and never stored. Please allow camera access and position your face within the frame.", type: 'camera_button', options: ['Open Camera'] }
+            { key: 'welcome', type: 'message', text: "Hello! 👋 I'm your personal AI Wellness Coach. I'll be guiding you through this analysis to help you discover insights about your well-being." },
+            { key: 'disclaimer', type: 'message', text: "Before we begin, a quick heads-up: ☝️ I'm an AI coach, not a medical doctor. This analysis is for educational purposes only and is not a substitute for professional medical advice." },
+            { key: 'terms', type: 'question', text: "Your privacy is our top priority. 🛡️ Everything is secure and anonymous. We never store your photo, and all your data is permanently deleted right after you get your report. Please confirm you agree to our <a href='#' target='_blank' class='underline text-purple-600'>Terms</a> and <a href='#' target='_blank' class='underline text-purple-600'>Privacy Policy</a> to continue.", options: ["I Understand & Agree"] },
+            { key: 'name', type: 'question', text: "Great, let's get started! What should I call you? 😊", options: [], placeholder: "Type your name..." },
+            { key: 'age', type: 'question', text: (name) => `Perfect, ${name}! To start, what's your age? 🎂`, options: ['Under 18', '18-25', '26-35', '36-50', '50+'], placeholder: "or type your age..." },
+            { key: 'gender', type: 'question', text: "Great start! Now, what's your biological sex? 🧬", options: ['Male', 'Female'], placeholder: "or type your gender..." },
+            { key: 'height', type: 'question', text: "Perfect. Let's talk about your height. 📏 (e.g., 5 ft 10 in)", options: ["Under 5 ft", "5'0\" - 5'5\"", "5'6\" - 5'11\"", "6'0\" - 6'5\"", "Over 6'5\""], placeholder: "or type your height..." },
+            { key: 'weight', type: 'question', text: "Thanks! And your current weight in pounds? ⚖️", options: ["Under 120 lbs", "120-150 lbs", "151-180 lbs", "181-220 lbs", "Over 220 lbs"], placeholder: "or type your weight in lbs..." },
+            { key: 'sleep', type: 'question', text: "Sleep is crucial. 😴 How many hours of <i>quality</i> sleep do you get on an average night?", options: ["Less than 5 hours", "5-6 hours", "7-8 hours", "More than 8 hours"], placeholder: "or type your sleep hours..." },
+            { key: 'mot_sleep', type: 'message', text: "Excellent. Quality sleep is the foundation of wellness. 👍" },
+            { key: 'activity', type: 'question', text: "Awesome. Movement is key! 🏃‍♀️ How often do you engage in moderate physical activity (like a brisk walk) per week?", options: ["Rarely", "1-2 times", "3-4 times", "5+ times"], placeholder: "or type how many times..." },
+            { key: 'mot_activity', type: 'message', text: "Great job! Every bit of movement counts. ✨" },
+            { key: 'nutrition', type: 'question', text: "Let's dive into nutrition. 🥦 How many servings of fruits or vegetables do you typically eat per day?", options: ["0-1", "2-3", "4-5", "More than 5"], placeholder: "or type number of servings..." },
+            { key: 'processed_food', type: 'question', text: "Honesty is the best policy here. 😉 How often do you eat processed or fast food in a typical week?", options: ["Rarely", "1-2 times", "3-4 times", "Daily"], placeholder: "or type how often..." },
+            { key: 'mot_nutrition', type: 'message', text: "Thanks for sharing. Nutrition is fuel for your body and mind! ⛽" },
+            { key: 'hydration', type: 'question', text: "Hydration check! 💧 How many glasses of water (approx. 8 oz) do you drink per day?", options: ["1-3 glasses", "4-6 glasses", "7-9 glasses", "10+ glasses"], placeholder: "or type number of glasses..." },
+            { key: 'stress', type: 'question', text: "Now for the mind. 🧠 On a scale of 1 to 10, how would you rate your typical stress level?", options: ["1-3 (Low)", "4-6 (Moderate)", "7-8 (High)", "9-10 (Very High)"], placeholder: "or type a number from 1-10..." },
+            { key: 'mindfulness', type: 'question', text: "Finding calm is a superpower. 🧘‍♂️ How often do you practice mindfulness, meditation, or deep breathing?", options: ["Never", "Occasionally", "Weekly", "Daily"], placeholder: "or type how often..." },
+            { key: 'mot_mind', type: 'message', text: "Awesome! Taking time for your mind is just as important as for your body. 🙏" },
+            { key: 'mood', type: 'question', text: "Let's check in with your emotions. ❤️ How would you describe your overall mood on a typical day?", options: ["Happy & Energetic", "Generally Content", "Neutral", "Often Stressed or Sad"], placeholder: "or describe your mood..." },
+            { key: 'alcohol', type: 'question', text: "Time for some lifestyle questions. 🍻 How many alcoholic drinks do you have in a typical week?", options: ["0", "1-3", "4-7", "8+"], placeholder: "or type number of drinks..." },
+            { key: 'smoking', type: 'question', text: "This is a safe space. 🚭 Do you smoke or use tobacco products?", options: ["No", "Occasionally", "Yes, daily"], placeholder: "or type your answer..." },
+            { key: 'screen_time', type: 'question', text: "Last question before the final step! 📱 How much time do you spend on screens (phone, computer, TV) outside of work?", options: ["Less than 2 hours", "2-4 hours", "4-6 hours", "More than 6 hours"], placeholder: "or type number of hours..." },
+            { key: 'camera', type: 'final_step', text: "You did it! 🎉 That's all the questions. Now for the fun part: a quick selfie. This helps me analyze non-medical indicators of stress and fatigue. Your photo is processed on the fly and never stored. Please allow camera access and position your face within the frame." }
         ];
 
         // --- SERVER COMMUNICATION ---
-        const API_ENDPOINT = '/.netlify/functions/quiz';
         async function startQuizSession() {
             try {
-                const response = await fetch(API_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'startSession' }) });
-                if (!response.ok) throw new Error('Server error');
+                const response = await fetch('/.netlify/functions/quiz', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ action: 'startSession' }) 
+                });
+                if (!response.ok) throw new Error('Server error starting session');
                 const data = await response.json();
                 sessionId = data.sessionId;
+                console.log('Session started:', sessionId);
             } catch (error) {
                 console.error('Failed to start session:', error);
-                addMessage("Sorry, I'm having trouble connecting. Please refresh.");
+                addBotMessage("Sorry, I'm having trouble connecting to my brain right now. 🧠 Please try refreshing the page.");
                 inputArea.style.display = 'none';
             }
         }
-        
-        async function saveAnswerToServer(questionId, answer) {
+
+        async function saveAnswerToServer(questionKey, answer) {
             if (!sessionId) return;
             try {
-                await fetch(API_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'saveAnswer', sessionId, questionId, answer }) });
-            } catch (error) { console.error('Failed to save answer:', error); }
+                await fetch('/.netlify/functions/quiz', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ action: 'saveAnswer', sessionId, questionId: questionKey, answer }) 
+                });
+            } catch (error) { 
+                console.error('Failed to save answer:', error); 
+                // Optionally notify user of save failure
+            }
         }
 
-        // --- CHAT UI LOGIC ---
-        function getBotAvatar() {
-            const avatar = document.createElement('div');
-            avatar.className = 'flex-shrink-0 w-8 h-8 flex items-center justify-center';
-            avatar.innerHTML = `<div class="lottie-avatar"></div>`;
-            try { lottie.loadAnimation({ container: avatar.querySelector('.lottie-avatar'), renderer: 'svg', loop: true, autoplay: true, path: 'avatar.json' }); } catch(e) { console.error("Lottie failed:", e); }
-            return avatar;
+        async function confirmPhotoAndAnalyze(photoDataUrl) {
+            const processingMessage = document.createElement('div');
+            processingMessage.className = 'text-center p-2';
+            processingMessage.innerHTML = `<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div><p class="text-gray-600 mt-2">Analyzing photo and preparing your report...</p>`;
+            inputArea.innerHTML = '';
+            inputArea.appendChild(processingMessage);
+            inputArea.style.display = 'block';
+
+            try {
+                // Step 1: Analyze the photo
+                const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ photoDataUrl })
+                });
+
+                let faceData = null;
+                if (!analyzeResponse.ok) {
+                    console.error('Face analysis failed, but continuing.');
+                    faceData = { error: 'Analysis failed', details: await analyzeResponse.text() };
+                } else {
+                    faceData = await analyzeResponse.json();
+                }
+
+                // Step 2: Save the analysis data (or error) to the session
+                await saveAnswerToServer('faceAnalysis', faceData);
+
+                // Step 3: Trigger the background report generation
+                await fetch('/.netlify/functions/result-background', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: sessionId })
+                });
+
+                // Step 4: Show completion and redirect
+                showCompletionAnimation();
+
+            } catch (error) {
+                console.error('Error during photo analysis step:', error);
+                addBotMessage("I had a little trouble with the photo analysis, but don't worry! I'll generate your report with the rest of your answers.");
+                await saveAnswerToServer('faceAnalysis', { error: error.message });
+                 // Still trigger background generation
+                await fetch('/.netlify/functions/result-background', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: sessionId })
+                });
+                showCompletionAnimation();
+            }
         }
-        function getLargeLottieAvatar() {
-            const container = document.createElement('div');
-            container.id = 'lottie-avatar';
-            container.className = 'w-48 h-48';
-            try { lottie.loadAnimation({ container: container, renderer: 'svg', loop: true, autoplay: true, path: 'assistent.json' }); } catch(e) { console.error("Lottie failed:", e); }
-            return container;
+        
+        // --- Main UI Functions ---
+        
+        function updateProgressBar() {
+            const questionKeys = quizQuestions.filter(q => q.type === 'question' && q.key !== 'terms').map(q => q.key);
+            const totalSteps = questionKeys.length + 1; // +1 for the photo step
+            const completedAnswers = Object.keys(userAnswers).filter(key => questionKeys.includes(key)).length;
+            const photoStepCompleted = userAnswers['selfie'] ? 1 : 0;
+            const progress = ((completedAnswers + photoStepCompleted) / totalSteps) * 100;
+            progressBar.style.width = `${progress}%`;
         }
+
+
         function showTypingIndicator() {
             const typingDiv = document.createElement('div');
             typingDiv.id = 'typing-indicator';
-            typingDiv.className = 'fade-in flex w-full items-end gap-3 justify-start';
-            const bubble = document.createElement('div');
-            bubble.className = 'max-w-xs md:max-w-md p-3 rounded-2xl bg-indigo-600 text-white rounded-bl-lg flex items-center justify-center space-x-1';
-            bubble.innerHTML = `<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>`;
-            typingDiv.appendChild(getBotAvatar());
-            typingDiv.appendChild(bubble);
-            chatContent.appendChild(typingDiv);
-            chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
+            typingDiv.className = 'flex justify-start mb-4 chat-bubble';
+            typingDiv.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center mr-3 flex-shrink-0 bot-avatar">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <div class="bg-gray-200 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl">
+                    <div class="typing-indicator"><span></span><span></span><span></span></div>
+                </div>`;
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
-        function hideTypingIndicator() { document.getElementById('typing-indicator')?.remove(); }
-  
-        function addWelcomeMessage(text) {
-            const welcomeContainer = document.createElement('div');
-            welcomeContainer.className = 'fade-in flex flex-col items-center text-center space-y-4 py-4';
-            welcomeContainer.appendChild(getLargeLottieAvatar());
-            const textDiv = document.createElement('div');
-            textDiv.className = 'text-lg text-gray-200 max-w-sm';
-            textDiv.innerHTML = text;
-            welcomeContainer.appendChild(textDiv);
-            chatContent.appendChild(welcomeContainer);
-            chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
+
+        function hideTypingIndicator() {
+            document.getElementById('typing-indicator')?.remove();
         }
-        function addMessage(htmlContent, sender = 'bot') {
+
+        function addBotMessage(html) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = `max-w-xs md:max-w-md p-3 rounded-2xl ${sender === 'bot' ? 'bg-indigo-600 text-white rounded-bl-lg' : 'bg-slate-700 text-gray-200 rounded-br-lg'}`;
-            messageDiv.innerHTML = htmlContent;
-            const wrapperDiv = document.createElement('div');
-            wrapperDiv.className = `fade-in flex w-full items-end gap-3 ${sender === 'bot' ? 'justify-start' : 'justify-end'}`;
-            if (sender === 'bot') wrapperDiv.appendChild(getBotAvatar());
-            wrapperDiv.appendChild(messageDiv);
-            chatContent.appendChild(wrapperDiv);
-            chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
+            messageDiv.className = 'flex justify-start mb-4 chat-bubble';
+            messageDiv.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center mr-3 flex-shrink-0 bot-avatar">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${html}</div>`;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
-        function updateProgressBar() {
-            const answeredQuestions = Object.keys(userAnswers).length;
-            progressBar.style.width = `${(answeredQuestions / totalQuizQuestions) * 100}%`;
+
+        function addUserMessage(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex justify-end mb-4 chat-bubble';
+            messageDiv.innerHTML = `<div class="bg-purple-600 text-white p-3 rounded-tl-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${text}</div>`;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
-       
-        function displayQuestion() {
+        
+        function showOptions(options) {
+            optionsContainer.innerHTML = '';
+            if (options?.length > 0) {
+                optionsContainerWrapper.classList.remove('hidden');
+                options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.className = 'option-btn bg-white border border-purple-300 text-purple-600 px-4 py-2 rounded-full text-sm flex-shrink-0 hover:bg-purple-50';
+                    button.onclick = () => handleAnswer(option);
+                    optionsContainer.appendChild(button);
+                });
+            } else {
+                 optionsContainerWrapper.classList.add('hidden');
+            }
+        }
+
+        function handleAnswer(answer) {
+            if (!answer.trim()) return;
+            const currentQuestion = quizQuestions[currentQuestionIndex];
+            addUserMessage(answer);
+            
+            if (currentQuestion.key !== 'terms') {
+                userAnswers[currentQuestion.key] = answer.trim();
+                saveAnswerToServer(currentQuestion.key, answer.trim());
+            }
+            
+            userInput.value = '';
+            
+            if (currentQuestion.key === 'terms') {
+                inputArea.classList.add('hidden');
+            }
+
+            currentQuestionIndex++;
+            updateProgressBar();
+            askNextQuestion();
+        }
+
+        function askNextQuestion() {
             if (currentQuestionIndex >= quizQuestions.length) {
-                endQuiz();
                 return;
             }
+
             const question = quizQuestions[currentQuestionIndex];
             showTypingIndicator();
+            
             setTimeout(() => {
                 hideTypingIndicator();
-                if (question.type === 'welcome') {
-                    addWelcomeMessage(question.text);
-                } else {
-                    let messageHtml = question.text;
-                    if (question.reason) {
-                        messageHtml += `<br><span class='block mt-2 text-sm text-indigo-200 opacity-80'>${question.reason}</span>`;
+                let questionText = typeof question.text === 'function' ? question.text(userAnswers.name || 'friend') : question.text;
+
+                if (question.type === 'message') {
+                    addBotMessage(questionText);
+                    currentQuestionIndex++;
+                    askNextQuestion();
+                } else if (question.type === 'question') {
+                    addBotMessage(questionText);
+                    showOptions(question.options);
+                    
+                    if (question.key === 'terms') {
+                        inputArea.classList.add('hidden');
+                    } else {
+                        inputArea.classList.remove('hidden');
+                        userInput.placeholder = question.placeholder || "Type your answer...";
                     }
-                    addMessage(messageHtml);
+                    userInput.focus();
+                } else if (question.type === 'final_step') {
+                    inputArea.classList.add('hidden');
+                    addBotMessage(questionText);
+                    showCameraStep();
                 }
-                setupInput(question);
-            }, 1000 + Math.random() * 500);
-        }
-        function setupInput(question) {
-            optionsContainer.innerHTML = '';
-            textInputContainer.style.display = 'none';
-            inputArea.style.display = 'block';
-            const isSimpleAction = question.type === 'welcome' || question.type === 'disclaimer' || question.type === 'camera_button';
-            optionsContainer.className = `flex gap-2 mb-3 pb-2 ${isSimpleAction ? 'justify-center' : 'flex-nowrap overflow-x-auto no-scrollbar'}`;
-            
-            question.options.forEach(option => {
-                const button = document.createElement('button');
-                button.textContent = option;
-                button.className = isSimpleAction 
-                    ? "px-6 py-3 bg-indigo-500 border border-indigo-400 text-white rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200 font-semibold"
-                    : "flex-shrink-0 px-4 py-2 bg-slate-700 border border-slate-600 text-gray-200 rounded-full hover:bg-indigo-500 hover:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200";
-                
-                if (question.type === 'camera_button') {
-                    button.onclick = () => handleCameraButtonClick();
-                } else {
-                    button.onclick = () => handleAnswer(option);
-                }
-                optionsContainer.appendChild(button);
-            });
-
-            if (question.type === 'chips_text') {
-                textInputContainer.style.display = 'flex';
-                userInput.placeholder = question.placeholder;
-                userInput.value = '';
-            }
-        }
-       
-        function handleAnswer(answer) {
-            if (!answer || !answer.trim()) return;
-            const question = quizQuestions[currentQuestionIndex];
-            if (question.type !== 'welcome' && question.type !== 'disclaimer') {
-                userAnswers[question.id] = answer;
-                saveAnswerToServer(question.id, answer);
-                addMessage(answer, 'user');
-                updateProgressBar();
-            }
-            currentQuestionIndex++;
-            displayQuestion();
-        }
-        function handleCameraButtonClick() {
-            addMessage("Opening camera...", 'bot');
-            optionsContainer.innerHTML = '';
-            inputArea.style.display = 'none';
-            initCamera();
+            }, 1200);
         }
 
-        // --- CAMERA LOGIC ---
-        let faceApiLoaded = false;
-        let detectionInterval;
-        let videoStream;
+        function showCameraStep() {
+            optionsContainerWrapper.classList.add('hidden');
+            inputArea.classList.remove('hidden');
+            inputArea.innerHTML = `
+                <button id="open-camera-btn" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-full hover:bg-purple-700 transition-colors pulse-btn">
+                    Open Camera
+                </button>`;
+            document.getElementById('open-camera-btn').onclick = startCamera;
+        }
 
-        async function loadFaceApiModels() {
-            const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
+        // --- Camera and Face Detection Logic ---
+
+        async function startCamera() {
+            cameraModal.classList.add('active');
             try {
-                cameraStatus.textContent = 'Loading AI models...';
+                // Using a more reliable model path
+                const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
                 await Promise.all([
                     faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
                     faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
                 ]);
-                faceApiLoaded = true;
-                cameraStatus.textContent = 'Position your face';
-            } catch (error) {
-                console.error("Error loading FaceAPI models:", error);
-                addMessage("Sorry, there was a problem preparing the camera analysis. Please try refreshing the page.");
-                closeCamera();
+
+                loaderText.textContent = "Requesting camera access...";
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                video.srcObject = stream;
+                
+                video.onloadedmetadata = () => {
+                    cameraLoader.style.display = 'none';
+                    startFaceDetection();
+                };
+
+            } catch (err) {
+                console.error("Camera/Model Error:", err);
+                loaderText.textContent = "Camera access denied or models failed to load. Please refresh and try again.";
+                setTimeout(stopCamera, 3000);
             }
         }
-
-        async function initCamera() {
-            cameraModal.classList.remove('hidden');
-            cameraModal.classList.add('flex');
-            
-            requestAnimationFrame(async () => {
-                if (!faceApiLoaded) {
-                    await loadFaceApiModels();
-                }
-                if (!faceApiLoaded) return;
-
-                try {
-                    videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-                    videoEl.srcObject = videoStream;
-                    videoEl.onloadedmetadata = () => {
-                        videoEl.play();
-                        const displaySize = { width: videoEl.clientWidth, height: videoEl.clientHeight };
-                        faceapi.matchDimensions(overlayCanvas, displaySize);
-                        startFaceDetection(videoEl, overlayCanvas);
-                    };
-                } catch (err) {
-                    console.error("Camera Error:", err);
-                    let errorMessage = "Oops, I couldn't access your camera. Please check your browser permissions and refresh the page.";
-                    if (err.name === 'NotAllowedError') errorMessage = "Camera access was denied. Please enable it in your browser settings and refresh.";
-                    else if (err.name === 'NotFoundError') errorMessage = "No camera was found. Please connect one and refresh.";
-                    addMessage(errorMessage);
-                    closeCamera();
-                }
-            });
-        }
-
-        function closeCamera() {
+        
+        function stopCamera() {
             clearInterval(detectionInterval);
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-            }
-            const context = overlayCanvas.getContext('2d');
-            context.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            cameraModal.classList.add('hidden');
-            cameraModal.classList.remove('flex');
-            inputArea.style.display = 'block';
-            if (currentQuestionIndex < quizQuestions.length) {
-                setupInput(quizQuestions[currentQuestionIndex]);
-            }
+            stream?.getTracks().forEach(track => track.stop());
+            cameraModal.classList.remove('active');
+            video.srcObject = null;
         }
 
-        function startFaceDetection(video, canvas) {
-            const context = canvas.getContext('2d');
-            let captureTimeout;
-            let scanY = 0;
-            let scanDirection = 1;
+        function startFaceDetection() {
+            let faceDetectedFrames = 0;
 
             detectionInterval = setInterval(async () => {
-                if (!faceApiLoaded) return;
-
-                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
-                const resizedDetections = faceapi.resizeResults(detections, { width: canvas.width, height: canvas.height });
-
-                context.clearRect(0, 0, canvas.width, canvas.height);
-                context.save();
-                context.translate(canvas.width, 0);
-                context.scale(-1, 1);
+                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
                 
-                if (resizedDetections.length > 0) {
-                    const box = resizedDetections[0].detection.box;
-                    faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
-                    scanY += 2 * scanDirection;
-                    if (scanY > box.height || scanY < 0) scanDirection *= -1;
-                    
-                    context.fillStyle = 'rgba(0, 255, 255, 0.4)';
-                    context.fillRect(box.x, box.y + scanY, box.width, 3);
-                    context.shadowColor = 'rgba(0, 255, 255, 1)';
-                    context.shadowBlur = 10;
-                    context.fillRect(box.x, box.y + scanY, box.width, 3);
-                    context.shadowBlur = 0;
-
-                    context.strokeStyle = '#00FFFF';
-                    context.lineWidth = 3;
-                    const cornerLength = 20;
-                    context.beginPath();
-                    context.moveTo(box.x, box.y + cornerLength); context.lineTo(box.x, box.y); context.lineTo(box.x + cornerLength, box.y);
-                    context.stroke();
-                    context.beginPath();
-                    context.moveTo(box.x + box.width - cornerLength, box.y); context.lineTo(box.x + box.width, box.y); context.lineTo(box.x + box.width, box.y + cornerLength);
-                    context.stroke();
-                    context.beginPath();
-                    context.moveTo(box.x, box.y + box.height - cornerLength); context.lineTo(box.x, box.y + box.height); context.lineTo(box.x + cornerLength, box.y + box.height);
-                    context.stroke();
-                    context.beginPath();
-                    context.moveTo(box.x + box.width - cornerLength, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height - cornerLength);
-                    context.stroke();
-                   
-                    const isGoodSize = box.width > canvas.width * 0.4;
-                    if (isGoodSize) {
-                        cameraStatus.textContent = "Hold still...";
-                        if (!captureTimeout) {
-                            captureTimeout = setTimeout(() => takePicture(video), 2000);
-                        }
-                    } else {
-                        cameraStatus.textContent = "Move closer";
-                        clearTimeout(captureTimeout);
-                        captureTimeout = null;
-                    }
+                if (detections.length > 0 && detections[0].score > 0.85) {
+                    faceDetectedFrames++;
                 } else {
-                    cameraStatus.textContent = "Position your face";
-                    clearTimeout(captureTimeout);
-                    captureTimeout = null;
+                    faceDetectedFrames = 0;
                 }
-                context.restore();
+
+                if (faceDetectedFrames > 30) { // Require ~1 second of stable detection
+                    takePhoto();
+                }
             }, 100);
         }
-       
-        function takePicture(video) {
+
+        function takePhoto() {
             clearInterval(detectionInterval);
-            cameraStatus.textContent = "Analysis complete!";
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const context = canvas.getContext('2d');
-            context.translate(canvas.width, 0);
-            context.scale(-1, 1);
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-           
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-            }
-            cameraModal.classList.add('hidden');
-            cameraModal.classList.remove('flex');
-
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-            showPhotoForConfirmation(dataUrl);
-        }
-
-        function showPhotoForConfirmation(dataUrl) {
-            capturedPhotoDataUrl = dataUrl;
-            const messageWrapper = document.createElement('div');
-            messageWrapper.id = 'photo-preview-wrapper';
-            messageWrapper.className = 'fade-in flex w-full items-end gap-3 justify-start';
-           
-            const contentWrapper = document.createElement('div');
-            contentWrapper.className = 'p-3 rounded-2xl bg-indigo-600 text-white rounded-bl-lg';
-            const text = document.createElement('p');
-            text.className = 'mb-2';
-            text.textContent = "Here's the photo. Happy with it?";
-            const image = new Image();
-            image.src = dataUrl;
-            image.alt = "Your selfie";
-            image.className = "rounded-lg max-w-full h-auto";
-            image.onload = () => { chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight; };
+            const photoCanvas = document.createElement('canvas');
+            photoCanvas.width = video.videoWidth;
+            photoCanvas.height = video.videoHeight;
+            const photoContext = photoCanvas.getContext('2d');
             
-            contentWrapper.appendChild(text);
-            contentWrapper.appendChild(image);
-            messageWrapper.appendChild(getBotAvatar());
-            messageWrapper.appendChild(contentWrapper);
-            chatContent.appendChild(messageWrapper);
-
-            optionsContainer.innerHTML = '';
-            const confirmBtn = document.createElement('button');
-            confirmBtn.id = 'confirm-photo-btn';
-            confirmBtn.textContent = 'Looks Good!';
-            confirmBtn.className = "px-6 py-3 bg-green-500 border border-green-400 text-white rounded-full hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-200 font-semibold";
-            confirmBtn.onclick = confirmPhoto;
-
-            const retakeBtn = document.createElement('button');
-            retakeBtn.textContent = 'Retake';
-            retakeBtn.className = "px-6 py-3 bg-slate-700 border border-slate-600 text-gray-200 rounded-full hover:bg-red-500 hover:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 transition-all duration-200 font-semibold";
-            retakeBtn.onclick = retakePhoto;
-           
-            optionsContainer.appendChild(confirmBtn);
-            optionsContainer.appendChild(retakeBtn);
-            optionsContainer.className = 'flex gap-2 mb-3 pb-2 justify-center';
-            textInputContainer.style.display = 'none';
-            inputArea.style.display = 'block';
-        }
-
-        async function confirmPhoto() {
-    const confirmButton = document.getElementById('confirm-photo-btn');
-    if (confirmButton) {
-        confirmButton.disabled = true;
-        confirmButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Analyzing...`;
-    }
-
-    addMessage('Looks Good!', 'user');
-    showTypingIndicator();
-    optionsContainer.innerHTML = '';
-    inputArea.style.display = 'none';
-    
-    try {
-        // Пытаемся анализировать фото
-        const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ photoDataUrl: capturedPhotoDataUrl })
-        });
-
-        let faceData = null;
-        if (!analyzeResponse.ok) {
-            // Если анализ не удался, логируем ошибку но продолжаем
-            console.error('Face analysis failed, continuing without it');
-            faceData = { error: 'Analysis failed', timestamp: new Date().toISOString() };
-        } else {
-            faceData = await analyzeResponse.json();
+            photoContext.translate(video.videoWidth, 0);
+            photoContext.scale(-1, 1);
+            photoContext.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+            
+            const photoDataUrl = photoCanvas.toDataURL('image/jpeg', 0.9);
+            userAnswers['selfie'] = 'Photo taken'; // Mark step as complete
+            
+            stopCamera();
+            addUserMessage("Photo Taken 👍");
+            updateProgressBar();
+            confirmPhotoAndAnalyze(photoDataUrl);
         }
         
-        // Сохраняем результат (или ошибку)
-        await saveAnswerToServer('faceAnalysis', faceData);
-
-        // Запускаем генерацию отчета в фоне, НЕ дожидаясь ответа
-        fetch('/.netlify/functions/result-background', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: sessionId })
-        }).catch(err => {
-            console.error('Background generation request failed:', err);
-        });
-
-        // Удаляем превью фото
-        document.getElementById('photo-preview-wrapper')?.remove();
-        
-        // Переходим к завершению
-        endQuiz();
-
-    } catch (error) {
-        console.error('Error during photo analysis step:', error);
-        hideTypingIndicator();
-        addMessage("I couldn't analyze the photo, but that's okay! Let's continue with your report.");
-        
-        // Сохраняем информацию об ошибке
-        await saveAnswerToServer('faceAnalysis', { error: error.message });
-        
-        // Всё равно запускаем генерацию отчета
-        fetch('/.netlify/functions/result-background', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: sessionId })
-        }).catch(err => {
-            console.error('Background generation request failed:', err);
-        });
-        
-        setTimeout(endQuiz, 1500);
-    } finally {
-        if (confirmButton) {
-            confirmButton.disabled = false;
-            confirmButton.innerHTML = 'Looks Good!';
-        }
-    }
-}
-
-        function retakePhoto() {
-            addMessage('Retake', 'user');
-            document.getElementById('photo-preview-wrapper')?.remove();
-            optionsContainer.innerHTML = '';
-            inputArea.style.display = 'none';
-            handleCameraButtonClick();
-        }
-
-        function endQuiz() {
-            inputArea.style.display = 'none';
-            progressBar.style.width = '100%';
-            showTypingIndicator();
+        function showCompletionAnimation() {
+            confetti({
+                particleCount: 150,
+                spread: 100,
+                origin: { y: 0.6 }
+            });
+            
             setTimeout(() => {
-                hideTypingIndicator();
-                addMessage("Thank you for sharing! I'm firing up my neural networks to analyze your results... This is exciting!");
-                showTypingIndicator();
-                setTimeout(() => {
+                 showTypingIndicator();
+                 setTimeout(() => {
                     hideTypingIndicator();
-                    const resultUrl = `result.html?sessionId=${sessionId}`;
-                    const message = `Done! Your personalized free report is ready. 🚀<br><a href='${resultUrl}' class='inline-block mt-4 px-6 py-3 bg-indigo-500 text-white font-semibold rounded-full hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-200'>View My Results</a>`;
-                    addMessage(message);
-                    localStorage.setItem(`wellnessReport-${sessionId}`, JSON.stringify(userAnswers));
-                }, 3000);
+                    addBotMessage("Awesome work! You've completed the assessment. 🥳 I'm now analyzing your results...");
+                    inputArea.innerHTML = `<div class="text-center p-2"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div><p class="text-gray-600 mt-2">This will just take a moment...</p></div>`;
+                    
+                    setTimeout(() => {
+                        const resultUrl = `/results.html?sessionId=${sessionId}`;
+                        hideTypingIndicator();
+                        addBotMessage(`All done! Your personalized report is ready. 🚀 <br><a href="${resultUrl}" class="inline-block mt-2 bg-purple-600 text-white font-bold py-2 px-6 rounded-full hover:bg-purple-700 transition-colors">View My Report</a>`);
+                        inputArea.style.display = 'none';
+                    }, 8000); // Simulate report generation time
+                }, 1000);
             }, 1500);
         }
 
-        // --- INITIALIZATION ---
+        // --- Event Listeners & Initial Call ---
         async function initQuiz() {
             await startQuizSession();
             if (sessionId) {
-                displayQuestion();
+                askNextQuestion();
             }
         }
+        
         sendBtn.addEventListener('click', () => handleAnswer(userInput.value));
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleAnswer(userInput.value);
         });
-        closeCameraBtn.addEventListener('click', closeCamera);
+        
+        inputArea.classList.add('hidden');
         initQuiz();
-    </script>
 
+    </script>
 </body>
 </html>
-
-
 
