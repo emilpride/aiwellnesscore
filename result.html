@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI WELLNESSCORE - Discover Your True Wellness Age</title>
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <title>Your AI WELLNESSCORE Report</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <style>
-        /* Core styles */
         body {
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
@@ -28,453 +28,336 @@
             75% { background-position: 0% 100%; }
             100% { background-position: 0% 0%; }
         }
-        /* Glass Card Effect */
+        @keyframes pulse-glow {
+            0% { filter: drop-shadow(0 0 5px rgba(20, 227, 227, 0.4)); }
+            50% { filter: drop-shadow(0 0 20px rgba(20, 227, 227, 0.8)); }
+            100% { filter: drop-shadow(0 0 5px rgba(20, 227, 227, 0.4)); }
+        }
+        @keyframes fill-bar {
+            from { width: 0%; }
+            to { width: var(--final-width); }
+        }
+        .score-circle-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        .score-circle-path {
+            transition: stroke-dashoffset 2s ease-out;
+        }
         .glass-card {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-            position: relative;
-            overflow: hidden;
         }
-        .glass-card:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.06), transparent 40%);
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-        .glass-card:hover:before {
-            opacity: 1;
-        }
-        .glass-card:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-8px);
-            box-shadow: 0 20px 30px rgba(0,0,0,0.2);
-        }
-        /* Fade-in Animation */
         .fade-in-section {
             opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
         }
         .fade-in-section.is-visible {
             opacity: 1;
             transform: translateY(0);
         }
-        .pulsate {
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(20, 227, 227, 0.7); }
-            50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(20, 227, 227, 0); }
-        }
-        /* Text Gradient Animation */
-        .animated-gradient-text {
-            background: linear-gradient(90deg, #e0e7ff, #a5b4fc, #6366f1, #14e3e3);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-size: 200% auto;
-            animation: text-shine 5s linear infinite;
-        }
-        @keyframes text-shine {
-            to {
-                background-position: 200% center;
-            }
-        }
-        /* FAQ accordion */
-        details summary::-webkit-details-marker { display: none; }
-        details summary { position: relative; padding-right: 2rem; }
-        details summary:after {
-            content: '+';
-            position: absolute;
-            right: 0.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.5rem;
-            font-weight: 200;
-            transition: transform 0.3s ease-in-out;
-        }
-        details[open] summary:after { transform: translateY(-50%) rotate(135deg); }
-        .hero-content {
-            position: relative;
-            z-index: 2;
+        .bar-animation {
+            animation: fill-bar 1.5s ease-out forwards;
         }
     </style>
 </head>
 <body class="bg-slate-900 text-gray-200">
 
-    <div class="gradient-bg-dark-animated min-h-screen">
-
-        <header class="absolute top-0 left-0 right-0 z-30 p-4">
-            <div class="max-w-7xl mx-auto flex justify-between items-center">
-                <a href="index.html"><img src="logo.png" alt="AI WELLNESSCORE Logo" class="h-16 w-auto"></a>
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="#faq" class="text-gray-300 hover:text-white transition-colors">FAQ</a>
-                    <a href="quiz.html" class="px-5 py-2 text-sm font-semibold bg-white/10 border border-white/20 rounded-full hover:bg-white/20 transition-all duration-300 transform hover:scale-105">Start Analysis</a>
-                </div>
-                <button id="menu-btn" class="md:hidden z-40 text-white">
-                    <svg id="menu-open-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" /></svg>
-                    <svg id="menu-close-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-            </div>
-        </header>
-
-        <div id="mobile-menu" class="hidden md:hidden fixed inset-0 bg-slate-900/95 backdrop-blur-sm z-20">
-            <div class="flex flex-col items-center justify-center h-full space-y-8 text-2xl font-semibold text-white">
-                <a href="quiz.html" class="hover:text-teal-300 transition-colors">Start Analysis</a>
-                <a href="#faq" class="hover:text-teal-300 transition-colors">FAQ</a>
-                <a href="terms.html" class="hover:text-teal-300 transition-colors">Terms of Service</a>
-                <a href="privacy.html" class="hover:text-teal-300 transition-colors">Privacy Policy</a>
-                <a href="#" class="hover:text-teal-300 transition-colors">Contact</a>
-            </div>
-        </div>
-
-        <main class="relative overflow-hidden">
-            <section class="min-h-screen flex items-center justify-center px-4 pt-20 pb-10">
-                <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-8 items-center">
-                    <div class="hero-content text-center md:text-left space-y-6">
-                        <h1 class="text-5xl md:text-7xl font-black text-white tracking-tighter">
-                            Discover Your <span class="animated-gradient-text">Wellnesscore</span>
-                        </h1>
-                        <p class="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto md:mx-0">
-                            Unlock a deeper understanding of your well-being with our AI-powered lifestyle analysis and get personalized insights in minutes.
-                        </p>
-                        <a href="quiz.html" class="inline-block px-8 py-4 text-lg font-bold rounded-lg shadow-lg text-slate-900 bg-teal-400 hover:bg-teal-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-teal-500 transition-transform transform hover:scale-105 pulsate">
-                            Start Free Analysis
-                        </a>
-                    </div>
-                    <div id="hero-animation" class="w-full max-w-md mx-auto md:max-w-none"></div>
-                </div>
-            </section>
-
-            <div class="max-w-7xl mx-auto px-4 space-y-24 md:space-y-32 py-16">
-                
+    <div class="gradient-bg-dark-animated min-h-screen py-8">
+        <div class="max-w-md mx-auto px-4 space-y-12">
+            
+            <div id="report-container">
                 <section class="fade-in-section text-center">
-                    <h2 class="text-4xl font-bold text-white mb-12">Get Your Results in <span class="animated-gradient-text">3 Simple Steps</span></h2>
-                    <div class="grid md:grid-cols-3 gap-8">
-                        <div class="glass-card p-8 rounded-2xl text-center flex flex-col items-center">
-                            <div class="text-5xl font-black text-indigo-400 mb-2">1</div>
-                            <h3 class="text-xl font-bold text-teal-300 mb-2">Answer Questions</h3>
-                            <p class="text-gray-400 text-sm flex-grow mb-4">Complete a short, conversational quiz about your lifestyle, habits, and goals.</p>
-                            <img src="Step1.png" alt="Screenshot of quiz questions" class="rounded-lg shadow-lg w-full max-w-xs" onerror="this.onerror=null;this.src='https://placehold.co/250x400/0f172a/e0e7ff?text=Step+1';">
-                        </div>
-                        <div class="glass-card p-8 rounded-2xl text-center flex flex-col items-center" style="transition-delay: 150ms;">
-                            <div class="text-5xl font-black text-indigo-400 mb-2">2</div>
-                            <h3 class="text-xl font-bold text-teal-300 mb-2">Snap a Photo</h3>
-                            <p class="text-gray-400 text-sm flex-grow mb-4">Our AI analyzes facial cues for non-medical indicators of stress and fatigue. Never stored.</p>
-                            <img src="Step2.png" alt="Screenshot of selfie camera view" class="rounded-lg shadow-lg w-full max-w-xs" onerror="this.onerror=null;this.src='https://placehold.co/250x400/0f172a/e0e7ff?text=Step+2';">
-                        </div>
-                        <div class="glass-card p-8 rounded-2xl text-center flex flex-col items-center" style="transition-delay: 300ms;">
-                            <div class="text-5xl font-black text-indigo-400 mb-2">3</div>
-                            <h3 class="text-xl font-bold text-teal-300 mb-2">Receive Report</h3>
-                            <p class="text-gray-400 text-sm flex-grow mb-4">Get an instant, free report with your Wellness Score, Archetype, and actionable first step.</p>
-                            <img src="Step3.png" alt="Screenshot of the final report" class="rounded-lg shadow-lg w-full max-w-xs" onerror="this.onerror=null;this.src='https://placehold.co/250x400/0f172a/e0e7ff?text=Step+3';">
-                        </div>
-                    </div>
-                </section>
-
-                <section id="demo-report-section" class="fade-in-section text-center">
-                    <h2 class="text-4xl font-bold text-white mb-2">This Isn't Just Another Health App</h2>
-                    <p class="text-lg text-gray-400 mb-12 max-w-2xl mx-auto">Visualize your wellness like never before. See what our AI can reveal for you.</p>
-                    <div class="glass-card p-6 md:p-10 rounded-2xl shadow-2xl max-w-4xl mx-auto">
-                        <div class="grid md:grid-cols-2 gap-8 items-center">
-                            <div class="space-y-6 text-center md:text-left">
-                                <div>
-                                    <span class="text-teal-300 text-sm font-medium px-4 py-1.5 rounded-full bg-teal-900/50 border border-teal-800">Your Wellness Archetype</span>
-                                    <h3 class="text-4xl font-black text-white mt-3">Creative Owl</h3>
-                                </div>
-                                <div>
-                                    <h3 class="text-xl font-bold text-white">Wellness Age</h3>
-                                    <p class="text-5xl text-teal-400 font-bold mt-2">32</p>
-                                    <p class="text-sm text-gray-400 mt-1">(Chronological Age: 35)</p>
-                                </div>
-                            </div>
-                            <div class="relative w-56 h-56 mx-auto">
-                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                                    <defs>
-                                        <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                            <stop offset="0%" style="stop-color:#14E3E3; stop-opacity:1" />
-                                            <stop offset="100%" style="stop-color:#4F46E5; stop-opacity:1" />
-                                        </linearGradient>
-                                    </defs>
-                                    <path class="text-slate-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="2" />
-                                    <path id="score-path" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke-width="2" stroke="url(#scoreGradient)" stroke-linecap="round" stroke-dasharray="0, 100" style="transition: stroke-dasharray 2s ease-out;"/>
-                                </svg>
-                                <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span id="score-text" class="text-6xl font-black text-white">0</span>
-                                    <span class="text-lg text-gray-400">Overall Score</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <span class="text-teal-300 text-sm font-medium px-4 py-1.5 rounded-full bg-teal-900/50 border border-teal-800">Your Wellness Archetype</span>
+                    <h1 class="text-4xl font-black text-white mt-3 tracking-tight">Loading...</h1>
+                    <p class="text-base text-gray-400 mt-2 mx-auto max-w-sm">Loading description...</p>
                 </section>
 
                 <section class="fade-in-section text-center">
-                    <h2 class="text-4xl font-bold text-white mb-2">Most People Don’t Know Their <span class="animated-gradient-text">True Wellness Age</span>.</h2>
-                    <p class="text-lg text-gray-400 mb-12 max-w-2xl mx-auto">Daily pressures from stress, poor sleep, and nutrition choices silently impact your long-term health. AI WELLNESSCORE helps you measure & improve what matters.</p>
+                    <div class="relative w-56 h-56 mx-auto">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <defs>
+                                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#14E3E3; stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#4F46E5; stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path class="text-slate-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="2" />
+                            <path id="score-circle-path" class="score-circle-path score-circle-glow" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="2" stroke="url(#scoreGradient)" stroke-linecap="round" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-6xl font-black text-white" id="score-text">0</span>
+                            <span class="text-lg text-gray-400">Overall Score</span>
+                        </div>
+                    </div>
                 </section>
-                
-                <section class="fade-in-section">
-                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        <div class="glass-card p-6 rounded-2xl flex items-start space-x-4">
-                            <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                            <div>
-                                <h3 class="font-semibold text-white text-lg">Personalized AI Report</h3>
-                                <p class="text-sm text-gray-400">Go beyond generic advice with an analysis tailored to your unique data.</p>
-                            </div>
+
+                <section id="score-breakdown-section" class="fade-in-section glass-card p-6 rounded-xl space-y-4">
+                    <h3 class="text-xl font-bold text-white text-center">Core Four Breakdown</h3>
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-medium text-teal-400">Body</span>
+                            <span id="body-score" class="text-teal-400 font-bold">0%</span>
                         </div>
-                        <div class="glass-card p-6 rounded-2xl flex items-start space-x-4" style="transition-delay: 150ms;">
-                            <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.896-1.792A2 2 0 0110.428 4h3.144a2 2 0 011.664.89l.896 1.792A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
-                            <div>
-                                <h3 class="font-semibold text-white text-lg">Photo-based Insights</h3>
-                                <p class="text-sm text-gray-400">Our AI analyzes subtle facial cues to provide a more holistic wellness picture.</p>
-                            </div>
+                        <div class="w-full bg-slate-700 rounded-full h-2.5">
+                            <div id="body-bar" class="bg-teal-400 h-2.5 rounded-full" style="width: 0%;"></div>
                         </div>
-                        <div class="glass-card p-6 rounded-2xl flex items-start space-x-4" style="transition-delay: 300ms;">
-                            <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg></div>
-                            <div>
-                                <h3 class="font-semibold text-white text-lg">7-Day Action Plan</h3>
-                                <p class="text-sm text-gray-400">Unlock a step-by-step plan to measurably improve your score.</p>
-                            </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-medium text-indigo-400">Mind</span>
+                            <span id="mind-score" class="text-indigo-400 font-bold">0%</span>
                         </div>
-                        <div class="glass-card p-6 rounded-2xl flex items-start space-x-4" style="transition-delay: 450ms;">
-                            <div class="bg-indigo-900/50 p-2 rounded-md mt-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg></div>
-                            <div>
-                                <h3 class="font-semibold text-white text-lg">Long-term Forecast</h3>
-                                <p class="text-sm text-gray-400">See the potential impact of your habits on your future wellness trajectory.</p>
-                            </div>
+                        <div class="w-full bg-slate-700 rounded-full h-2.5">
+                            <div id="mind-bar" class="bg-indigo-400 h-2.5 rounded-full" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-medium text-emerald-400">Nutrition</span>
+                            <span id="nutrition-score" class="text-emerald-400 font-bold">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-2.5">
+                            <div id="nutrition-bar" class="bg-emerald-400 h-2.5 rounded-full" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-medium text-sky-400">Lifestyle</span>
+                            <span id="lifestyle-score" class="text-sky-400 font-bold">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-2.5">
+                            <div id="lifestyle-bar" class="bg-sky-400 h-2.5 rounded-full" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="fade-in-section text-center space-y-6">
+                    <div class="glass-card p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-white mb-2">Key AI Insight</h3>
+                        <p id="key-insight" class="text-sm text-gray-300">...</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-white mb-2">Wellness Age</h3>
+                        <p class="text-2xl text-teal-400 font-bold mt-2" id="wellness-age">0</p>
+                    </div>
+                </section>
+
+                <section class="fade-in-section glass-card p-6 rounded-xl text-center">
+                    <h3 class="text-xl font-bold text-white mb-2">Comparison to Peers</h3>
+                    <p id="peer-comparison" class="text-sm text-gray-300">...</p>
+                </section>
+
+                <section class="fade-in-section glass-card p-6 rounded-xl text-center">
+                    <h3 class="text-xl font-bold text-white mb-2">Your First Step</h3>
+                    <div class="flex flex-col items-center space-y-4">
+                        <div class="bg-indigo-900/50 border border-indigo-800 p-4 rounded-xl w-full">
+                            <p id="first-step" class="text-teal-300 text-lg font-semibold">...</p>
+                        </div>
+                        <div class="pt-4 border-t border-slate-700/50 w-full">
+                            <p class="text-sm text-gray-400 italic">Motivation Trigger:</p>
+                            <p id="motivation-trigger" class="text-white font-semibold mt-1">"...</p>
                         </div>
                     </div>
                 </section>
 
                 <section class="fade-in-section">
-                    <h2 class="text-4xl font-bold text-white text-center mb-12">Trusted by People Like You</h2>
-                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <div class="glass-card p-8 rounded-2xl">
-                            <p class="text-gray-300 italic">"I was shocked by my Wellness Age. It was the wake-up call I needed. The first step was so simple, and it made an immediate difference in my sleep."</p>
-                            <div class="flex items-center mt-6">
-                                <img src="https://placehold.co/48x48/1e293b/a5b4fc?text=JM" alt="Jessica M." class="w-12 h-12 rounded-full mr-4">
-                                <div>
-                                    <p class="font-bold text-white">Jessica M.</p>
-                                    <p class="text-sm text-gray-400">Improved score by 8 points</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="glass-card p-8 rounded-2xl" style="transition-delay: 150ms;">
-                            <p class="text-gray-300 italic">"Finally, a wellness tool that isn't about guilt or extreme diets. The 'Creative Owl' archetype resonated so much with me. It felt like it truly understood my lifestyle."</p>
-                            <div class="flex items-center mt-6">
-                                <img src="https://placehold.co/48x48/1e293b/a5b4fc?text=DL" alt="David L." class="w-12 h-12 rounded-full mr-4">
-                                <div>
-                                    <p class="font-bold text-white">David L.</p>
-                                    <p class="text-sm text-gray-400">Gained insight on work stress</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="glass-card p-8 rounded-2xl md:col-span-2 lg:col-span-1" style="transition-delay: 300ms;">
-                            <p class="text-gray-300 italic">"The photo analysis was fascinating. I had no idea my screen time was showing up as visible eye strain. This service connected the dots for me in a way nothing else has."</p>
-                            <div class="flex items-center mt-6">
-                                <img src="https://placehold.co/48x48/1e293b/a5b4fc?text=SK" alt="Sarah K." class="w-12 h-12 rounded-full mr-4">
-                                <div>
-                                    <p class="font-bold text-white">Sarah K.</p>
-                                    <p class="text-sm text-gray-400">Identified key energy drains</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                
-                <section class="fade-in-section text-center">
-                    <h2 class="text-4xl font-bold text-white mb-12">Secure, Private, and <span class="animated-gradient-text">Powerful</span></h2>
-                    <div class="glass-card p-8 rounded-2xl max-w-4xl mx-auto mb-8">
-                        <p class="text-lg text-gray-300">Your answers + photo &rarr; AI Core Analysis &rarr; Personalized Report</p>
-                    </div>
-                    <div class="flex justify-center items-center space-x-8 text-gray-400">
-                        <div class="text-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                            <p class="text-sm">Your photo is analyzed on the fly and never stored on our servers.</p>
-                        </div>
+                    <h3 class="text-xl font-bold text-white text-center mb-6">Report at a Glance</h3>
+                    <div class="w-full h-80 relative">
+                        <canvas id="wellnessWheel"></canvas>
                     </div>
                 </section>
 
-                <section id="faq" class="fade-in-section max-w-3xl mx-auto">
-                    <h2 class="text-4xl font-bold text-white text-center mb-12">Frequently Asked Questions</h2>
-                    <div class="space-y-4">
-                        <details class="glass-card rounded-xl p-6 cursor-pointer">
-                            <summary class="font-semibold text-lg text-white">Is this a medical service?</summary>
-                            <p class="text-gray-400 mt-4">No. AI WELLNESSCORE is an educational tool designed to provide insights into your lifestyle and general well-being. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified health provider for any medical concerns.</p>
-                        </details>
-                        <details class="glass-card rounded-xl p-6 cursor-pointer">
-                            <summary class="font-semibold text-lg text-white">How is my data protected?</summary>
-                            <p class="text-gray-400 mt-4">We take your privacy seriously. Your quiz answers are used solely to generate your report. Your photo is processed in real-time and is deleted immediately after analysis. We do not store or share your personal data. All payments for premium reports are handled securely by Stripe.</p>
-                        </details>
-                        <details class="glass-card rounded-xl p-6 cursor-pointer">
-                            <summary class="font-semibold text-lg text-white">Do I need to upload a photo?</summary>
-                            <p class="text-gray-400 mt-4">The photo analysis is a key part of our holistic approach, providing insights into non-obvious wellness indicators. While you can skip this step, we highly recommend it for the most accurate and comprehensive report.</p>
-                        </details>
-                    </div>
+                <section id="premium-report-section" class="fade-in-section text-center">
+                    <h2 class="text-3xl font-bold text-white mb-2">Your Full Premium Report</h2>
+                    <p class="text-gray-400 text-base">Unlock to see your complete, personalized report.</p>
                 </section>
-                
-                <section class="fade-in-section text-center glass-card rounded-2xl p-10 md:p-16">
-                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">Ready to Discover Your <span class="animated-gradient-text">Wellness Core?</span></h2>
-                    <p class="text-lg text-gray-300 max-w-xl mx-auto mb-8">Get your free, personalized report in under 2 minutes. Your journey to a better you starts now.</p>
-                    <a href="quiz.html" class="inline-block px-8 py-4 text-lg font-bold rounded-lg shadow-lg text-slate-900 bg-teal-400 hover:bg-teal-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-teal-500 transition-transform transform hover:scale-105 pulsate">
-                        Start My Free Analysis
-                    </a>
-                </section>
-                
-            </div>
-        </main>
-        
-        <footer class="text-center p-8 border-t border-white/10">
-            <div class="max-w-7xl mx-auto text-gray-400">
-                <p class="text-xs mb-4">
-                    <strong>Medical Disclaimer:</strong> AI WELLNESSCORE is not a medical service and does not provide medical advice. The information provided is for educational and informational purposes only. Consult a healthcare professional for any health concerns.
-                </p>
-                <div class="flex justify-center space-x-6 mb-4">
-                    <a href="privacy.html" class="hover:text-white transition">Privacy Policy</a>
-                    <a href="terms.html" class="hover:text-white transition">Terms of Service</a>
-                    <a href="#" class="hover:text-white transition">Contact</a>
-                </div>
-                <p>&copy; 2025 AI WELLNESSCORE. All Rights Reserved.</p>
-            </div>
-        </footer>
-    </div>
 
-    <div id="cookie-consent-banner" class="fixed bottom-0 left-0 right-0 bg-slate-800/90 backdrop-blur-sm p-4 z-50 hidden transition-opacity duration-300">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p class="text-sm text-gray-300 text-center sm:text-left">
-                We use cookies to enhance your browsing experience and analyze our traffic. By clicking "Accept", you consent to our <a href="privacy.html" class="underline hover:text-teal-300">use of cookies</a>.
-            </p>
-            <button id="accept-cookies-btn" class="px-5 py-2 text-sm font-semibold bg-teal-400 text-slate-900 rounded-lg hover:bg-teal-300 transition-colors whitespace-nowrap">
-                Accept
-            </button>
+                <section id="payment-section" class="fade-in-section glass-card p-6 rounded-xl text-center">
+                    <h3 class="text-xl font-bold text-white mb-4">Unlock Full Report</h3>
+                    <p class="text-gray-400 text-sm mb-6">Start your journey to a better you for just $9.99.</p>
+                    <button id="pay-button" class="mt-4 w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-bold rounded-lg shadow-lg text-slate-900 bg-teal-400 hover:bg-teal-300">
+                        Pay $9.99
+                    </button>
+                </section>
+            </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Cookie Consent Logic ---
-            const consentBanner = document.getElementById('cookie-consent-banner');
-            const acceptBtn = document.getElementById('accept-cookies-btn');
+    document.addEventListener('DOMContentLoaded', () => {
+        const reportContainer = document.getElementById('report-container');
+        const originalContent = reportContainer.innerHTML;
 
-            const setCookie = (name, value, days) => {
-                let expires = "";
-                if (days) {
-                    const date = new Date();
-                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                    expires = "; expires=" + date.toUTCString();
-                }
-                document.cookie = name + "=" + (value || "") + expires + "; path=/";
-            }
-
-            const getCookie = (name) => {
-                const nameEQ = name + "=";
-                const ca = document.cookie.split(';');
-                for (let i = 0; i < ca.length; i++) {
-                    let c = ca[i];
-                    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-                    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-                }
-                return null;
-            }
-
-            if (!getCookie('cookies_accepted')) {
-                consentBanner.classList.remove('hidden');
-            }
-
-            acceptBtn.addEventListener('click', () => {
-                setCookie('cookies_accepted', 'true', 365);
-                consentBanner.style.opacity = '0';
-                setTimeout(() => consentBanner.classList.add('hidden'), 300);
-            });
-
-            // --- Lottie Hero Animation ---
+        function showLoadingState() {
+            reportContainer.innerHTML = `
+                <div class="text-center p-8">
+                    <div id="loader-animation" class="w-48 h-48 mx-auto"></div>
+                    <h2 class="text-2xl font-bold text-white mt-4">Analyzing your results...</h2>
+                    <p class="text-gray-400">Your personalized report is being generated by our AI. This may take a moment.</p>
+                </div>
+            `;
             try {
                 lottie.loadAnimation({
-                    container: document.getElementById('hero-animation'),
+                    container: document.getElementById('loader-animation'),
                     renderer: 'svg',
                     loop: true,
                     autoplay: true,
-                    path: 'assistent.json'
+                    path: 'loader-animation.json'
                 });
-            } catch(e) { console.error("Lottie failed:", e); }
+            } catch (e) { console.error("Lottie failed:", e); }
+        }
+        
+        function populatePage(data) {
+            reportContainer.innerHTML = originalContent;
+            const freeReport = data.freeReport;
 
-            // --- Glass Card Mouse Follow Effect ---
-            document.querySelectorAll('.glass-card').forEach(card => {
-                card.addEventListener('mousemove', e => {
-                    const rect = card.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    card.style.setProperty('--mouse-x', `${x}px`);
-                    card.style.setProperty('--mouse-y', `${y}px`);
-                });
-            });
-
-            // --- Intersection Observer for fade-in ---
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('is-visible');
-                        if (entry.target.id === 'demo-report-section') {
-                            const scoreText = entry.target.querySelector('#score-text');
-                            const scorePath = entry.target.querySelector('#score-path');
-                            if (scoreText && scorePath && !scoreText.dataset.animated) {
-                                scoreText.dataset.animated = 'true';
-                                const score = 78;
-                                let currentScore = 0;
-                                const interval = setInterval(() => {
-                                    if (currentScore >= score) {
-                                        clearInterval(interval);
-                                        scoreText.textContent = score;
-                                    } else {
-                                        currentScore++;
-                                        scoreText.textContent = currentScore;
-                                    }
-                                }, 25);
-                                setTimeout(() => {
-                                    scorePath.style.strokeDasharray = `${score}, 100`;
-                                }, 100);
-                            }
-                        }
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.1 });
-
-            document.querySelectorAll('.fade-in-section').forEach(section => {
-                observer.observe(section);
-            });
-
-            // --- Burger Menu Logic ---
-            const menuBtn = document.getElementById('menu-btn');
-            const mobileMenu = document.getElementById('mobile-menu');
-            const openIcon = document.getElementById('menu-open-icon');
-            const closeIcon = document.getElementById('menu-close-icon');
-
-            menuBtn.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-                openIcon.classList.toggle('hidden');
-                closeIcon.classList.toggle('hidden');
-                document.body.classList.toggle('overflow-hidden');
-            });
+            const elements = {
+                archetype: document.querySelector('h1.text-4xl'),
+                archetypeDescription: document.querySelector('p.text-base'),
+                wellnessAge: document.getElementById('wellness-age'),
+                keyInsight: document.getElementById('key-insight'),
+                firstStep: document.getElementById('first-step'),
+                motivationTrigger: document.getElementById('motivation-trigger'),
+                peerComparison: document.getElementById('peer-comparison'),
+                scoreText: document.getElementById('score-text'),
+                scoreCircle: document.getElementById('score-circle-path'),
+                wellnessWheelCanvas: document.getElementById('wellnessWheel'),
+                bodyBar: document.getElementById('body-bar'),
+                bodyScore: document.getElementById('body-score'),
+                mindBar: document.getElementById('mind-bar'),
+                mindScore: document.getElementById('mind-score'),
+                nutritionBar: document.getElementById('nutrition-bar'),
+                nutritionScore: document.getElementById('nutrition-score'),
+                lifestyleBar: document.getElementById('lifestyle-bar'),
+                lifestyleScore: document.getElementById('lifestyle-score')
+            };
             
-            mobileMenu.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', () => {
-                    mobileMenu.classList.add('hidden');
-                    openIcon.classList.remove('hidden');
-                    closeIcon.classList.add('hidden');
-                    document.body.classList.remove('overflow-hidden');
-                });
+            elements.archetype.textContent = freeReport.archetype;
+            elements.archetypeDescription.textContent = freeReport.archetypeDescription;
+            elements.wellnessAge.textContent = freeReport.wellnessAge;
+            elements.keyInsight.innerHTML = freeReport.keyInsight;
+            elements.firstStep.textContent = freeReport.firstStep;
+            elements.motivationTrigger.textContent = `"${freeReport.motivationTrigger}"`;
+            elements.peerComparison.textContent = freeReport.peerComparison;
+            
+            animateValue(elements.scoreText, 0, freeReport.wellnessScore, 1500);
+            animateScoreCircle(elements.scoreCircle, freeReport.wellnessScore);
+            
+            const coreFour = freeReport.coreFour;
+            elements.bodyScore.textContent = `${coreFour.body.score}%`;
+            animateProgressBar(elements.bodyBar, coreFour.body.score);
+            
+            elements.mindScore.textContent = `${coreFour.mind.score}%`;
+            animateProgressBar(elements.mindBar, coreFour.mind.score);
+
+            elements.nutritionScore.textContent = `${coreFour.nutrition.score}%`;
+            animateProgressBar(elements.nutritionBar, coreFour.nutrition.score);
+
+            elements.lifestyleScore.textContent = `${coreFour.lifestyle.score}%`;
+            animateProgressBar(elements.lifestyleBar, coreFour.lifestyle.score);
+            
+            createWellnessWheel(elements.wellnessWheelCanvas, Object.values(coreFour).map(item => item.score));
+        }
+
+        function animateValue(element, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                element.textContent = Math.floor(progress * (end - start) + start);
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function animateScoreCircle(element, score) {
+            const radius = 15.9155;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (score / 100) * circumference;
+            element.style.strokeDasharray = `${circumference} ${circumference}`;
+            element.style.strokeDashoffset = circumference;
+            setTimeout(() => {
+                element.style.transition = 'stroke-dashoffset 2s ease-out';
+                element.style.strokeDashoffset = offset;
+            }, 100);
+        }
+        
+        function animateProgressBar(element, score) {
+            element.style.setProperty('--final-width', `${score}%`);
+            element.classList.add('bar-animation');
+        }
+
+        function createWellnessWheel(canvas, data) {
+            if (!canvas) return;
+            new Chart(canvas.getContext('2d'), {
+                type: 'radar',
+                data: {
+                    labels: ['Body', 'Mind', 'Nutrition', 'Lifestyle'],
+                    datasets: [{
+                        label: 'Your Score',
+                        data: data,
+                        backgroundColor: 'rgba(20, 227, 227, 0.2)',
+                        borderColor: 'rgba(20, 227, 227, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(20, 227, 227, 1)',
+                        pointBorderColor: '#fff',
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                            pointLabels: { font: { size: 12, weight: '600' }, color: '#cbd5e1' },
+                            ticks: { backdropColor: 'transparent', color: '#94a3b8', stepSize: 25 },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: { legend: { display: false } },
+                    maintainAspectRatio: false,
+                    responsive: true
+                }
             });
-        });
+        }
+
+        async function main() {
+            showLoadingState();
+
+            const params = new URLSearchParams(window.location.search);
+            const sessionId = params.get('sessionId');
+
+            if (!sessionId) {
+                reportContainer.innerHTML = '<p class="text-center text-red-400">Error: Session ID not found. Please take the quiz again.</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch('/.netlify/functions/result', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: sessionId })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.details || 'Failed to load report.');
+                }
+
+                const reportData = await response.json();
+                populatePage(reportData);
+
+            } catch (error) {
+                console.error('Error loading report:', error);
+                reportContainer.innerHTML = `<p class="text-center text-red-400">An error occurred while generating your report: ${error.message}</p>`;
+            }
+        }
+
+        main();
+    });
     </script>
 </body>
 </html>
-
