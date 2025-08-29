@@ -1,124 +1,586 @@
-function generateUnlockedPremiumContent(premium) {
-    return `
-        <!-- Deep Dive Analysis -->
-        <div class="glass-card rounded-xl p-6">
-            <h3 class="text-xl font-bold text-white mb-4">📊 Deep Dive Analysis</h3>
-            <div class="grid md:grid-cols-2 gap-4">
-                ${premium.deepDive ? Object.entries(premium.deepDive).map(([key, value]) => `
-                    <div class="bg-slate-800/50 rounded-lg p-4">
-                        <h4 class="text-teal-400 font-semibold">${key.replace(/([A-Z])/g, ' $1').trim()}</h4>
-                        <p class="text-gray-300 text-sm mt-1">${value}</p>
-                    </div>
-                `).join('') : ''}
-            </div>
-        </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your AI WELLNESSCORE Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background-color: #0f172a;
+            color: #e5e7eb;
+        }
+        .gradient-bg-dark-animated {
+            background: linear-gradient(300deg, #0f172a, #1e1b4b, #312e81, #0f172a);
+            background-size: 200% 200%;
+            animation: slow-pan 25s ease infinite;
+        }
+        @keyframes slow-pan {
+            0% { background-position: 0% 0%; }
+            25% { background-position: 100% 0%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px rgba(0,0,0,0.2);
+        }
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .animated-gradient-text {
+            background: linear-gradient(90deg, #e0e7ff, #a5b4fc, #6366f1, #14e3e3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: text-shine 5s linear infinite;
+        }
+        @keyframes text-shine {
+            to { background-position: 200% center; }
+        }
+        .premium-blur {
+            filter: blur(8px);
+            transition: filter 0.5s ease;
+            position: relative;
+        }
+        .premium-blur::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.1), rgba(15, 23, 42, 0.8));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .pulsate {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(20, 227, 227, 0.7); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(20, 227, 227, 0); }
+        }
+        .countdown-timer {
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum";
+        }
+    </style>
+</head>
+<body class="gradient-bg-dark-animated min-h-screen">
 
-        <!-- Full Photo Analysis -->
-        <div class="glass-card rounded-xl p-6">
-            <h3 class="text-xl font-bold text-white mb-4">📸 Full Photo Analysis Breakdown</h3>
-            <div class="bg-slate-800/50 rounded-lg p-4">
-                <p class="text-gray-300">${premium.fullPhotoAnalysis}</p>
-            </div>
+    <!-- Navigation -->
+    <header class="absolute top-0 left-0 right-0 z-30 p-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-black text-indigo-400">AI WELLNESSCORE</a>
+            <a href="index.html" class="px-4 py-2 text-sm font-semibold bg-white/10 border border-white/20 rounded-full hover:bg-white/20 transition-all">Home</a>
         </div>
+    </header>
 
-        <!-- 7-Day Action Plan -->
-        <div class="glass-card rounded-xl p-6">
-            <h3 class="text-xl font-bold text-white mb-4">📅 Your Personalized 7-Day Action Plan</h3>
-            <div class="space-y-3">
-                ${premium.sevenDayActionPlan ? premium.sevenDayActionPlan.map(day => `
-                    <div class="bg-slate-800/50 rounded-lg p-4">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-teal-400 font-bold">Day ${day.day}</span>
-                                <p class="text-gray-300 mt-1">${day.task}</p>
-                                ${day.duration ? `<p class="text-xs text-gray-500 mt-1">Duration: ${day.duration}</p>` : ''}
-                            </div>
-                            <span class="px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full text-xs">${day.focus}</span>
+    <main class="pt-24 pb-16 px-4 max-w-6xl mx-auto">
+        <!-- Hero Section -->
+        <section class="text-center mb-16 fade-in-section">
+            <h1 class="text-4xl md:text-5xl font-black text-white mb-4">Your Personalized <span class="animated-gradient-text">Wellness Report</span></h1>
+            <p class="text-lg text-gray-400 max-w-2xl mx-auto">Based on your unique data and facial analysis, here's your comprehensive wellness assessment</p>
+        </section>
+
+        <!-- Wellness Score -->
+        <section class="glass-card rounded-2xl p-8 mb-12 text-center fade-in-section">
+            <h2 class="text-2xl font-bold text-white mb-2">Your Overall Wellness Score</h2>
+            <p class="text-gray-400 mb-8">How you're doing across all key health dimensions</p>
+            
+            <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="w-full md:w-1/3">
+                    <div class="relative w-56 h-56 mx-auto">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <defs>
+                                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#14E3E3; stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#4F46E5; stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path class="text-slate-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="2" />
+                            <path id="score-path" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke-width="2" stroke="url(#scoreGradient)" stroke-linecap="round" stroke-dasharray="0, 100" style="transition: stroke-dasharray 2s ease-out;"/>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span id="score-text" class="text-6xl font-black text-white">0</span>
+                            <span class="text-lg text-gray-400">Overall Score</span>
                         </div>
                     </div>
-                `).join('') : ''}
-            </div>
-        </div>
-
-        <!-- BMI Analysis -->
-        <div class="glass-card rounded-xl p-6">
-            <h3 class="text-xl font-bold text-white mb-4">📏 BMI (Body Mass Index)</h3>
-            <div class="bg-slate-800/50 rounded-lg p-4">
-                <p class="text-gray-300">${premium.bmiAnalysis}</p>
-            </div>
-        </div>
-
-        <!-- Long-Term Risks & Opportunities -->
-        <div class="glass-card rounded-xl p-6">
-            <h3 class="text-xl font-bold text-white mb-4">⚠️ Long-Term Risks & Opportunities</h3>
-            <div class="space-y-4">
-                <div class="bg-slate-800/50 rounded-lg p-4">
-                    <h4 class="text-red-400 font-semibold mb-2">Risks</h4>
-                    <p class="text-gray-300 text-sm">${premium.longTermRisks}</p>
                 </div>
-                <div class="bg-slate-800/50 rounded-lg p-4">
-                    <h4 class="text-green-400 font-semibold mb-2">Opportunities</h4>
-                    <p class="text-gray-300 text-sm">${premium.opportunities}</p>
+                
+                <div class="w-full md:w-2/3 text-left space-y-6">
+                    <div>
+                        <h3 class="text-xl font-bold text-teal-300 mb-2">Biological Age</h3>
+                        <p id="biological-age" class="text-3xl font-bold text-white">--</p>
+                        <p class="text-sm text-gray-400">Based on your lifestyle and facial analysis</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-indigo-300 mb-1">Energy Index</h3>
+                            <p id="energy-index" class="text-2xl font-bold text-white">--/100</p>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-indigo-300 mb-1">Stress Level</h3>
+                            <p id="stress-level" class="text-2xl font-bold text-white">--/100</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Wellness Trajectory Forecast -->
-        <div class="glass-card rounded-xl p-6">
-            <h3 class="text-xl font-bold text-white mb-4">📈 5-Year Wellness Trajectory Forecast</h3>
-            ${premium.trajectoryForecast ? `
-                <div class="space-y-4">
-                    <div class="bg-slate-800/50 rounded-lg p-4">
-                        <h4 class="text-orange-400 font-semibold mb-2">Current Path</h4>
-                        <p class="text-gray-300 text-sm">${premium.trajectoryForecast.currentPath}</p>
+        <!-- Core Four Assessment -->
+        <section class="glass-card rounded-2xl p-8 mb-12 fade-in-section">
+            <h2 class="text-2xl font-bold text-white mb-8 text-center">Core Four Assessment</h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-slate-800/50 rounded-xl p-6 text-center">
+                    <div class="w-20 h-20 mx-auto mb-4 relative">
+                        <canvas id="mind-chart" width="80" height="80"></canvas>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="mind-score" class="text-lg font-bold text-white">--</span>
+                        </div>
                     </div>
-                    <div class="bg-slate-800/50 rounded-lg p-4">
-                        <h4 class="text-green-400 font-semibold mb-2">Optimized Path</h4>
-                        <p class="text-gray-300 text-sm">${premium.trajectoryForecast.optimizedPath}</p>
+                    <h3 class="text-lg font-semibold text-teal-300 mb-2">Mind</h3>
+                    <p id="mind-summary" class="text-sm text-gray-300">Analyzing your mental wellness...</p>
+                </div>
+                
+                <div class="bg-slate-800/50 rounded-xl p-6 text-center">
+                    <div class="w-20 h-20 mx-auto mb-4 relative">
+                        <canvas id="body-chart" width="80" height="80"></canvas>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="body-score" class="text-lg font-bold text-white">--</span>
+                        </div>
                     </div>
-                    <div class="bg-slate-800/50 rounded-lg p-4">
-                        <h4 class="text-indigo-400 font-semibold mb-2">Key Milestones</h4>
-                        <p class="text-gray-300 text-sm">${premium.trajectoryForecast.keyMilestones}</p>
+                    <h3 class="text-lg font-semibold text-teal-300 mb-2">Body</h3>
+                    <p id="body-summary" class="text-sm text-gray-300">Analyzing your physical health...</p>
+                </div>
+                
+                <div class="bg-slate-800/50 rounded-xl p-6 text-center">
+                    <div class="w-20 h-20 mx-auto mb-4 relative">
+                        <canvas id="nutrition-chart" width="80" height="80"></canvas>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="nutrition-score" class="text-lg font-bold text-white">--</span>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-semibold text-teal-300 mb-2">Nutrition</h3>
+                    <p id="nutrition-summary" class="text-sm text-gray-300">Analyzing your diet quality...</p>
+                </div>
+                
+                <div class="bg-slate-800/50 rounded-xl p-6 text-center">
+                    <div class="w-20 h-20 mx-auto mb-4 relative">
+                        <canvas id="sleep-chart" width="80" height="80"></canvas>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="sleep-score" class="text-lg font-bold text-white">--</span>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-semibold text-teal-300 mb-2">Sleep</h3>
+                    <p id="sleep-summary" class="text-sm text-gray-300">Analyzing your sleep patterns...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Insights -->
+        <section class="glass-card rounded-2xl p-8 mb-12 fade-in-section">
+            <h2 class="text-2xl font-bold text-white mb-6 text-center">Key Insights</h2>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-gradient-to-br from-indigo-900/50 to-teal-900/50 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-indigo-300 mb-3">Main Barrier</h3>
+                    <p id="main-barrier" class="text-gray-300">Identifying your primary wellness challenge...</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-indigo-900/50 to-teal-900/50 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-indigo-300 mb-3">Quick Win</h3>
+                    <p id="quick-win" class="text-gray-300">Your easiest path to immediate improvement...</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-indigo-900/50 to-teal-900/50 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-indigo-300 mb-3">Peer Comparison</h3>
+                    <p id="peer-comparison" class="text-gray-300">How you compare to others your age...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Premium Section Teaser -->
+        <section class="glass-card rounded-2xl p-8 mb-12 fade-in-section">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-black text-white mb-2">Unlock Your <span class="animated-gradient-text">Full Potential</span></h2>
+                <p class="text-lg text-gray-400">Your comprehensive premium report includes detailed analysis and personalized recommendations</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-10 premium-blur" id="premium-teaser">
+                <div>
+                    <h3 class="text-xl font-bold text-teal-300 mb-4">Deep Health Analysis</h3>
+                    <ul class="space-y-3 text-gray-300">
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Metabolic Age & Recovery Score</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Inflammation Index & Digital Wellness</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Detailed Face Health Analysis</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Circadian Protocol & Nutrition Gaps</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold text-teal-300 mb-4">Action Plan</h3>
+                    <ul class="space-y-3 text-gray-300">
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Personalized Exercise Prescription</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Stress Management Toolkit</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>30-Day Transformation Plan</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Habit Stacking Strategy</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Payment Section -->
+            <div class="glass-card rounded-xl p-6 border-2 border-teal-500/30">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-white mb-2">Complete Your Wellness Journey</h3>
+                    <p class="text-gray-400">One-time payment • Lifetime access</p>
+                </div>
+                
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+                    <div class="text-center md:text-left">
+                        <div class="flex items-baseline justify-center md:justify-start">
+                            <span class="text-4xl font-black text-teal-400">$9.99</span>
+                            <span class="text-lg text-gray-400 ml-2 line-through">$19.99</span>
+                        </div>
+                        <p class="text-sm text-teal-300 mt-1">50% limited time discount</p>
+                    </div>
+                    
+                    <div class="bg-red-900/30 border border-red-700/50 rounded-lg px-4 py-2 flex items-center">
+                        <svg class="h-5 w-5 text-red-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-white countdown-timer" id="countdown">15:00</span>
+                        <span class="text-red-300 ml-1">left at this price</span>
                     </div>
                 </div>
-            ` : ''}
-        </div>
-
-        <!-- Habit Formation Index -->
-        <div class="glass-card rounded-xl p-6">
-            <h3 class="text-xl font-bold text-white mb-4">🧠 Habit Formation Index</h3>
-            <div class="bg-slate-800/50 rounded-lg p-4">
-                <p class="text-gray-300">${premium.habitFormationIndex}</p>
-            </div>
-        </div>
-
-        <!-- Supplementary Insights -->
-        <div class="glass-card rounded-xl p-6">
-            <h3 class="text-xl font-bold text-white mb-4">💊 Supplementary Insights</h3>
-            ${premium.supplementaryInsights ? `
-                <div class="grid md:grid-cols-3 gap-4">
-                    <div class="bg-slate-800/50 rounded-lg p-4">
-                        <h4 class="text-blue-400 font-semibold mb-2">💧 Hydration</h4>
-                        <p class="text-gray-300 text-sm">${premium.supplementaryInsights.hydration}</p>
-                    </div>
-                    <div class="bg-slate-800/50 rounded-lg p-4">
-                        <h4 class="text-yellow-400 font-semibold mb-2">💊 Vitamins</h4>
-                        <p class="text-gray-300 text-sm">${premium.supplementaryInsights.vitamins}</p>
-                    </div>
-                    <div class="bg-slate-800/50 rounded-lg p-4">
-                        <h4 class="text-purple-400 font-semibold mb-2">🌙 Circadian Rhythm</h4>
-                        <p class="text-gray-300 text-sm">${premium.supplementaryInsights.circadianRhythm}</p>
-                    </div>
+                
+                <div class="bg-green-900/20 border border-green-700/30 rounded-lg p-4 mb-6 flex items-start">
+                    <svg class="h-5 w-5 text-green-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-green-300 text-sm">Your data is secured with bank-level encryption. This is a one-time payment with no subscription.</p>
                 </div>
-            ` : ''}
-        </div>
-
-        <!-- AI Coach Notes -->
-        <div class="glass-card rounded-xl p-6">
-            <h3 class="text-xl font-bold text-white mb-4">💬 Personal AI Coach Notes</h3>
-            <div class="bg-gradient-to-r from-teal-500/10 to-indigo-500/10 rounded-lg p-6">
-                <p class="text-gray-300 italic">"${premium.aiCoachNotes}"</p>
+                
+                <button id="purchase-btn" class="w-full bg-teal-500 hover:bg-teal-400 text-white font-bold py-4 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 pulsate flex items-center justify-center">
+                    <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Unlock Premium Report - $9.99
+                </button>
+                
+                <p class="text-center text-xs text-gray-500 mt-4">By purchasing, you agree to our <a href="#" class="text-indigo-400 hover:text-indigo-300">Terms of Service</a> and <a href="#" class="text-indigo-400 hover:text-indigo-300">Privacy Policy</a></p>
             </div>
+        </section>
+
+        <!-- Premium Content (Hidden until purchase) -->
+        <section id="premium-content" class="glass-card rounded-2xl p-8 mb-12 hidden">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-black text-white mb-2"><span class="animated-gradient-text">Premium</span> Wellness Analysis</h2>
+                <p class="text-lg text-gray-400">Your comprehensive health assessment with personalized recommendations</p>
+            </div>
+            
+            <div class="space-y-8">
+                <!-- This section will be populated with premium content after payment -->
+                <div id="premium-details"></div>
+                
+                <div class="text-center pt-8 border-t border-white/10">
+                    <button id="download-pdf" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-6 rounded-lg inline-flex items-center">
+                        <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download Full PDF Report
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center p-8 border-t border-white/10 mt-12">
+        <div class="max-w-7xl mx-auto text-gray-400">
+            <p class="text-xs mb-4">
+                <strong>Medical Disclaimer:</strong> AI WELLNESSCORE is not a medical service and does not provide medical advice. The information provided is for educational and informational purposes only. Consult a healthcare professional for any health concerns.
+            </p>
+            <div class="flex justify-center space-x-6 mb-4">
+                <a href="privacy.html" class="hover:text-white transition">Privacy Policy</a>
+                <a href="terms.html" class="hover:text-white transition">Terms of Service</a>
+                <a href="#" class="hover:text-white transition">Contact</a>
+            </div>
+            <p>&copy; 2025 AI WELLNESSCORE. All Rights Reserved.</p>
         </div>
-    `;
-}
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Get session ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('sessionId');
+            
+            if (!sessionId) {
+                alert('No session ID found. Please complete the assessment first.');
+                window.location.href = 'quiz.html';
+                return;
+            }
+            
+            // Start countdown timer
+            let timeLeft = 15 * 60; // 15 minutes in seconds
+            const countdownEl = document.getElementById('countdown');
+            
+            const countdownInterval = setInterval(() => {
+                timeLeft--;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    document.getElementById('purchase-btn').disabled = true;
+                    document.getElementById('purchase-btn').textContent = 'Offer Expired';
+                    document.getElementById('purchase-btn').classList.remove('pulsate');
+                    document.getElementById('purchase-btn').classList.add('bg-gray-500');
+                    countdownEl.textContent = '00:00';
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                countdownEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+            
+            // Fetch report data
+            try {
+                const response = await fetch('/.netlify/functions/checkResult', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ sessionId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'complete' && data.data) {
+                    populateReport(data.data);
+                } else if (data.status === 'pending') {
+                    // Poll until report is ready
+                    setTimeout(() => window.location.reload(), 2000);
+                } else {
+                    console.error('Error fetching report:', data.message);
+                    alert('Error generating your report. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Network error. Please check your connection and try again.');
+            }
+            
+            // Purchase button handler
+            document.getElementById('purchase-btn').addEventListener('click', async function() {
+                this.disabled = true;
+                this.innerHTML = `<svg class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg> Processing...`;
+                
+                // Simulate payment processing
+                setTimeout(() => {
+                    // Show success message
+                    alert('Payment successful! Your premium report is now unlocked.');
+                    
+                    // Show premium content
+                    document.getElementById('premium-teaser').classList.remove('premium-blur');
+                    document.getElementById('premium-content').classList.remove('hidden');
+                    
+                    // Change button to download
+                    this.innerHTML = `<svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg> Download PDF Report`;
+                    this.classList.remove('bg-teal-500', 'hover:bg-teal-400');
+                    this.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
+                    this.onclick = () => {
+                        alert('PDF download started!');
+                        // In a real implementation, this would download the PDF
+                    };
+                }, 2000);
+            });
+            
+            // Initialize animations
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            document.querySelectorAll('.fade-in-section').forEach(section => {
+                observer.observe(section);
+            });
+        });
+        
+        function populateReport(reportData) {
+            const freeReport = reportData.freeReport || {};
+            const premiumReport = reportData.premiumReport || {};
+            
+            // Update wellness score with animation
+            const scoreText = document.getElementById('score-text');
+            const scorePath = document.getElementById('score-path');
+            const score = freeReport.wellnessScore || 75;
+            
+            let currentScore = 0;
+            const interval = setInterval(() => {
+                if (currentScore >= score) {
+                    clearInterval(interval);
+                    scoreText.textContent = score;
+                } else {
+                    currentScore++;
+                    scoreText.textContent = currentScore;
+                }
+            }, 25);
+            
+            setTimeout(() => {
+                scorePath.style.strokeDasharray = `${score}, 100`;
+            }, 100);
+            
+            // Update other free report values
+            document.getElementById('biological-age').textContent = freeReport.biologicalAge || '--';
+            document.getElementById('energy-index').textContent = `${freeReport.energyIndex || '--'}/100`;
+            document.getElementById('stress-level').textContent = `${freeReport.stressLevel || '--'}/100`;
+            
+            // Update core four
+            if (freeReport.coreFour) {
+                updateCoreFourChart('mind', freeReport.coreFour.mind);
+                updateCoreFourChart('body', freeReport.coreFour.body);
+                updateCoreFourChart('nutrition', freeReport.coreFour.nutrition);
+                updateCoreFourChart('sleep', freeReport.coreFour.sleep);
+            }
+            
+            // Update key insights
+            document.getElementById('main-barrier').textContent = freeReport.mainBarrier || 'Data not available';
+            document.getElementById('quick-win').textContent = freeReport.quickWin || 'Data not available';
+            document.getElementById('peer-comparison').textContent = freeReport.peerComparison || 'Data not available';
+            
+            // Populate premium content if available
+            if (Object.keys(premiumReport).length > 0) {
+                populatePremiumContent(premiumReport);
+            }
+        }
+        
+        function updateCoreFourChart(type, data) {
+            if (!data) return;
+            
+            const score = data.score || 50;
+            const ctx = document.getElementById(`${type}-chart`).getContext('2d');
+            
+            // Create circular progress chart
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [score, 100 - score],
+                        backgroundColor: [
+                            getColorForScore(score),
+                            'rgba(30, 41, 59, 0.3)'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '65%',
+                    responsive: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    }
+                }
+            });
+            
+            // Update score and summary text
+            document.getElementById(`${type}-score`).textContent = score;
+            document.getElementById(`${type}-summary`).textContent = data.summary || 'No summary available';
+        }
+        
+        function getColorForScore(score) {
+            if (score >= 80) return '#34d399'; // Green
+            if (score >= 60) return '#fbbf24'; // Yellow
+            return '#f87171'; // Red
+        }
+        
+        function populatePremiumContent(premiumReport) {
+            // This function would populate the premium content section
+            // For now, we'll just store the data for when the user purchases
+            window.premiumReportData = premiumReport;
+            
+            // In a real implementation, you would create detailed elements
+            // for each section of the premium report here
+        }
+    </script>
+</body>
+</html>
