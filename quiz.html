@@ -215,7 +215,6 @@
                 });
             } catch (error) { 
                 console.error('Failed to save answer:', error); 
-                // Optionally notify user of save failure
             }
         }
 
@@ -228,7 +227,6 @@
             inputArea.style.display = 'block';
 
             try {
-                // Step 1: Analyze the photo
                 const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -243,24 +241,20 @@
                     faceData = await analyzeResponse.json();
                 }
 
-                // Step 2: Save the analysis data (or error) to the session
                 await saveAnswerToServer('faceAnalysis', faceData);
 
-                // Step 3: Trigger the background report generation
                 await fetch('/.netlify/functions/result-background', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sessionId: sessionId })
                 });
 
-                // Step 4: Show completion and redirect
                 showCompletionAnimation();
 
             } catch (error) {
                 console.error('Error during photo analysis step:', error);
                 addBotMessage("I had a little trouble with the photo analysis, but don't worry! I'll generate your report with the rest of your answers.");
                 await saveAnswerToServer('faceAnalysis', { error: error.message });
-                 // Still trigger background generation
                 await fetch('/.netlify/functions/result-background', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -274,7 +268,7 @@
         
         function updateProgressBar() {
             const questionKeys = quizQuestions.filter(q => q.type === 'question' && q.key !== 'terms').map(q => q.key);
-            const totalSteps = questionKeys.length + 1; // +1 for the photo step
+            const totalSteps = questionKeys.length + 1;
             const completedAnswers = Object.keys(userAnswers).filter(key => questionKeys.includes(key)).length;
             const photoStepCompleted = userAnswers['selfie'] ? 1 : 0;
             const progress = ((completedAnswers + photoStepCompleted) / totalSteps) * 100;
@@ -408,7 +402,6 @@
         async function startCamera() {
             cameraModal.classList.add('active');
             try {
-                // Using a more reliable model path
                 const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
                 await Promise.all([
                     faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
@@ -440,18 +433,30 @@
 
         function startFaceDetection() {
             let faceDetectedFrames = 0;
+            const context = canvas.getContext('2d');
 
             detectionInterval = setInterval(async () => {
-                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
+                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
                 
-                if (detections.length > 0 && detections[0].score > 0.85) {
-                    faceDetectedFrames++;
+                const displaySize = { width: video.clientWidth, height: video.clientHeight };
+                faceapi.matchDimensions(canvas, displaySize);
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                
+                if (detections.length > 0) {
+                    const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                    faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+
+                    if (detections[0].detection.score > 0.85) {
+                        faceDetectedFrames++;
+                    } else {
+                        faceDetectedFrames = 0;
+                    }
+
+                    if (faceDetectedFrames > 30) {
+                        takePhoto();
+                    }
                 } else {
                     faceDetectedFrames = 0;
-                }
-
-                if (faceDetectedFrames > 30) { // Require ~1 second of stable detection
-                    takePhoto();
                 }
             }, 100);
         }
@@ -468,7 +473,7 @@
             photoContext.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
             
             const photoDataUrl = photoCanvas.toDataURL('image/jpeg', 0.9);
-            userAnswers['selfie'] = 'Photo taken'; // Mark step as complete
+            userAnswers['selfie'] = 'Photo taken';
             
             stopCamera();
             addUserMessage("Photo Taken 👍");
@@ -495,7 +500,7 @@
                         hideTypingIndicator();
                         addBotMessage(`All done! Your personalized report is ready. 🚀 <br><a href="${resultUrl}" class="inline-block mt-2 bg-purple-600 text-white font-bold py-2 px-6 rounded-full hover:bg-purple-700 transition-colors">View My Report</a>`);
                         inputArea.style.display = 'none';
-                    }, 8000); // Simulate report generation time
+                    }, 8000);
                 }, 1000);
             }, 1500);
         }
