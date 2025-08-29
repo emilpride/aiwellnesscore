@@ -1,10 +1,8 @@
 const axios = require('axios');
 const querystring = require('querystring');
 
-// --- ЭТИ СТРОКИ, СКОРЕЕ ВСЕГО, ОТСУТСТВОВАЛИ ---
 const DETECT_URL = 'https://api-us.faceplusplus.com/facepp/v3/detect';
 const ANALYZE_URL = 'https://api-us.faceplusplus.com/facepp/v3/face/analyze';
-// ---------------------------------------------
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -19,7 +17,6 @@ exports.handler = async (event) => {
 
     const base64Image = photoDataUrl.split(';base64,').pop();
 
-    // --- STEP 1: DETECT FACE and GET face_token ---
     const detectFormData = {
       api_key: process.env.FACEPLUSPLUS_API_KEY,
       api_secret: process.env.FACEPLUSPLUS_API_SECRET,
@@ -34,7 +31,6 @@ exports.handler = async (event) => {
 
     const faceToken = detectResponse.data.faces[0].face_token;
 
-    // --- STEP 2: ANALYZE FACE using face_token ---
     const analyzeFormData = {
       api_key: process.env.FACEPLUSPLUS_API_KEY,
       api_secret: process.env.FACEPLUSPLUS_API_SECRET,
@@ -45,7 +41,7 @@ exports.handler = async (event) => {
     const analyzeResponse = await axios.post(ANALYZE_URL, querystring.stringify(analyzeFormData));
 
     if (!analyzeResponse.data.faces || analyzeResponse.data.faces.length === 0) {
-        return { statusCode: 404, body: JSON.stringify({ error: 'Could not analyze the detected face in Step 2' }) };
+      return { statusCode: 404, body: JSON.stringify({ error: 'Could not analyze the detected face in Step 2' }) };
     }
 
     const faceAttributes = analyzeResponse.data.faces[0].attributes;
