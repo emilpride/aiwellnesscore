@@ -100,7 +100,7 @@ async function generateAndSaveReport(sessionRef, sessionId) {
     const faceAnalysisData = sessionData.faceAnalysis || sessionData.skinAnalysis || null;
     const prompt = createPrompt(sessionData.answers, faceAnalysisData);
     
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const rawText = response.text();
