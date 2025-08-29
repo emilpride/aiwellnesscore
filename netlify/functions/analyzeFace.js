@@ -35,7 +35,7 @@ exports.handler = async (event) => {
       api_key: process.env.FACEPLUSPLUS_API_KEY,
       api_secret: process.env.FACEPLUSPLUS_API_SECRET,
       face_tokens: faceToken,
-      return_attributes: 'gender,age,smiling,emotion,glasses'
+      return_attributes: 'gender,age,smiling,emotion,eyestatus,skinstatus'
     };
 
     const analyzeResponse = await axios.post(ANALYZE_URL, querystring.stringify(analyzeFormData));
