@@ -2,7 +2,6 @@ const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Инициализация Firebase
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
 let db;
 if (!global._firebaseApp) {
@@ -10,7 +9,6 @@ if (!global._firebaseApp) {
 }
 db = getFirestore();
 
-// Инициализация Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 function createPrompt(answers, faceAnalysis) {
@@ -29,7 +27,6 @@ function createPrompt(answers, faceAnalysis) {
   - Emotions detected: ${JSON.stringify(faceAnalysis.emotion)}
   ` : 'Face analysis was skipped.';
 
-  // Улучшенный промпт с более строгими инструкциями
   return `
     You are AI WELLNESSCORE, an expert AI wellness coach.
     Based on the User Data below, generate a complete and valid JSON object for their wellness report.
@@ -88,19 +85,17 @@ exports.handler = async (event) => {
 
     const prompt = createPrompt(sessionData.answers, faceAnalysisData);
     
-    // Используем быструю и современную модель
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const rawText = response.text();
     
-    console.log('--- RAW RESPONSE FROM GEMINI ---', rawText); // Лог для отладки
+    console.log('--- RAW RESPONSE FROM GEMINI ---', rawText);
 
     const cleanedText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
     const reportData = JSON.parse(cleanedText);
 
-    // ДОБАВЛЕНА ПРОВЕРКА: Убеждаемся, что ключевые поля существуют
     if (!reportData.freeReport || !reportData.freeReport.coreFour) {
         throw new Error("AI response is missing critical data (freeReport or coreFour).");
     }
