@@ -157,7 +157,7 @@
 
             try {
                 // 1. Запускаем генерацию отчета
-                const initialResponse = await fetch('/.netlify/functions/result', {
+                const initialResponse = await fetch('/.netlify/functions/result-background', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sessionId: sessionId })
@@ -178,3 +178,4 @@
 </script>
 </body>
 </html>
+
