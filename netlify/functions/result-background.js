@@ -111,7 +111,7 @@ async function generateAndSaveReport(sessionRef, sessionData) {
     const faceAnalysisData = sessionData.faceAnalysis || sessionData.skinAnalysis || null;
     const prompt = createPrompt(sessionData.answers, faceAnalysisData);
     
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const rawText = response.text();
@@ -133,3 +133,4 @@ async function generateAndSaveReport(sessionRef, sessionData) {
     await sessionRef.update({ reportError: error.message });
   }
 }
+
