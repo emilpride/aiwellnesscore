@@ -1,4 +1,4 @@
-// /netlify/functions/result-background.js - ИСПРАВЛЕННАЯ ВЕРСИЯ
+// /netlify/functions/result-background.js - ИСПРАВЛЕННАЯ ВЕРСИЯ С BACKGROUND
 
 'use strict';
 
@@ -26,7 +26,6 @@ function createPrompt(answers = {}, faceAnalysis) {
 
   const faceData = faceAnalysis ? `Face++ analysis available: ${JSON.stringify(faceAnalysis)}` : "No face photo provided.";
   
-  // ИСПОЛЬЗУЕМ СТРУКТУРУ, КОТОРАЯ СООТВЕТСТВУЕТ result.html
   return `
 You are AI WELLNESSCORE, a professional wellness coach and data scientist.
 Using the user-provided quiz answers and optional Face++ photo analysis, produce a single VALID JSON object that matches exactly the schema specified below.
@@ -104,120 +103,90 @@ REQUIRED JSON SCHEMA (return only this object, exact keys and structure):
     },
     "aiCoachNotes": string
   }
-}
-
-Analyze the user data and create personalized, specific insights. Use actual numbers from their quiz answers. If face analysis is available, incorporate those metrics into your assessments.`;
+}`;
 }
 
 function buildFallback(sessionData = {}, faceAnalysis = null) {
   const answers = sessionData.answers || {};
-  let height = null, weight = null, age = null;
+  let height = null, weight = null, age = 35;
   
   // Парсим базовые данные
   try {
-    if (answers.height) {
-      const heightStr = answers.height.toString();
-      if (heightStr.includes('cm')) {
-        height = parseFloat(heightStr);
-      } else if (heightStr.includes('ft') || heightStr.includes("'")) {
-        const matches = heightStr.match(/(\d+)'?\s*(\d+)?/);
-        if (matches) {
-          const feet = parseInt(matches[1]) || 0;
-          const inches = parseInt(matches[2]) || 0;
-          height = (feet * 30.48) + (inches * 2.54);
-        }
-      } else {
-        height = parseFloat(heightStr) > 100 ? parseFloat(heightStr) : parseFloat(heightStr) * 100;
-      }
-    }
-    if (answers.weight) {
-      const weightStr = answers.weight.toString();
-      weight = parseFloat(weightStr) * (weightStr.includes('kg') ? 1 : 0.453592);
-    }
     if (answers.age) {
       const ageStr = answers.age.toString();
       if (ageStr.includes('-')) {
         const range = ageStr.split('-');
         age = parseInt(range[0]) + 5;
+      } else if (ageStr.includes('+')) {
+        age = parseInt(ageStr) || 55;
       } else {
-        age = parseInt(ageStr);
+        age = parseInt(ageStr) || 35;
       }
     }
   } catch(e) {
-    console.error("Error parsing user data:", e);
+    console.error("Error parsing age:", e);
   }
 
-  const bmi = (height && weight && height > 0) ? +(weight / ((height/100)*(height/100))).toFixed(1) : null;
-  const face = faceAnalysis || {};
-  const estimatedVisualAge = face.age || null;
-  const biologicalAgeEst = estimatedVisualAge ? Math.round((estimatedVisualAge + (age || estimatedVisualAge))/2) : (age || 35);
-  
-  // Расчёт wellness score
-  let wellnessScore = 60;
-  if (bmi && bmi >= 18.5 && bmi <= 24.9) wellnessScore += 5;
+  const stressLevel = answers.stress ? 
+    (answers.stress.includes('Very High') || answers.stress.includes('9-10') ? 9 : 
+     answers.stress.includes('High') || answers.stress.includes('7-8') ? 7 : 
+     answers.stress.includes('Moderate') || answers.stress.includes('4-6') ? 5 : 3) : 5;
+
+  let wellnessScore = 65;
   if (answers.sleep && answers.sleep.includes('7-8')) wellnessScore += 5;
   if (answers.activity && (answers.activity.includes('3-4') || answers.activity.includes('5+'))) wellnessScore += 5;
-  if (answers.nutrition && (answers.nutrition.includes('4-5') || answers.nutrition.includes('More'))) wellnessScore += 5;
-  if (answers.stress && answers.stress.includes('Low')) wellnessScore += 5;
-  if (answers.mindfulness && answers.mindfulness.includes('Daily')) wellnessScore += 3;
-  if (answers.hydration && answers.hydration.includes('7+')) wellnessScore += 2;
-  
-  const stressLevel = answers.stress ? 
-    (answers.stress.includes('Very High') ? 9 : 
-     answers.stress.includes('High') ? 7 : 
-     answers.stress.includes('Moderate') ? 5 : 3) : 5;
+  if (stressLevel <= 5) wellnessScore += 3;
 
-  // СТРУКТУРА СООТВЕТСТВУЕТ result.html
   return {
     freeReport: {
       metrics: {
-        wellnessScore: Math.min(100, Math.max(1, wellnessScore)),
-        biologicalAge: biologicalAgeEst,
-        energyIndex: Math.round(70 + Math.random() * 20),
+        wellnessScore: wellnessScore,
+        biologicalAge: age + Math.round(Math.random() * 6 - 3),
+        energyIndex: 70,
         stressLevel: stressLevel
       },
       coreFour: {
         mind: {
-          score: Math.round(60 + Math.random() * 20),
-          summary: stressLevel > 6 ? "High stress detected, focus on mindfulness" : "Moderate mental wellness"
+          score: 70,
+          summary: "Moderate mental wellness"
         },
         body: {
-          score: Math.round(55 + Math.random() * 25),
-          summary: bmi ? `BMI: ${bmi} - ${bmi < 18.5 ? 'Underweight' : bmi <= 24.9 ? 'Healthy' : bmi <= 29.9 ? 'Overweight' : 'Obese'}` : "Physical activity recommended",
-          bmi: bmi
+          score: 65,
+          summary: "Regular activity recommended",
+          bmi: null
         },
         nutrition: {
-          score: Math.round(50 + Math.random() * 30),
+          score: 60,
           summary: "Room for dietary improvements",
-          fruitsVegPerDay: answers.nutrition ? parseInt(answers.nutrition) || 3 : 3,
-          processedFoodLevel: answers.processed_food || "Moderate",
-          waterLiters: answers.hydration ? parseFloat(answers.hydration) * 0.24 : 1.5
+          fruitsVegPerDay: 3,
+          processedFoodLevel: "Moderate",
+          waterLiters: 1.5
         },
         sleep: {
-          score: Math.round(60 + Math.random() * 20),
-          summary: answers.sleep ? `Getting ${answers.sleep}` : "Sleep quality could improve",
-          hours: answers.sleep ? parseFloat(answers.sleep) || 7 : 7,
-          visualSigns: face.dark_circles ? "Dark circles detected" : null
+          score: 75,
+          summary: "Generally good sleep patterns",
+          hours: 7,
+          visualSigns: null
         }
       },
       insights: {
-        mainBarrier: stressLevel > 6 ? "Chronic stress affecting overall wellness" : "Inconsistent sleep patterns",
+        mainBarrier: "Inconsistent daily routines",
         quickWin: "Start with 10-minute morning meditation",
         comparison: "You're in the 60th percentile for your age group"
       }
     },
     premiumReport: {
       detailedAnalytics: {
-        metabolicAge: biologicalAgeEst + Math.round(Math.random() * 6 - 3),
-        recoveryScore: Math.round(65 + Math.random() * 20),
-        inflammationRiskIndex: Math.round(30 + Math.random() * 40),
-        digitalWellnessScore: Math.round(50 + Math.random() * 30)
+        metabolicAge: age + 2,
+        recoveryScore: 70,
+        inflammationRiskIndex: 40,
+        digitalWellnessScore: 65
       },
       faceAnalysis: {
-        skinHealthScore: face.skin_health_score || Math.round(70 + Math.random() * 20),
+        skinHealthScore: 75,
         hydrationAssessment: "Moderate hydration levels",
         sleepDebtVisualization: "Mild signs of sleep deprivation",
-        stressMarkers: "Some tension visible around eyes"
+        stressMarkers: "Some tension visible"
       },
       recommendations: {
         circadianReset: {
@@ -230,8 +199,8 @@ function buildFallback(sessionData = {}, faceAnalysis = null) {
           ]
         },
         nutritionGaps: [
-          { nutrient: "Vitamin D", why: "Low sun exposure detected" },
-          { nutrient: "Omega-3", why: "Support cognitive function" }
+          { nutrient: "Vitamin D", why: "Low sun exposure" },
+          { nutrient: "Omega-3", why: "Brain health support" }
         ],
         exercisePrescription: {
           type: "HIIT and Yoga combination",
@@ -247,99 +216,24 @@ function buildFallback(sessionData = {}, faceAnalysis = null) {
       forecasts: {
         thirtyDayPotential: {
           expectedWellnessScoreIncrease: 8,
-          notes: "Focus on sleep and stress management for best results"
+          notes: "Focus on sleep and stress management"
         },
         riskTimeline: [
-          { yearsFromNow: 5, risk: "Increased stress-related health issues if patterns continue" },
-          { yearsFromNow: 10, risk: "Metabolic syndrome risk without lifestyle changes" }
+          { yearsFromNow: 5, risk: "Increased stress-related issues if patterns continue" },
+          { yearsFromNow: 10, risk: "Metabolic health concerns without lifestyle changes" }
         ],
         habitStackingPlan: [
           { week: 1, habit: "5-minute morning meditation" },
           { week: 2, habit: "Add 10-minute evening walk" },
-          { week: 3, habit: "Implement digital sunset at 9 PM" }
+          { week: 3, habit: "Digital sunset at 9 PM" }
         ]
       },
-      aiCoachNotes: "You're showing great potential! Your awareness is the first step. Focus on the quick wins I've identified, and remember: small consistent changes lead to remarkable transformations."
+      aiCoachNotes: "You're on the right track! Small consistent changes will lead to big improvements."
     }
   };
 }
 
-async function generateAndSaveReport(sessionRef, sessionId) {
-  try {
-    console.log(`[${sessionId}] Starting report generation.`);
-    const doc = await sessionRef.get();
-    if (!doc.exists) throw new Error(`Session ${sessionId} not found.`);
-    
-    await sessionRef.update({ reportStatus: 'processing' });
-    console.log(`[${sessionId}] Status set to 'processing'.`);
-
-    const sessionData = doc.data();
-    const faceAnalysisData = sessionData.faceAnalysis || null;
-    const prompt = createPrompt(sessionData.answers, faceAnalysisData);
-    
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-    
-    console.log(`[${sessionId}] Sending prompt to Gemini...`);
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: { 
-        temperature: 0.7,
-        maxOutputTokens: 8000,
-        topP: 0.9,
-        topK: 40
-      }
-    });
-    console.log(`[${sessionId}] Received response from Gemini.`);
-    
-    const response = await result.response;
-    const rawText = response.text ? response.text() : "";
-    if (!rawText || rawText.trim().length === 0) throw new Error("Empty response from model");
-
-    const cleaned = rawText.replace(/```json\s*/gi, '').replace(/```/gi, '').trim();
-    let reportData;
-    
-    try {
-      const jsonMatch = cleaned.match(/\{[\s\S]*\}$/);
-      if (!jsonMatch) throw new Error("No JSON object detected in model output");
-      reportData = JSON.parse(jsonMatch[0]);
-      
-      // Проверяем структуру
-      if (!reportData.freeReport || !reportData.freeReport.metrics) {
-        throw new Error("Required keys missing from parsed JSON");
-      }
-      
-      console.log(`[${sessionId}] Successfully parsed JSON from AI response.`);
-    } catch (parseErr) {
-      console.error(`[${sessionId}] JSON Parse error, using fallback:`, parseErr);
-      reportData = buildFallback(sessionData, faceAnalysisData);
-    }
-
-    await sessionRef.update({ reportData, reportStatus: 'complete' });
-    console.log(`[${sessionId}] Report successfully generated and saved to Firestore.`);
-    
-  } catch (error) {
-    console.error(`--- FATAL ERROR in background generation for [${sessionId}] ---`, error);
-    try {
-      // В случае ошибки используем fallback
-      const doc = await sessionRef.get();
-      const sessionData = doc.exists ? doc.data() : {};
-      const fallbackReport = buildFallback(sessionData, sessionData.faceAnalysis);
-      await sessionRef.update({ 
-        reportData: fallbackReport, 
-        reportStatus: 'complete',
-        reportError: `Used fallback due to: ${error.message}`
-      });
-      console.log(`[${sessionId}] Fallback report saved.`);
-    } catch (dbError) {
-      console.error(`--- [${sessionId}] Could not even save fallback ---`, dbError);
-      await sessionRef.update({ 
-        reportStatus: 'error', 
-        reportError: error.message 
-      });
-    }
-  }
-}
-
+// ГЛАВНОЕ ИЗМЕНЕНИЕ - делаем handler асинхронным и ждём начала генерации
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -347,19 +241,110 @@ exports.handler = async (event) => {
   
   try {
     const { sessionId } = JSON.parse(event.body);
-    if (!sessionId) return { statusCode: 400, body: 'Session ID is required' };
+    if (!sessionId) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Session ID is required' }) };
+    }
     
+    console.log(`[${sessionId}] Starting report generation.`);
     const sessionRef = db.collection('sessions').doc(sessionId);
     
-    // Запускаем генерацию асинхронно
-    generateAndSaveReport(sessionRef, sessionId);
+    // Проверяем существование сессии
+    const doc = await sessionRef.get();
+    if (!doc.exists) {
+      console.error(`Session ${sessionId} not found`);
+      return { 
+        statusCode: 404, 
+        body: JSON.stringify({ error: 'Session not found' }) 
+      };
+    }
+    
+    // Устанавливаем статус processing
+    await sessionRef.update({ reportStatus: 'processing' });
+    console.log(`[${sessionId}] Status set to processing`);
+    
+    // Запускаем генерацию в фоне
+    setTimeout(async () => {
+      try {
+        const sessionData = doc.data();
+        const faceAnalysisData = sessionData.faceAnalysis || null;
+        
+        // Пробуем сгенерировать через AI
+        try {
+          if (!process.env.GEMINI_API_KEY) {
+            throw new Error('GEMINI_API_KEY not configured');
+          }
+          
+          const prompt = createPrompt(sessionData.answers, faceAnalysisData);
+          const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+          
+          console.log(`[${sessionId}] Calling Gemini API...`);
+          const result = await model.generateContent({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { 
+              temperature: 0.7,
+              maxOutputTokens: 8000,
+              topP: 0.9,
+              topK: 40
+            }
+          });
+          
+          const response = await result.response;
+          const rawText = response.text ? response.text() : "";
+          console.log(`[${sessionId}] Got response from Gemini, length: ${rawText.length}`);
+          
+          if (!rawText || rawText.trim().length === 0) {
+            throw new Error("Empty response from model");
+          }
+
+          const cleaned = rawText.replace(/```json\s*/gi, '').replace(/```/gi, '').trim();
+          const jsonMatch = cleaned.match(/\{[\s\S]*\}$/);
+          if (!jsonMatch) {
+            throw new Error("No JSON in response");
+          }
+          
+          const reportData = JSON.parse(jsonMatch[0]);
+          
+          if (!reportData.freeReport || !reportData.freeReport.metrics) {
+            throw new Error("Invalid report structure");
+          }
+          
+          await sessionRef.update({ 
+            reportData, 
+            reportStatus: 'complete' 
+          });
+          console.log(`[${sessionId}] Report saved successfully`);
+          
+        } catch (aiError) {
+          console.error(`[${sessionId}] AI generation failed:`, aiError.message);
+          // Используем fallback
+          const fallbackReport = buildFallback(sessionData, faceAnalysisData);
+          await sessionRef.update({ 
+            reportData: fallbackReport, 
+            reportStatus: 'complete',
+            reportError: `Fallback used: ${aiError.message}`
+          });
+          console.log(`[${sessionId}] Fallback report saved`);
+        }
+        
+      } catch (error) {
+        console.error(`[${sessionId}] Fatal error:`, error);
+        await sessionRef.update({ 
+          reportStatus: 'error', 
+          reportError: error.message 
+        });
+      }
+    }, 100); // Небольшая задержка чтобы handler успел вернуть ответ
     
     return {
       statusCode: 202,
-      body: JSON.stringify({ message: 'Report generation started' })
+      body: JSON.stringify({ message: 'Report generation started', sessionId })
     };
-  } catch (e) {
-    console.error("Error in handler:", e);
-    return { statusCode: 400, body: JSON.stringify({ message: 'Invalid request' }) };
+    
+  } catch (error) {
+    console.error('Handler error:', error);
+    return { 
+      statusCode: 500, 
+      body: JSON.stringify({ error: error.message }) 
+    };
   }
 };
