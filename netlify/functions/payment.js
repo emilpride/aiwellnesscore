@@ -1,4 +1,3 @@
-// Устанавливаем Stripe с помощью `npm install stripe`
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 exports.handler = async (event) => {
@@ -8,8 +7,6 @@ exports.handler = async (event) => {
 
   try {
     const { sessionId } = JSON.parse(event.body);
-
-    // Создаем сессию оплаты в Stripe
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
