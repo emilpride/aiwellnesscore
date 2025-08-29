@@ -1,261 +1,172 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>AI WELLNESSCORE — Your Report</title>
+  <title>AI WELLNESSCORE — Ваш персональный отчет</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    body { 
-        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; 
-        background-color: #0f172a; 
-        color: #e2e8f0; 
-        overflow-x: hidden;
-    }
-    .gradient-bg-dark-animated {
-        background: linear-gradient(300deg, #0f172a, #1e1b4b, #312e81, #0f172a);
-        background-size: 200% 200%;
-        animation: slow-pan 25s ease infinite;
-    }
-    @keyframes slow-pan { 0% { background-position: 0% 0%; } 25% { background-position: 100% 0%; } 50% { background-position: 100% 100%; } 75% { background-position: 0% 100%; } 100% { background-position: 0% 0%; } }
-    .glass-card {
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-    .glass-card:before {
-        content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.06), transparent 40%);
-        opacity: 0; transition: opacity 0.5s;
-    }
-    .glass-card:hover:before { opacity: 1; }
-    .glass-card:hover { border-color: rgba(255, 255, 255, 0.2); transform: translateY(-5px); box-shadow: 0 20px 30px rgba(0,0,0,0.2); }
-    .animated-gradient-text {
-        background: linear-gradient(90deg, #e0e7ff, #a5b4fc, #6366f1, #14e3e3);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        background-size: 200% auto; animation: text-shine 5s linear infinite;
-    }
+    body { font-family: Inter, system-ui, sans-serif; background-color: #0f172a; color: #e2e8f0; overflow-x: hidden; }
+    .gradient-bg { background: linear-gradient(300deg, #0f172a, #1e1b4b, #312e81, #0f172a); background-size: 200% 200%; animation: slow-pan 25s ease infinite; }
+    @keyframes slow-pan { 0%{background-position:0% 0%} 25%{background-position:100% 0%} 50%{background-position:100% 100%} 75%{background-position:0% 100%} 100%{background-position:0% 0%} }
+    .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .animated-gradient-text { background: linear-gradient(90deg, #e0e7ff, #a5b4fc, #6366f1, #14e3e3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% auto; animation: text-shine 5s linear infinite; }
     @keyframes text-shine { to { background-position: 200% center; } }
     .muted { color: #94a3b8; }
-    .cta { 
-        background-color: #14e3e3; color: #0f172a; 
-        transition: all 0.2s ease; transform: scale(1);
-    }
-    .cta:hover { 
-        background-color: #67e8f9;
-        box-shadow: 0 4px 12px rgba(20, 227, 227, 0.3);
-        transform: scale(1.05);
-    }
-     .pulsate { animation: pulse 2s infinite; }
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(20, 227, 227, 0.7); }
-        50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(20, 227, 227, 0); }
-    }
-    .locked { filter: blur(8px); pointer-events: none; user-select: none; position: relative; }
-    .lock-overlay {
-      position: absolute; inset: 0; display:flex; align-items:center; justify-content:center;
-      background: linear-gradient(180deg, rgba(15,23,42,0.4), rgba(15,23,42,0.8));
-      border-radius: 1rem;
-    }
-    .small { font-size: 0.85rem; }
-    .fade-in-up {
-        opacity: 0;
-        transform: translateY(30px);
-        animation: fadeInUp 0.8s ease-out forwards;
-    }
+    .cta { background-color: #14e3e3; color: #0f172a; transition: all 0.2s ease; transform: scale(1); }
+    .cta:hover { background-color: #67e8f9; box-shadow: 0 4px 12px rgba(20, 227, 227, 0.3); transform: scale(1.05); }
+    .pulsate { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(20,227,227,.7)} 50%{transform:scale(1.05);box-shadow:0 0 20px 10px rgba(20,227,227,0)} }
+    .fade-in-up { opacity: 0; transform: translateY(30px); animation: fadeInUp 0.8s ease-out forwards; }
     @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    .icon-glow { filter: drop-shadow(0 0 8px rgba(20, 227, 227, 0.5)); }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
 </head>
-<body>
-<div class="gradient-bg-dark-animated">
-  <div class="max-w-6xl mx-auto p-4 sm:p-6">
-    <header class="fade-in-up flex items-center justify-between mb-6" style="animation-delay: 0.1s;">
+<body class="gradient-bg">
+
+<div id="loading-state" class="min-h-screen flex flex-col items-center justify-center text-center p-10">
+  <h2 class="text-2xl font-bold animated-gradient-text">Анализируем ваши данные...</h2>
+  <p class="muted mt-2 max-w-sm">Нейронные сети генерируют ваш персональный отчёт. Это может занять до 30 секунд.</p>
+  <div class="w-16 h-16 mx-auto mt-6 animate-spin rounded-full border-4 border-slate-600 border-t-teal-400"></div>
+</div>
+
+<main id="report-content" class="max-w-6xl mx-auto p-4 sm:p-6 hidden">
+    
+    <header class="flex items-center justify-between mb-6 fade-in-up">
       <div class="flex items-center gap-4">
         <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500 to-teal-500 grid place-items-center text-white font-black text-2xl">W</div>
         <div>
           <h1 class="text-xl font-semibold text-white">AI WELLNESSCORE</h1>
-          <div class="muted text-sm">Personalized Wellness Intelligence</div>
+          <p class="muted text-sm">Ваш персональный отчет</p>
         </div>
-      </div>
-      <div class="hidden sm:flex items-center gap-2 muted small">
-        <div class="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-xs">SSL Secured</div>
-        <div class="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-xs">PCI-ready</div>
       </div>
     </header>
 
-    <section class="fade-in-up glass-card rounded-2xl p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6" style="animation-delay: 0.2s;">
-      <div class="flex flex-col items-center justify-center">
-        <div class="text-sm muted">Your Wellness Archetype</div>
-        <div id="archetype" class="text-3xl font-bold animated-gradient-text mt-1">—</div>
-
-        <div class="mt-6 flex flex-col sm:flex-row items-center gap-6 sm:gap-10">
-          <canvas id="gauge" class="w-[240px] h-[120px]"></canvas>
-          <div class="space-y-4 text-center sm:text-left">
-            <div><div class="muted small">Biological Age</div><div id="biologicalAge" class="text-2xl font-semibold">0</div></div>
-            <div><div class="muted small">Energy Index</div><div id="energyIndex" class="text-2xl font-semibold">0</div></div>
-            <div><div class="muted small">Stress Level</div><div id="stressLevel" class="text-2xl font-semibold">0</div></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="border-t border-white/10 lg:border-none pt-6 lg:pt-0">
-        <h2 class="text-lg font-semibold text-white text-center lg:text-left">Quick Insights</h2>
-        <div class="mt-4 grid grid-cols-1 gap-4">
-          <div class="p-4 rounded-lg border border-white/10 bg-white/5"><div class="muted small">Main Barrier</div><div id="mainBarrier" class="font-medium text-white">—</div></div>
-          <div class="p-4 rounded-lg border border-white/10 bg-white/5"><div class="muted small">Quick Win</div><div id="quickWin" class="font-medium text-white">—</div></div>
-          <div class="p-4 rounded-lg border border-white/10 bg-white/5"><div class="muted small">Comparison</div><div id="comparison" class="font-medium text-white">—</div></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="fade-in-up glass-card rounded-2xl p-4 sm:p-6 mb-6" style="animation-delay: 0.3s;">
-      <h2 class="text-xl font-semibold text-white mb-4">Free Report — Metrics & Core Four</h2>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="space-y-4">
-          <div class="p-4 rounded-lg border border-white/10 bg-white/5">
-            <div class="muted small">Wellness Score</div>
-            <div id="wellnessScore" class="text-5xl font-black animated-gradient-text">0</div>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-               <div class="p-3 rounded-lg border border-white/10 bg-white/5"><div class="muted small">Biological Age</div><div id="bioAge2" class="font-semibold text-white text-lg">0</div></div>
-               <div class="p-3 rounded-lg border border-white/10 bg-white/5"><div class="muted small">Energy Index</div><div id="energyIndex2" class="font-semibold text-white text-lg">0</div></div>
-               <div class="p-3 rounded-lg border border-white/10 bg-white/5"><div class="muted small">Stress Level</div><div id="stressLevel2" class="font-semibold text-white text-lg">0</div></div>
-          </div>
+    <section id="free-report-view">
+        <div class="glass-card rounded-2xl p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-6 fade-in-up" style="animation-delay: 0.2s;">
+            <div class="lg:col-span-2">
+                <h2 class="text-lg font-semibold text-white text-center lg:text-left">Ваш Wellness Дашборд</h2>
+                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                    <div>
+                        <div class="p-4 rounded-lg border border-white/10 bg-white/5 text-center">
+                            <p class="muted text-sm">Wellness Score</p>
+                            <p id="wellnessScore" class="text-6xl font-black animated-gradient-text">0</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div class="p-3 rounded-lg border border-white/10 bg-white/5"><p class="muted text-sm">Био-возраст</p><p id="biologicalAge" class="font-semibold text-white text-2xl">0</p></div>
+                        <div class="p-3 rounded-lg border border-white/10 bg-white/5"><p class="muted text-sm">Энергия</p><p id="energyIndex" class="font-semibold text-white text-2xl">0</p></div>
+                        <div class="p-3 rounded-lg border border-white/10 bg-white/5 col-span-2"><p class="muted text-sm">Уровень стресса</p><p id="stressLevel" class="font-semibold text-white text-2xl">0</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-white/10 lg:border-t-0 lg:border-l lg:pl-8 pt-6 lg:pt-0">
+                <h2 class="text-lg font-semibold text-white mb-4 text-center lg:text-left">Ключевые инсайты</h2>
+                <div class="space-y-3">
+                    <div class="p-3 rounded-lg bg-white/5"><p class="muted text-sm">Главный барьер</p><p id="mainBarrier" class="font-medium text-white">—</p></div>
+                    <div class="p-3 rounded-lg bg-white/5"><p class="muted text-sm">Быстрая победа</p><p id="quickWin" class="font-medium text-white">—</p></div>
+                    <div class="p-3 rounded-lg bg-white/5"><p class="muted text-sm">Сравнение</p><p id="comparison" class="font-medium text-white">—</p></div>
+                </div>
+            </div>
         </div>
 
-        <div>
-            <h3 class="text-base font-semibold text-white mb-2 text-center">Core Four Balance</h3>
-            <canvas id="coreRadar" height="250"></canvas>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 fade-in-up" style="animation-delay: 0.3s;">
+            <div class="glass-card rounded-2xl p-4 sm:p-6">
+                <h3 class="text-lg font-semibold text-white mb-2 text-center">Баланс "Core Four"</h3>
+                <canvas id="coreRadar" height="250"></canvas>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="glass-card rounded-xl p-4"><p class="muted text-sm">Разум</p><p id="mindScore" class="text-2xl font-semibold text-white">0</p><p id="mindSummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
+                <div class="glass-card rounded-xl p-4"><p class="muted text-sm">Тело</p><p id="bodyScore" class="text-2xl font-semibold text-white">0</p><p id="bodySummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
+                <div class="glass-card rounded-xl p-4"><p class="muted text-sm">Питание</p><p id="nutritionScore" class="text-2xl font-semibold text-white">0</p><p id="nutritionSummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
+                <div class="glass-card rounded-xl p-4"><p class="muted text-sm">Сон</p><p id="sleepScore" class="text-2xl font-semibold text-white">0</p><p id="sleepSummary" class="muted text-sm leading-relaxed mt-1">—</p></div>
+            </div>
         </div>
-      </div>
     </section>
     
-    <section class="fade-in-up mb-6" style="animation-delay: 0.4s;">
-         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="glass-card rounded-xl p-4"><div class="muted small">Mind</div><div id="mindScore" class="text-xl font-semibold text-white">0</div><div id="mindSummary" class="muted small leading-relaxed mt-1">—</div></div>
-            <div class="glass-card rounded-xl p-4"><div class="muted small">Body</div><div id="bodyScore" class="text-xl font-semibold text-white">0</div><div id="bodySummary" class="muted small leading-relaxed mt-1">—</div><div id="bodyBMI" class="muted small mt-1">BMI: —</div></div>
-            <div class="glass-card rounded-xl p-4"><div class="muted small">Nutrition</div><div id="nutritionScore" class="text-xl font-semibold text-white">0</div><div id="nutritionSummary" class="muted small leading-relaxed mt-1">—</div></div>
-            <div class="glass-card rounded-xl p-4"><div class="muted small">Sleep</div><div id="sleepScore" class="text-xl font-semibold text-white">0</div><div id="sleepSummary" class="muted small leading-relaxed mt-1">—</div></div>
-        </div>
-    </section>
+    <section id="premium-section" class="fade-in-up" style="animation-delay: 0.4s;"></section>
 
-    <section class="fade-in-up" style="animation-delay: 0.5s;">
-      <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold text-white">Unlock Your Premium Report</h2>
-        <p class="muted max-w-2xl mx-auto mt-2">Go deeper with advanced analytics, personalized recommendations, and future wellness forecasts.</p>
-      </div>
+    <footer id="footer-cta" class="fade-in-up mt-8" style="animation-delay: 0.5s;"></footer>
 
-      <div id="premiumWrap" class="grid md:grid-cols-2 gap-6">
-        </div>
-    </section>
+</main>
 
-    <footer class="fade-in-up mt-8 glass-card rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4" style="animation-delay: 0.6s;">
-      <div class="flex items-center gap-4 text-center md:text-left">
-        <div class="hidden sm:grid w-12 h-12 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 place-items-center font-bold text-white text-2xl flex-shrink-0">★</div>
-        <div>
-          <div class="font-semibold text-white">Limited Time Offer — <span class="text-teal-400">30% Off</span></div>
-          <div class="muted small">Unlock your full potential. Offer expires in <span id="timer" class="font-bold text-white">15:00</span></div>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <div class="text-right mr-2">
-          <div class="muted small line-through">$49</div>
-          <div class="text-2xl font-bold text-white">$34.30</div>
-        </div>
-        <button id="unlockBtn" class="cta px-5 py-3 rounded-lg font-bold pulsate">Unlock Premium</button>
-        <button id="downloadPDFBtn" class="hidden px-4 py-2 rounded-lg border border-white/20 bg-white/10 text-white hover:bg-white/20">Download PDF</button>
-      </div>
-    </footer>
+<div id="payment-success-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+  <div class="glass-card rounded-xl p-6 w-full max-w-md border-teal-400/50 text-center">
+    <h3 class="font-semibold text-2xl text-white">Оплата прошла успешно!</h3>
+    <p class="muted mt-2">Ваш премиум-отчет разблокирован. Теперь вы можете просмотреть все детали и скачать PDF-версию.</p>
+    <div class="mt-6"><button id="close-modal-btn" class="cta px-5 py-2.5 rounded-lg text-sm font-semibold">Отлично!</button></div>
   </div>
 </div>
 
-  <div id="paymentModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
-    <div class="glass-card rounded-xl p-6 w-full max-w-md border-teal-400/50">
-      <h3 class="font-semibold text-lg text-white">Payment Success</h3>
-      <p class="muted small mt-2">Your premium report has been unlocked. You can now view all details and download a PDF.</p>
-      <div class="mt-4 text-right"><button id="closeModal" class="cta px-4 py-2 rounded-lg text-sm font-semibold">OK</button></div>
-    </div>
-  </div>
 
 <script>
 /* =========================
-   SETUP & DOM ELEMENTS
+   ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
    ========================= */
 const $ = id => document.getElementById(id);
-
-// Глобальные переменные для хранения графиков
-let gaugeChart, coreRadar;
+let coreRadarChart, gaugeChart;
+let sessionId = null;
+let isPaid = false;
 
 /* =========================
-   ЛОГИКА ПОЛУЧЕНИЯ ДАННЫХ
+   ЛОГИКА ЗАГРУЗКИ И ПОЛУЧЕНИЯ ДАННЫХ
    ========================= */
-async function init() {
-  const loadingHTML = `
-    <div id="loading-state" class="text-center p-10">
-      <h2 class="text-2xl font-bold animated-gradient-text">Анализируем ваши данные...</h2>
-      <p class="muted mt-2">Нейронные сети генерируют ваш персональный отчёт. Это может занять до 30 секунд.</p>
-      <div class="w-16 h-16 mx-auto mt-6 animate-spin rounded-full border-4 border-slate-600 border-t-teal-400"></div>
-    </div>
-  `;
-  // Скрываем основной контент и показываем загрузку
-  const mainContent = document.querySelector('.max-w-6xl');
-  mainContent.style.display = 'none';
-  document.body.insertAdjacentHTML('afterbegin', loadingHTML);
-  
-  const sessionId = new URLSearchParams(window.location.search).get('sessionId');
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    sessionId = urlParams.get('sessionId');
+    isPaid = urlParams.get('payment') === 'success';
 
-  if (!sessionId) {
-    showError("Ошибка: Session ID не найден. Пожалуйста, начните анализ заново.");
-    return;
-  }
-  
-  pollForResult(sessionId);
-}
+    if (isPaid) {
+        $('payment-success-modal').classList.remove('hidden');
+        $('payment-success-modal').classList.add('flex');
+    }
+
+    if (!sessionId) {
+        showError("Ошибка: Session ID не найден. Пожалуйста, начните анализ заново.");
+        return;
+    }
+    
+    pollForResult(sessionId);
+});
 
 function pollForResult(sessionId, retries = 15) {
-  if (retries <= 0) {
-    showError("Не удалось сгенерировать отчёт. Пожалуйста, попробуйте позже.");
-    return;
-  }
-
-  fetch('/.netlify/functions/checkResult', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sessionId })
-  })
-  .then(res => res.json())
-  .then(result => {
-    if (result.status === 'complete') {
-      document.getElementById('loading-state')?.remove();
-      document.querySelector('.max-w-6xl').style.display = 'block';
-      renderReport(result.data);
-    } else if (result.status === 'error') {
-      showError(result.message);
-    } else {
-      // Статус 'pending', продолжаем опрос
-      setTimeout(() => pollForResult(sessionId, retries - 1), 3000);
+    if (retries <= 0) {
+        showError("Не удалось сгенерировать отчёт в отведённое время. Пожалуйста, попробуйте позже.");
+        return;
     }
-  })
-  .catch(err => {
-    console.error(err);
-    showError("Произошла ошибка при связи с сервером.");
-  });
+
+    fetch('/.netlify/functions/checkResult', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId })
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.status === 'complete') {
+            $('loading-state')?.remove();
+            $('report-content').classList.remove('hidden');
+            renderReport(result.data);
+        } else if (result.status === 'error') {
+            showError(result.message);
+        } else {
+            setTimeout(() => pollForResult(sessionId, retries - 1), 3000);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showError("Произошла ошибка при связи с сервером.");
+    });
 }
 
 function showError(message) {
-    const loadingState = document.getElementById('loading-state');
+    const loadingState = $('loading-state');
     if (loadingState) {
         loadingState.innerHTML = `
             <h2 class="text-2xl font-bold text-red-400">Произошла ошибка</h2>
@@ -265,76 +176,231 @@ function showError(message) {
     }
 }
 
+/* =========================
+   ЛОГИКА РЕНДЕРИНГА
+   ========================= */
+function renderReport(reportData) {
+    // 1. Рендерим бесплатную часть, которая видна всем
+    const { freeReport, premiumReport } = reportData;
+    renderFreeReport(freeReport);
+
+    // 2. В зависимости от статуса оплаты, рендерим премиум-раздел и футер
+    if (isPaid) {
+        renderPaidView(premiumReport);
+    } else {
+        renderUnpaidView();
+    }
+    
+    // 3. Устанавливаем обработчики событий
+    setupEventListeners(premiumReport);
+}
+
+function renderFreeReport(freeReport) {
+    const DURATION = 1500;
+    animateValue($('wellnessScore'), 0, freeReport.metrics.wellnessScore, DURATION);
+    animateValue($('biologicalAge'), 0, freeReport.metrics.biologicalAge, DURATION);
+    animateValue($('energyIndex'), 0, freeReport.metrics.energyIndex, DURATION);
+    animateValue($('stressLevel'), 0, freeReport.metrics.stressLevel, DURATION);
+    animateValue($('mindScore'), 0, freeReport.coreFour.mind.score, DURATION);
+    animateValue($('bodyScore'), 0, freeReport.coreFour.body.score, DURATION);
+    animateValue($('nutritionScore'), 0, freeReport.coreFour.nutrition.score, DURATION);
+    animateValue($('sleepScore'), 0, freeReport.coreFour.sleep.score, DURATION);
+    
+    $('mainBarrier').textContent = freeReport.insights.mainBarrier;
+    $('quickWin').textContent = freeReport.insights.quickWin;
+    $('comparison').textContent = freeReport.insights.comparison;
+    $('mindSummary').textContent = freeReport.coreFour.mind.summary;
+    $('bodySummary').textContent = freeReport.coreFour.body.summary;
+    $('nutritionSummary').textContent = freeReport.coreFour.nutrition.summary;
+    $('sleepSummary').textContent = freeReport.coreFour.sleep.summary;
+
+    renderCoreRadar(freeReport.coreFour);
+}
+
+function renderUnpaidView() {
+    // Рендерим тизер премиум-раздела
+    $('premium-section').innerHTML = `
+        <div class="text-center mb-6">
+            <h2 class="text-3xl font-bold text-white">Разблокируйте ваш <span class="animated-gradient-text">Премиум-отчет</span></h2>
+            <p class="muted max-w-2xl mx-auto mt-2">Получите доступ к углубленной аналитике, персональным рекомендациям и прогнозам для долгосрочного улучшения самочувствия.</p>
+        </div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${createTeaserCard('Детальная аналитика', 'Метаболический возраст, оценка восстановления, риски воспалений и цифровой велнес.')}
+            ${createTeaserCard('Анализ по фото', 'Оценка здоровья кожи, уровень гидратации, признаки недосыпа и маркеров стресса.')}
+            ${createTeaserCard('Персональные рекомендации', 'Протокол сброса циркадных ритмов, план питания и тренировок, инструменты для борьбы со стрессом.')}
+            ${createTeaserCard('Прогнозы', 'Ваш потенциал на 30 дней, риски в будущем и пошаговый план внедрения привычек.')}
+            ${createTeaserCard('Уникальные функции', 'Wellness-погода, матрица энергии, оценка социального здоровья и персональные добавки.')}
+            ${createTeaserCard('Заметки AI-коуча', 'Личное и мотивирующее заключение от вашего AI-наставника.')}
+        </div>
+    `;
+
+    // Рендерим футер с призывом к действию
+    $('footer-cta').innerHTML = `
+      <div class="glass-card rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="text-center md:text-left">
+          <p class="font-semibold text-white">Специальное предложение — <span class="text-teal-400">Скидка 30%</span></p>
+          <p class="muted text-sm">Время действия предложения истекает: <span id="timer" class="font-bold text-white">15:00</span></p>
+        </div>
+        <button id="unlock-btn" class="cta px-6 py-3 rounded-lg font-bold pulsate w-full md:w-auto">Разблокировать за $34.30</button>
+      </div>
+    `;
+    startCountdown(15 * 60);
+}
+
+function renderPaidView(premiumReport) {
+    // Рендерим все премиум-разделы
+    $('premium-section').innerHTML = `
+        <h2 class="text-3xl font-bold text-white text-center mb-6">Ваш <span class="animated-gradient-text">Премиум-отчет</span></h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            ${createPremiumCard('Детальная аналитика', premiumReport.detailedAnalytics)}
+            ${createPremiumCard('Анализ по фото (Face++)', premiumReport.faceAnalysis)}
+            ${createPremiumCard('Персональные рекомендации', premiumReport.recommendations)}
+            ${createPremiumCard('Прогнозы и планы', premiumReport.forecasts)}
+            <div class="md:col-span-2">${createPremiumCard('Заметки AI-коуча', { 'Личное заключение': premiumReport.aiCoachNotes })}</div>
+        </div>
+    `;
+
+    // Рендерим футер с кнопкой скачивания
+    $('footer-cta').innerHTML = `
+      <div class="glass-card rounded-2xl p-4 text-center">
+        <p class="font-semibold text-white mb-2">Ваш отчет полностью разблокирован.</p>
+        <button id="download-pdf-btn" class="cta px-6 py-3 rounded-lg font-bold">Скачать PDF-отчет</button>
+      </div>
+    `;
+}
+
 
 /* =========================
-   ANIMATION & RENDERING
+   ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
    ========================= */
-
-function renderReport(reportData) {
-  const { freeReport, premiumReport } = reportData;
-
-  // -- Populate Free Report --
-  // $('archetype').textContent = freeReport.insights.archetype || 'Wellness Explorer'; // 'archetype' нет в новой схеме
-  $('mainBarrier').textContent = freeReport.insights.mainBarrier;
-  $('quickWin').textContent = freeReport.insights.quickWin;
-  $('comparison').textContent = freeReport.insights.comparison;
-
-  const DURATION = 1500;
-  animateValue($('wellnessScore'), 0, freeReport.metrics.wellnessScore, DURATION);
-  animateValue($('biologicalAge'), 0, freeReport.metrics.biologicalAge, DURATION);
-  animateValue($('energyIndex'), 0, freeReport.metrics.energyIndex, DURATION);
-  animateValue($('stressLevel'), 0, freeReport.metrics.stressLevel, DURATION);
-  animateValue($('bioAge2'), 0, freeReport.metrics.biologicalAge, DURATION);
-  animateValue($('energyIndex2'), 0, freeReport.metrics.energyIndex, DURATION);
-  animateValue($('stressLevel2'), 0, freeReport.metrics.stressLevel, DURATION);
-  animateValue($('mindScore'), 0, freeReport.coreFour.mind.score, DURATION);
-  animateValue($('bodyScore'), 0, freeReport.coreFour.body.score, DURATION);
-  animateValue($('nutritionScore'), 0, freeReport.coreFour.nutrition.score, DURATION);
-  animateValue($('sleepScore'), 0, freeReport.coreFour.sleep.score, DURATION);
-
-  $('mindSummary').textContent = freeReport.coreFour.mind.summary;
-  $('bodySummary').textContent = freeReport.coreFour.body.summary;
-  $('bodyBMI').textContent = freeReport.coreFour.body.bmi ? `BMI: ${freeReport.coreFour.body.bmi}` : 'BMI: —';
-  $('nutritionSummary').textContent = freeReport.coreFour.nutrition.summary;
-  $('sleepSummary').textContent = freeReport.coreFour.sleep.summary;
-
-  setTimeout(() => {
-      renderGauge(freeReport.metrics.wellnessScore);
-      renderCoreRadar(freeReport.coreFour);
-  }, 300);
-  
-  // -- Populate Premium Section --
-  populatePremiumCards(premiumReport); // Будет работать с новой структурой
-  setupEventListeners();
+function animateValue(element, start, end, duration) {
+    if (!element) return;
+    let startTimestamp = null;
+    const step = timestamp => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        element.textContent = Math.floor(progress * (end - start) + start);
+        if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
 }
 
-// ... Оставьте функции animateValue, renderGauge, renderCoreRadar без изменений ...
-// [cite: 526, 527, 528-531]
+function renderCoreRadar(coreFour) {
+  const ctx = $('coreRadar').getContext('2d');
+  const lightColor = 'rgba(255, 255, 255, 0.25)';
+  if (coreRadarChart) coreRadarChart.destroy();
+  const data = [ coreFour.mind.score, coreFour.body.score, coreFour.nutrition.score, coreFour.sleep.score ];
+  const labels = ['Разум','Тело','Питание','Сон'];
+  coreRadarChart = new Chart(ctx, {
+    type: 'radar',
+    data: { labels, datasets: [{ data, fill: true, backgroundColor: 'rgba(20, 227, 227, 0.2)', borderColor: '#14e3e3', pointBackgroundColor: '#14e3e3' }] },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { r: { min: 0, max: 100, grid: { color: lightColor }, angleLines: { color: lightColor }, pointLabels: { color: '#e2e8f0', font: { size: 12 } }, ticks: { display: false } } }, 
+        plugins: { legend: { display: false } } 
+    }
+  });
+}
 
-function populatePremiumCards(premiumData) {
-    // Эта функция должна быть адаптирована для работы с объектами, а не простыми значениями
-    // Для краткости, этот раздел опущен, но его нужно будет доработать для красивого вывода сложных данных (массивов, объектов)
-    console.log("Premium Data to render:", premiumData);
-    $('premiumWrap').innerHTML = `<div class="glass-card rounded-xl p-4 md:col-span-2 text-center">
-        <h3 class="font-semibold text-white">Детальный Премиум-отчет</h3>
-        <p class="muted small mt-2">Разблокируйте, чтобы увидеть полную аналитику, включая метаболический возраст, персональные рекомендации и прогнозы.</p>
-        <div class="lock-overlay" style="position: relative; background: none; filter: blur(5px); pointer-events: none;">
-            <p class="p-3 rounded-lg bg-white/5 border border-white/10 mt-2">Метаболический возраст: ${premiumData.detailedAnalytics.metabolicAge}</p>
-            <p class="p-3 rounded-lg bg-white/5 border border-white/10 mt-2">Рекомендации по питанию: ${premiumData.recommendations.nutritionGaps[0].nutrient}</p>
+function createTeaserCard(title, description) {
+    return `
+        <div class="glass-card rounded-xl p-4 text-center">
+            <h3 class="font-semibold text-white">${title}</h3>
+            <p class="muted text-sm mt-1">${description}</p>
         </div>
-    </div>`;
+    `;
 }
 
-function setupEventListeners() {
-    startCountdown(15 * 60);
-    // Остальные слушатели событий (нажатие на кнопки, модальные окна)
-    // ... Скопируйте эту часть из вашего оригинального файла ...
-    // [cite: 543-551]
+function createPremiumCard(title, data) {
+    let content = '';
+    for (const [key, value] of Object.entries(data)) {
+        let displayValue = '';
+        if (typeof value === 'object' && value !== null) {
+            // Преобразуем сложные объекты/массивы в читаемый вид
+            displayValue = `<ul class="list-disc list-inside muted text-sm mt-1">${Object.values(value).map(item => `<li>${typeof item === 'object' ? JSON.stringify(item) : item}</li>`).join('')}</ul>`;
+        } else {
+            displayValue = `<p class="font-semibold text-white break-words">${value}</p>`;
+        }
+        const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+        content += `<div class="p-3 rounded-lg bg-white/5 border border-white/10"><p class="muted text-sm">${formattedKey}</p>${displayValue}</div>`;
+    }
+
+    return `
+        <div class="glass-card rounded-2xl p-4 sm:p-6 h-full">
+            <h3 class="text-lg font-semibold text-white mb-4">${title}</h3>
+            <div class="space-y-3">${content}</div>
+        </div>
+    `;
 }
 
-// Запуск приложения
-init();
+function startCountdown(seconds) {
+    const timerEl = $('timer');
+    if (!timerEl) return;
+    let left = seconds;
+    const interval = setInterval(() => {
+        left--;
+        if (left < 0) {
+            clearInterval(interval);
+            timerEl.textContent = '00:00';
+            return;
+        }
+        const m = String(Math.floor(left/60)).padStart(2,'0');
+        const s = String(left%60).padStart(2,'0');
+        timerEl.textContent = `${m}:${s}`;
+    }, 1000);
+}
 
+function setupEventListeners(premiumReport) {
+    const unlockBtn = $('unlock-btn');
+    if (unlockBtn) {
+        unlockBtn.addEventListener('click', async () => {
+            unlockBtn.textContent = 'Создаем сессию...';
+            unlockBtn.disabled = true;
+            try {
+                const res = await fetch('/.netlify/functions/payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId })
+                });
+                const { id: stripeSessionId } = await res.json();
+                const stripe = Stripe(process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_..._YOUR_KEY_HERE'); // Вставьте ваш публичный ключ Stripe
+                await stripe.redirectToCheckout({ sessionId: stripeSessionId });
+            } catch (error) {
+                console.error("Stripe Error:", error);
+                unlockBtn.textContent = 'Ошибка. Попробуйте снова';
+                unlockBtn.disabled = false;
+            }
+        });
+    }
+
+    const downloadPdfBtn = $('download-pdf-btn');
+    if (downloadPdfBtn) {
+        downloadPdfBtn.addEventListener('click', async () => {
+            const el = $('report-content');
+            const originalBg = document.body.style.background;
+            document.body.style.background = '#0f172a'; // Устанавливаем сплошной фон для PDF
+            
+            const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#0f172a' });
+            document.body.style.background = originalBg; // Возвращаем градиент
+            
+            const img = canvas.toDataURL('image/png');
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: 'a4' });
+            
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const ratio = Math.min(pageWidth / canvas.width, pageHeight / canvas.height);
+            pdf.addImage(img, 'PNG', 0, 0, canvas.width * ratio, canvas.height * ratio);
+            pdf.save(`AI-WELLNESSCORE-Report-${sessionId}.pdf`);
+        });
+    }
+
+    $('close-modal-btn')?.addEventListener('click', () => {
+        $('payment-success-modal').classList.add('hidden');
+        $('payment-success-modal').classList.remove('flex');
+    });
+}
 </script>
+
 </body>
 </html>
