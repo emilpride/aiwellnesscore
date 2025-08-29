@@ -22,51 +22,70 @@ function createPrompt(answers, faceAnalysis) {
       }).filter(Boolean).join('\n');
     
     const faceData = faceAnalysis ? `
-    Face Analysis (non-medical indicators):
-    - Apparent Age: ${faceAnalysis.age || 'N/A'}
-    - Gender: ${faceAnalysis.gender || 'N/A'}
-    - Smile detected: ${faceAnalysis.smile || 'N/A'}
-    - Glasses type: ${faceAnalysis.glasses || 'N/A'}
-    - Emotions detected: ${JSON.stringify(faceAnalysis.emotion || {})}
-    ` : 'Face analysis was skipped.';
+    Face Analysis available: yes
+    ` : 'Face analysis: skipped';
 
     return `
       You are AI WELLNESSCORE, an expert AI wellness coach.
-      Based on the User Data below, generate a complete and valid JSON object for their wellness report.
-      The JSON object MUST strictly follow the structure provided in the 'Task' section. Do not add any text or markdown before or after the JSON object.
+      Generate a comprehensive wellness report based on the user data below.
+      Return ONLY valid JSON without any markdown formatting.
 
       User Data:
       ${quizData}
       ${faceData}
 
-      Task: Generate a JSON object with the following structure:
+      Generate JSON with this EXACT structure:
       {
         "freeReport": {
-          "archetype": "A creative, metaphorical title for the user (e.g., 'Creative Owl').",
-          "archetypeDescription": "A short, positive description of this archetype.",
-          "wellnessScore": "An overall score from 1 to 100 based on all data.",
-          "wellnessAge": "An estimated wellness age.",
+          "archetype": "Creative metaphorical title like 'Resilient Phoenix'",
+          "archetypeDescription": "2-3 sentence positive description",
+          "wellnessScore": [number 1-100],
+          "wellnessAge": [number],
           "coreFour": {
-            "mind": {"score": 0-100, "summary": "Brief summary for mind."},
-            "body": {"score": 0-100, "summary": "Brief summary for body."},
-            "nutrition": {"score": 0-100, "summary": "Brief summary for nutrition."},
-            "lifestyle": {"score": 0-100, "summary": "Brief summary for lifestyle."}
+            "mind": {"score": [0-100], "summary": "Brief insight"},
+            "body": {"score": [0-100], "summary": "Brief insight"},
+            "nutrition": {"score": [0-100], "summary": "Brief insight"},
+            "lifestyle": {"score": [0-100], "summary": "Brief insight"}
           },
-          "keyInsight": "The single most important insight linking data points.",
-          "firstStep": "One simple, actionable first step.",
-          "motivationTrigger": "An inspiring phrase based on strengths.",
-          "peerComparison": "A short, anonymous comparison."
+          "keyInsight": "Most important finding linking multiple data points",
+          "firstStep": "One specific, actionable step to start today",
+          "motivationTrigger": "Inspiring phrase based on user's strengths",
+          "peerComparison": "Anonymous comparison with demographic group"
         },
         "premiumReport": {
-          "fullPhotoAnalysis": "Detailed non-medical insights from the face analysis.",
+          "deepDive": {
+            "sleepEfficiency": "Detailed sleep quality analysis",
+            "stressRecovery": "Stress recovery index analysis",
+            "energyLevels": "Daily energy pattern analysis",
+            "metabolicHealth": "Metabolic indicators assessment"
+          },
+          "fullPhotoAnalysis": "Detailed non-medical facial analysis if photo provided",
           "sevenDayActionPlan": [
-            {"day": 1, "task": "A specific task for day 1.", "focus": "Mind"},
-            {"day": 2, "task": "A specific task for day 2.", "focus": "Nutrition"}
+            {"day": 1, "task": "Specific morning routine task", "focus": "Mind", "duration": "10 min"},
+            {"day": 2, "task": "Nutrition optimization task", "focus": "Nutrition", "duration": "15 min"},
+            {"day": 3, "task": "Movement practice", "focus": "Body", "duration": "20 min"},
+            {"day": 4, "task": "Stress management technique", "focus": "Mind", "duration": "10 min"},
+            {"day": 5, "task": "Sleep optimization ritual", "focus": "Lifestyle", "duration": "5 min"},
+            {"day": 6, "task": "Social wellness activity", "focus": "Lifestyle", "duration": "30 min"},
+            {"day": 7, "task": "Weekly reflection practice", "focus": "Mind", "duration": "15 min"}
           ],
-          "aiCoachNotes": "A personal, encouraging note from the AI coach."
+          "bmiAnalysis": "BMI calculation with interpretation based on height/weight data",
+          "habitFormationIndex": "Assessment of habit-forming potential with specific tips",
+          "supplementaryInsights": {
+            "hydration": "Daily water intake recommendation",
+            "vitamins": "Key vitamin considerations",
+            "circadianRhythm": "Optimal daily schedule suggestions"
+          },
+          "longTermRisks": "5-year health trajectory risks based on current habits",
+          "opportunities": "Key opportunities for wellness improvement",
+          "trajectoryForecast": {
+            "currentPath": "Wellness score projection if habits unchanged",
+            "optimizedPath": "Wellness score projection with recommendations",
+            "keyMilestones": "Important checkpoints in wellness journey"
+          },
+          "aiCoachNotes": "Personal, encouraging message from AI coach"
         }
-      }
-    `;
+      }`;
 }
 
 exports.handler = async (event) => {
