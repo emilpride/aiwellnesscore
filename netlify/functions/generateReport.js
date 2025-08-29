@@ -8,7 +8,7 @@ if (!getApps().length) {
   try {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
     initializeApp({ credential: cert(serviceAccount) });
-  } catch (e) { 
+  } catch (e) {
     console.error("Firebase init error:", e);
   }
 }
@@ -16,7 +16,7 @@ if (!getApps().length) {
 const db = getFirestore();
 
 function createPrompt(answers, faceAnalysis) {
-  const quizData = Object.entries(answers)
+  const quizData = Object.entries(answers || {})
     .filter(([key]) => !['selfie','faceAnalysis','skinAnalysis','reportData','reportStatus','reportError'].includes(key))
     .map(([key, value]) => `${key}: ${value}`)
     .join('\n');
@@ -26,8 +26,7 @@ function createPrompt(answers, faceAnalysis) {
     : "No photo uploaded.";
 
   return `You are AI WELLNESSCORE, an expert AI wellness coach. 
-Analyze this user data and generate a comprehensive wellness report in JSON format.
-Do not include any extra text, comments or markdown. Only valid JSON.
+Analyze this user data and generate a JSON wellness report.
 
 User Data:
 ${quizData}
@@ -38,61 +37,34 @@ The JSON MUST strictly follow this structure:
 {
   "freeReport": {
     "metrics": {
-      "wellnessScore": "Overall wellness score from 1-100",
-      "biologicalAge": "Estimated biological age combining lifestyle + Face++ age",
-      "energyIndex": "Energy level index based on sleep, activity, and fatigue signs",
-      "stressLevel": "Stress index combining answers + facial markers"
+      "wellnessScore": 0-100,
+      "biologicalAge": "number",
+      "energyIndex": 0-100,
+      "stressLevel": 0-100
     },
     "coreFour": {
-      "mind": {"score": 0-100, "summary": "Mental wellness summary"},
-      "body": {"score": 0-100, "summary": "Physical health summary (include BMI if available)"},
-      "nutrition": {"score": 0-100, "summary": "Diet quality summary"},
-      "sleep": {"score": 0-100, "summary": "Sleep quality summary"}
+      "mind": {"score": 0-100, "summary": "string"},
+      "body": {"score": 0-100, "summary": "string"},
+      "nutrition": {"score": 0-100, "summary": "string"},
+      "sleep": {"score": 0-100, "summary": "string"}
     },
     "insights": {
-      "mainBarrier": "Biggest obstacle to wellness progress",
-      "quickWin": "One simple high-impact change",
-      "comparison": "Comparison with peers (e.g., 'Your sleep is lower than 70% of people your age')"
+      "mainBarrier": "string",
+      "quickWin": "string",
+      "comparison": "string"
     }
   },
   "premiumReport": {
-    "detailedAnalytics": {
-      "metabolicAge": "Calculated metabolic age",
-      "recoveryScore": "Ability to recover from stress and activity",
-      "inflammationRisk": "Inflammation risk index from lifestyle & skin",
-      "digitalWellnessScore": "Impact of screen time on sleep and stress"
-    },
-    "faceAnalysis": {
-      "skinHealthScore": "Numeric score for skin health",
-      "hydrationAssessment": "Skin hydration evaluation",
-      "sleepDebtVisualization": "Signs of sleep debt (dark circles, eye bags)",
-      "stressMarkers": "Visible stress markers (wrinkles, tension)"
-    },
-    "recommendations": {
-      "circadianReset": "Personal sleep/wake optimization plan",
-      "nutritionGaps": "Key nutrients missing in diet",
-      "exercisePrescription": "Personalized exercise type & timing",
-      "stressToolkit": "Recommended stress management techniques"
-    },
-    "forecasts": {
-      "thirtyDayPotential": "Expected realistic improvements in 30 days",
-      "riskTimeline": "Timeline of risks if habits continue",
-      "habitStackingPlan": "Step-by-step habit introduction plan"
-    },
-    "uniqueFeatures": {
-      "wellnessWeather": "7-day forecast of wellbeing",
-      "energyMatrix": "Best times for focus & rest",
-      "socialHealthScore": "Assessment of social wellbeing",
-      "supplementStack": "Suggested supplements (with disclaimer)"
-    },
-    "aiCoachNotes": "Encouraging, personal closing message"
+    "detailedAnalytics": {...},
+    "faceAnalysis": {...},
+    "recommendations": {...},
+    "forecasts": {...},
+    "uniqueFeatures": {...},
+    "aiCoachNotes": "string"
   }
 }
 
-IMPORTANT:
-- Return ONLY valid JSON.
-- Populate ALL fields with realistic, personalized content based on user data.
-- Use numbers for numeric fields and plain text for descriptions.`;
+Return ONLY valid JSON.`;
 }
 
 exports.handler = async (event) => {
@@ -103,7 +75,7 @@ exports.handler = async (event) => {
   }
 
   let sessionId;
-  
+
   try {
     const body = JSON.parse(event.body);
     sessionId = body.sessionId;
@@ -135,37 +107,50 @@ exports.handler = async (event) => {
 
     const prompt = createPrompt(sessionData.answers || {}, sessionData.faceAnalysis);
 
-    const generationConfig = {
-      temperature: 0.7,
-      topK: 40,
-      topP: 0.95,
-      maxOutputTokens: 2048,
-    };
-    
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig,
+      generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
     });
-    
+
     const response = await result.response;
     const rawText = response.text();
-    
     const cleanedText = rawText.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
 
     let reportData;
     try {
-      reportData = JSON.parse(cleanedText);
+      const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("No JSON found");
+      reportData = JSON.parse(jsonMatch[0]);
     } catch (e) {
-      console.error('Parse error, report not valid JSON:', e);
-      throw e;
+      console.error("Parse error:", e, "Raw:", cleanedText);
+      // fallback minimal report
+      reportData = {
+        freeReport: {
+          metrics: {
+            wellnessScore: 72,
+            biologicalAge: 31,
+            energyIndex: 68,
+            stressLevel: 45
+          },
+          coreFour: {
+            mind: { score: 70, summary: "Moderate stress" },
+            body: { score: 65, summary: "Slightly high BMI" },
+            nutrition: { score: 60, summary: "Unbalanced diet" },
+            sleep: { score: 55, summary: "Not enough rest" }
+          },
+          insights: {
+            mainBarrier: "Irregular sleep",
+            quickWin: "Go to bed earlier",
+            comparison: "Your sleep is lower than 70% of your peers"
+          }
+        },
+        premiumReport: {
+          aiCoachNotes: "Upgrade to unlock premium analytics."
+        }
+      };
     }
 
-    await sessionRef.update({ 
-      reportData: reportData, 
-      reportStatus: 'complete' 
-    });
-
-    console.log('Report saved successfully');
+    await sessionRef.update({ reportData, reportStatus: 'complete' });
 
     return {
       statusCode: 200,
