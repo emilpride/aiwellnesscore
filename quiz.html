@@ -88,7 +88,6 @@
             background-color: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(8px);
             z-index: 50;
-            /* display УДАЛЕНО. Видимость управляется классом 'hidden' */
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -246,6 +245,7 @@
                 inputArea.style.display = 'none';
             }
         }
+        
         async function saveAnswerToServer(questionId, answer) {
             if (!sessionId) return;
             try {
@@ -281,6 +281,7 @@
             chatContent.parentElement.scrollTop = chatContent.parentElement.scrollHeight;
         }
         function hideTypingIndicator() { document.getElementById('typing-indicator')?.remove(); }
+  
         function addWelcomeMessage(text) {
             const welcomeContainer = document.createElement('div');
             welcomeContainer.className = 'fade-in flex flex-col items-center text-center space-y-4 py-4';
@@ -307,6 +308,7 @@
             const answeredQuestions = Object.keys(userAnswers).length;
             progressBar.style.width = `${(answeredQuestions / totalQuizQuestions) * 100}%`;
         }
+       
         function displayQuestion() {
             if (currentQuestionIndex >= quizQuestions.length) {
                 endQuiz();
@@ -356,6 +358,7 @@
                 userInput.value = '';
             }
         }
+       
         function handleAnswer(answer) {
             if (!answer || !answer.trim()) return;
             const question = quizQuestions[currentQuestionIndex];
@@ -399,7 +402,7 @@
 
         async function initCamera() {
             cameraModal.classList.remove('hidden');
-            cameraModal.classList.add('flex'); // Explicitly make it a flex container
+            cameraModal.classList.add('flex');
             
             requestAnimationFrame(async () => {
                 if (!faceApiLoaded) {
@@ -458,7 +461,7 @@
                 context.save();
                 context.translate(canvas.width, 0);
                 context.scale(-1, 1);
-               
+                
                 if (resizedDetections.length > 0) {
                     const box = resizedDetections[0].detection.box;
                     faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
@@ -524,7 +527,6 @@
             }
             cameraModal.classList.add('hidden');
             cameraModal.classList.remove('flex');
-
 
             const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
             showPhotoForConfirmation(dataUrl);
