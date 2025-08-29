@@ -351,6 +351,7 @@ function renderPaidView(data) {
             <h2 class="text-3xl font-bold text-white">Your <span class="animated-gradient-text">Premium Analysis</span></h2>
         </div>
         
+        <!-- Detailed Analytics -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <div class="glass-card rounded-2xl p-6">
                 <h3 class="text-lg font-semibold text-white mb-4">Detailed Analytics</h3>
@@ -373,6 +374,7 @@ function renderPaidView(data) {
             </div>
         </div>
         
+        <!-- Recommendations -->
         <div class="glass-card rounded-2xl p-6 mb-6">
             <h3 class="text-lg font-semibold text-white mb-4">Personalized Recommendations</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -390,8 +392,71 @@ function renderPaidView(data) {
                     <p class="muted text-sm">${recommendations.exercisePrescription?.durationMin || '—'} minutes, ${recommendations.exercisePrescription?.timeOfDay || '—'}</p>
                 </div>
             </div>
+            
+            <!-- Nutrition Gaps -->
+            <div class="mt-6">
+                <h4 class="font-semibold text-teal-400 mb-2">Nutrition Gaps</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    ${(recommendations.nutritionGaps || []).map(gap => `
+                        <div class="bg-white/5 rounded-lg p-3">
+                            <span class="text-white font-medium">${gap.nutrient}</span>
+                            <p class="text-sm muted mt-1">${gap.why}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <!-- Stress Toolkit -->
+            <div class="mt-6">
+                <h4 class="font-semibold text-teal-400 mb-2">Stress Management Toolkit</h4>
+                <div class="flex flex-wrap gap-2">
+                    ${(recommendations.stressToolkit || []).map(tool => `
+                        <span class="bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full text-sm">${tool}</span>
+                    `).join('')}
+                </div>
+            </div>
         </div>
         
+        <!-- 30-Day Forecast -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">30-Day Potential</h3>
+                <div class="text-center mb-4">
+                    <p class="text-5xl font-bold text-teal-400">+${forecasts.thirtyDayPotential?.expectedWellnessScoreIncrease || 0}</p>
+                    <p class="muted text-sm">Expected score increase</p>
+                </div>
+                <p class="text-gray-300 text-sm">${forecasts.thirtyDayPotential?.notes || '—'}</p>
+            </div>
+            
+            <div class="glass-card rounded-2xl p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Habit Stacking Plan</h3>
+                <div class="space-y-3">
+                    ${(forecasts.habitStackingPlan || []).map(plan => `
+                        <div class="flex items-start gap-3">
+                            <span class="bg-indigo-500 text-white text-xs px-2 py-1 rounded">Week ${plan.week}</span>
+                            <p class="text-sm text-gray-300">${plan.habit}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Risk Timeline -->
+        <div class="glass-card rounded-2xl p-6 mb-6">
+            <h3 class="text-lg font-semibold text-white mb-4">Risk Timeline</h3>
+            <div class="space-y-4">
+                ${(forecasts.riskTimeline || []).map(risk => `
+                    <div class="flex items-start gap-4">
+                        <div class="bg-red-500/20 text-red-400 px-3 py-1 rounded text-sm font-semibold whitespace-nowrap">
+                            ${risk.yearsFromNow} ${risk.yearsFromNow === 1 ? 'year' : 'years'}
+                        </div>
+                        <p class="text-gray-300 text-sm">${risk.risk}</p>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        
+        <!-- AI Coach Notes -->
         <div class="glass-card rounded-2xl p-6">
             <h3 class="text-lg font-semibold text-white mb-4">AI Coach Notes</h3>
             <p class="text-gray-300 italic">${premium.aiCoachNotes || 'Keep up the great work!'}</p>
