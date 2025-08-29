@@ -587,7 +587,7 @@
             inputArea.style.display = 'none';
             
             try {
-                const analyzeResponse = await fetch('/.netlify/functions/analyzeFace', {
+                const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ photoDataUrl: capturedPhotoDataUrl })
@@ -659,3 +659,4 @@
 
 </body>
 </html>
+
