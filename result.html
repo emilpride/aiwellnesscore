@@ -191,149 +191,94 @@
 
 <script>
 /* =========================
-   SETUP & MOCK DATA
+   SETUP & DOM ELEMENTS
    ========================= */
 const $ = id => document.getElementById(id);
 
-const premiumSections = {
-    "Detailed Analytics": {
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>`,
-        data: ["metabolicAge", "recoveryScore", "inflammationRisk", "digitalWellness"]
-    },
-    "Face Analysis (Face++)": {
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
-        data: ["skinHealthScore", "hydrationAssessment", "sleepDebtVisualization", "stressMarkers"]
-    },
-    "Personalized Recommendations": {
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>`,
-        data: ["circadianReset", "nutritionGaps", "exercisePrescription", "stressToolkit"]
-    },
-    "Forecasts": {
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>`,
-        data: ["thirtyDayPotential", "riskTimeline", "habitStackingPlan"]
-    },
-    "AI Coach Notes": {
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>`,
-        data: ["aiCoachNotes"]
-    },
-};
+// Глобальные переменные для хранения графиков
+let gaugeChart, coreRadar;
 
-function localMockReport() {
- return {
-  freeReport: {
-   metrics: { wellnessScore: 78, biologicalAge: 33, energyIndex: 66, stressLevel: 44 },
-   coreFour: { mind: { score: 68, summary: "Moderate stress levels detected. Daily breathwork or mindfulness could significantly improve focus." }, body: { score: 75, summary: "Good activity levels, but consistency is key. Adding 2 weekly strength sessions would be beneficial." }, nutrition: { score: 62, summary: "Low vegetable intake and moderate processed food consumption are holding back your score." }, sleep: { score: 55, summary: "Short sleep windows are leading to accumulated sleep debt, impacting daily energy." }, bmi: 24.1 },
-   insights: { mainBarrier: "Erratic sleep schedule disrupting circadian rhythm.", quickWin: "Establish a consistent bedtime, even on weekends.", comparison: "Your sleep score is lower than ~70% of your peers." }
-  },
-  premiumReport: {
-   metabolicAge: {label: "Metabolic Age", value: 36}, 
-   recoveryScore: {label: "Recovery Score", value: 58}, 
-   inflammationRisk: {label: "Inflammation Risk", value: "35 (Low)"}, 
-   digitalWellness: {label: "Digital Wellness", value: "52 (Fair)"},
-   skinHealthScore: {label: "Skin Health Score", value: 64}, 
-   hydrationAssessment: {label: "Hydration Assessment", value: "Slight dehydration signs"}, 
-   sleepDebtVisualization: {label: "Sleep Debt Visualization", value: "Mild under-eye bags"}, 
-   stressMarkers: {label: "Stress Markers", value: "Forehead lines present"},
-   circadianReset: {label: "Circadian Reset Protocol", value: "Bedtime: 22:30, Wake: 06:30. Dim screens after 21:00."}, 
-   nutritionGaps: {label: "Nutrition Gaps", value: "Vitamin D (low sun exposure), Iron (low red meat/leafy greens)."}, 
-   exercisePrescription: {label: "Exercise Prescription", value: "Brisk walking (30 min) + 2x weekly resistance training."}, 
-   stressToolkit: {label: "Stress Management Toolkit", value: "4-4-8 breathing, 10-min daily mindfulness, walk breaks."},
-   thirtyDayPotential: {label: "30-Day Potential", value: "+6 score points with consistent sleep and nutrition changes."},
-   riskTimeline: {label: "Risk Timeline", value: "In 3 years, worsening sleep may impact metabolic health."},
-   habitStackingPlan: {label: "Habit Stacking Plan", value: "Week 1: Set bedtime. Week 2: Add morning walk after waking up."},
-   aiCoachNotes: {label: "AI Coach Notes", value: "Your primary lever for improvement is sleep consistency. An erratic schedule is impacting energy and recovery. We recommend targeting 10:30 PM nightly. This single change can raise your score by 5-7 points in two weeks. Your nutrition is solid, but increasing vegetable intake to 4+ servings daily will reduce inflammation risk."}
+/* =========================
+   ЛОГИКА ПОЛУЧЕНИЯ ДАННЫХ
+   ========================= */
+async function init() {
+  const loadingHTML = `
+    <div id="loading-state" class="text-center p-10">
+      <h2 class="text-2xl font-bold animated-gradient-text">Анализируем ваши данные...</h2>
+      <p class="muted mt-2">Нейронные сети генерируют ваш персональный отчёт. Это может занять до 30 секунд.</p>
+      <div class="w-16 h-16 mx-auto mt-6 animate-spin rounded-full border-4 border-slate-600 border-t-teal-400"></div>
+    </div>
+  `;
+  // Скрываем основной контент и показываем загрузку
+  const mainContent = document.querySelector('.max-w-6xl');
+  mainContent.style.display = 'none';
+  document.body.insertAdjacentHTML('afterbegin', loadingHTML);
+  
+  const sessionId = new URLSearchParams(window.location.search).get('sessionId');
+
+  if (!sessionId) {
+    showError("Ошибка: Session ID не найден. Пожалуйста, начните анализ заново.");
+    return;
   }
- };
+  
+  pollForResult(sessionId);
 }
+
+function pollForResult(sessionId, retries = 15) {
+  if (retries <= 0) {
+    showError("Не удалось сгенерировать отчёт. Пожалуйста, попробуйте позже.");
+    return;
+  }
+
+  fetch('/.netlify/functions/checkResult', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId })
+  })
+  .then(res => res.json())
+  .then(result => {
+    if (result.status === 'complete') {
+      document.getElementById('loading-state')?.remove();
+      document.querySelector('.max-w-6xl').style.display = 'block';
+      renderReport(result.data);
+    } else if (result.status === 'error') {
+      showError(result.message);
+    } else {
+      // Статус 'pending', продолжаем опрос
+      setTimeout(() => pollForResult(sessionId, retries - 1), 3000);
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    showError("Произошла ошибка при связи с сервером.");
+  });
+}
+
+function showError(message) {
+    const loadingState = document.getElementById('loading-state');
+    if (loadingState) {
+        loadingState.innerHTML = `
+            <h2 class="text-2xl font-bold text-red-400">Произошла ошибка</h2>
+            <p class="muted mt-2">${message}</p>
+            <a href="quiz.html" class="cta inline-block mt-6 px-5 py-3 rounded-lg font-bold">Начать заново</a>
+        `;
+    }
+}
+
 
 /* =========================
    ANIMATION & RENDERING
    ========================= */
-function animateValue(element, start, end, duration) {
-    let startTimestamp = null;
-    const step = (timestamp) => {
-        if (!startTimestamp) startTimestamp = timestamp;
-        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-        element.innerHTML = Math.floor(progress * (end - start) + start);
-        if (progress < 1) { window.requestAnimationFrame(step); }
-    };
-    window.requestAnimationFrame(step);
-}
 
-let gaugeChart, coreRadar;
+function renderReport(reportData) {
+  const { freeReport, premiumReport } = reportData;
 
-function renderGauge(score) {
-  const ctx = $('gauge').getContext('2d');
-  if (gaugeChart) gaugeChart.destroy();
-  gaugeChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: { datasets: [{ data: [score, 100 - score], backgroundColor: ['#14e3e3', 'rgba(255, 255, 255, 0.1)'], borderWidth: 0, borderRadius: 20 }] },
-    options: { rotation: -90 * (Math.PI/180), circumference: 180 * (Math.PI/180), cutout: '70%', plugins: { legend: { display: false }, tooltip: { enabled: false } }, animation: { animateRotate: true, duration: 1500 } }
-  });
-}
-
-function renderCoreRadar(coreFour) {
-  const ctx = $('coreRadar').getContext('2d');
-  const lightColor = 'rgba(255, 255, 255, 0.25)';
-  if (coreRadar) coreRadar.destroy();
-  const data = [ coreFour.mind.score, coreFour.body.score, coreFour.nutrition.score, coreFour.sleep.score ];
-  const labels = ['Mind','Body','Nutrition','Sleep'];
-  coreRadar = new Chart(ctx, {
-    type: 'radar',
-    data: { labels, datasets: [{ data, fill: true, backgroundColor: 'rgba(20, 227, 227, 0.2)', borderColor: '#14e3e3', pointBackgroundColor: '#14e3e3' }] },
-    options: {
-        responsive: true, maintainAspectRatio: false,
-        scales: { r: { min: 0, max: 100, grid: { color: lightColor }, angleLines: { color: lightColor }, pointLabels: { color: '#e2e8f0', font: { size: 12 } }, ticks: { display: false } } }, 
-        plugins: { legend: { display: false } } 
-    }
-  });
-}
-
-function populatePremiumCards(premiumData) {
-    const container = $('premiumWrap');
-    container.innerHTML = ''; // Clear previous content
-    Object.entries(premiumSections).forEach(([title, section]) => {
-        const isCoachNotes = title === "AI Coach Notes";
-        const card = document.createElement('div');
-        card.className = `glass-card rounded-xl p-4 relative ${isCoachNotes ? 'md:col-span-2' : ''}`;
-        
-        let contentHTML = `<div class="flex items-center gap-3 mb-3"><div class="text-teal-400">${section.icon}</div><h3 class="font-semibold text-white">${title}</h3></div>`;
-        contentHTML += `<div class="mt-3 space-y-3 lockable" data-key="${title.toLowerCase().replace(/\s/g, '')}">`;
-
-        if (isCoachNotes) {
-            const item = premiumData.aiCoachNotes;
-            contentHTML += `<p class="muted small leading-relaxed">${item.value}</p>`;
-        } else {
-             section.data.forEach(key => {
-                const item = premiumData[key];
-                if(item) {
-                    contentHTML += `<div class="p-3 rounded-lg bg-white/5 border border-white/10"><div class="muted small">${item.label}</div><div class="font-semibold text-white break-words">${item.value}</div></div>`;
-                }
-            });
-        }
-        
-        contentHTML += `</div>`;
-        contentHTML += `<div class="lock-overlay hidden" aria-hidden="true"><button class="cta px-4 py-2 rounded-lg font-semibold">Unlock Premium</button></div>`;
-        card.innerHTML = contentHTML;
-        container.appendChild(card);
-    });
-}
-
-
-/* =========================
-   MAIN APP LOGIC
-   ========================= */
-(async function init() {
-  const report = localMockReport(); // Using mock data directly
-  const { freeReport, premiumReport } = report;
-  
   // -- Populate Free Report --
-  $('archetype').textContent = freeReport.insights.archetype || 'Wellness Explorer';
+  // $('archetype').textContent = freeReport.insights.archetype || 'Wellness Explorer'; // 'archetype' нет в новой схеме
   $('mainBarrier').textContent = freeReport.insights.mainBarrier;
   $('quickWin').textContent = freeReport.insights.quickWin;
   $('comparison').textContent = freeReport.insights.comparison;
-  
-  // Animate values
+
   const DURATION = 1500;
   animateValue($('wellnessScore'), 0, freeReport.metrics.wellnessScore, DURATION);
   animateValue($('biologicalAge'), 0, freeReport.metrics.biologicalAge, DURATION);
@@ -349,83 +294,47 @@ function populatePremiumCards(premiumData) {
 
   $('mindSummary').textContent = freeReport.coreFour.mind.summary;
   $('bodySummary').textContent = freeReport.coreFour.body.summary;
-  $('bodyBMI').textContent = 'BMI: ' + freeReport.coreFour.bmi;
+  $('bodyBMI').textContent = freeReport.coreFour.body.bmi ? `BMI: ${freeReport.coreFour.body.bmi}` : 'BMI: —';
   $('nutritionSummary').textContent = freeReport.coreFour.nutrition.summary;
   $('sleepSummary').textContent = freeReport.coreFour.sleep.summary;
 
-  // Render charts after a small delay for animation
   setTimeout(() => {
       renderGauge(freeReport.metrics.wellnessScore);
       renderCoreRadar(freeReport.coreFour);
   }, 300);
-
+  
   // -- Populate Premium Section --
-  populatePremiumCards(premiumReport);
+  populatePremiumCards(premiumReport); // Будет работать с новой структурой
+  setupEventListeners();
+}
 
-  // -- Event Listeners & Initial State --
-  startCountdown(15*60);
-  
-  document.querySelectorAll('.lockable').forEach(el => {
-    el.classList.add('locked');
-    const parent = el.closest('.glass-card');
-    const overlay = parent.querySelector('.lock-overlay');
-    if (overlay) overlay.classList.remove('hidden');
-  });
+// ... Оставьте функции animateValue, renderGauge, renderCoreRadar без изменений ...
+// [cite: 526, 527, 528-531]
 
-  document.body.addEventListener('click', (e) => {
-      if (e.target.closest('#unlockBtn') || e.target.closest('.lock-overlay button')) {
-          $('paymentModal').classList.remove('hidden');
-          $('paymentModal').classList.add('flex');
-      }
-  });
+function populatePremiumCards(premiumData) {
+    // Эта функция должна быть адаптирована для работы с объектами, а не простыми значениями
+    // Для краткости, этот раздел опущен, но его нужно будет доработать для красивого вывода сложных данных (массивов, объектов)
+    console.log("Premium Data to render:", premiumData);
+    $('premiumWrap').innerHTML = `<div class="glass-card rounded-xl p-4 md:col-span-2 text-center">
+        <h3 class="font-semibold text-white">Детальный Премиум-отчет</h3>
+        <p class="muted small mt-2">Разблокируйте, чтобы увидеть полную аналитику, включая метаболический возраст, персональные рекомендации и прогнозы.</p>
+        <div class="lock-overlay" style="position: relative; background: none; filter: blur(5px); pointer-events: none;">
+            <p class="p-3 rounded-lg bg-white/5 border border-white/10 mt-2">Метаболический возраст: ${premiumData.detailedAnalytics.metabolicAge}</p>
+            <p class="p-3 rounded-lg bg-white/5 border border-white/10 mt-2">Рекомендации по питанию: ${premiumData.recommendations.nutritionGaps[0].nutrient}</p>
+        </div>
+    </div>`;
+}
 
-  $('closeModal').addEventListener('click', () => {
-    $('paymentModal').classList.add('hidden');
-    $('paymentModal').classList.remove('flex');
-     setTimeout(() => {
-        document.querySelectorAll('.lockable').forEach(el => { el.style.transition = 'filter 0.5s ease'; el.classList.remove('locked'); });
-        document.querySelectorAll('.lock-overlay').forEach(o => { o.style.transition = 'opacity 0.5s ease'; o.style.opacity = '0'; setTimeout(() => o.classList.add('hidden'), 500); });
-        $('downloadPDFBtn').classList.remove('hidden');
-     }, 300);
-  });
-  
-  $('downloadPDFBtn').addEventListener('click', async () => {
-      const el = document.querySelector('.max-w-6xl');
-      document.body.style.backgroundColor = '#0f172a';
-      document.querySelector('.gradient-bg-dark-animated').style.background = '#0f172a';
-      const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#0f172a' });
-      document.body.style.backgroundColor = '';
-      document.querySelector('.gradient-bg-dark-animated').style.background = '';
-      const img = canvas.toDataURL('image/png');
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: 'a4' });
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const ratio = Math.min(pageWidth / canvas.width, pageHeight / canvas.height);
-      pdf.addImage(img, 'PNG', 0, 0, canvas.width * ratio, canvas.height * ratio);
-      pdf.save('AI-WELLNESSCORE-Report.pdf');
-  });
+function setupEventListeners() {
+    startCountdown(15 * 60);
+    // Остальные слушатели событий (нажатие на кнопки, модальные окна)
+    // ... Скопируйте эту часть из вашего оригинального файла ...
+    // [cite: 543-551]
+}
 
-  document.querySelectorAll('.glass-card').forEach(card => {
-    card.addEventListener('mousemove', e => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        card.style.setProperty('--mouse-x', `${x}px`);
-        card.style.setProperty('--mouse-y', `${y}px`);
-    });
-  });
+// Запуск приложения
+init();
 
-  function startCountdown(seconds = 15*60) {
-    let left = seconds;
-    const t = setInterval(()=> {
-        left--;
-        if (left < 0) { clearInterval(t); $('timer').textContent = '00:00'; return; }
-        const m = String(Math.floor(left/60)).padStart(2,'0'), s = String(left%60).padStart(2,'0');
-        $('timer').textContent = `${m}:${s}`;
-    },1000);
-  }
-})();
 </script>
 </body>
 </html>
