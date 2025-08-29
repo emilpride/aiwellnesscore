@@ -55,25 +55,11 @@
             opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
         #camera-modal.active { opacity: 1; pointer-events: all; }
-        #camera-container { position: relative; width: 90%; max-width: 640px; aspect-ratio: 3/4; overflow: hidden; border-radius: 1.5rem; background: #111; }
+        #camera-container { position: relative; width: 90%; max-width: 400px; aspect-ratio: 3/4; overflow: hidden; border-radius: 1.5rem; background: #111; border: 1px solid rgba(255,255,255,0.2); }
         #camera-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         #camera-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        #camera-loader p { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-        
-        #face-outline {
-            position: absolute;
-            border: 3px solid rgba(255, 255, 255, 0.7);
-            border-radius: 50%;
-            transition: all 0.2s ease-out;
-            box-shadow: 0 0 20px rgba(76, 201, 240, 0.7);
-            opacity: 0;
-        }
-        #face-outline.detected {
-             border-color: #4ade80; /* green-400 */
-             box-shadow: 0 0 30px rgba(74, 222, 128, 0.9);
-             opacity: 1;
-        }
+        #camera-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; text-align: center; }
+        #camera-status { background-color: rgba(0,0,0,0.5); padding: 0.5rem 1rem; border-radius: 9999px; display: inline-block; color: white; font-weight: 500; transition: background-color 0.3s; }
 
         /* New Animations */
         #progress-bar {
@@ -105,8 +91,8 @@
         <div id="chat-container" class="flex-1 p-6 overflow-y-auto chat-container"></div>
         
         <!-- Options Area -->
-        <div id="options-container-wrapper" class="px-4">
-             <div id="options-container" class="flex gap-2 overflow-x-auto py-3 options-container"></div>
+        <div id="options-container-wrapper" class="px-4 pt-1 pb-2">
+             <div id="options-container" class="flex gap-2 overflow-x-auto py-2 options-container"></div>
         </div>
         
         <!-- Input Area -->
@@ -125,13 +111,15 @@
         <div id="camera-container">
             <video id="camera-video" autoplay muted playsinline></video>
             <canvas id="camera-canvas"></canvas>
-            <div id="face-outline"></div>
             <div id="camera-loader" class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4">
                 <svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 <p id="loader-text" class="text-lg font-semibold">Initializing AI models...</p>
+            </div>
+            <div id="camera-overlay">
+                <p id="camera-status">Position your face in the frame</p>
             </div>
         </div>
     </div>
@@ -150,6 +138,7 @@
         const canvas = document.getElementById('camera-canvas');
         const cameraLoader = document.getElementById('camera-loader');
         const loaderText = document.getElementById('loader-text');
+        const cameraStatus = document.getElementById('camera-status');
 
         // --- State ---
         let sessionId = null;
@@ -157,6 +146,7 @@
         let currentQuestionIndex = 0;
         let detectionInterval;
         let stream;
+        let capturedPhotoDataUrl = null;
 
         // --- Quiz Data ---
         const quizQuestions = [
@@ -197,7 +187,6 @@
                 if (!response.ok) throw new Error('Server error starting session');
                 const data = await response.json();
                 sessionId = data.sessionId;
-                console.log('Session started:', sessionId);
             } catch (error) {
                 console.error('Failed to start session:', error);
                 addBotMessage("Sorry, I'm having trouble connecting to my brain right now. 🧠 Please try refreshing the page.");
@@ -218,19 +207,25 @@
             }
         }
 
-        async function confirmPhotoAndAnalyze(photoDataUrl) {
+        async function confirmPhotoAndAnalyze() {
+            addUserMessage("Looks Good!");
+            const photoPreview = document.getElementById('photo-preview-wrapper');
+            if (photoPreview) photoPreview.remove();
+
             const processingMessage = document.createElement('div');
             processingMessage.className = 'text-center p-2';
             processingMessage.innerHTML = `<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div><p class="text-gray-600 mt-2">Analyzing photo and preparing your report...</p>`;
             inputArea.innerHTML = '';
             inputArea.appendChild(processingMessage);
             inputArea.style.display = 'block';
+            optionsContainerWrapper.classList.add('hidden');
+
 
             try {
                 const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ photoDataUrl })
+                    body: JSON.stringify({ photoDataUrl: capturedPhotoDataUrl })
                 });
 
                 let faceData = null;
@@ -315,15 +310,15 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
         
-        function showOptions(options) {
+        function showOptions(options, handlers) {
             optionsContainer.innerHTML = '';
             if (options?.length > 0) {
                 optionsContainerWrapper.classList.remove('hidden');
-                options.forEach(option => {
+                options.forEach((option, index) => {
                     const button = document.createElement('button');
-                    button.textContent = option;
-                    button.className = 'option-btn bg-white border border-purple-300 text-purple-600 px-4 py-2 rounded-full text-sm flex-shrink-0 hover:bg-purple-50';
-                    button.onclick = () => handleAnswer(option);
+                    button.textContent = option.text;
+                    button.className = option.class;
+                    button.onclick = handlers[index];
                     optionsContainer.appendChild(button);
                 });
             } else {
@@ -342,10 +337,8 @@
             }
             
             userInput.value = '';
-            
-            if (currentQuestion.key === 'terms') {
-                inputArea.classList.add('hidden');
-            }
+            inputArea.classList.add('hidden');
+            optionsContainerWrapper.classList.add('hidden');
 
             currentQuestionIndex++;
             updateProgressBar();
@@ -370,7 +363,9 @@
                     askNextQuestion();
                 } else if (question.type === 'question') {
                     addBotMessage(questionText);
-                    showOptions(question.options);
+                    const optionButtons = question.options.map(opt => ({ text: opt, class: 'option-btn bg-white border border-purple-300 text-purple-600 px-4 py-2 rounded-full text-sm flex-shrink-0 hover:bg-purple-50' }));
+                    const handlers = question.options.map(opt => () => handleAnswer(opt));
+                    showOptions(optionButtons, handlers);
                     
                     if (question.key === 'terms') {
                         inputArea.classList.add('hidden');
@@ -433,7 +428,11 @@
 
         function startFaceDetection() {
             let faceDetectedFrames = 0;
+            let captureTimeout;
             const context = canvas.getContext('2d');
+            let scanY = 0;
+            let scanDirection = 1;
+
 
             detectionInterval = setInterval(async () => {
                 const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
@@ -441,28 +440,58 @@
                 const displaySize = { width: video.clientWidth, height: video.clientHeight };
                 faceapi.matchDimensions(canvas, displaySize);
                 context.clearRect(0, 0, canvas.width, canvas.height);
+                context.save();
+                context.translate(canvas.width, 0);
+                context.scale(-1, 1);
                 
                 if (detections.length > 0) {
                     const resizedDetections = faceapi.resizeResults(detections, displaySize);
-                    faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+                    const landmarks = resizedDetections[0].landmarks;
+                    const box = resizedDetections[0].detection.box;
 
-                    if (detections[0].detection.score > 0.85) {
-                        faceDetectedFrames++;
+                    // Draw a techy mesh
+                    context.strokeStyle = 'rgba(0, 255, 255, 0.4)';
+                    context.lineWidth = 1;
+                    faceapi.draw.drawFaceLandmarks(canvas, landmarks, { drawLines: true });
+                    
+                    // Draw corner brackets
+                    context.strokeStyle = '#00FFFF';
+                    context.lineWidth = 3;
+                    context.shadowColor = '#00FFFF';
+                    context.shadowBlur = 10;
+                    const cornerLength = 20;
+                    context.beginPath();
+                    context.moveTo(box.x, box.y + cornerLength); context.lineTo(box.x, box.y); context.lineTo(box.x + cornerLength, box.y);
+                    context.moveTo(box.x + box.width - cornerLength, box.y); context.lineTo(box.x + box.width, box.y); context.lineTo(box.x + box.width, box.y + cornerLength);
+                    context.moveTo(box.x, box.y + box.height - cornerLength); context.lineTo(box.x, box.y + box.height); context.lineTo(box.x + cornerLength, box.y + box.height);
+                    context.moveTo(box.x + box.width - cornerLength, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height - cornerLength);
+                    context.stroke();
+                    context.shadowBlur = 0;
+
+
+                    const isGoodSize = box.width > canvas.width * 0.4;
+                    if (isGoodSize) {
+                        cameraStatus.textContent = "Hold still...";
+                         if (!captureTimeout) {
+                            captureTimeout = setTimeout(() => takePhoto(), 1500);
+                        }
                     } else {
-                        faceDetectedFrames = 0;
-                    }
-
-                    if (faceDetectedFrames > 30) {
-                        takePhoto();
+                         cameraStatus.textContent = "Move closer";
+                         clearTimeout(captureTimeout);
+                         captureTimeout = null;
                     }
                 } else {
-                    faceDetectedFrames = 0;
+                    cameraStatus.textContent = "Position your face";
+                    clearTimeout(captureTimeout);
+                    captureTimeout = null;
                 }
+                context.restore();
             }, 100);
         }
 
         function takePhoto() {
             clearInterval(detectionInterval);
+            cameraStatus.textContent = "Perfect!";
             const photoCanvas = document.createElement('canvas');
             photoCanvas.width = video.videoWidth;
             photoCanvas.height = video.videoHeight;
@@ -472,13 +501,48 @@
             photoContext.scale(-1, 1);
             photoContext.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
             
-            const photoDataUrl = photoCanvas.toDataURL('image/jpeg', 0.9);
+            capturedPhotoDataUrl = photoCanvas.toDataURL('image/jpeg', 0.9);
             userAnswers['selfie'] = 'Photo taken';
             
             stopCamera();
-            addUserMessage("Photo Taken 👍");
             updateProgressBar();
-            confirmPhotoAndAnalyze(photoDataUrl);
+            showPhotoForConfirmation();
+        }
+
+        function showPhotoForConfirmation() {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.id = 'photo-preview-wrapper';
+            messageWrapper.className = 'flex justify-start mb-4 chat-bubble';
+
+            const imageHtml = `<div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">
+                <p class="mb-2">Here's the photo. Happy with it?</p>
+                <img src="${capturedPhotoDataUrl}" alt="Your selfie" class="rounded-lg"/>
+            </div>`;
+            
+            messageWrapper.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center mr-3 flex-shrink-0 bot-avatar">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                ${imageHtml}`;
+            
+            chatContainer.appendChild(messageWrapper);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            const confirmOptions = [
+                { text: 'Looks Good!', class: 'option-btn bg-green-500 border-green-600 text-white px-4 py-2 rounded-full text-sm flex-shrink-0 font-semibold' },
+                { text: 'Retake', class: 'option-btn bg-white border-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm flex-shrink-0' }
+            ];
+            const handlers = [confirmPhotoAndAnalyze, retakePhoto];
+            showOptions(confirmOptions, handlers);
+            inputArea.classList.add('hidden');
+        }
+
+        function retakePhoto() {
+            addUserMessage("Retake");
+            const photoPreview = document.getElementById('photo-preview-wrapper');
+            if (photoPreview) photoPreview.remove();
+            optionsContainerWrapper.classList.add('hidden');
+            startCamera();
         }
         
         function showCompletionAnimation() {
