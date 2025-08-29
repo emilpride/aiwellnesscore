@@ -1,637 +1,627 @@
-<!-- result.html -->
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>AI WELLNESSCORE — Report</title>
-
-  <!-- Tailwind + Inter -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: #f7fafc; color: #0f172a; }
-    .card { background: white; border-radius: 16px; box-shadow: 0 6px 18px rgba(15,23,42,0.06); }
-    .muted { color: #64748b; }
-    .accent { color: #2563eb; }
-    .cta { background: linear-gradient(90deg,#10b981,#34d399); color: #042f2e; }
-    /* premium blur */
-    .locked { filter: blur(6px); pointer-events: none; user-select: none; position: relative; }
-    .lock-overlay {
-      position: absolute; inset: 0; display:flex; align-items:center; justify-content:center;
-      background: linear-gradient(180deg, rgba(255,255,255,0.0), rgba(255,255,255,0.55));
-      border-radius: 12px;
-    }
-    .gauge { width: 240px; height: 120px; }
-    .small { font-size: 0.85rem; }
-  </style>
-
-  <!-- Chart.js & html2canvas + jsPDF -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your AI WELLNESSCORE Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background-color: #0f172a;
+            color: #e5e7eb;
+        }
+        .gradient-bg-dark-animated {
+            background: linear-gradient(300deg, #0f172a, #1e1b4b, #312e81, #0f172a);
+            background-size: 200% 200%;
+            animation: slow-pan 25s ease infinite;
+        }
+        @keyframes slow-pan {
+            0% { background-position: 0% 0%; }
+            25% { background-position: 100% 0%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px rgba(0,0,0,0.2);
+        }
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .animated-gradient-text {
+            background: linear-gradient(90deg, #e0e7ff, #a5b4fc, #6366f1, #14e3e3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: text-shine 5s linear infinite;
+        }
+        @keyframes text-shine {
+            to { background-position: 200% center; }
+        }
+        .premium-blur {
+            filter: blur(8px);
+            transition: filter 0.5s ease;
+            position: relative;
+        }
+        .premium-blur::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.1), rgba(15, 23, 42, 0.8));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .pulsate {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(20, 227, 227, 0.7); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(20, 227, 227, 0); }
+        }
+        .countdown-timer {
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum";
+        }
+        .lock-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            z-index: 10;
+        }
+    </style>
 </head>
-<body>
-  <div class="max-w-6xl mx-auto p-6">
-    <!-- Header -->
-    <header class="flex items-center justify-between mb-6">
-      <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 grid place-items-center text-white font-bold">W</div>
-        <div>
-          <h1 class="text-xl font-semibold">AI WELLNESSCORE</h1>
-          <div class="muted text-sm">Personalized wellness intelligence</div>
+<body class="gradient-bg-dark-animated min-h-screen">
+
+    <!-- Navigation -->
+    <header class="absolute top-0 left-0 right-0 z-30 p-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-black text-indigo-400">AI WELLNESSCORE</a>
+            <a href="index.html" class="px-4 py-2 text-sm font-semibold bg-white/10 border border-white/20 rounded-full hover:bg-white/20 transition-all">Home</a>
         </div>
-      </div>
-      <div class="flex items-center gap-4 muted small">
-        <div class="px-3 py-1 bg-white rounded-lg shadow text-xs">SSL Secured</div>
-        <div class="px-3 py-1 bg-white rounded-lg shadow text-xs">PCI-ready</div>
-        <div class="px-3 py-1 bg-white rounded-lg shadow text-xs">GDPR friendly</div>
-      </div>
     </header>
 
-    <!-- Top summary: gauge + quick metrics -->
-    <section class="card p-6 grid lg:grid-cols-2 gap-6 mb-6">
-      <div class="flex flex-col items-center justify-center">
-        <div class="text-sm muted">Wellness Archetype</div>
-        <div id="archetype" class="text-2xl font-bold accent mt-1">—</div>
+    <main class="pt-24 pb-16 px-4 max-w-6xl mx-auto">
+        <!-- Hero Section -->
+        <section class="text-center mb-16 fade-in-section">
+            <h1 class="text-4xl md:text-5xl font-black text-white mb-4">Your Personalized <span class="animated-gradient-text">Wellness Report</span></h1>
+            <p class="text-lg text-gray-400 max-w-2xl mx-auto">Based on your unique data and facial analysis, here's your comprehensive wellness assessment</p>
+        </section>
 
-        <div class="mt-6 flex items-center gap-10">
-          <canvas id="gauge" class="gauge" width="240" height="120"></canvas>
-          <div class="space-y-3 text-left">
-            <div><div class="muted small">Biological Age</div><div id="biologicalAge" class="text-lg font-semibold">—</div></div>
-            <div><div class="muted small">Energy Index</div><div id="energyIndex" class="text-lg font-semibold">—</div></div>
-            <div><div class="muted small">Stress Level</div><div id="stressLevel" class="text-lg font-semibold">—</div></div>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h2 class="text-lg font-semibold">Quick Insights</h2>
-        <div class="mt-4 grid grid-cols-1 gap-3">
-          <div class="p-4 rounded-lg border">
-            <div class="muted small">Main barrier</div>
-            <div id="mainBarrier" class="font-medium">—</div>
-          </div>
-          <div class="p-4 rounded-lg border">
-            <div class="muted small">Quick win</div>
-            <div id="quickWin" class="font-medium">—</div>
-          </div>
-          <div class="p-4 rounded-lg border">
-            <div class="muted small">Comparison</div>
-            <div id="comparison" class="font-medium">—</div>
-          </div>
-        </div>
-
-        <div class="mt-6">
-          <h3 class="text-sm muted mb-2">Core Four Overview</h3>
-          <canvas id="coreRadar" height="200"></canvas>
-        </div>
-      </div>
-    </section>
-
-    <!-- Free report detail -->
-    <section class="card p-6 mb-6">
-      <h2 class="text-lg font-semibold mb-4">Free report — metrics & Core Four</h2>
-
-      <div class="grid md:grid-cols-2 gap-4">
-        <div class="space-y-3">
-          <div class="p-4 rounded-lg border">
-            <div class="muted small">Wellness Score</div>
-            <div id="wellnessScore" class="text-3xl font-bold accent">—</div>
-          </div>
-
-          <div class="p-4 rounded-lg border">
-            <div class="muted small">Biological Age</div>
-            <div id="bioAge2" class="font-semibold">—</div>
-          </div>
-
-          <div class="p-4 rounded-lg border">
-            <div class="muted small">Energy Index</div>
-            <div id="energyIndex2" class="font-semibold">—</div>
-          </div>
-
-          <div class="p-4 rounded-lg border">
-            <div class="muted small">Stress Level</div>
-            <div id="stressLevel2" class="font-semibold">—</div>
-          </div>
-        </div>
-
-        <div class="space-y-3">
-          <!-- Mind -->
-          <div class="p-4 rounded-lg border">
-            <div class="muted small">Mind</div>
-            <div class="flex items-center justify-between">
-              <div>
-                <div id="mindScore" class="text-xl font-semibold">—</div>
-                <div id="mindSummary" class="muted small">—</div>
-              </div>
-              <div class="text-sm muted">Stress & mindfulness</div>
+        <!-- Wellness Score -->
+        <section class="glass-card rounded-2xl p-8 mb-12 text-center fade-in-section">
+            <h2 class="text-2xl font-bold text-white mb-2">Your Overall Wellness Score</h2>
+            <p class="text-gray-400 mb-8">How you're doing across all key health dimensions</p>
+            
+            <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="w-full md:w-1/3">
+                    <div class="relative w-56 h-56 mx-auto">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <defs>
+                                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#14E3E3; stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#4F46E5; stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path class="text-slate-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="2" />
+                            <path id="score-path" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke-width="2" stroke="url(#scoreGradient)" stroke-linecap="round" stroke-dasharray="0, 100" style="transition: stroke-dasharray 2s ease-out;"/>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span id="score-text" class="text-6xl font-black text-white">0</span>
+                            <span class="text-lg text-gray-400">Overall Score</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="w-full md:w-2/3 text-left space-y-6">
+                    <div>
+                        <h3 class="text-xl font-bold text-teal-300 mb-2">Biological Age</h3>
+                        <p id="biological-age" class="text-3xl font-bold text-white">--</p>
+                        <p class="text-sm text-gray-400">Based on your lifestyle and facial analysis</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-indigo-300 mb-1">Energy Index</h3>
+                            <p id="energy-index" class="text-2xl font-bold text-white">--/100</p>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-indigo-300 mb-1">Stress Level</h3>
+                            <p id="stress-level" class="text-2xl font-bold text-white">--/100</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
+        </section>
 
-          <!-- Body -->
-          <div class="p-4 rounded-lg border">
-            <div class="muted small">Body</div>
-            <div class="flex items-center justify-between">
-              <div>
-                <div id="bodyScore" class="text-xl font-semibold">—</div>
-                <div id="bodySummary" class="muted small">—</div>
-                <div id="bodyBMI" class="muted small mt-1">BMI: —</div>
-              </div>
-              <div class="text-sm muted">Activity & BMI</div>
+        <!-- Core Four Assessment -->
+        <section class="glass-card rounded-2xl p-8 mb-12 fade-in-section">
+            <h2 class="text-2xl font-bold text-white mb-8 text-center">Core Four Assessment</h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-slate-800/50 rounded-xl p-6 text-center">
+                    <div class="w-20 h-20 mx-auto mb-4 relative">
+                        <canvas id="mind-chart" width="80" height="80"></canvas>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="mind-score" class="text-lg font-bold text-white">--</span>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-semibold text-teal-300 mb-2">Mind</h3>
+                    <p id="mind-summary" class="text-sm text-gray-300">Analyzing your mental wellness...</p>
+                </div>
+                
+                <div class="bg-slate-800/50 rounded-xl p-6 text-center">
+                    <div class="w-20 h-20 mx-auto mb-4 relative">
+                        <canvas id="body-chart" width="80" height="80"></canvas>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="body-score" class="text-lg font-bold text-white">--</span>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-semibold text-teal-300 mb-2">Body</h3>
+                    <p id="body-summary" class="text-sm text-gray-300">Analyzing your physical health...</p>
+                </div>
+                
+                <div class="bg-slate-800/50 rounded-xl p-6 text-center">
+                    <div class="w-20 h-20 mx-auto mb-4 relative">
+                        <canvas id="nutrition-chart" width="80" height="80"></canvas>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="nutrition-score" class="text-lg font-bold text-white">--</span>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-semibold text-teal-300 mb-2">Nutrition</h3>
+                    <p id="nutrition-summary" class="text-sm text-gray-300">Analyzing your diet quality...</p>
+                </div>
+                
+                <div class="bg-slate-800/50 rounded-xl p-6 text-center">
+                    <div class="w-20 h-20 mx-auto mb-4 relative">
+                        <canvas id="sleep-chart" width="80" height="80"></canvas>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="sleep-score" class="text-lg font-bold text-white">--</span>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-semibold text-teal-300 mb-2">Sleep</h3>
+                    <p id="sleep-summary" class="text-sm text-gray-300">Analyzing your sleep patterns...</p>
+                </div>
             </div>
-          </div>
+        </section>
 
-          <!-- Nutrition -->
-          <div class="p-4 rounded-lg border">
-            <div class="muted small">Nutrition</div>
-            <div id="nutritionScore" class="text-xl font-semibold">—</div>
-            <div id="nutritionSummary" class="muted small">—</div>
-            <div class="mt-2 muted small">F/V per day: <span id="fruitsVeg">—</span> • Processed: <span id="processedLevel">—</span> • Water (L): <span id="waterL">—</span></div>
-          </div>
-
-          <!-- Sleep -->
-          <div class="p-4 rounded-lg border">
-            <div class="muted small">Sleep</div>
-            <div id="sleepScore" class="text-xl font-semibold">—</div>
-            <div id="sleepSummary" class="muted small">—</div>
-            <div class="mt-2 muted small">Hours: <span id="sleepHours">—</span> • Visual: <span id="sleepVisual">—</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- PREMIUM REPORT area (headers visible) -->
-    <section>
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-xl font-semibold">Premium report — advanced analytics (locked)</h2>
-        <div class="text-sm muted">Unlock for full insights</div>
-      </div>
-
-      <div id="premiumWrap" class="grid md:grid-cols-2 gap-6">
-        <!-- Detailed Analytics -->
-        <div class="card p-4 relative">
-          <h3 class="font-semibold">Detailed Analytics</h3>
-          <div class="mt-3 lockable" data-key="detailedAnalytics">
-            <div class="grid grid-cols-2 gap-2">
-              <div class="p-3 rounded bg-white/5 border">
-                <div class="muted small">Metabolic Age</div>
-                <div id="metabolicAge" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border">
-                <div class="muted small">Recovery Score</div>
-                <div id="recoveryScore" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border">
-                <div class="muted small">Inflammation Risk</div>
-                <div id="inflammationRisk" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border">
-                <div class="muted small">Digital Wellness</div>
-                <div id="digitalWellness" class="font-semibold">—</div>
-              </div>
+        <!-- Key Insights -->
+        <section class="glass-card rounded-2xl p-8 mb-12 fade-in-section">
+            <h2 class="text-2xl font-bold text-white mb-6 text-center">Key Insights</h2>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-gradient-to-br from-indigo-900/50 to-teal-900/50 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-indigo-300 mb-3">Main Barrier</h3>
+                    <p id="main-barrier" class="text-gray-300">Identifying your primary wellness challenge...</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-indigo-900/50 to-teal-900/50 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-indigo-300 mb-3">Quick Win</h3>
+                    <p id="quick-win" class="text-gray-300">Your easiest path to immediate improvement...</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-indigo-900/50 to-teal-900/50 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-indigo-300 mb-3">Peer Comparison</h3>
+                    <p id="peer-comparison" class="text-gray-300">How you compare to others your age...</p>
+                </div>
             </div>
-            <canvas id="premiumBar" class="mt-4" height="140"></canvas>
-          </div>
-          <div class="lock-overlay hidden" aria-hidden="true"><button class="cta px-4 py-2 rounded">Unlock Premium</button></div>
-        </div>
+        </section>
 
-        <!-- Face Analysis -->
-        <div class="card p-4 relative">
-          <h3 class="font-semibold">Face Analysis (Face++)</h3>
-          <div class="mt-3 lockable" data-key="faceAnalysis">
-            <div class="grid grid-cols-2 gap-2">
-              <div class="p-3 rounded bg-white/5 border">
-                <div class="muted small">Skin Health Score</div>
-                <div id="skinHealthScore" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border">
-                <div class="muted small">Hydration Assessment</div>
-                <div id="hydrationAssessment" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border col-span-2">
-                <div class="muted small">Sleep Debt Visualization</div>
-                <div id="sleepDebtVisualization" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border col-span-2">
-                <div class="muted small">Stress Markers</div>
-                <div id="stressMarkers" class="font-semibold">—</div>
-              </div>
+        <!-- Premium Section Teaser -->
+        <section class="glass-card rounded-2xl p-8 mb-12 fade-in-section">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-black text-white mb-2">Unlock Your <span class="animated-gradient-text">Full Potential</span></h2>
+                <p class="text-lg text-gray-400">Your comprehensive premium report includes detailed analysis and personalized recommendations</p>
             </div>
-          </div>
-          <div class="lock-overlay hidden" aria-hidden="true"><button class="cta px-4 py-2 rounded">Unlock Premium</button></div>
-        </div>
-
-        <!-- Recommendations -->
-        <div class="card p-4 relative">
-          <h3 class="font-semibold">Personalized Recommendations</h3>
-          <div class="mt-3 lockable" data-key="recommendations">
-            <div class="grid gap-2">
-              <div class="p-3 rounded bg-white/5 border">
-                <div class="muted small">Circadian Reset Protocol</div>
-                <div id="circadianReset" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border">
-                <div class="muted small">Nutrition Gaps</div>
-                <div id="nutritionGaps" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border">
-                <div class="muted small">Exercise Prescription</div>
-                <div id="exercisePrescription" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border">
-                <div class="muted small">Stress Management Toolkit</div>
-                <div id="stressToolkit" class="font-semibold">—</div>
-              </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-10 premium-blur" id="premium-teaser">
+                <div>
+                    <h3 class="text-xl font-bold text-teal-300 mb-4">Deep Health Analysis</h3>
+                    <ul class="space-y-3 text-gray-300">
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Metabolic Age & Recovery Score</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Inflammation Index & Digital Wellness</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Detailed Face Health Analysis</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Circadian Protocol & Nutrition Gaps</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold text-teal-300 mb-4">Action Plan</h3>
+                    <ul class="space-y-3 text-gray-300">
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Personalized Exercise Prescription</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Stress Management Toolkit</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>30-Day Transformation Plan</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-teal-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Habit Stacking Strategy</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
-          </div>
-          <div class="lock-overlay hidden" aria-hidden="true"><button class="cta px-4 py-2 rounded">Unlock Premium</button></div>
-        </div>
-
-        <!-- Forecasts -->
-        <div class="card p-4 relative">
-          <h3 class="font-semibold">Forecasts</h3>
-          <div class="mt-3 lockable" data-key="forecasts">
-            <div class="p-3 rounded bg-white/5 border">
-              <div class="muted small">30-Day Potential</div>
-              <div id="thirtyDayPotential" class="font-semibold">—</div>
+            
+            <!-- Payment Section -->
+            <div class="glass-card rounded-xl p-6 border-2 border-teal-500/30">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-white mb-2">Complete Your Wellness Journey</h3>
+                    <p class="text-gray-400">One-time payment • Lifetime access</p>
+                </div>
+                
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+                    <div class="text-center md:text-left">
+                        <div class="flex items-baseline justify-center md:justify-start">
+                            <span class="text-4xl font-black text-teal-400">$9.99</span>
+                            <span class="text-lg text-gray-400 ml-2 line-through">$19.99</span>
+                        </div>
+                        <p class="text-sm text-teal-300 mt-1">50% limited time discount</p>
+                    </div>
+                    
+                    <div class="bg-red-900/30 border border-red-700/50 rounded-lg px-4 py-2 flex items-center">
+                        <svg class="h-5 w-5 text-red-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-white countdown-timer" id="countdown">15:00</span>
+                        <span class="text-red-300 ml-1">left at this price</span>
+                    </div>
+                </div>
+                
+                <div class="bg-green-900/20 border border-green-700/30 rounded-lg p-4 mb-6 flex items-start">
+                    <svg class="h-5 w-5 text-green-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-green-300 text-sm">Your data is secured with bank-level encryption. This is a one-time payment with no subscription.</p>
+                </div>
+                
+                <button id="purchase-btn" class="w-full bg-teal-500 hover:bg-teal-400 text-white font-bold py-4 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 pulsate flex items-center justify-center">
+                    <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Unlock Premium Report - $9.99
+                </button>
+                
+                <p class="text-center text-xs text-gray-500 mt-4">By purchasing, you agree to our <a href="#" class="text-indigo-400 hover:text-indigo-300">Terms of Service</a> and <a href="#" class="text-indigo-400 hover:text-indigo-300">Privacy Policy</a></p>
             </div>
-            <div class="p-3 rounded bg-white/5 border mt-2">
-              <div class="muted small">Risk Timeline</div>
-              <div id="riskTimeline" class="font-semibold">—</div>
+        </section>
+
+        <!-- Premium Content (Hidden until purchase) -->
+        <section id="premium-content" class="glass-card rounded-2xl p-8 mb-12 hidden">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-black text-white mb-2"><span class="animated-gradient-text">Premium</span> Wellness Analysis</h2>
+                <p class="text-lg text-gray-400">Your comprehensive health assessment with personalized recommendations</p>
             </div>
-            <div class="p-3 rounded bg-white/5 border mt-2">
-              <div class="muted small">Habit Stacking Plan</div>
-              <div id="habitStackingPlan" class="font-semibold">—</div>
+            
+            <div class="space-y-8">
+                <!-- This section will be populated with premium content after payment -->
+                <div id="premium-details"></div>
+                
+                <div class="text-center pt-8 border-t border-white/10">
+                    <button id="download-pdf" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-6 rounded-lg inline-flex items-center">
+                        <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download Full PDF Report
+                    </button>
+                </div>
             </div>
-          </div>
-          <div class="lock-overlay hidden" aria-hidden="true"><button class="cta px-4 py-2 rounded">Unlock Premium</button></div>
-        </div>
+        </section>
+    </main>
 
-        <!-- Unique features -->
-        <div class="card p-4 relative">
-          <h3 class="font-semibold">Unique Features</h3>
-          <div class="mt-3 lockable" data-key="uniqueFeatures">
-            <div class="grid gap-2">
-              <div class="p-3 rounded bg-white/5 border">
-                <div class="muted small">Wellness Weather (7d)</div>
-                <div id="wellnessWeather" class="font-semibold small">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border">
-                <div class="muted small">Energy Management Matrix</div>
-                <div id="energyMatrix" class="font-semibold small">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border">
-                <div class="muted small">Social Health Score</div>
-                <div id="socialHealthScore" class="font-semibold">—</div>
-              </div>
-              <div class="p-3 rounded bg-white/5 border">
-                <div class="muted small">Personalized Supplement Stack</div>
-                <div id="supplementStack" class="font-semibold small">—</div>
-                <div class="muted small mt-2">*Not medical advice — consult a physician</div>
-              </div>
+    <footer class="text-center p-8 border-t border-white/10 mt-12">
+        <div class="max-w-7xl mx-auto text-gray-400">
+            <p class="text-xs mb-4">
+                <strong>Medical Disclaimer:</strong> AI WELLNESSCORE is not a medical service and does not provide medical advice. The information provided is for educational and informational purposes only. Consult a healthcare professional for any health concerns.
+            </p>
+            <div class="flex justify-center space-x-6 mb-4">
+                <a href="privacy.html" class="hover:text-white transition">Privacy Policy</a>
+                <a href="terms.html" class="hover:text-white transition">Terms of Service</a>
+                <a href="#" class="hover:text-white transition">Contact</a>
             </div>
-          </div>
-          <div class="lock-overlay hidden" aria-hidden="true"><button class="cta px-4 py-2 rounded">Unlock Premium</button></div>
+            <p>&copy; 2025 AI WELLNESSCORE. All Rights Reserved.</p>
         </div>
-
-        <!-- AI Coach notes (full text blurred) -->
-        <div class="card p-4 relative md:col-span-2">
-          <h3 class="font-semibold">AI Coach Notes</h3>
-          <div class="mt-3 lockable" data-key="aiCoachNotes">
-            <div id="aiCoachNotes" class="muted">—</div>
-          </div>
-          <div class="lock-overlay hidden" aria-hidden="true"><button class="cta px-4 py-2 rounded">Unlock Premium</button></div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- Payment strip -->
-    <footer class="mt-6 card p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-green-400 to-emerald-500 grid place-items-center font-bold text-white">★</div>
-        <div>
-          <div class="text-sm muted">Limited time offer</div>
-          <div class="font-semibold">Premium unlock — <span class="text-green-600">30% off</span></div>
-          <div class="muted small">Offer expires in <span id="timer" class="font-bold">15:00</span></div>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <div class="text-right mr-2">
-          <div class="muted small line-through">$49</div>
-          <div class="text-xl font-bold">$34.30</div>
-        </div>
-        <button id="unlockBtn" class="cta px-5 py-3 rounded-lg font-semibold">Unlock Premium</button>
-        <button id="downloadPDFBtn" class="hidden px-4 py-2 rounded border">Download PDF</button>
-      </div>
     </footer>
-  </div>
 
-  <!-- Payment modal -->
-  <div id="paymentModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-xl p-6 w-full max-w-md">
-      <h3 class="font-semibold text-lg">Payment success</h3>
-      <p class="muted small mt-2">Your premium report has been unlocked. You can now view all details and download a PDF.</p>
-      <div class="mt-4 text-right"><button id="closeModal" class="px-4 py-2 rounded bg-blue-600 text-white">OK</button></div>
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
+        <div class="glass-card rounded-2xl p-8 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-2">Payment Successful!</h3>
+                <p class="text-gray-300 mb-6">Your premium report has been unlocked. You can now view all details and download a PDF.</p>
+                <button id="close-modal" class="bg-teal-500 hover:bg-teal-400 text-white font-semibold py-2 px-6 rounded-lg">
+                    Continue to Report
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
 
-<script>
-/* =========================
-   Utilities & Mock fallback
-   ========================= */
-const $ = id => document.getElementById(id);
-function fmt(v, def = '—') { return (v === null || v === undefined || v === '') ? def : v; }
-
-async function fetchReportFromServer(sessionId) {
-  try {
-    const res = await fetch('/.netlify/functions/generateReport', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId })
-    });
-    const json = await res.json();
-    if (!json || !json.data) throw new Error('Invalid server response');
-    return json.data;
-  } catch (e) {
-    console.warn('Server fetch failed', e);
-    // If server fails, rely on embedded fallback by calling endpoint again or use local mock
-    // Here we will try to use a minimal mock so UI still shows complete schema.
-    return localMockReport();
-  }
-}
-
-/* Local mock fallback (complete schema) to ensure all fields exist and the UI never breaks */
-function localMockReport() {
-  return {
-    freeReport: {
-      metrics: { wellnessScore: 72, biologicalAge: 33, energyIndex: 66, stressLevel: 44 },
-      coreFour: {
-        mind: { score: 68, summary: "Moderate stress; benefit from daily breathwork" },
-        body: { score: 64, summary: "Active but inconsistent; increase weekly strength", bmi: 26.1 },
-        nutrition: { score: 62, summary: "Low veg intake, some processed food", fruitsVegPerDay: 2, processedFoodLevel: "Moderate", waterLiters: 1.8 },
-        sleep: { score: 55, summary: "Short sleep windows; accumulate sleep debt", hours: 6, visualSigns: "Under-eye shadows" }
-      },
-      insights: { mainBarrier: "Erratic sleep schedule", quickWin: "Establish consistent bedtime", comparison: "Your sleep is lower than ~70% of peers" }
-    },
-    premiumReport: {
-      detailedAnalytics: { metabolicAge: 36, recoveryScore: 58, inflammationRiskIndex: 35, digitalWellnessScore: 52 },
-      faceAnalysis: { skinHealthScore: 64, hydrationAssessment: "Slight dehydration signs", sleepDebtVisualization: "Mild under-eye bags", stressMarkers: "Forehead lines present" },
-      recommendations: {
-        circadianReset: { bedtime: "22:30", wakeTime: "06:30", steps: ["Dim screens after 21:00", "Morning sunlight for 10 min", "Consistent bedtime schedule"] },
-        nutritionGaps: [{ nutrient: "Vitamin D", why: "Low sun exposure" }, { nutrient: "Iron", why: "Low red meat/leafy greens" }],
-        exercisePrescription: { type: "Brisk walking + resistance twice/week", durationMin: 30, timeOfDay: "Morning" },
-        stressToolkit: ["4-4-8 breathing", "Daily 10-min mindfulness", "Walk breaks every 90 minutes"]
-      },
-      forecasts: {
-        thirtyDayPotential: { expectedWellnessScoreIncrease: 6, notes: "With consistent sleep and one nutrition change" },
-        riskTimeline: [{ yearsFromNow: 3, risk: "Worsening sleep may impact metabolic health" }],
-        habitStackingPlan: [{ week: 1, habit: "Set bedtime" }, { week: 2, habit: "Morning walk" }]
-      },
-      uniqueFeatures: {
-        wellnessWeather: [
-          { day: "Mon", forecast: "Good", scoreModifier: 1 },
-          { day: "Tue", forecast: "Moderate", scoreModifier: 0 },
-          { day: "Wed", forecast: "Good", scoreModifier: 1 },
-          { day: "Thu", forecast: "Low", scoreModifier: -1 },
-          { day: "Fri", forecast: "Moderate", scoreModifier: 0 },
-          { day: "Sat", forecast: "Good", scoreModifier: 1 },
-          { day: "Sun", forecast: "Rest", scoreModifier: 2 }
-        ],
-        energyMatrix: [
-          { timeRange: "06:00-09:00", recommendedTask: "Deep Work", intensity: "High" },
-          { timeRange: "12:00-14:00", recommendedTask: "Light tasks / walk", intensity: "Low" },
-          { timeRange: "18:00-20:00", recommendedTask: "Social / family time", intensity: "Medium" }
-        ],
-        socialHealthScore: 68,
-        personalizedSupplementStack: [
-          { name: "Vitamin D", reason: "Low exposure", dose: "1000 IU" },
-          { name: "Omega-3", reason: "Inflammation support", dose: "1000 mg" }
-        ]
-      },
-      aiCoachNotes: "This is a mock coach note. Upgrade to Premium to unlock full personalization."
-    }
-  };
-}
-
-/* =========================
-   Rendering functions
-   ========================= */
-
-let gaugeChart, coreRadar, premiumBar;
-
-function renderGauge(score) {
-  const ctx = document.getElementById('gauge').getContext('2d');
-  if (gaugeChart) gaugeChart.destroy();
-  gaugeChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: { datasets: [{ data: [score, 100 - score], backgroundColor: ['#2563eb', '#e6eefc'], borderWidth: 0 }] },
-    options: {
-      rotation: -90 * (Math.PI/180),
-      circumference: 180 * (Math.PI/180),
-      cutout: '70%',
-      plugins: { legend: { display: false }, tooltip: { enabled: false } },
-      animation: { animateRotate: true, duration: 1000 }
-    }
-  });
-  $('wellnessScore').textContent = score;
-}
-
-function renderCoreRadar(coreFour) {
-  const ctx = document.getElementById('coreRadar').getContext('2d');
-  if (coreRadar) coreRadar.destroy();
-  const data = [
-    coreFour.mind.score || 0,
-    coreFour.body.score || 0,
-    coreFour.nutrition.score || 0,
-    coreFour.sleep.score || 0
-  ];
-  coreRadar = new Chart(ctx, {
-    type: 'radar',
-    data: { labels: ['Mind','Body','Nutrition','Sleep'], datasets: [{ data, fill: true, backgroundColor: 'rgba(37,99,235,0.12)', borderColor: '#2563eb' }] },
-    options: { scales: { r: { min: 0, max: 100 } }, plugins: { legend: { display: false } } }
-  });
-}
-
-function renderPremiumBar(metrics) {
-  const ctx = document.getElementById('premiumBar').getContext('2d');
-  if (premiumBar) premiumBar.destroy();
-  premiumBar = new Chart(ctx, {
-    type: 'bar',
-    data: { labels: ['Metabolic Age','Recovery','Inflammation','Digital'], datasets: [{ data: [metrics.metabolicAge || 0, metrics.recoveryScore || 0, metrics.inflammationRiskIndex || 0, metrics.digitalWellnessScore || 0], backgroundColor: ['#34d399','#60a5fa','#fb7185','#f59e0b'] }] },
-    options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
-  });
-}
-
-/* Fill the DOM with the report data */
-function fillFree(free) {
-  $('archetype').textContent = fmt(free.archetype || 'Wellness Explorer');
-  renderGauge(Number(free.metrics.wellnessScore || 0));
-  $('biologicalAge').textContent = fmt(free.metrics.biologicalAge);
-  $('energyIndex').textContent = fmt(free.metrics.energyIndex);
-  $('stressLevel').textContent = fmt(free.metrics.stressLevel);
-
-  $('wellnessScore').textContent = fmt(free.metrics.wellnessScore);
-
-  $('bioAge2').textContent = fmt(free.metrics.biologicalAge);
-  $('energyIndex2').textContent = fmt(free.metrics.energyIndex);
-  $('stressLevel2').textContent = fmt(free.metrics.stressLevel);
-
-  $('mindScore').textContent = fmt(free.coreFour.mind.score);
-  $('mindSummary').textContent = fmt(free.coreFour.mind.summary);
-  $('bodyScore').textContent = fmt(free.coreFour.body.score);
-  $('bodySummary').textContent = fmt(free.coreFour.body.summary);
-  $('bodyBMI').textContent = 'BMI: ' + fmt(free.coreFour.body.bmi || '—');
-  $('nutritionScore').textContent = fmt(free.coreFour.nutrition.score);
-  $('nutritionSummary').textContent = fmt(free.coreFour.nutrition.summary);
-  $('fruitsVeg').textContent = fmt(free.coreFour.nutrition.fruitsVegPerDay);
-  $('processedLevel').textContent = fmt(free.coreFour.nutrition.processedFoodLevel);
-  $('waterL').textContent = fmt(free.coreFour.nutrition.waterLiters);
-
-  $('sleepScore').textContent = fmt(free.coreFour.sleep.score);
-  $('sleepSummary').textContent = fmt(free.coreFour.sleep.summary);
-  $('sleepHours').textContent = fmt(free.coreFour.sleep.hours);
-  $('sleepVisual').textContent = fmt(free.coreFour.sleep.visualSigns);
-
-  $('mainBarrier').textContent = fmt(free.insights.mainBarrier);
-  $('quickWin').textContent = fmt(free.insights.quickWin);
-  $('comparison').textContent = fmt(free.insights.comparison);
-
-  renderCoreRadar(free.coreFour);
-}
-
-/* Premium: populate locked content but keep it blurred initially */
-function fillPremium(premium) {
-  // detailed analytics
-  $('metabolicAge').textContent = fmt(premium.detailedAnalytics.metabolicAge);
-  $('recoveryScore').textContent = fmt(premium.detailedAnalytics.recoveryScore);
-  $('inflammationRisk').textContent = fmt(premium.detailedAnalytics.inflammationRiskIndex);
-  $('digitalWellness').textContent = fmt(premium.detailedAnalytics.digitalWellnessScore);
-  renderPremiumBar(premium.detailedAnalytics);
-
-  // face analysis
-  $('skinHealthScore').textContent = fmt(premium.faceAnalysis.skinHealthScore);
-  $('hydrationAssessment').textContent = fmt(premium.faceAnalysis.hydrationAssessment);
-  $('sleepDebtVisualization').textContent = fmt(premium.faceAnalysis.sleepDebtVisualization);
-  $('stressMarkers').textContent = fmt(premium.faceAnalysis.stressMarkers);
-
-  // recommendations
-  $('circadianReset').textContent = premium.recommendations.circadianReset ? `${premium.recommendations.circadianReset.bedtime} → ${premium.recommendations.circadianReset.wakeTime} • ${premium.recommendations.circadianReset.steps.join('; ')}` : '—';
-  $('nutritionGaps').textContent = (premium.recommendations.nutritionGaps || []).map(n => `${n.nutrient}: ${n.why}`).join('; ');
-  $('exercisePrescription').textContent = premium.recommendations.exercisePrescription ? `${premium.recommendations.exercisePrescription.type} • ${premium.recommendations.exercisePrescription.durationMin} min • ${premium.recommendations.exercisePrescription.timeOfDay}` : '—';
-  $('stressToolkit').textContent = (premium.recommendations.stressToolkit || []).join('; ');
-
-  // forecasts
-  $('thirtyDayPotential').textContent = premium.forecasts.thirtyDayPotential ? `${premium.forecasts.thirtyDayPotential.expectedWellnessScoreIncrease} points • ${premium.forecasts.thirtyDayPotential.notes}` : '—';
-  $('riskTimeline').textContent = (premium.forecasts.riskTimeline || []).map(r => `${r.yearsFromNow}y: ${r.risk}`).join('; ');
-  $('habitStackingPlan').textContent = (premium.forecasts.habitStackingPlan || []).map(h => `W${h.week}: ${h.habit}`).join('; ');
-
-  // unique features
-  $('wellnessWeather').textContent = (premium.uniqueFeatures.wellnessWeather || []).map(d => `${d.day}: ${d.forecast} (${d.scoreModifier>=0? '+'+d.scoreModifier:d.scoreModifier})`).join(' • ');
-  $('energyMatrix').textContent = (premium.uniqueFeatures.energyMatrix || []).map(e => `${e.timeRange}: ${e.recommendedTask}`).join(' • ');
-  $('socialHealthScore').textContent = fmt(premium.uniqueFeatures.socialHealthScore);
-  $('supplementStack').textContent = (premium.uniqueFeatures.personalizedSupplementStack || []).map(s => `${s.name}: ${s.reason} (${s.dose})`).join('; ');
-
-  $('aiCoachNotes').textContent = fmt(premium.aiCoachNotes);
-}
-
-/* Activate unlock (called after simulated payment) */
-function unlockPremiumUI() {
-  // remove locked state for all .lockable containers
-  document.querySelectorAll('.lockable').forEach(el => {
-    el.classList.remove('locked');
-  });
-  // hide overlay buttons
-  document.querySelectorAll('.lock-overlay').forEach(o => o.classList.add('hidden'));
-  // enable Download
-  $('downloadPDFBtn').classList.remove('hidden');
-}
-
-/* Generate PDF of report root */
-async function downloadPDF() {
-  const { jsPDF } = window.jspdf;
-  const el = document.querySelector('.max-w-6xl') || document.body;
-  // increase scale for clarity
-  const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#f7fafc' });
-  const img = canvas.toDataURL('image/png');
-  const pdf = new jsPDF({ orientation: 'portrait', unit: 'px' });
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const ratio = pageWidth / canvas.width;
-  const pageHeight = canvas.height * ratio;
-  pdf.addImage(img, 'PNG', 0, 0, pageWidth, pageHeight);
-  pdf.save('AI-WELLNESSCORE-Report.pdf');
-}
-
-/* Timer for 15-minute discount */
-function startCountdown(seconds = 15*60) {
-  let left = seconds;
-  const t = setInterval(()=> {
-    left--;
-    if (left < 0) { clearInterval(t); $('timer').textContent = '00:00'; return; }
-    const m = String(Math.floor(left/60)).padStart(2,'0'), s = String(left%60).padStart(2,'0');
-    $('timer').textContent = `${m}:${s}`;
-  },1000);
-}
-
-/* Intro: set everything locked initially by adding .locked */
-function setInitialLockedState() {
-  document.querySelectorAll('.lockable').forEach(el => {
-    el.classList.add('locked');
-    // add overlay button if not present
-    const parent = el.closest('.card') || el.parentElement;
-    const overlay = parent.querySelector('.lock-overlay');
-    if (overlay) overlay.classList.remove('hidden');
-  });
-}
-
-/* =========================
-   Bootstrap: Fetch, render, wire UI
-   ========================= */
-(async function init() {
-  startCountdown(15*60);
-  setInitialLockedState();
-
-  // UI handlers
-  $('unlockBtn').addEventListener('click', async () => {
-    // simulate payment action
-    $('paymentModal').classList.remove('hidden');
-    // simulate backend payment processing delay
-    setTimeout(()=> {
-      $('paymentModal').classList.add('hidden');
-      unlockPremiumUI();
-      // show modal success too
-      document.getElementById('paymentModal').classList.add('hidden');
-    }, 800);
-  });
-
-  $('closeModal').addEventListener('click', () => {
-    $('paymentModal').classList.add('hidden');
-  });
-
-  $('downloadPDFBtn').addEventListener('click', downloadPDF);
-
-  // load sessionId
-  const params = new URLSearchParams(window.location.search);
-  const sessionId = params.get('sessionId') || 'demo-session';
-
-  const report = await fetchReportFromServer(sessionId);
-
-  // ensure top-level optional fields exist for older fallback compatibility
-  if (!report.freeReport) report.freeReport = localMockReport().freeReport;
-  if (!report.premiumReport) report.premiumReport = localMockReport().premiumReport;
-
-  // freeReport may include an 'archetype' key in freeReport; ensure we map it
-  if (!report.freeReport.archetype && report.freeReport.metrics && report.freeReport.metrics.wellnessScore) {
-    report.freeReport.archetype = "Wellness Explorer";
-  }
-
-  // Fill UI
-  fillFree(report.freeReport);
-  fillPremium(report.premiumReport);
-
-})();
-</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Get session ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('sessionId');
+            
+            if (!sessionId) {
+                alert('No session ID found. Please complete the assessment first.');
+                window.location.href = 'quiz.html';
+                return;
+            }
+            
+            // Start countdown timer
+            let timeLeft = 15 * 60; // 15 minutes in seconds
+            const countdownEl = document.getElementById('countdown');
+            
+            const countdownInterval = setInterval(() => {
+                timeLeft--;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    document.getElementById('purchase-btn').disabled = true;
+                    document.getElementById('purchase-btn').textContent = 'Offer Expired';
+                    document.getElementById('purchase-btn').classList.remove('pulsate');
+                    document.getElementById('purchase-btn').classList.add('bg-gray-500');
+                    countdownEl.textContent = '00:00';
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                countdownEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+            
+            // Fetch report data
+            try {
+                const response = await fetch('/.netlify/functions/checkResult', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ sessionId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'complete' && data.data) {
+                    populateReport(data.data);
+                } else if (data.status === 'pending') {
+                    // Poll until report is ready
+                    setTimeout(() => window.location.reload(), 2000);
+                } else {
+                    console.error('Error fetching report:', data.message);
+                    alert('Error generating your report. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Network error. Please check your connection and try again.');
+            }
+            
+            // Purchase button handler
+            document.getElementById('purchase-btn').addEventListener('click', async function() {
+                this.disabled = true;
+                this.innerHTML = `<svg class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg> Processing...`;
+                
+                // Simulate payment processing
+                setTimeout(() => {
+                    // Show success modal
+                    document.getElementById('payment-modal').classList.remove('hidden');
+                    
+                    // Unlock premium content
+                    document.getElementById('premium-teaser').classList.remove('premium-blur');
+                    document.getElementById('premium-content').classList.remove('hidden');
+                    
+                    // Change button to download
+                    const purchaseBtn = document.getElementById('purchase-btn');
+                    purchaseBtn.innerHTML = `<svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg> Download PDF Report`;
+                    purchaseBtn.classList.remove('bg-teal-500', 'hover:bg-teal-400');
+                    purchaseBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
+                    purchaseBtn.onclick = () => {
+                        alert('PDF download started!');
+                        // In a real implementation, this would download the PDF
+                    };
+                }, 2000);
+            });
+            
+            // Close modal handler
+            document.getElementById('close-modal').addEventListener('click', function() {
+                document.getElementById('payment-modal').classList.add('hidden');
+            });
+            
+            // Download PDF handler
+            document.getElementById('download-pdf').addEventListener('click', function() {
+                alert('PDF download started!');
+                // In a real implementation, this would download the PDF
+            });
+            
+            // Initialize animations
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            document.querySelectorAll('.fade-in-section').forEach(section => {
+                observer.observe(section);
+            });
+        });
+        
+        function populateReport(reportData) {
+            const freeReport = reportData.freeReport || {};
+            const premiumReport = reportData.premiumReport || {};
+            
+            // Update wellness score with animation
+            const scoreText = document.getElementById('score-text');
+            const scorePath = document.getElementById('score-path');
+            const score = freeReport.wellnessScore || 75;
+            
+            let currentScore = 0;
+            const interval = setInterval(() => {
+                if (currentScore >= score) {
+                    clearInterval(interval);
+                    scoreText.textContent = score;
+                } else {
+                    currentScore++;
+                    scoreText.textContent = currentScore;
+                }
+            }, 25);
+            
+            setTimeout(() => {
+                scorePath.style.strokeDasharray = `${score}, 100`;
+            }, 100);
+            
+            // Update other free report values
+            document.getElementById('biological-age').textContent = freeReport.biologicalAge || '--';
+            document.getElementById('energy-index').textContent = `${freeReport.energyIndex || '--'}/100`;
+            document.getElementById('stress-level').textContent = `${freeReport.stressLevel || '--'}/100`;
+            
+            // Update core four
+            if (freeReport.coreFour) {
+                updateCoreFourChart('mind', freeReport.coreFour.mind);
+                updateCoreFourChart('body', freeReport.coreFour.body);
+                updateCoreFourChart('nutrition', freeReport.coreFour.nutrition);
+                updateCoreFourChart('sleep', freeReport.coreFour.sleep);
+            }
+            
+            // Update key insights
+            document.getElementById('main-barrier').textContent = freeReport.mainBarrier || 'Data not available';
+            document.getElementById('quick-win').textContent = freeReport.quickWin || 'Data not available';
+            document.getElementById('peer-comparison').textContent = freeReport.peerComparison || 'Data not available';
+            
+            // Populate premium content if available
+            if (Object.keys(premiumReport).length > 0) {
+                populatePremiumContent(premiumReport);
+            }
+        }
+        
+        function updateCoreFourChart(type, data) {
+            if (!data) return;
+            
+            const score = data.score || 50;
+            const ctx = document.getElementById(`${type}-chart`).getContext('2d');
+            
+            // Create circular progress chart
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [score, 100 - score],
+                        backgroundColor: [
+                            getColorForScore(score),
+                            'rgba(30, 41, 59, 0.3)'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '65%',
+                    responsive: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    }
+                }
+            });
+            
+            // Update score and summary text
+            document.getElementById(`${type}-score`).textContent = score;
+            document.getElementById(`${type}-summary`).textContent = data.summary || 'No summary available';
+        }
+        
+        function getColorForScore(score) {
+            if (score >= 80) return '#34d399'; // Green
+            if (score >= 60) return '#fbbf24'; // Yellow
+            return '#f87171'; // Red
+        }
+        
+        function populatePremiumContent(premiumReport) {
+            // This function would populate the premium content section
+            // For now, we'll just store the data for when the user purchases
+            window.premiumReportData = premiumReport;
+            
+            // In a real implementation, you would create detailed elements
+            // for each section of the premium report here
+        }
+    </script>
 </body>
 </html>
