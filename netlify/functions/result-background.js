@@ -193,23 +193,30 @@ function buildFallback(sessionData = {}, faceAnalysis = null) {
 }
 
 
+// /netlify/functions/result-background.js
+
 async function generateAndSaveReport(sessionRef, sessionId) {
   try {
+    console.log(`[${sessionId}] Starting report generation.`);
+    
     const doc = await sessionRef.get();
-    [cite_start]if (!doc.exists) throw new Error(`Session ${sessionId} not found.`); [cite: 144]
+    if (!doc.exists) throw new Error(`Session ${sessionId} not found.`);
     
     await sessionRef.update({ reportStatus: 'processing' });
+    console.log(`[${sessionId}] Status set to 'processing'.`);
 
     const sessionData = doc.data();
     const faceAnalysisData = sessionData.faceAnalysis || null;
     const prompt = createPrompt(sessionData.answers, faceAnalysisData);
     
-    // Используем более мощную модель для сложного JSON
-    [cite_start]const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" }); [cite: 146]
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    
+    console.log(`[${sessionId}] Sending prompt to Gemini...`);
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       generationConfig: { temperature: 0.6, maxOutputTokens: 4096 }
     });
+    console.log(`[${sessionId}] Received response from Gemini.`);
     
     const response = await result.response;
     const rawText = response.text ? response.text() : "";
@@ -221,22 +228,29 @@ async function generateAndSaveReport(sessionRef, sessionId) {
     let reportData;
     
     try {
-      [cite_start]const jsonMatch = cleaned.match(/\{[\s\S]*\}$/); [cite: 87]
-      [cite_start]if (!jsonMatch) throw new Error("No JSON object detected in model output"); [cite: 87]
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}$/);
+      if (!jsonMatch) throw new Error("No JSON object detected in model output");
       reportData = JSON.parse(jsonMatch[0]);
-      [cite_start]if (!reportData.freeReport || !reportData.freeReport.metrics || typeof reportData.freeReport.metrics.wellnessScore === 'undefined') { [cite: 88]
-        [cite_start]throw new Error("Required keys missing from parsed JSON"); [cite: 88]
+      if (!reportData.freeReport || !reportData.freeReport.metrics) {
+        throw new Error("Required keys missing from parsed JSON");
       }
+      console.log(`[${sessionId}] Successfully parsed JSON from AI response.`);
     } catch (parseErr) {
-      console.error("Parse error, falling back:", parseErr);
+      console.error(`[${sessionId}] JSON Parse error, falling back:`, parseErr);
       reportData = buildFallback(sessionData, faceAnalysisData);
     }
 
-    [cite_start]await sessionRef.update({ reportData, reportStatus: 'complete' }); [cite: 92]
-    console.log(`Report successfully generated for sessionId: ${sessionId}`);
+    await sessionRef.update({ reportData, reportStatus: 'complete' });
+    console.log(`[${sessionId}] Report successfully generated and saved to Firestore.`);
+
   } catch (error) {
-    [cite_start]console.error(`--- ERROR in background generation for sessionId: ${sessionId} ---`, error); [cite: 149]
-    [cite_start]await sessionRef.update({ reportStatus: 'error', reportError: error.message }); [cite: 150]
+    console.error(`--- FATAL ERROR in background generation for [${sessionId}] ---`, error);
+    // Попытаемся сохранить ошибку в Firestore для отладки на фронтенде
+    try {
+        await sessionRef.update({ reportStatus: 'error', reportError: error.message });
+    } catch (dbError) {
+        console.error(`--- [${sessionId}] Could not even save error to Firestore ---`, dbError);
+    }
   }
 }
 
