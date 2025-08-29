@@ -6,11 +6,13 @@ if (!getApps().length) {
   try {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
     initializeApp({ credential: cert(serviceAccount) });
-  } catch (e) { console.error("Firebase init error in generateReport:", e); }
+  } catch (e) { 
+    console.error("Firebase init error:", e);
+    throw new Error("Firebase initialization failed");
+  }
 }
 
 const db = getFirestore();
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 function createPrompt(answers, faceAnalysis) {
     const quizData = Object.entries(answers)
@@ -21,11 +23,11 @@ function createPrompt(answers, faceAnalysis) {
     
     const faceData = faceAnalysis ? `
     Face Analysis (non-medical indicators):
-    - Apparent Age: ${faceAnalysis.age}
-    - Gender: ${faceAnalysis.gender}
-    - Smile detected: ${faceAnalysis.smile}
-    - Glasses type: ${faceAnalysis.glasses}
-    - Emotions detected: ${JSON.stringify(faceAnalysis.emotion)}
+    - Apparent Age: ${faceAnalysis.age || 'N/A'}
+    - Gender: ${faceAnalysis.gender || 'N/A'}
+    - Smile detected: ${faceAnalysis.smile || 'N/A'}
+    - Glasses type: ${faceAnalysis.glasses || 'N/A'}
+    - Emotions detected: ${JSON.stringify(faceAnalysis.emotion || {})}
     ` : 'Face analysis was skipped.';
 
     return `
@@ -68,33 +70,43 @@ function createPrompt(answers, faceAnalysis) {
 }
 
 exports.handler = async (event) => {
+  console.log('generateReport handler called');
+  
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
 
+  let sessionId;
+  
   try {
-    const { sessionId } = JSON.parse(event.body);
+    const body = JSON.parse(event.body);
+    sessionId = body.sessionId;
     
     if (!sessionId) {
+      console.error('No sessionId provided');
       return { 
         statusCode: 400, 
         body: JSON.stringify({ status: 'error', message: 'Session ID is required' }) 
       };
     }
 
+    console.log('Fetching session:', sessionId);
     const sessionRef = db.collection('sessions').doc(sessionId);
     const doc = await sessionRef.get();
     
     if (!doc.exists) {
+      console.error('Session not found:', sessionId);
       return { 
         statusCode: 404, 
         body: JSON.stringify({ status: 'error', message: 'Session not found' }) 
       };
     }
 
-    // Проверяем, не сгенерирован ли уже отчет
     const sessionData = doc.data();
+    
+    // Если отчет уже есть, возвращаем его
     if (sessionData.reportData) {
+      console.log('Report already exists for session:', sessionId);
       return {
         statusCode: 200,
         body: JSON.stringify({ 
@@ -104,28 +116,61 @@ exports.handler = async (event) => {
       };
     }
 
-    // Генерируем отчет
+    // Проверяем наличие API ключа
+    if (!process.env.GEMINI_API_KEY) {
+      console.error('GEMINI_API_KEY not found');
+      throw new Error('AI service configuration error');
+    }
+
+    console.log('Generating report for session:', sessionId);
     await sessionRef.update({ reportStatus: 'processing' });
 
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const faceAnalysisData = sessionData.faceAnalysis || sessionData.skinAnalysis || null;
-    const prompt = createPrompt(sessionData.answers, faceAnalysisData);
+    const prompt = createPrompt(sessionData.answers || {}, faceAnalysisData);
     
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    // Используем gemini-2.5-pro
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const rawText = response.text();
     
-    const cleanedText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-    const reportData = JSON.parse(cleanedText);
+    console.log('AI Response received');
+    
+    // Очищаем ответ от markdown
+    const cleanedText = rawText
+      .replace(/```json\s*/g, '')
+      .replace(/```\s*/g, '')
+      .trim();
+    
+    let reportData;
+    try {
+      reportData = JSON.parse(cleanedText);
+    } catch (parseError) {
+      console.error('Failed to parse AI response:', cleanedText);
+      throw new Error('Invalid AI response format');
+    }
 
+    // Проверяем структуру ответа
     if (!reportData.freeReport || !reportData.freeReport.coreFour) {
-      throw new Error("AI response is missing critical data.");
+      console.error('AI response missing required fields');
+      throw new Error("AI response is missing critical data");
+    }
+
+    // Преобразуем строковые значения в числа, если нужно
+    if (typeof reportData.freeReport.wellnessScore === 'string') {
+      reportData.freeReport.wellnessScore = parseInt(reportData.freeReport.wellnessScore);
+    }
+    if (typeof reportData.freeReport.wellnessAge === 'string') {
+      reportData.freeReport.wellnessAge = parseInt(reportData.freeReport.wellnessAge);
     }
 
     await sessionRef.update({ 
       reportData: reportData, 
       reportStatus: 'complete' 
     });
+
+    console.log('Report successfully generated for session:', sessionId);
 
     return {
       statusCode: 200,
@@ -136,12 +181,11 @@ exports.handler = async (event) => {
     };
 
   } catch (error) {
-    console.error('Error generating report:', error);
+    console.error('Error in generateReport:', error.message, error.stack);
     
-    // Обновляем статус ошибки в базе
-    if (error.message.includes('Session not found') === false) {
+    // Пытаемся обновить статус ошибки в базе
+    if (sessionId) {
       try {
-        const { sessionId } = JSON.parse(event.body);
         const sessionRef = db.collection('sessions').doc(sessionId);
         await sessionRef.update({ 
           reportStatus: 'error', 
@@ -156,7 +200,7 @@ exports.handler = async (event) => {
       statusCode: 500,
       body: JSON.stringify({ 
         status: 'error', 
-        message: error.message || 'Failed to generate report' 
+        message: 'Failed to generate report. Please try again.' 
       })
     };
   }
