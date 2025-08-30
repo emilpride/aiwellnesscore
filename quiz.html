@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Face Recognition Script -->
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <!-- Confetti Animation Script -->
@@ -16,11 +16,11 @@
         body { font-family: 'Inter', sans-serif; }
         .chat-container { 
             scroll-behavior: smooth; 
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         .chat-container::-webkit-scrollbar { 
-            display: none; /* Chrome, Safari, Opera*/
+            display: none;
         }
         .chat-bubble { animation: slide-up 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
         @keyframes slide-up {
@@ -39,7 +39,6 @@
         .typing-indicator span:nth-of-type(3) { animation-delay: -0.16s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
 
-        /* Avatar Animation */
         .bot-avatar { animation: avatar-float 3s ease-in-out infinite; }
         @keyframes avatar-float {
             0% { transform: translateY(0); }
@@ -47,7 +46,6 @@
             100% { transform: translateY(0); }
         }
 
-        /* Camera Modal Styles */
         #camera-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.8); z-index: 100;
@@ -61,7 +59,6 @@
         #camera-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; text-align: center; }
         #camera-status { background-color: rgba(0,0,0,0.5); padding: 0.5rem 1rem; border-radius: 9999px; display: inline-block; color: white; font-weight: 500; transition: background-color 0.3s; }
 
-        /* New Animations */
         #progress-bar {
             animation: glow 2s ease-in-out infinite alternate;
         }
@@ -76,6 +73,13 @@
             0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7); }
             70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
             100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
+        }
+        .payment-form {
+            animation: slide-up-form 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+        }
+        @keyframes slide-up-form {
+            0% { transform: translateY(100%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
         }
 
     </style>
@@ -104,6 +108,9 @@
                 </button>
             </div>
         </div>
+
+        <!-- Payment Form Placeholder -->
+        <div id="payment-form-container" class="hidden"></div>
     </div>
 
     <!-- Camera Modal -->
@@ -139,6 +146,7 @@
         const cameraLoader = document.getElementById('camera-loader');
         const loaderText = document.getElementById('loader-text');
         const cameraStatus = document.getElementById('camera-status');
+        const paymentFormContainer = document.getElementById('payment-form-container');
 
         // --- State ---
         let sessionId = null;
@@ -147,6 +155,7 @@
         let detectionInterval;
         let stream;
         let capturedPhotoDataUrl = null;
+        let countdownInterval;
 
         // --- Quiz Data ---
         const quizQuestions = [
@@ -154,7 +163,7 @@
             { key: 'disclaimer', type: 'message', text: "Before we begin, a quick heads-up: ☝️ I'm an AI coach, not a medical doctor. This analysis is for educational purposes only and is not a substitute for professional medical advice." },
             { key: 'terms', type: 'question', text: "Your privacy is our top priority. 🛡️ Everything is secure and anonymous. We never store your photo, and all your data is permanently deleted right after you get your report. Please confirm you agree to our <a href='#' target='_blank' class='underline text-purple-600'>Terms</a> and <a href='#' target='_blank' class='underline text-purple-600'>Privacy Policy</a> to continue.", options: ["I Understand & Agree"] },
             { key: 'name', type: 'question', text: "Great, let's get started! What should I call you? 😊", options: [], placeholder: "Type your name..." },
-            { key: 'age', type: 'question', text: (name) => `Perfect, ${name}! To start, what's your age? 🎂`, options: ['Under 18', '18-25', '26-35', '36-50', '50+'], placeholder: "or type your age..." },
+            { key: 'age', type: 'question', text: (name) => `Perfect, ${name}! To start, what's your age? 🎂`, options: [], placeholder: "Type your exact age..." },
             { key: 'gender', type: 'question', text: "Great start! Now, what's your biological sex? 🧬", options: ['Male', 'Female'], placeholder: "or type your gender..." },
             { key: 'height', type: 'question', text: "Perfect. Let's talk about your height. 📏 (e.g., 5 ft 10 in)", options: ["Under 5 ft", "5'0\" - 5'5\"", "5'6\" - 5'11\"", "6'0\" - 6'5\"", "Over 6'5\""], placeholder: "or type your height..." },
             { key: 'weight', type: 'question', text: "Thanks! And your current weight in pounds? ⚖️", options: ["Under 120 lbs", "120-150 lbs", "151-180 lbs", "181-220 lbs", "Over 220 lbs"], placeholder: "or type your weight in lbs..." },
@@ -175,6 +184,15 @@
             { key: 'screen_time', type: 'question', text: "Last question before the final step! 📱 How much time do you spend on screens (phone, computer, TV) outside of work?", options: ["Less than 2 hours", "2-4 hours", "4-6 hours", "More than 6 hours"], placeholder: "or type number of hours..." },
             { key: 'camera', type: 'final_step', text: "You did it! 🎉 That's all the questions. Now for the fun part: a quick selfie. This helps me analyze non-medical indicators of stress and fatigue. Your photo is processed on the fly and never stored. Please allow camera access and position your face within the frame." }
         ];
+
+        // --- Utility Functions ---
+        const isMobile = () => window.innerWidth <= 768;
+        const scrollToBottom = () => {
+            setTimeout(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 0);
+        };
+
 
         // --- SERVER COMMUNICATION ---
         async function startQuizSession() {
@@ -207,20 +225,7 @@
             }
         }
 
-        async function confirmPhotoAndAnalyze() {
-            addUserMessage("Looks Good!");
-            const photoPreview = document.getElementById('photo-preview-wrapper');
-            if (photoPreview) photoPreview.remove();
-
-            const processingMessage = document.createElement('div');
-            processingMessage.className = 'text-center p-2';
-            processingMessage.innerHTML = `<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div><p class="text-gray-600 mt-2">Analyzing photo and preparing your report...</p>`;
-            inputArea.innerHTML = '';
-            inputArea.appendChild(processingMessage);
-            inputArea.style.display = 'block';
-            optionsContainerWrapper.classList.add('hidden');
-
-
+        async function proceedToAnalysis() {
             try {
                 const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
                     method: 'POST',
@@ -283,7 +288,7 @@
                     <div class="typing-indicator"><span></span><span></span><span></span></div>
                 </div>`;
             chatContainer.appendChild(typingDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            scrollToBottom();
         }
 
         function hideTypingIndicator() {
@@ -299,7 +304,7 @@
                 </div>
                 <div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${html}</div>`;
             chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            scrollToBottom();
         }
 
         function addUserMessage(text) {
@@ -307,7 +312,7 @@
             messageDiv.className = 'flex justify-end mb-4 chat-bubble';
             messageDiv.innerHTML = `<div class="bg-purple-600 text-white p-3 rounded-tl-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${text}</div>`;
             chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            scrollToBottom();
         }
         
         function showOptions(options, handlers) {
@@ -373,7 +378,9 @@
                         inputArea.classList.remove('hidden');
                         userInput.placeholder = question.placeholder || "Type your answer...";
                     }
-                    userInput.focus();
+                    if (!isMobile()) {
+                        userInput.focus();
+                    }
                 } else if (question.type === 'final_step') {
                     inputArea.classList.add('hidden');
                     addBotMessage(questionText);
@@ -427,12 +434,8 @@
         }
 
         function startFaceDetection() {
-            let faceDetectedFrames = 0;
             let captureTimeout;
             const context = canvas.getContext('2d');
-            let scanY = 0;
-            let scanDirection = 1;
-
 
             detectionInterval = setInterval(async () => {
                 const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
@@ -446,20 +449,17 @@
                 
                 if (detections.length > 0) {
                     const resizedDetections = faceapi.resizeResults(detections, displaySize);
-                    const landmarks = resizedDetections[0].landmarks;
                     const box = resizedDetections[0].detection.box;
 
-                    // Draw a techy mesh
                     context.strokeStyle = 'rgba(0, 255, 255, 0.4)';
                     context.lineWidth = 1;
-                    faceapi.draw.drawFaceLandmarks(canvas, landmarks, { drawLines: true });
+                    faceapi.draw.drawFaceLandmarks(canvas, resizedDetections[0].landmarks, { drawLines: true });
                     
-                    // Draw corner brackets
                     context.strokeStyle = '#00FFFF';
                     context.lineWidth = 3;
                     context.shadowColor = '#00FFFF';
                     context.shadowBlur = 10;
-                    const cornerLength = 20;
+                    const cornerLength = box.width * 0.1;
                     context.beginPath();
                     context.moveTo(box.x, box.y + cornerLength); context.lineTo(box.x, box.y); context.lineTo(box.x + cornerLength, box.y);
                     context.moveTo(box.x + box.width - cornerLength, box.y); context.lineTo(box.x + box.width, box.y); context.lineTo(box.x + box.width, box.y + cornerLength);
@@ -526,13 +526,13 @@
                 ${imageHtml}`;
             
             chatContainer.appendChild(messageWrapper);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            scrollToBottom();
 
             const confirmOptions = [
                 { text: 'Looks Good!', class: 'option-btn bg-green-500 border-green-600 text-white px-4 py-2 rounded-full text-sm flex-shrink-0 font-semibold' },
                 { text: 'Retake', class: 'option-btn bg-white border-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm flex-shrink-0' }
             ];
-            const handlers = [confirmPhotoAndAnalyze, retakePhoto];
+            const handlers = [showPaymentForm, retakePhoto];
             showOptions(confirmOptions, handlers);
             inputArea.classList.add('hidden');
         }
@@ -542,7 +542,84 @@
             const photoPreview = document.getElementById('photo-preview-wrapper');
             if (photoPreview) photoPreview.remove();
             optionsContainerWrapper.classList.add('hidden');
+            inputArea.classList.add('hidden');
             startCamera();
+        }
+
+        // --- Payment Form Logic ---
+        function showPaymentForm() {
+            addUserMessage("Looks Good!");
+            document.getElementById('photo-preview-wrapper')?.remove();
+            optionsContainerWrapper.classList.add('hidden');
+            inputArea.classList.add('hidden');
+            
+            const formHtml = `
+            <div class="payment-form p-4 border-t border-gray-200 bg-gray-50">
+                <div class="relative bg-gradient-to-br from-purple-600 to-indigo-700 text-white p-6 rounded-2xl shadow-lg overflow-hidden">
+                     <div class="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full"></div>
+                     <div class="absolute -bottom-8 -left-8 w-32 h-32 bg-white/10 rounded-full"></div>
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-2xl font-extrabold">Your Best Offer</h3>
+                                <p class="text-purple-200">Unlock your full report now!</p>
+                            </div>
+                            <span class="bg-yellow-400 text-yellow-900 text-sm font-bold px-3 py-1 rounded-full">-30%</span>
+                        </div>
+                        <div class="bg-white/20 h-px my-4"></div>
+                        <div class="text-center bg-white/10 rounded-lg p-2 mt-4">
+                            <p class="text-sm text-purple-200">This exclusive offer ends in:</p>
+                            <p id="countdown-timer" class="text-2xl font-bold tracking-widest">10:00</p>
+                        </div>
+                         <!-- Placeholder for payment fields -->
+                        <div class="mt-4 space-y-3">
+                            <div class="bg-white/10 p-3 rounded-lg text-left text-sm placeholder-purple-200">Card Number</div>
+                            <div class="flex gap-3">
+                                <div class="w-1/2 bg-white/10 p-3 rounded-lg text-left text-sm placeholder-purple-200">MM/YY</div>
+                                <div class="w-1/2 bg-white/10 p-3 rounded-lg text-left text-sm placeholder-purple-200">CVC</div>
+                            </div>
+                        </div>
+
+                        <button id="pay-btn" class="mt-5 w-full bg-white text-purple-700 font-bold py-3 px-4 rounded-lg hover:bg-purple-100 transition-colors text-lg">
+                           Pay Now & Get Report
+                        </button>
+                         <p class="text-xs text-purple-200/80 mt-3 text-center flex items-center justify-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1.5a8.5 8.5 0 100 17 8.5 8.5 0 000-17zM8.25 7.5a.75.75 0 01.75-.75h2a.75.75 0 010 1.5h-2a.75.75 0 01-.75-.75zM9 10.5a.75.75 0 000 1.5h2a.75.75 0 000-1.5H9z" clip-rule="evenodd" /></svg>
+                            Secure Payment
+                        </p>
+                    </div>
+                </div>
+            </div>`;
+            paymentFormContainer.innerHTML = formHtml;
+            paymentFormContainer.classList.remove('hidden');
+            scrollToBottom();
+
+            document.getElementById('pay-btn').onclick = handlePayment;
+            startCountdown();
+        }
+
+        function startCountdown() {
+            let duration = 10 * 60; // 10 minutes
+            const timerEl = document.getElementById('countdown-timer');
+            countdownInterval = setInterval(() => {
+                const minutes = Math.floor(duration / 60).toString().padStart(2, '0');
+                const seconds = (duration % 60).toString().padStart(2, '0');
+                timerEl.textContent = `${minutes}:${seconds}`;
+                duration--;
+                if (duration < 0) {
+                    clearInterval(countdownInterval);
+                    timerEl.textContent = "00:00";
+                    document.getElementById('pay-btn').textContent = "Offer Expired";
+                    document.getElementById('pay-btn').disabled = true;
+                }
+            }, 1000);
+        }
+
+        function handlePayment() {
+            clearInterval(countdownInterval);
+            paymentFormContainer.innerHTML = '';
+            paymentFormContainer.classList.add('hidden');
+            proceedToAnalysis();
         }
         
         function showCompletionAnimation() {
@@ -558,6 +635,7 @@
                     hideTypingIndicator();
                     addBotMessage("Awesome work! You've completed the assessment. 🥳 I'm now analyzing your results...");
                     inputArea.innerHTML = `<div class="text-center p-2"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div><p class="text-gray-600 mt-2">This will just take a moment...</p></div>`;
+                    inputArea.style.display = 'block';
                     
                     setTimeout(() => {
                         const resultUrl = `/results.html?sessionId=${sessionId}`;
