@@ -110,19 +110,28 @@
         .week-day.active { background-color: #7c3aed; transform: scale(1.3); box-shadow: 0 0 8px #a78bfa; }
         .bio-age-footer { font-size: 0.75rem; color: #7e22ce; }
 
-        /* --- NEW ANIMATION STYLES --- */
         @keyframes fade-in-up {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .animated-list li {
+        /* New styles for animated list items */
+        .animated-list-item {
             opacity: 0;
-            animation: fade-in-up 0.5s ease-out forwards;
+            animation: fade-in-up 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; /* Softer ease-out */
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* Space between icon and text */
+            margin-bottom: 0.75rem; /* More space between list items */
         }
-        .bot-list { list-style: none; padding-left: 20px; }
-        .bot-list li { position: relative; margin-bottom: 8px; }
-        .bot-list li::before {
-            content: '✓'; position: absolute; left: -20px; color: #8b5cf6; font-weight: bold;
+        .list-icon-wrapper {
+            background-color: #a78bfa; /* purple-400 */
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
         .bmi-widget { background-color: #faf5ff; border: 1px solid #e9d5ff; border-radius: 1rem; padding: 1rem; text-align: center; max-width: 250px; margin: auto; }
@@ -139,8 +148,6 @@
         .gauge-needle { position: absolute; bottom: 0; left: 50%; width: 3px; height: 65px; background-color: #5b21b6; transform-origin: bottom center; transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
         .gauge-value { font-size: 1.875rem; font-weight: 700; }
         .gauge-label { font-size: 0.75rem; font-weight: 500; color: #7e22ce; }
-        /* --- END OF NEW STYLES --- */
-
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-50 to-indigo-100 md:flex md:items-center md:justify-center min-h-screen">
@@ -210,6 +217,7 @@
         let stream;
         let capturedPhotoDataUrl = null;
         let countdownInterval;
+        const messageDelay = 1800; // Increased delay for all bot messages
 
         // --- Quiz Data ---
         const quizQuestions = [
@@ -219,16 +227,40 @@
                 key: 'intro_purpose', 
                 type: 'message', 
                 text: (name) => `Great to meet you, ${name}! Here's a quick look at what we'll uncover together:
-                    <ul class="bot-list animated-list mt-2 text-sm">
-                        <li style="animation-delay: 0.2s;">Calculate your Wellness Score</li>
-                        <li style="animation-delay: 0.4s;">Reveal your Biological Age</li>
-                        <li style="animation-delay: 0.6s;">Assess your energy and recovery levels</li>
-                        <li style="animation-delay: 0.8s;">Measure your stress and find ways to reduce it</li>
-                        <li style="animation-delay: 1.0s;">Analyze your skin health with AI insights</li>
-                        <li style="animation-delay: 1.2s;">Review nutrition, BMI & life expectancy</li>
-                        <li style="animation-delay: 1.4s;">Highlight healthy habits & areas for improvement</li>
-                        <li style="animation-delay: 1.6s;">Provide a personalized 7-day improvement plan</li>
-                    </ul>`
+                    <div class="mt-4 text-sm text-gray-800">
+                        <div class="animated-list-item" style="animation-delay: 0.2s;">
+                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg></div>
+                            <span>Calculate your Wellness Score</span>
+                        </div>
+                        <div class="animated-list-item" style="animation-delay: 0.6s;">
+                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l3 3a1 1 0 001.414-1.414L11 9.586V6z" clip-rule="evenodd" /></svg></div>
+                            <span>Reveal your Biological Age</span>
+                        </div>
+                        <div class="animated-list-item" style="animation-delay: 1.0s;">
+                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h.01a1 1 0 100-2H10zm3 0a1 1 0 000 2h.01a1 1 0 100-2H13zm-3 4a1 1 0 000 2h.01a1 1 0 100-2H10z" clip-rule="evenodd" /></svg></div>
+                            <span>Assess your energy & recovery levels</span>
+                        </div>
+                        <div class="animated-list-item" style="animation-delay: 1.4s;">
+                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg></div>
+                            <span>Measure your stress and find ways to reduce it</span>
+                        </div>
+                        <div class="animated-list-item" style="animation-delay: 1.8s;">
+                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></div>
+                            <span>Analyze your skin health with AI insights</span>
+                        </div>
+                        <div class="animated-list-item" style="animation-delay: 2.2s;">
+                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" /></svg></div>
+                            <span>Review nutrition, BMI & life expectancy</span>
+                        </div>
+                        <div class="animated-list-item" style="animation-delay: 2.6s;">
+                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 10-6 0v2h6V6zM17 6a3 3 0 10-6 0v2h6V6zM1 20h18V8H1v12zM5 9a1 1 0 011-1h2a1 1 0 110 2H6a1 1 0 01-1-1zM13 9a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" /></svg></div>
+                            <span>Highlight healthy habits & areas for improvement</span>
+                        </div>
+                        <div class="animated-list-item" style="animation-delay: 3.0s;">
+                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" /></svg></div>
+                            <span>Provide a personalized 7-day improvement plan</span>
+                        </div>
+                    </div>`
             },
             { key: 'intro_how', type: 'message', text: "To help you on your wellness journey, I need to get to know you a bit better—your lifestyle, habits, and a quick, secure look at you." },
             { key: 'intro_convo', type: 'message', text: "What makes this unique is our relaxed, conversational approach. I'll ask some questions, and you can use the quick-reply buttons or type your own answers. Every detail helps, so I appreciate you taking the time!" },
@@ -448,9 +480,11 @@
 
                 if (question.type === 'message') {
                     if (question.key === 'bmi_calculation') {
-                        playBmiAnimation();
+                        addBotMessage(questionText); // Show the "Calculating..." message
+                        setTimeout(playBmiAnimation, 500); // Then play the animation
                     } else if (question.key === 'stress_gauge') {
-                        playStressGaugeAnimation();
+                        addBotMessage(questionText); // Show the "Thanks for sharing..." message
+                        setTimeout(playStressGaugeAnimation, 500); // Then play the animation
                     } else {
                         addBotMessage(questionText);
                     }
@@ -474,7 +508,7 @@
                     addBotMessage(questionText);
                     showCameraStep();
                 }
-            }, 1200);
+            }, messageDelay); // Use the increased messageDelay here
         }
 
         // --- Camera & Payment Logic (unchanged) ---
