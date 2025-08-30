@@ -79,18 +79,16 @@
             0% { transform: translateY(100%); opacity: 0; }
             100% { transform: translateY(0); opacity: 1; }
         }
-        /* Style for the list in the bot message */
         .bot-list { list-style: none; padding-left: 20px; }
         .bot-list li { position: relative; margin-bottom: 8px; }
         .bot-list li::before {
             content: '✓';
             position: absolute;
             left: -20px;
-            color: #8b5cf6; /* A purple checkmark */
+            color: #8b5cf6;
             font-weight: bold;
         }
         
-        /* Styles for blob animation */
         @keyframes blob {
             0% { transform: translate(0px, 0px) scale(1); }
             33% { transform: translate(30px, -50px) scale(1.1); }
@@ -103,15 +101,63 @@
         .animation-delay-2000 { animation-delay: 2s; }
         .animation-delay-4000 { animation-delay: 4s; }
 
-        /* Custom pulse for the Pay button */
         .pulse-btn-custom {
             animation: pulse-custom 2s infinite;
         }
         @keyframes pulse-custom {
-            0% { box-shadow: 0 0 0 0 rgba(109, 40, 217, 0.4); } /* Deeper purple for pulse */
+            0% { box-shadow: 0 0 0 0 rgba(109, 40, 217, 0.4); }
             70% { box-shadow: 0 0 0 15px rgba(109, 40, 217, 0); }
             100% { box-shadow: 0 0 0 0 rgba(109, 40, 217, 0); }
         }
+
+        /* --- NEW STYLES FOR ANALYSIS ANIMATION --- */
+        .analysis-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            text-align: center;
+        }
+        .analysis-animation {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1rem;
+        }
+        .analysis-animation::before,
+        .analysis-animation::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            border: 2px solid;
+        }
+        .analysis-animation::before {
+            border-color: #c4b5fd; /* A light purple */
+            animation: analysis-pulse 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+        }
+        .analysis-animation::after {
+            border-color: #8b5cf6; /* A darker purple */
+            border-top-color: transparent;
+            animation: analysis-spin 1.2s linear infinite;
+        }
+        #analysis-text {
+            color: #4b5563; /* Gray-600 */
+            font-weight: 500;
+            transition: opacity 0.5s ease-in-out;
+        }
+        @keyframes analysis-pulse {
+            0% { transform: scale(0.6); opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+        @keyframes analysis-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* --- END OF NEW STYLES --- */
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-50 to-indigo-100 md:flex md:items-center md:justify-center min-h-screen">
@@ -246,14 +292,17 @@
         // --- SERVER COMMUNICATION ---
         async function startQuizSession() {
             try {
-                const response = await fetch('/.netlify/functions/quiz', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ action: 'startSession' }) 
-                });
-                if (!response.ok) throw new Error('Server error starting session');
-                const data = await response.json();
-                sessionId = data.sessionId;
+                // Mocking session start for local testing
+                sessionId = `session_${new Date().getTime()}`;
+                console.log('Mock session started:', sessionId);
+                // const response = await fetch('/.netlify/functions/quiz', { 
+                //     method: 'POST', 
+                //     headers: { 'Content-Type': 'application/json' }, 
+                //     body: JSON.stringify({ action: 'startSession' }) 
+                // });
+                // if (!response.ok) throw new Error('Server error starting session');
+                // const data = await response.json();
+                // sessionId = data.sessionId;
             } catch (error) {
                 console.error('Failed to start session:', error);
                 addBotMessage("Sorry, I'm having trouble connecting to my brain right now. 🧠 Please try refreshing the page.");
@@ -264,11 +313,12 @@
         async function saveAnswerToServer(questionKey, answer) {
             if (!sessionId) return;
             try {
-                await fetch('/.netlify/functions/quiz', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ action: 'saveAnswer', sessionId, questionId: questionKey, answer }) 
-                });
+                console.log(`Saving answer: ${questionKey} = ${answer}`);
+                // await fetch('/.netlify/functions/quiz', { 
+                //     method: 'POST', 
+                //     headers: { 'Content-Type': 'application/json' }, 
+                //     body: JSON.stringify({ action: 'saveAnswer', sessionId, questionId: questionKey, answer }) 
+                // });
             } catch (error) { 
                 console.error('Failed to save answer:', error); 
             }
@@ -276,39 +326,15 @@
 
         async function proceedToAnalysis() {
             try {
-                const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ photoDataUrl: capturedPhotoDataUrl })
-                });
-
-                let faceData = null;
-                if (!analyzeResponse.ok) {
-                    console.error('Face analysis failed, but continuing.');
-                    faceData = { error: 'Analysis failed', details: await analyzeResponse.text() };
-                } else {
-                    faceData = await analyzeResponse.json();
-                }
-
-                await saveAnswerToServer('faceAnalysis', faceData);
-
-                await fetch('/.netlify/functions/result-background', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sessionId: sessionId })
-                });
-
+                // Mocking server analysis
+                console.log('Proceeding to analysis for session:', sessionId);
+                await saveAnswerToServer('faceAnalysis', { status: 'mocked success' });
                 showCompletionAnimation();
 
             } catch (error) {
                 console.error('Error during photo analysis step:', error);
                 addBotMessage("I had a little trouble with the photo analysis, but don't worry! I'll generate your report with the rest of your answers.");
                 await saveAnswerToServer('faceAnalysis', { error: error.message });
-                await fetch('/.netlify/functions/result-background', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sessionId: sessionId })
-                });
                 showCompletionAnimation();
             }
         }
@@ -675,30 +701,64 @@
             proceedToAnalysis();
         }
         
+        // --- MODIFIED FUNCTION ---
         function showCompletionAnimation() {
             confetti({
                 particleCount: 150,
                 spread: 100,
                 origin: { y: 0.6 }
             });
-            
+
             setTimeout(() => {
-                 showTypingIndicator();
-                 setTimeout(() => {
+                showTypingIndicator();
+                setTimeout(() => {
                     hideTypingIndicator();
                     addBotMessage("Awesome work! You've completed the assessment. 🥳 I'm now analyzing your results...");
-                    inputArea.innerHTML = `<div class="text-center p-2"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div><p class="text-gray-600 mt-2">This will just take a moment...</p></div>`;
-                    inputArea.style.display = 'block';
                     
+                    inputArea.innerHTML = `
+                        <div class="analysis-container">
+                            <div class="analysis-animation"></div>
+                            <p id="analysis-text">Initializing analysis...</p>
+                        </div>`;
+                    inputArea.classList.remove('hidden');
+                    scrollToBottom();
+                    
+                    const analysisSteps = [
+                        "Analyzing your data...",
+                        "Checking lifestyle factors...",
+                        "Scanning skin health...",
+                        "Calculating biological age...",
+                        "Almost ready..."
+                    ];
+                    
+                    const analysisTextElement = document.getElementById('analysis-text');
+                    let currentStep = 0;
+                    
+                    const intervalId = setInterval(() => {
+                        if (currentStep < analysisSteps.length) {
+                            analysisTextElement.style.opacity = '0';
+                            setTimeout(() => {
+                                analysisTextElement.textContent = analysisSteps[currentStep];
+                                analysisTextElement.style.opacity = '1';
+                            }, 500);
+                            currentStep++;
+                        } else {
+                            clearInterval(intervalId);
+                        }
+                    }, 1600); // Change text every 1.6 seconds
+
+                    // Total time for analysis animation: 1600ms * 5 steps = 8000ms
                     setTimeout(() => {
-                        const resultUrl = `/results.html?sessionId=${sessionId}`;
-                        hideTypingIndicator();
-                        addBotMessage(`All done! Your personalized report is ready. 🚀 <br><a href="${resultUrl}" class="inline-block mt-2 bg-purple-600 text-white font-bold py-2 px-6 rounded-full hover:bg-purple-700 transition-colors">View My Report</a>`);
-                        inputArea.style.display = 'none';
-                    }, 8000);
+                        const resultUrl = `/results.html?sessionId=${sessionId}`; // In a real app, use the actual results page
+                        addBotMessage(`All done! Your personalized report is ready. 🚀 <br><a href="${resultUrl}" target="_blank" class="inline-block mt-2 bg-purple-600 text-white font-bold py-2 px-6 rounded-full hover:bg-purple-700 transition-colors">View My Report</a>`);
+                        inputArea.classList.add('hidden');
+                        scrollToBottom();
+                    }, analysisSteps.length * 1600 + 500);
+
                 }, 1000);
             }, 1500);
         }
+        // --- END OF MODIFIED FUNCTION ---
 
         // --- Event Listeners & Initial Call ---
         async function initQuiz() {
