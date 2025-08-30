@@ -43,7 +43,6 @@
             50% { transform: translateY(-4px); }
             100% { transform: translateY(0); }
         }
-
         #camera-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.8); z-index: 100;
@@ -64,155 +63,84 @@
             from { box-shadow: 0 0 2px #a855f7, 0 0 4px #a855f7; }
             to { box-shadow: 0 0 6px #6366f1, 0 0 8px #6366f1; }
         }
-        .pulse-btn {
-            animation: pulse-animation 2s infinite;
-        }
+        .pulse-btn { animation: pulse-animation 2s infinite; }
         @keyframes pulse-animation {
             0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7); }
             70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
             100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
         }
-        .payment-form {
-            animation: slide-up-form 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-        }
+        .payment-form { animation: slide-up-form 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
         @keyframes slide-up-form {
             0% { transform: translateY(100%); opacity: 0; }
             100% { transform: translateY(0); opacity: 1; }
         }
-        .bot-list { list-style: none; padding-left: 20px; }
-        .bot-list li { position: relative; margin-bottom: 8px; }
-        .bot-list li::before {
-            content: '✓';
-            position: absolute;
-            left: -20px;
-            color: #8b5cf6;
-            font-weight: bold;
-        }
-        
         @keyframes blob {
             0% { transform: translate(0px, 0px) scale(1); }
             33% { transform: translate(30px, -50px) scale(1.1); }
             66% { transform: translate(-20px, 20px) scale(0.9); }
             100% { transform: translate(0px, 0px) scale(1); }
         }
-        .animate-blob {
-            animation: blob 7s infinite;
-        }
+        .animate-blob { animation: blob 7s infinite; }
         .animation-delay-2000 { animation-delay: 2s; }
         .animation-delay-4000 { animation-delay: 4s; }
 
-        .pulse-btn-custom {
-            animation: pulse-custom 2s infinite;
-        }
+        .pulse-btn-custom { animation: pulse-custom 2s infinite; }
         @keyframes pulse-custom {
             0% { box-shadow: 0 0 0 0 rgba(109, 40, 217, 0.4); }
             70% { box-shadow: 0 0 0 15px rgba(109, 40, 217, 0); }
             100% { box-shadow: 0 0 0 0 rgba(109, 40, 217, 0); }
         }
 
-        .analysis-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            text-align: center;
-        }
-        .analysis-animation {
-            position: relative;
-            width: 60px;
-            height: 60px;
-            margin-bottom: 1rem;
-        }
-        .analysis-animation::before,
-        .analysis-animation::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            border: 2px solid;
-        }
-        .analysis-animation::before {
-            border-color: #c4b5fd;
-            animation: analysis-pulse 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
-        }
-        .analysis-animation::after {
-            border-color: #8b5cf6;
-            border-top-color: transparent;
-            animation: analysis-spin 1.2s linear infinite;
-        }
-        #analysis-text {
-            color: #4b5563;
-            font-weight: 500;
-            transition: opacity 0.5s ease-in-out;
-        }
-        @keyframes analysis-pulse {
-            0% { transform: scale(0.6); opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { transform: scale(1.2); opacity: 0; }
-        }
-        @keyframes analysis-spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        .analysis-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; text-align: center; }
+        .analysis-animation { position: relative; width: 60px; height: 60px; margin-bottom: 1rem; }
+        .analysis-animation::before, .analysis-animation::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; border: 2px solid; }
+        .analysis-animation::before { border-color: #c4b5fd; animation: analysis-pulse 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
+        .analysis-animation::after { border-color: #8b5cf6; border-top-color: transparent; animation: analysis-spin 1.2s linear infinite; }
+        #analysis-text { color: #4b5563; font-weight: 500; transition: opacity 0.5s ease-in-out; }
+        @keyframes analysis-pulse { 0% { transform: scale(0.6); opacity: 0.5; } 50% { opacity: 1; } 100% { transform: scale(1.2); opacity: 0; } }
+        @keyframes analysis-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
+        .bio-age-container { background-color: #f3e8ff; border: 1px solid #d8b4fe; border-radius: 1rem; padding: 1rem; text-align: center; max-width: 250px; margin: auto; }
+        .bio-age-header { font-size: 0.875rem; font-weight: 600; color: #6b21a8; margin-bottom: 0.75rem; }
+        .bio-age-display { display: flex; justify-content: center; align-items: baseline; margin-bottom: 1rem; color: #5b21b6; }
+        #bio-age-value { font-size: 3.75rem; font-weight: 800; line-height: 1; transition: color 0.3s; }
+        .bio-age-unit { font-size: 1rem; font-weight: 600; margin-left: 0.5rem; }
+        .week-progress { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .week-day { width: 10px; height: 10px; background-color: #ddd6fe; border-radius: 50%; transition: all 0.5s; }
+        .week-day.active { background-color: #7c3aed; transform: scale(1.3); box-shadow: 0 0 8px #a78bfa; }
+        .bio-age-footer { font-size: 0.75rem; color: #7e22ce; }
+
         /* --- NEW ANIMATION STYLES --- */
-        .bio-age-container {
-            background-color: #f3e8ff; /* purple-100 */
-            border: 1px solid #d8b4fe; /* purple-300 */
-            border-radius: 1rem;
-            padding: 1rem;
-            text-align: center;
-            max-width: 250px;
-            margin: auto;
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .bio-age-header {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #6b21a8; /* purple-800 */
-            margin-bottom: 0.75rem;
+        .animated-list li {
+            opacity: 0;
+            animation: fade-in-up 0.5s ease-out forwards;
         }
-        .bio-age-display {
-            display: flex;
-            justify-content: center;
-            align-items: baseline;
-            margin-bottom: 1rem;
-            color: #5b21b6; /* violet-700 */
+        .bot-list { list-style: none; padding-left: 20px; }
+        .bot-list li { position: relative; margin-bottom: 8px; }
+        .bot-list li::before {
+            content: '✓'; position: absolute; left: -20px; color: #8b5cf6; font-weight: bold;
         }
-        #bio-age-value {
-            font-size: 3.75rem;
-            font-weight: 800;
-            line-height: 1;
-            transition: color 0.3s;
-        }
-        .bio-age-unit {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-left: 0.5rem;
-        }
-        .week-progress {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-        .week-day {
-            width: 10px;
-            height: 10px;
-            background-color: #ddd6fe; /* violet-200 */
-            border-radius: 50%;
-            transition: all 0.5s;
-        }
-        .week-day.active {
-            background-color: #7c3aed; /* violet-600 */
-            transform: scale(1.3);
-            box-shadow: 0 0 8px #a78bfa;
-        }
-        .bio-age-footer {
-            font-size: 0.75rem;
-            color: #7e22ce; /* purple-700 */
-        }
+
+        .bmi-widget { background-color: #faf5ff; border: 1px solid #e9d5ff; border-radius: 1rem; padding: 1rem; text-align: center; max-width: 250px; margin: auto; }
+        .bmi-value { font-size: 2.5rem; font-weight: 800; color: #5b21b6; line-height: 1; }
+        .bmi-label { font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; }
+        .bmi-scale { position: relative; height: 10px; background-image: linear-gradient(to right, #60a5fa, #34d399, #facc15, #f87171); border-radius: 9999px; margin: 0.5rem 0; }
+        .bmi-indicator { position: absolute; top: 50%; width: 16px; height: 16px; background-color: white; border: 3px solid #5b21b6; border-radius: 50%; transform: translate(-50%, -50%); transition: left 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
+        .bmi-category { font-size: 0.75rem; font-weight: 500; color: #7e22ce; }
+
+        .stress-gauge-container { max-width: 250px; margin: auto; text-align: center; }
+        .stress-gauge { position: relative; width: 150px; height: 75px; overflow: hidden; margin: 0 auto 0.5rem; }
+        .gauge-arc { width: 150px; height: 150px; border: 20px solid #e9d5ff; border-radius: 50%; border-bottom-color: transparent; border-right-color: transparent; transform: rotate(-135deg); }
+        .gauge-fill { position: absolute; top: 0; left: 0; width: 150px; height: 150px; border: 20px solid; border-radius: 50%; border-bottom-color: transparent; border-right-color: transparent; transform: rotate(-135deg); clip-path: inset(50% 0 0 0); transition: border-color 1s ease; }
+        .gauge-needle { position: absolute; bottom: 0; left: 50%; width: 3px; height: 65px; background-color: #5b21b6; transform-origin: bottom center; transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
+        .gauge-value { font-size: 1.875rem; font-weight: 700; }
+        .gauge-label { font-size: 0.75rem; font-weight: 500; color: #7e22ce; }
         /* --- END OF NEW STYLES --- */
+
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-50 to-indigo-100 md:flex md:items-center md:justify-center min-h-screen">
@@ -291,20 +219,19 @@
                 key: 'intro_purpose', 
                 type: 'message', 
                 text: (name) => `Great to meet you, ${name}! Here's a quick look at what we'll uncover together:
-                    <ul class="bot-list mt-2 text-sm">
-                        <li>Calculate your Wellness Score</li>
-                        <li>Reveal your Biological Age</li>
-                        <li>Assess your energy and recovery levels</li>
-                        <li>Measure your stress and find ways to reduce it</li>
-                        <li>Analyze your skin health with AI insights</li>
-                        <li>Review nutrition, BMI & life expectancy</li>
-                        <li>Highlight healthy habits & areas for improvement</li>
-                        <li>Provide a personalized 7-day improvement plan</li>
+                    <ul class="bot-list animated-list mt-2 text-sm">
+                        <li style="animation-delay: 0.2s;">Calculate your Wellness Score</li>
+                        <li style="animation-delay: 0.4s;">Reveal your Biological Age</li>
+                        <li style="animation-delay: 0.6s;">Assess your energy and recovery levels</li>
+                        <li style="animation-delay: 0.8s;">Measure your stress and find ways to reduce it</li>
+                        <li style="animation-delay: 1.0s;">Analyze your skin health with AI insights</li>
+                        <li style="animation-delay: 1.2s;">Review nutrition, BMI & life expectancy</li>
+                        <li style="animation-delay: 1.4s;">Highlight healthy habits & areas for improvement</li>
+                        <li style="animation-delay: 1.6s;">Provide a personalized 7-day improvement plan</li>
                     </ul>`
             },
             { key: 'intro_how', type: 'message', text: "To help you on your wellness journey, I need to get to know you a bit better—your lifestyle, habits, and a quick, secure look at you." },
             { key: 'intro_convo', type: 'message', text: "What makes this unique is our relaxed, conversational approach. I'll ask some questions, and you can use the quick-reply buttons or type your own answers. Every detail helps, so I appreciate you taking the time!" },
-            // --- MODIFIED ANIMATION BLOCK ---
             { 
                 key: 'intro_testimonial', 
                 type: 'message', 
@@ -316,13 +243,7 @@
                         <span class="bio-age-unit">Years</span>
                     </div>
                     <div class="week-progress">
-                        <div class="week-day" id="day-1"></div>
-                        <div class="week-day" id="day-2"></div>
-                        <div class="week-day" id="day-3"></div>
-                        <div class="week-day" id="day-4"></div>
-                        <div class="week-day" id="day-5"></div>
-                        <div class="week-day" id="day-6"></div>
-                        <div class="week-day" id="day-7"></div>
+                        <div class="week-day" id="day-1"></div><div class="week-day" id="day-2"></div><div class="week-day" id="day-3"></div><div class="week-day" id="day-4"></div><div class="week-day" id="day-5"></div><div class="week-day" id="day-6"></div><div class="week-day" id="day-7"></div>
                     </div>
                     <div class="bio-age-footer">Biological Age Improvement</div>
                 </div>
@@ -335,17 +256,15 @@
             { key: 'gender', type: 'question', text: "Great start! Now, what's your biological sex? 🧬", options: ['Male', 'Female'], placeholder: "or type your gender..." },
             { key: 'height', type: 'question', text: "Perfect. Let's talk about your height. 📏 (e.g., 5 ft 10 in)", options: ["Under 5 ft", "5'0\" - 5'5\"", "5'6\" - 5'11\"", "6'0\" - 6'5\"", "Over 6'5\""], placeholder: "or type your height..." },
             { key: 'weight', type: 'question', text: "Thanks! And your current weight in pounds? ⚖️", options: ["Under 120 lbs", "120-150 lbs", "151-180 lbs", "181-220 lbs", "Over 220 lbs"], placeholder: "or type your weight in lbs..." },
+            { key: 'bmi_calculation', type: 'message', text: "Calculating your BMI based on your stats..."},
             { key: 'sleep', type: 'question', text: "Sleep is crucial. 😴 How many hours of <i>quality</i> sleep do you get on an average night?", options: ["Less than 5 hours", "5-6 hours", "7-8 hours", "More than 8 hours"], placeholder: "or type your sleep hours..." },
-            { key: 'mot_sleep', type: 'message', text: "Excellent. Quality sleep is the foundation of wellness. 👍" },
-            { key: 'activity', type: 'question', text: "Awesome. Movement is key! 🏃‍♀️ How often do you engage in moderate physical activity (like a brisk walk) per week?", options: ["Rarely", "1-2 times", "3-4 times", "5+ times"], placeholder: "or type how many times..." },
-            { key: 'mot_activity', type: 'message', text: "Great job! Every bit of movement counts. ✨" },
+            { key: 'activity', type: 'question', text: "Movement is key! 🏃‍♀️ How often do you engage in moderate physical activity (like a brisk walk) per week?", options: ["Rarely", "1-2 times", "3-4 times", "5+ times"], placeholder: "or type how many times..." },
             { key: 'nutrition', type: 'question', text: "Let's dive into nutrition. 🥦 How many servings of fruits or vegetables do you typically eat per day?", options: ["0-1", "2-3", "4-5", "More than 5"], placeholder: "or type number of servings..." },
             { key: 'processed_food', type: 'question', text: "Honesty is the best policy here. 😉 How often do you eat processed or fast food in a typical week?", options: ["Rarely", "1-2 times", "3-4 times", "Daily"], placeholder: "or type how often..." },
-            { key: 'mot_nutrition', type: 'message', text: "Thanks for sharing. Nutrition is fuel for your body and mind! ⛽" },
             { key: 'hydration', type: 'question', text: "Hydration check! 💧 How many glasses of water (approx. 8 oz) do you drink per day?", options: ["1-3 glasses", "4-6 glasses", "7-9 glasses", "10+ glasses"], placeholder: "or type number of glasses..." },
             { key: 'stress', type: 'question', text: "Now for the mind. 🧠 On a scale of 1 to 10, how would you rate your typical stress level?", options: ["1-3 (Low)", "4-6 (Moderate)", "7-8 (High)", "9-10 (Very High)"], placeholder: "or type a number from 1-10..." },
+            { key: 'stress_gauge', type: 'message', text: "Thanks for sharing. Here's what that looks like:"},
             { key: 'mindfulness', type: 'question', text: "Finding calm is a superpower. 🧘‍♂️ How often do you practice mindfulness, meditation, or deep breathing?", options: ["Never", "Occasionally", "Weekly", "Daily"], placeholder: "or type how often..." },
-            { key: 'mot_mind', type: 'message', text: "Awesome! Taking time for your mind is just as important as for your body. 🙏" },
             { key: 'mood', type: 'question', text: "Let's check in with your emotions. ❤️ How would you describe your overall mood on a typical day?", options: ["Happy & Energetic", "Generally Content", "Neutral", "Often Stressed or Sad"], placeholder: "or describe your mood..." },
             { key: 'alcohol', type: 'question', text: "Time for some lifestyle questions. 🍻 How many alcoholic drinks do you have in a typical week?", options: ["0", "1-3", "4-7", "8+"], placeholder: "or type number of drinks..." },
             { key: 'smoking', type: 'question', text: "This is a safe space. 🚭 Do you smoke or use tobacco products?", options: ["No", "Occasionally", "Yes, daily"], placeholder: "or type your answer..." },
@@ -354,172 +273,171 @@
         ];
 
         // --- Utility Functions ---
-        const setAppHeight = () => {
-            mainContainer.style.height = `${window.innerHeight}px`;
-        };
-
+        const setAppHeight = () => { mainContainer.style.height = `${window.innerHeight}px`; };
         const isMobile = () => window.innerWidth <= 768;
-        const scrollToBottom = () => {
-            setTimeout(() => {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }, 0);
-        };
-
-
-        // --- SERVER COMMUNICATION ---
-        async function startQuizSession() {
-            try {
-                sessionId = `session_${new Date().getTime()}`;
-                console.log('Mock session started:', sessionId);
-            } catch (error) {
-                console.error('Failed to start session:', error);
-                addBotMessage("Sorry, I'm having trouble connecting to my brain right now. 🧠 Please try refreshing the page.");
-                inputArea.style.display = 'none';
-            }
-        }
-
-        async function saveAnswerToServer(questionKey, answer) {
-            if (!sessionId) return;
-            try {
-                console.log(`Saving answer: ${questionKey} = ${answer}`);
-            } catch (error) { 
-                console.error('Failed to save answer:', error); 
-            }
-        }
-
-        async function proceedToAnalysis() {
-            try {
-                console.log('Proceeding to analysis for session:', sessionId);
-                await saveAnswerToServer('faceAnalysis', { status: 'mocked success' });
-                showCompletionAnimation();
-            } catch (error) {
-                console.error('Error during photo analysis step:', error);
-                addBotMessage("I had a little trouble with the photo analysis, but don't worry! I'll generate your report with the rest of your answers.");
-                await saveAnswerToServer('faceAnalysis', { error: error.message });
-                showPaymentForm();
-            }
-        }
+        const scrollToBottom = () => { setTimeout(() => { chatContainer.scrollTop = chatContainer.scrollHeight; }, 0); };
         
-        // --- Main UI Functions ---
-        
-        function updateProgressBar() {
-            const questionKeys = quizQuestions.filter(q => q.type === 'question').map(q => q.key);
-            const totalSteps = questionKeys.length + 1;
-            const completedAnswers = Object.keys(userAnswers).filter(key => questionKeys.includes(key)).length;
-            const photoStepCompleted = userAnswers['selfie'] ? 1 : 0;
-            const progress = ((completedAnswers + photoStepCompleted) / totalSteps) * 100;
-            progressBar.style.width = `${progress}%`;
-        }
+        // --- NEW Animation & Helper Functions ---
 
-
-        function showTypingIndicator() {
-            const typingDiv = document.createElement('div');
-            typingDiv.id = 'typing-indicator';
-            typingDiv.className = 'flex justify-start mb-4 chat-bubble';
-            typingDiv.innerHTML = `
-                <div class="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center mr-3 flex-shrink-0 bot-avatar">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                </div>
-                <div class="bg-gray-200 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl">
-                    <div class="typing-indicator"><span></span><span></span><span></span></div>
-                </div>`;
-            chatContainer.appendChild(typingDiv);
-            scrollToBottom();
-        }
-
-        function hideTypingIndicator() {
-            document.getElementById('typing-indicator')?.remove();
-        }
-
-        function addBotMessage(html) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'flex justify-start mb-4 chat-bubble';
-            messageDiv.innerHTML = `
-                <div class="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center mr-3 flex-shrink-0 bot-avatar">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                </div>
-                <div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${html}</div>`;
-            chatContainer.appendChild(messageDiv);
-            scrollToBottom();
-        }
-
-        function addUserMessage(text) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'flex justify-end mb-4 chat-bubble';
-            messageDiv.innerHTML = `<div class="bg-purple-600 text-white p-3 rounded-tl-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${text}</div>`;
-            chatContainer.appendChild(messageDiv);
-            scrollToBottom();
-        }
-        
-        function showOptions(options, handlers) {
-            optionsContainer.innerHTML = '';
-            if (options?.length > 0) {
-                optionsContainerWrapper.classList.remove('hidden');
-                options.forEach((option, index) => {
-                    const button = document.createElement('button');
-                    button.textContent = option.text;
-                    button.className = option.class;
-                    button.onclick = handlers[index];
-                    optionsContainer.appendChild(button);
-                });
-            } else {
-                 optionsContainerWrapper.classList.add('hidden');
-            }
-        }
-        
-        // --- NEW ANIMATION FUNCTION ---
         function playBiologicalAgeAnimation() {
             const ageElement = document.getElementById('bio-age-value');
             if (!ageElement) return;
 
             let currentAge = 42;
             const targetAge = 39;
-            const duration = 2800; // Total duration in ms
-            const steps = currentAge - targetAge; // 3 steps
-            const stepDuration = duration / steps; // Duration per year drop
-            const dayDuration = duration / 7; // Highlight a day every 400ms
+            const duration = 2800;
+            const steps = currentAge - targetAge;
+            const stepDuration = duration / steps;
+            const dayDuration = duration / 7;
 
-            // Animate days of the week
             for (let i = 1; i <= 7; i++) {
                 setTimeout(() => {
-                    document.getElementById(`day-${i}`).classList.add('active');
+                    const dayEl = document.getElementById(`day-${i}`);
+                    if (dayEl) dayEl.classList.add('active');
                 }, i * dayDuration);
             }
             
-            // Animate age countdown
             setTimeout(() => {
                 const countdownInterval = setInterval(() => {
                     currentAge--;
                     ageElement.textContent = currentAge;
                     if (currentAge === targetAge) {
                         clearInterval(countdownInterval);
-                        ageElement.style.color = '#16a34a'; // green-600
+                        ageElement.style.color = '#16a34a';
                     }
                 }, stepDuration);
-            }, 500); // Start countdown after a small delay
+            }, 500);
         }
+
+        function parseHeightToInches(heightStr) {
+            if (!heightStr) return 68; // Default to 5'8"
+            let inches = 0;
+            const feetMatch = heightStr.match(/(\d+)\s*(ft|')/);
+            const inchesMatch = heightStr.match(/(\d+)\s*(in|")/);
+            
+            if (feetMatch) inches += parseInt(feetMatch[1]) * 12;
+            if (inchesMatch) inches += parseInt(inchesMatch[1]);
+
+            // Simple case for numbers only e.g. "5.8"
+            if (inches === 0 && !isNaN(parseFloat(heightStr))) {
+                const parts = heightStr.split(/[\s.]+/);
+                if(parts.length > 0) inches += parseInt(parts[0]) * 12;
+                if(parts.length > 1) inches += parseInt(parts[1]);
+            }
+
+            return inches > 0 ? inches : 68;
+        }
+
+        function playBmiAnimation() {
+            const heightIn = parseHeightToInches(userAnswers.height);
+            const weightLbs = parseInt(userAnswers.weight) || 160;
+            
+            if (heightIn && weightLbs) {
+                const bmi = ((weightLbs / (heightIn * heightIn)) * 703).toFixed(1);
+                let category = "Normal";
+                let percent = 50;
+                
+                if (bmi < 18.5) { category = "Underweight"; percent = (bmi / 18.5) * 25; } 
+                else if (bmi < 25) { category = "Normal"; percent = 25 + ((bmi - 18.5) / 6.5) * 50; } 
+                else if (bmi < 30) { category = "Overweight"; percent = 75 + ((bmi - 25) / 5) * 25; } 
+                else { category = "Obese"; percent = 100; }
+                percent = Math.max(5, Math.min(95, percent));
+
+                const html = `
+                <div class="bmi-widget">
+                    <div id="bmi-value-anim" class="bmi-value">0.0</div>
+                    <div class="bmi-label">Your Estimated BMI</div>
+                    <div class="bmi-scale"><div id="bmi-indicator-anim" class="bmi-indicator" style="left: 0%;"></div></div>
+                    <div id="bmi-category-anim" class="bmi-category">&nbsp;</div>
+                </div>`;
+                addBotMessage(html);
+
+                setTimeout(() => {
+                    const valEl = document.getElementById('bmi-value-anim');
+                    const catEl = document.getElementById('bmi-category-anim');
+                    const indEl = document.getElementById('bmi-indicator-anim');
+
+                    if(indEl) indEl.style.left = `${percent}%`;
+                    if(catEl) catEl.textContent = category;
+
+                    let start = 0;
+                    const end = parseFloat(bmi);
+                    const animDuration = 1500;
+                    const frameDuration = 1000 / 60;
+                    const totalFrames = Math.round(animDuration / frameDuration);
+                    let frame = 0;
+                    const countUp = setInterval(() => {
+                        frame++;
+                        const progress = frame / totalFrames;
+                        const currentVal = (start + (end - start) * progress).toFixed(1);
+                        if(valEl) valEl.textContent = currentVal;
+                        if (frame === totalFrames) {
+                             clearInterval(countUp);
+                             if(valEl) valEl.textContent = bmi;
+                        }
+                    }, frameDuration);
+
+                }, 100);
+            }
+        }
+
+        function playStressGaugeAnimation() {
+            const stressAnswer = userAnswers.stress || "1-3 (Low)";
+            const level = parseInt(stressAnswer.match(/\d+/)[0]);
+            
+            const rotation = (level / 10) * 180 - 90; // Map 1-10 scale to -90 to +90 degrees
+            let color = '#34d399'; // green
+            if (level > 3) color = '#facc15'; // yellow
+            if (level > 6) color = '#fbbf24'; // amber
+            if (level > 8) color = '#f87171'; // red
+
+            const html = `
+            <div class="stress-gauge-container">
+                <div class="stress-gauge">
+                    <div class="gauge-arc"></div>
+                    <div class="gauge-fill" id="gauge-fill-anim" style="border-color: ${color};"></div>
+                    <div class="gauge-needle" id="gauge-needle-anim" style="transform: rotate(0deg);"></div>
+                </div>
+                <div class="gauge-value" style="color: ${color};">${level}/10</div>
+                <div class="gauge-label">Your Reported Stress Level</div>
+            </div>`;
+            addBotMessage(html);
+
+            setTimeout(() => {
+                const needle = document.getElementById('gauge-needle-anim');
+                if (needle) needle.style.transform = `rotate(${rotation}deg)`;
+            }, 100);
+        }
+
+        // --- Server & Core Functions (largely unchanged) ---
+        async function startQuizSession() {
+            try { sessionId = `session_${new Date().getTime()}`; } catch (error) { console.error('Failed to start session:', error); addBotMessage("Sorry, I'm having trouble connecting. Please refresh."); inputArea.style.display = 'none'; }
+        }
+        async function saveAnswerToServer(questionKey, answer) { if (!sessionId) return; try { console.log(`Saving: ${questionKey} = ${answer}`); } catch (error) { console.error('Failed to save answer:', error); } }
+        async function proceedToAnalysis() { try { await saveAnswerToServer('faceAnalysis', { status: 'mocked success' }); showCompletionAnimation(); } catch (error) { console.error('Error during analysis:', error); addBotMessage("I had a little trouble with the photo analysis, but we can proceed."); showPaymentForm(); } }
+        function updateProgressBar() { const questionKeys = quizQuestions.filter(q => q.type === 'question').map(q => q.key); const totalSteps = questionKeys.length + 1; const completedAnswers = Object.keys(userAnswers).filter(key => questionKeys.includes(key)).length; const photoStepCompleted = userAnswers['selfie'] ? 1 : 0; const progress = ((completedAnswers + photoStepCompleted) / totalSteps) * 100; progressBar.style.width = `${progress}%`; }
+        function showTypingIndicator() { const d = document.createElement('div'); d.id = 'typing-indicator'; d.className = 'flex justify-start mb-4 chat-bubble'; d.innerHTML = `<div class="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center mr-3 flex-shrink-0 bot-avatar"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div class="bg-gray-200 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`; chatContainer.appendChild(d); scrollToBottom(); }
+        function hideTypingIndicator() { document.getElementById('typing-indicator')?.remove(); }
+        function addBotMessage(html) { const d = document.createElement('div'); d.className = 'flex justify-start mb-4 chat-bubble'; d.innerHTML = `<div class="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center mr-3 flex-shrink-0 bot-avatar"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${html}</div>`; chatContainer.appendChild(d); scrollToBottom(); }
+        function addUserMessage(text) { const d = document.createElement('div'); d.className = 'flex justify-end mb-4 chat-bubble'; d.innerHTML = `<div class="bg-purple-600 text-white p-3 rounded-tl-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${text}</div>`; chatContainer.appendChild(d); scrollToBottom(); }
+        function showOptions(options, handlers) { optionsContainer.innerHTML = ''; if (options?.length > 0) { optionsContainerWrapper.classList.remove('hidden'); options.forEach((option, index) => { const button = document.createElement('button'); button.textContent = option.text; button.className = option.class; button.onclick = handlers[index]; optionsContainer.appendChild(button); }); } else { optionsContainerWrapper.classList.add('hidden'); } }
 
         function handleAnswer(answer) {
             if (!answer.trim()) return;
             const currentQuestion = quizQuestions[currentQuestionIndex];
             addUserMessage(answer);
-            
             userAnswers[currentQuestion.key] = answer.trim();
             saveAnswerToServer(currentQuestion.key, answer.trim());
-            
             userInput.value = '';
             inputArea.classList.add('hidden');
             optionsContainerWrapper.classList.add('hidden');
-
             currentQuestionIndex++;
             updateProgressBar();
             askNextQuestion();
         }
 
         function askNextQuestion() {
-            if (currentQuestionIndex >= quizQuestions.length) {
-                return;
-            }
+            if (currentQuestionIndex >= quizQuestions.length) return;
 
             const question = quizQuestions[currentQuestionIndex];
             showTypingIndicator();
@@ -529,10 +447,16 @@
                 let questionText = typeof question.text === 'function' ? question.text(userAnswers.name || 'friend') : question.text;
 
                 if (question.type === 'message') {
-                    addBotMessage(questionText);
-                    // --- TRIGGER FOR ANIMATION ---
+                    if (question.key === 'bmi_calculation') {
+                        playBmiAnimation();
+                    } else if (question.key === 'stress_gauge') {
+                        playStressGaugeAnimation();
+                    } else {
+                        addBotMessage(questionText);
+                    }
+                    
                     if (question.key === 'intro_testimonial') {
-                        setTimeout(playBiologicalAgeAnimation, 500); // Wait for bubble to appear
+                        setTimeout(playBiologicalAgeAnimation, 500);
                     }
                     currentQuestionIndex++;
                     askNextQuestion();
@@ -542,15 +466,9 @@
                     const handlers = question.options.map(opt => () => handleAnswer(opt));
                     showOptions(optionButtons, handlers);
                     
-                    if (question.hideInput) {
-                        inputArea.classList.add('hidden');
-                    } else {
-                        inputArea.classList.remove('hidden');
-                        userInput.placeholder = question.placeholder || "Type your answer...";
-                    }
-                    if (!isMobile()) {
-                        userInput.focus();
-                    }
+                    if (question.hideInput) { inputArea.classList.add('hidden'); } 
+                    else { inputArea.classList.remove('hidden'); userInput.placeholder = question.placeholder || "Type..."; }
+                    if (!isMobile()) { userInput.focus(); }
                 } else if (question.type === 'final_step') {
                     inputArea.classList.add('hidden');
                     addBotMessage(questionText);
@@ -559,320 +477,25 @@
             }, 1200);
         }
 
-        function showCameraStep() {
-            optionsContainerWrapper.classList.add('hidden');
-            inputArea.classList.remove('hidden');
-            inputArea.innerHTML = `
-                <button id="open-camera-btn" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-full hover:bg-purple-700 transition-colors pulse-btn">
-                    Open Camera
-                </button>`;
-            document.getElementById('open-camera-btn').onclick = startCamera;
-        }
+        // --- Camera & Payment Logic (unchanged) ---
+        function showCameraStep() { optionsContainerWrapper.classList.add('hidden'); inputArea.classList.remove('hidden'); inputArea.innerHTML = `<button id="open-camera-btn" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-full hover:bg-purple-700 transition-colors pulse-btn">Open Camera</button>`; document.getElementById('open-camera-btn').onclick = startCamera; }
+        async function startCamera() { cameraModal.classList.add('active'); try { const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights'; await Promise.all([ faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL) ]); loaderText.textContent = "Requesting camera access..."; stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } }); video.srcObject = stream; video.onloadedmetadata = () => { cameraLoader.style.display = 'none'; startFaceDetection(); }; } catch (err) { console.error("Camera/Model Error:", err); loaderText.textContent = "Camera access denied or models failed to load. Please refresh and try again."; setTimeout(stopCamera, 3000); } }
+        function stopCamera() { clearInterval(detectionInterval); stream?.getTracks().forEach(track => track.stop()); cameraModal.classList.remove('active'); video.srcObject = null; }
+        function startFaceDetection() { let captureTimeout; const context = canvas.getContext('2d'); detectionInterval = setInterval(async () => { const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks(); const displaySize = { width: video.clientWidth, height: video.clientHeight }; faceapi.matchDimensions(canvas, displaySize); context.clearRect(0, 0, canvas.width, canvas.height); context.save(); context.translate(canvas.width, 0); context.scale(-1, 1); if (detections.length > 0) { const resizedDetections = faceapi.resizeResults(detections, displaySize); const box = resizedDetections[0].detection.box; context.strokeStyle = 'rgba(0, 255, 255, 0.4)'; context.lineWidth = 1; faceapi.draw.drawFaceLandmarks(canvas, resizedDetections[0].landmarks, { drawLines: true }); context.strokeStyle = '#00FFFF'; context.lineWidth = 3; context.shadowColor = '#00FFFF'; context.shadowBlur = 10; const cornerLength = box.width * 0.1; context.beginPath(); context.moveTo(box.x, box.y + cornerLength); context.lineTo(box.x, box.y); context.lineTo(box.x + cornerLength, box.y); context.moveTo(box.x + box.width - cornerLength, box.y); context.lineTo(box.x + box.width, box.y); context.lineTo(box.x + box.width, box.y + cornerLength); context.moveTo(box.x, box.y + box.height - cornerLength); context.lineTo(box.x, box.y + box.height); context.lineTo(box.x + cornerLength, box.y + box.height); context.moveTo(box.x + box.width - cornerLength, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height - cornerLength); context.stroke(); context.shadowBlur = 0; const isGoodSize = box.width > canvas.width * 0.4; if (isGoodSize) { cameraStatus.textContent = "Hold still..."; if (!captureTimeout) { captureTimeout = setTimeout(() => takePhoto(), 1500); } } else { cameraStatus.textContent = "Move closer"; clearTimeout(captureTimeout); captureTimeout = null; } } else { cameraStatus.textContent = "Position your face"; clearTimeout(captureTimeout); captureTimeout = null; } context.restore(); }, 100); }
+        function takePhoto() { clearInterval(detectionInterval); cameraStatus.textContent = "Perfect!"; const photoCanvas = document.createElement('canvas'); photoCanvas.width = video.videoWidth; photoCanvas.height = video.videoHeight; const photoContext = photoCanvas.getContext('2d'); photoContext.translate(video.videoWidth, 0); photoContext.scale(-1, 1); photoContext.drawImage(video, 0, 0, video.videoWidth, video.videoHeight); capturedPhotoDataUrl = photoCanvas.toDataURL('image/jpeg', 0.9); userAnswers['selfie'] = 'Photo taken'; stopCamera(); updateProgressBar(); showPhotoForConfirmation(); }
+        function startAnalysisAndShowForm() { addUserMessage("Looks Good!"); document.getElementById('photo-preview-wrapper')?.remove(); optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); proceedToAnalysis(); }
+        function showPhotoForConfirmation() { const messageWrapper = document.createElement('div'); messageWrapper.id = 'photo-preview-wrapper'; messageWrapper.className = 'flex justify-start mb-4 chat-bubble'; const imageHtml = `<div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs"><p class="mb-2">Here's the photo. Happy with it?</p><img src="${capturedPhotoDataUrl}" alt="Your selfie" class="rounded-lg"/></div>`; messageWrapper.innerHTML = `<div class="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center mr-3 flex-shrink-0 bot-avatar"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>${imageHtml}`; chatContainer.appendChild(messageWrapper); scrollToBottom(); const confirmOptions = [ { text: 'Looks Good!', class: 'option-btn bg-green-500 border-green-600 text-white px-4 py-2 rounded-full text-sm flex-shrink-0 font-semibold' }, { text: 'Retake', class: 'option-btn bg-white border-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm flex-shrink-0' } ]; const handlers = [startAnalysisAndShowForm, retakePhoto]; showOptions(confirmOptions, handlers); inputArea.classList.add('hidden'); }
+        function retakePhoto() { addUserMessage("Retake"); document.getElementById('photo-preview-wrapper')?.remove(); optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); startCamera(); }
+        function showPaymentForm() { optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); const formHtml = `<div class="payment-form p-4 border-t border-gray-100 bg-gradient-to-br from-indigo-50 to-purple-50"><div class="relative bg-white/20 backdrop-blur-3xl border border-white/40 shadow-xl p-6 rounded-3xl overflow-hidden transform hover:scale-[1.01] transition-all duration-300"><div class="absolute inset-0 z-0 opacity-10"><div class="absolute top-1/4 left-1/4 w-32 h-32 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div><div class="absolute top-1/2 right-1/4 w-32 h-32 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div><div class="absolute bottom-1/4 left-1/2 w-32 h-32 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div></div><div class="sticky top-0 z-20 bg-white/30 backdrop-blur-xl -mx-6 -mt-6 mb-5 p-3 rounded-t-3xl text-center shadow-md"><p class="text-sm font-semibold text-gray-800 opacity-80">This exclusive offer ends in:</p><p id="countdown-timer" class="text-3xl font-extrabold text-purple-700 tracking-widest mt-1 drop-shadow-md">10:00</p></div><div class="relative z-10 text-center"><h3 class="text-3xl font-extrabold text-gray-900 mb-2 leading-tight">Unlock Your Full Report</h3><p class="text-gray-600 text-lg mb-6">Get your personalized wellness insights today!</p><div class="my-6"><span class="text-6xl font-extrabold text-purple-700">$9.99</span><span class="text-2xl font-medium text-gray-500 line-through ml-3">$24.99</span></div><div class="space-y-4 mb-6"><div class="bg-white/50 border border-white/60 rounded-xl p-4 flex items-center gap-4 text-base text-gray-800 shadow-inner focus-within:ring-2 focus-within:ring-purple-400 transition-all duration-200"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-purple-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H4a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg><input type="text" placeholder="Card Number" class="flex-1 bg-transparent border-none outline-none placeholder-gray-500 text-gray-900" /><input type="text" placeholder="MM/YY" class="w-20 bg-transparent border-none outline-none placeholder-gray-500 text-gray-900 text-right" /><input type="text" placeholder="CVC" class="w-16 bg-transparent border-none outline-none placeholder-gray-500 text-gray-900 text-right" /></div></div><button id="pay-btn" class="mt-4 w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 text-xl shadow-lg shadow-purple-500/30 transform hover:-translate-y-1 active:scale-95 pulse-btn-custom">Pay Now & Get Report</button><p class="text-sm text-gray-600 mt-4 flex items-center justify-center gap-2 opacity-80"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2.167 6.884a6.5 6.5 0 000 6.232c-.378 1.401-1.309 3.037-3.003 4.298C-.15 18.067 2.059 20 5 20h10c2.94 0 5.15-1.933 4.836-3.884-1.694-1.261-2.625-2.897-3.003-4.298a6.5 6.5 0 000-6.232c.378-1.401 1.309-3.037 3.003-4.298C19.85 1.933 17.94 0 15 0H5C2.06 0-.15 1.933.167 3.884c1.694 1.261 2.625 2.897 3.003 4.298zM9 10a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm3 0a1 1 0 011-1h.01a1 1 0 110 2H13a1 1 0 01-1-1zm-6 0a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>Your payment is secured by industry-leading SSL encryption.</p></div></div></div>`; paymentFormContainer.innerHTML = formHtml; paymentFormContainer.classList.remove('hidden'); scrollToBottom(); document.getElementById('pay-btn').onclick = handlePayment; startCountdown(); }
+        function startCountdown() { let duration = 600; const timerEl = document.getElementById('countdown-timer'); countdownInterval = setInterval(() => { const minutes = Math.floor(duration / 60).toString().padStart(2, '0'); const seconds = (duration % 60).toString().padStart(2, '0'); timerEl.textContent = `${minutes}:${seconds}`; duration--; if (duration < 0) { clearInterval(countdownInterval); timerEl.textContent = "00:00"; document.getElementById('pay-btn').textContent = "Offer Expired"; document.getElementById('pay-btn').disabled = true; } }, 1000); }
+        function handlePayment() { clearInterval(countdownInterval); paymentFormContainer.innerHTML = ''; paymentFormContainer.classList.add('hidden'); showTypingIndicator(); setTimeout(() => { hideTypingIndicator(); addBotMessage("Thank you! Your payment is being processed. (This is a demo and no payment was taken)."); }, 1500); }
+        function showCompletionAnimation() { confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } }); showTypingIndicator(); setTimeout(() => { hideTypingIndicator(); addBotMessage("Awesome work! You've completed the assessment. 🥳 I'm now analyzing your results..."); inputArea.innerHTML = `<div class="analysis-container"><div class="analysis-animation"></div><p id="analysis-text">Initializing analysis...</p></div>`; inputArea.classList.remove('hidden'); scrollToBottom(); const analysisSteps = [ "Analyzing your data...", "Checking lifestyle factors...", "Scanning skin health...", "Calculating biological age...", "Almost ready..." ]; const analysisTextElement = document.getElementById('analysis-text'); let currentStep = 0; const intervalId = setInterval(() => { if (currentStep < analysisSteps.length) { analysisTextElement.style.opacity = '0'; setTimeout(() => { analysisTextElement.textContent = analysisSteps[currentStep]; analysisTextElement.style.opacity = '1'; }, 500); currentStep++; } else { clearInterval(intervalId); } }, 1600); setTimeout(() => { inputArea.classList.add('hidden'); showTypingIndicator(); setTimeout(() => { hideTypingIndicator(); addBotMessage("Great! Your preliminary analysis is complete. Just one final step to unlock your full, personalized report."); showPaymentForm(); }, 1200); }, analysisSteps.length * 1600 + 500); }, 1000); }
 
-        async function startCamera() {
-            cameraModal.classList.add('active');
-            try {
-                const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
-                await Promise.all([
-                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-                    faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
-                ]);
-
-                loaderText.textContent = "Requesting camera access...";
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-                video.srcObject = stream;
-                
-                video.onloadedmetadata = () => {
-                    cameraLoader.style.display = 'none';
-                    startFaceDetection();
-                };
-
-            } catch (err) {
-                console.error("Camera/Model Error:", err);
-                loaderText.textContent = "Camera access denied or models failed to load. Please refresh and try again.";
-                setTimeout(stopCamera, 3000);
-            }
-        }
-        
-        function stopCamera() {
-            clearInterval(detectionInterval);
-            stream?.getTracks().forEach(track => track.stop());
-            cameraModal.classList.remove('active');
-            video.srcObject = null;
-        }
-
-        function startFaceDetection() {
-            let captureTimeout;
-            const context = canvas.getContext('2d');
-
-            detectionInterval = setInterval(async () => {
-                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
-                
-                const displaySize = { width: video.clientWidth, height: video.clientHeight };
-                faceapi.matchDimensions(canvas, displaySize);
-                context.clearRect(0, 0, canvas.width, canvas.height);
-                context.save();
-                context.translate(canvas.width, 0);
-                context.scale(-1, 1);
-                
-                if (detections.length > 0) {
-                    const resizedDetections = faceapi.resizeResults(detections, displaySize);
-                    const box = resizedDetections[0].detection.box;
-                    context.strokeStyle = 'rgba(0, 255, 255, 0.4)';
-                    context.lineWidth = 1;
-                    faceapi.draw.drawFaceLandmarks(canvas, resizedDetections[0].landmarks, { drawLines: true });
-                    context.strokeStyle = '#00FFFF';
-                    context.lineWidth = 3;
-                    context.shadowColor = '#00FFFF';
-                    context.shadowBlur = 10;
-                    const cornerLength = box.width * 0.1;
-                    context.beginPath();
-                    context.moveTo(box.x, box.y + cornerLength); context.lineTo(box.x, box.y); context.lineTo(box.x + cornerLength, box.y);
-                    context.moveTo(box.x + box.width - cornerLength, box.y); context.lineTo(box.x + box.width, box.y); context.lineTo(box.x + box.width, box.y + cornerLength);
-                    context.moveTo(box.x, box.y + box.height - cornerLength); context.lineTo(box.x, box.y + box.height); context.lineTo(box.x + cornerLength, box.y + box.height);
-                    context.moveTo(box.x + box.width - cornerLength, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height - cornerLength);
-                    context.stroke();
-                    context.shadowBlur = 0;
-
-                    const isGoodSize = box.width > canvas.width * 0.4;
-                    if (isGoodSize) {
-                        cameraStatus.textContent = "Hold still...";
-                         if (!captureTimeout) {
-                            captureTimeout = setTimeout(() => takePhoto(), 1500);
-                        }
-                    } else {
-                         cameraStatus.textContent = "Move closer";
-                         clearTimeout(captureTimeout);
-                         captureTimeout = null;
-                    }
-                } else {
-                    cameraStatus.textContent = "Position your face";
-                    clearTimeout(captureTimeout);
-                    captureTimeout = null;
-                }
-                context.restore();
-            }, 100);
-        }
-
-        function takePhoto() {
-            clearInterval(detectionInterval);
-            cameraStatus.textContent = "Perfect!";
-            const photoCanvas = document.createElement('canvas');
-            photoCanvas.width = video.videoWidth;
-            photoCanvas.height = video.videoHeight;
-            const photoContext = photoCanvas.getContext('2d');
-            
-            photoContext.translate(video.videoWidth, 0);
-            photoContext.scale(-1, 1);
-            photoContext.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-            
-            capturedPhotoDataUrl = photoCanvas.toDataURL('image/jpeg', 0.9);
-            userAnswers['selfie'] = 'Photo taken';
-            
-            stopCamera();
-            updateProgressBar();
-            showPhotoForConfirmation();
-        }
-
-        function startAnalysisAndShowForm() {
-            addUserMessage("Looks Good!");
-            document.getElementById('photo-preview-wrapper')?.remove();
-            optionsContainerWrapper.classList.add('hidden');
-            inputArea.classList.add('hidden');
-            proceedToAnalysis();
-        }
-
-        function showPhotoForConfirmation() {
-            const messageWrapper = document.createElement('div');
-            messageWrapper.id = 'photo-preview-wrapper';
-            messageWrapper.className = 'flex justify-start mb-4 chat-bubble';
-            const imageHtml = `<div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">
-                <p class="mb-2">Here's the photo. Happy with it?</p>
-                <img src="${capturedPhotoDataUrl}" alt="Your selfie" class="rounded-lg"/>
-            </div>`;
-            
-            messageWrapper.innerHTML = `
-                <div class="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center mr-3 flex-shrink-0 bot-avatar">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                </div>
-                ${imageHtml}`;
-            
-            chatContainer.appendChild(messageWrapper);
-            scrollToBottom();
-
-            const confirmOptions = [
-                { text: 'Looks Good!', class: 'option-btn bg-green-500 border-green-600 text-white px-4 py-2 rounded-full text-sm flex-shrink-0 font-semibold' },
-                { text: 'Retake', class: 'option-btn bg-white border-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm flex-shrink-0' }
-            ];
-            const handlers = [startAnalysisAndShowForm, retakePhoto];
-            showOptions(confirmOptions, handlers);
-            inputArea.classList.add('hidden');
-        }
-
-        function retakePhoto() {
-            addUserMessage("Retake");
-            document.getElementById('photo-preview-wrapper')?.remove();
-            optionsContainerWrapper.classList.add('hidden');
-            inputArea.classList.add('hidden');
-            startCamera();
-        }
-
-        function showPaymentForm() {
-            optionsContainerWrapper.classList.add('hidden');
-            inputArea.classList.add('hidden');
-            
-            const formHtml = `
-            <div class="payment-form p-4 border-t border-gray-100 bg-gradient-to-br from-indigo-50 to-purple-50">
-                <div class="relative bg-white/20 backdrop-blur-3xl border border-white/40 shadow-xl p-6 rounded-3xl overflow-hidden transform hover:scale-[1.01] transition-all duration-300">
-                    
-                    <div class="absolute inset-0 z-0 opacity-10">
-                        <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-                        <div class="absolute top-1/2 right-1/4 w-32 h-32 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-                        <div class="absolute bottom-1/4 left-1/2 w-32 h-32 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-                    </div>
-
-                    <div class="sticky top-0 z-20 bg-white/30 backdrop-blur-xl -mx-6 -mt-6 mb-5 p-3 rounded-t-3xl text-center shadow-md">
-                        <p class="text-sm font-semibold text-gray-800 opacity-80">This exclusive offer ends in:</p>
-                        <p id="countdown-timer" class="text-3xl font-extrabold text-purple-700 tracking-widest mt-1 drop-shadow-md">10:00</p>
-                    </div>
-
-                    <div class="relative z-10 text-center">
-                        <h3 class="text-3xl font-extrabold text-gray-900 mb-2 leading-tight">Unlock Your Full Report</h3>
-                        <p class="text-gray-600 text-lg mb-6">Get your personalized wellness insights today!</p>
-                        
-                        <div class="my-6">
-                            <span class="text-6xl font-extrabold text-purple-700">$9.99</span>
-                            <span class="text-2xl font-medium text-gray-500 line-through ml-3">$24.99</span>
-                        </div>
-
-                        <div class="space-y-4 mb-6">
-                            <div class="bg-white/50 border border-white/60 rounded-xl p-4 flex items-center gap-4 text-base text-gray-800 shadow-inner focus-within:ring-2 focus-within:ring-purple-400 transition-all duration-200">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-purple-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H4a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-                                <input type="text" placeholder="Card Number" class="flex-1 bg-transparent border-none outline-none placeholder-gray-500 text-gray-900" />
-                                <input type="text" placeholder="MM/YY" class="w-20 bg-transparent border-none outline-none placeholder-gray-500 text-gray-900 text-right" />
-                                <input type="text" placeholder="CVC" class="w-16 bg-transparent border-none outline-none placeholder-gray-500 text-gray-900 text-right" />
-                            </div>
-                        </div>
-
-                        <button id="pay-btn" class="mt-4 w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 text-xl shadow-lg shadow-purple-500/30 transform hover:-translate-y-1 active:scale-95 pulse-btn-custom">
-                           Pay Now & Get Report
-                        </button>
-                         <p class="text-sm text-gray-600 mt-4 flex items-center justify-center gap-2 opacity-80">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2.167 6.884a6.5 6.5 0 000 6.232c-.378 1.401-1.309 3.037-3.003 4.298C-.15 18.067 2.059 20 5 20h10c2.94 0 5.15-1.933 4.836-3.884-1.694-1.261-2.625-2.897-3.003-4.298a6.5 6.5 0 000-6.232c.378-1.401 1.309-3.037 3.003-4.298C19.85 1.933 17.94 0 15 0H5C2.06 0-.15 1.933.167 3.884c1.694 1.261 2.625 2.897 3.003 4.298zM9 10a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm3 0a1 1 0 011-1h.01a1 1 0 110 2H13a1 1 0 01-1-1zm-6 0a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>
-                            Your payment is secured by industry-leading SSL encryption.
-                        </p>
-                    </div>
-                </div>
-            </div>`;
-            paymentFormContainer.innerHTML = formHtml;
-            paymentFormContainer.classList.remove('hidden');
-            scrollToBottom();
-
-            document.getElementById('pay-btn').onclick = handlePayment;
-            startCountdown();
-        }
-
-        function startCountdown() {
-            let duration = 10 * 60; 
-            const timerEl = document.getElementById('countdown-timer');
-            countdownInterval = setInterval(() => {
-                const minutes = Math.floor(duration / 60).toString().padStart(2, '0');
-                const seconds = (duration % 60).toString().padStart(2, '0');
-                timerEl.textContent = `${minutes}:${seconds}`;
-                duration--;
-                if (duration < 0) {
-                    clearInterval(countdownInterval);
-                    timerEl.textContent = "00:00";
-                    document.getElementById('pay-btn').textContent = "Offer Expired";
-                    document.getElementById('pay-btn').disabled = true;
-                }
-            }, 1000);
-        }
-
-        function handlePayment() {
-            clearInterval(countdownInterval);
-            paymentFormContainer.innerHTML = '';
-            paymentFormContainer.classList.add('hidden');
-            showTypingIndicator();
-            setTimeout(() => {
-                hideTypingIndicator();
-                addBotMessage("Thank you! Your payment is being processed. (This is a demo and no payment was taken).");
-            }, 1500);
-        }
-        
-        function showCompletionAnimation() {
-            confetti({
-                particleCount: 150,
-                spread: 100,
-                origin: { y: 0.6 }
-            });
-            
-            showTypingIndicator();
-            setTimeout(() => {
-                hideTypingIndicator();
-                addBotMessage("Awesome work! You've completed the assessment. 🥳 I'm now analyzing your results...");
-                
-                inputArea.innerHTML = `
-                    <div class="analysis-container">
-                        <div class="analysis-animation"></div>
-                        <p id="analysis-text">Initializing analysis...</p>
-                    </div>`;
-                inputArea.classList.remove('hidden');
-                scrollToBottom();
-                
-                const analysisSteps = [
-                    "Analyzing your data...",
-                    "Checking lifestyle factors...",
-                    "Scanning skin health...",
-                    "Calculating biological age...",
-                    "Almost ready..."
-                ];
-                
-                const analysisTextElement = document.getElementById('analysis-text');
-                let currentStep = 0;
-                
-                const intervalId = setInterval(() => {
-                    if (currentStep < analysisSteps.length) {
-                        analysisTextElement.style.opacity = '0';
-                        setTimeout(() => {
-                            analysisTextElement.textContent = analysisSteps[currentStep];
-                            analysisTextElement.style.opacity = '1';
-                        }, 500);
-                        currentStep++;
-                    } else {
-                        clearInterval(intervalId);
-                    }
-                }, 1600);
-
-                setTimeout(() => {
-                    inputArea.classList.add('hidden');
-                    showTypingIndicator();
-                    setTimeout(() => {
-                        hideTypingIndicator();
-                        addBotMessage("Great! Your preliminary analysis is complete. Just one final step to unlock your full, personalized report.");
-                        showPaymentForm();
-                    }, 1200);
-                }, analysisSteps.length * 1600 + 500);
-
-            }, 1000);
-        }
-
-        // --- Event Listeners & Initial Call ---
-        async function initQuiz() {
-            setAppHeight(); 
-            await startQuizSession();
-            if (sessionId) {
-                askNextQuestion();
-            }
-        }
-        
+        // --- Initial Call ---
+        async function initQuiz() { setAppHeight(); await startQuizSession(); if (sessionId) { askNextQuestion(); } }
         sendBtn.addEventListener('click', () => handleAnswer(userInput.value));
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleAnswer(userInput.value);
-        });
-
+        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAnswer(userInput.value); });
         window.addEventListener('resize', setAppHeight);
-        
         inputArea.classList.add('hidden');
         initQuiz();
 
