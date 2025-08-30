@@ -12,85 +12,39 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .chat-container { 
-            scroll-behavior: smooth; 
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        .chat-container::-webkit-scrollbar { 
-            display: none;
-        }
+        .chat-container { scroll-behavior: smooth; -ms-overflow-style: none; scrollbar-width: none; }
+        .chat-container::-webkit-scrollbar { display: none; }
         .chat-bubble { animation: slide-up 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
-        @keyframes slide-up {
-            0% { transform: translateY(20px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
+        @keyframes slide-up { 0% { transform: translateY(20px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
         .options-container::-webkit-scrollbar { display: none; }
         .options-container { -ms-overflow-style: none; scrollbar-width: none; }
         .option-btn { transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out; }
         .option-btn:hover { transform: translateY(-2px); }
-        .typing-indicator span {
-            height: 8px; width: 8px; background-color: #9ca3af; border-radius: 50%; display: inline-block;
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
+        .typing-indicator span { height: 8px; width: 8px; background-color: #9ca3af; border-radius: 50%; display: inline-block; animation: bounce 1.4s infinite ease-in-out both; }
         .typing-indicator span:nth-of-type(2) { animation-delay: -0.32s; }
         .typing-indicator span:nth-of-type(3) { animation-delay: -0.16s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
-
         .bot-avatar { animation: avatar-float 3s ease-in-out infinite; }
-        @keyframes avatar-float {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-4px); }
-            100% { transform: translateY(0); }
-        }
-        #camera-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.8); z-index: 100;
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-        }
+        @keyframes avatar-float { 0% { transform: translateY(0); } 50% { transform: translateY(-4px); } 100% { transform: translateY(0); } }
+        #camera-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #camera-modal.active { opacity: 1; pointer-events: all; }
         #camera-container { position: relative; width: 90%; max-width: 400px; aspect-ratio: 3/4; overflow: hidden; border-radius: 1.5rem; background: #111; border: 1px solid rgba(255,255,255,0.2); }
         #camera-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         #camera-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         #camera-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; text-align: center; }
         #camera-status { background-color: rgba(0,0,0,0.5); padding: 0.5rem 1rem; border-radius: 9999px; display: inline-block; color: white; font-weight: 500; transition: background-color 0.3s; }
-
-        #progress-bar {
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-        @keyframes glow {
-            from { box-shadow: 0 0 2px #a855f7, 0 0 4px #a855f7; }
-            to { box-shadow: 0 0 6px #6366f1, 0 0 8px #6366f1; }
-        }
+        #progress-bar { animation: glow 2s ease-in-out infinite alternate; }
+        @keyframes glow { from { box-shadow: 0 0 2px #a855f7, 0 0 4px #a855f7; } to { box-shadow: 0 0 6px #6366f1, 0 0 8px #6366f1; } }
         .pulse-btn { animation: pulse-animation 2s infinite; }
-        @keyframes pulse-animation {
-            0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
-        }
+        @keyframes pulse-animation { 0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); } 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); } }
         .payment-form { animation: slide-up-form 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
-        @keyframes slide-up-form {
-            0% { transform: translateY(100%); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes blob {
-            0% { transform: translate(0px, 0px) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-            100% { transform: translate(0px, 0px) scale(1); }
-        }
+        @keyframes slide-up-form { 0% { transform: translateY(100%); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+        @keyframes blob { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } }
         .animate-blob { animation: blob 7s infinite; }
         .animation-delay-2000 { animation-delay: 2s; }
         .animation-delay-4000 { animation-delay: 4s; }
-
         .pulse-btn-custom { animation: pulse-custom 2s infinite; }
-        @keyframes pulse-custom {
-            0% { box-shadow: 0 0 0 0 rgba(109, 40, 217, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(109, 40, 217, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(109, 40, 217, 0); }
-        }
-
+        @keyframes pulse-custom { 0% { box-shadow: 0 0 0 0 rgba(109, 40, 217, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(109, 40, 217, 0); } 100% { box-shadow: 0 0 0 0 rgba(109, 40, 217, 0); } }
         .analysis-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; text-align: center; }
         .analysis-animation { position: relative; width: 60px; height: 60px; margin-bottom: 1rem; }
         .analysis-animation::before, .analysis-animation::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; border: 2px solid; }
@@ -99,7 +53,6 @@
         #analysis-text { color: #4b5563; font-weight: 500; transition: opacity 0.5s ease-in-out; }
         @keyframes analysis-pulse { 0% { transform: scale(0.6); opacity: 0.5; } 50% { opacity: 1; } 100% { transform: scale(1.2); opacity: 0; } }
         @keyframes analysis-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
         .bio-age-container { background-color: #f3e8ff; border: 1px solid #d8b4fe; border-radius: 1rem; padding: 1rem; text-align: center; max-width: 250px; margin: auto; }
         .bio-age-header { font-size: 0.875rem; font-weight: 600; color: #6b21a8; margin-bottom: 0.75rem; }
         .bio-age-display { display: flex; justify-content: center; align-items: baseline; margin-bottom: 1rem; color: #5b21b6; }
@@ -109,38 +62,15 @@
         .week-day { width: 10px; height: 10px; background-color: #ddd6fe; border-radius: 50%; transition: all 0.5s; }
         .week-day.active { background-color: #7c3aed; transform: scale(1.3); box-shadow: 0 0 8px #a78bfa; }
         .bio-age-footer { font-size: 0.75rem; color: #7e22ce; }
-
-        @keyframes fade-in-up {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        /* New styles for animated list items */
-        .animated-list-item {
-            opacity: 0;
-            animation: fade-in-up 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; /* Softer ease-out */
-            display: flex;
-            align-items: center;
-            gap: 0.75rem; /* Space between icon and text */
-            margin-bottom: 0.75rem; /* More space between list items */
-        }
-        .list-icon-wrapper {
-            background-color: #a78bfa; /* purple-400 */
-            color: white;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
+        @keyframes fade-in-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animated-list-item { opacity: 0; animation: fade-in-up 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .list-icon-wrapper { background-color: #a78bfa; color: white; padding: 0.5rem; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .bmi-widget { background-color: #faf5ff; border: 1px solid #e9d5ff; border-radius: 1rem; padding: 1rem; text-align: center; max-width: 250px; margin: auto; }
         .bmi-value { font-size: 2.5rem; font-weight: 800; color: #5b21b6; line-height: 1; }
         .bmi-label { font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; }
         .bmi-scale { position: relative; height: 10px; background-image: linear-gradient(to right, #60a5fa, #34d399, #facc15, #f87171); border-radius: 9999px; margin: 0.5rem 0; }
         .bmi-indicator { position: absolute; top: 50%; width: 16px; height: 16px; background-color: white; border: 3px solid #5b21b6; border-radius: 50%; transform: translate(-50%, -50%); transition: left 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
         .bmi-category { font-size: 0.75rem; font-weight: 500; color: #7e22ce; }
-
         .stress-gauge-container { max-width: 250px; margin: auto; text-align: center; }
         .stress-gauge { position: relative; width: 150px; height: 75px; overflow: hidden; margin: 0 auto 0.5rem; }
         .gauge-arc { width: 150px; height: 150px; border: 20px solid #e9d5ff; border-radius: 50%; border-bottom-color: transparent; border-right-color: transparent; transform: rotate(-135deg); }
@@ -148,6 +78,23 @@
         .gauge-needle { position: absolute; bottom: 0; left: 50%; width: 3px; height: 65px; background-color: #5b21b6; transform-origin: bottom center; transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
         .gauge-value { font-size: 1.875rem; font-weight: 700; }
         .gauge-label { font-size: 0.75rem; font-weight: 500; color: #7e22ce; }
+
+        /* --- NEW ANIMATION STYLES --- */
+        @keyframes star-glow { 0%, 100% { filter: drop-shadow(0 0 2px #fde047); } 50% { filter: drop-shadow(0 0 6px #fde047); } }
+        .sleep-widget { text-align:center; }
+        .sleep-moon { color: #facc15; }
+        .sleep-star { color: #e0e7ff; transition: all 0.5s ease-out; }
+        .sleep-star.active { color: #fde047; transform: scale(1.2); animation: star-glow 2s infinite; }
+        
+        .activity-widget { text-align: center; }
+        .activity-week { display:flex; justify-content:center; gap: 0.5rem; margin-top: 0.5rem; }
+        .activity-day { width: 30px; height: 30px; border-radius: 0.5rem; background-color: #ede9fe; color: #a78bfa; font-weight: 600; display:flex; align-items:center; justify-content:center; font-size:0.75rem; transition: all 0.4s ease-out; }
+        .activity-day.active { background-color: #8b5cf6; color: white; transform: scale(1.1); box-shadow: 0 4px 10px rgba(139, 92, 246, 0.4); }
+
+        .hydration-widget { position:relative; width: 80px; height: 120px; margin: auto; }
+        .hydration-glass-outline { fill: none; stroke: #c4b5fd; stroke-width: 4; }
+        .hydration-water { fill: #a5b4fc; transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
+        .hydration-text { font-size: 1.5rem; font-weight: 700; fill: #6366f1; text-anchor: middle; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-50 to-indigo-100 md:flex md:items-center md:justify-center min-h-screen">
@@ -228,38 +175,12 @@
                 type: 'message', 
                 text: (name) => `Great to meet you, ${name}! Here's a quick look at what we'll uncover together:
                     <div class="mt-4 text-sm text-gray-800">
-                        <div class="animated-list-item" style="animation-delay: 0.2s;">
-                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg></div>
-                            <span>Calculate your Wellness Score</span>
-                        </div>
-                        <div class="animated-list-item" style="animation-delay: 0.6s;">
-                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l3 3a1 1 0 001.414-1.414L11 9.586V6z" clip-rule="evenodd" /></svg></div>
-                            <span>Reveal your Biological Age</span>
-                        </div>
-                        <div class="animated-list-item" style="animation-delay: 1.0s;">
-                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h.01a1 1 0 100-2H10zm3 0a1 1 0 000 2h.01a1 1 0 100-2H13zm-3 4a1 1 0 000 2h.01a1 1 0 100-2H10z" clip-rule="evenodd" /></svg></div>
-                            <span>Assess your energy & recovery levels</span>
-                        </div>
-                        <div class="animated-list-item" style="animation-delay: 1.4s;">
-                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg></div>
-                            <span>Measure your stress and find ways to reduce it</span>
-                        </div>
-                        <div class="animated-list-item" style="animation-delay: 1.8s;">
-                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></div>
-                            <span>Analyze your skin health with AI insights</span>
-                        </div>
-                        <div class="animated-list-item" style="animation-delay: 2.2s;">
-                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" /></svg></div>
-                            <span>Review nutrition, BMI & life expectancy</span>
-                        </div>
-                        <div class="animated-list-item" style="animation-delay: 2.6s;">
-                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 10-6 0v2h6V6zM17 6a3 3 0 10-6 0v2h6V6zM1 20h18V8H1v12zM5 9a1 1 0 011-1h2a1 1 0 110 2H6a1 1 0 01-1-1zM13 9a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" /></svg></div>
-                            <span>Highlight healthy habits & areas for improvement</span>
-                        </div>
-                        <div class="animated-list-item" style="animation-delay: 3.0s;">
-                            <div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" /></svg></div>
-                            <span>Provide a personalized 7-day improvement plan</span>
-                        </div>
+                        <div class="animated-list-item" style="animation-delay: 0.2s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg></div><span>Calculate your Wellness Score</span></div>
+                        <div class="animated-list-item" style="animation-delay: 0.6s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l3 3a1 1 0 001.414-1.414L11 9.586V6z" clip-rule="evenodd" /></svg></div><span>Reveal your Biological Age</span></div>
+                        <div class="animated-list-item" style="animation-delay: 1.0s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h.01a1 1 0 100-2H10zm3 0a1 1 0 000 2h.01a1 1 0 100-2H13zm-3 4a1 1 0 000 2h.01a1 1 0 100-2H10z" clip-rule="evenodd" /></svg></div><span>Assess your energy & recovery</span></div>
+                        <div class="animated-list-item" style="animation-delay: 1.4s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg></div><span>Measure stress & find solutions</span></div>
+                        <div class="animated-list-item" style="animation-delay: 1.8s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></div><span>Analyze skin health with AI</span></div>
+                        <div class="animated-list-item" style="animation-delay: 2.2s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L7 8.414V13a1 1 0 11-2 0V8.414L3.293 6.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h5a1 1 0 100-2h-5z" /></svg></div><span>Review nutrition, BMI & more</span></div>
                     </div>`
             },
             { key: 'intro_how', type: 'message', text: "To help you on your wellness journey, I need to get to know you a bit better—your lifestyle, habits, and a quick, secure look at you." },
@@ -267,19 +188,7 @@
             { 
                 key: 'intro_testimonial', 
                 type: 'message', 
-                text: `
-                <div class="bio-age-container">
-                    <div class="bio-age-header">See What A Week Can Do</div>
-                    <div class="bio-age-display">
-                        <span id="bio-age-value">42</span>
-                        <span class="bio-age-unit">Years</span>
-                    </div>
-                    <div class="week-progress">
-                        <div class="week-day" id="day-1"></div><div class="week-day" id="day-2"></div><div class="week-day" id="day-3"></div><div class="week-day" id="day-4"></div><div class="week-day" id="day-5"></div><div class="week-day" id="day-6"></div><div class="week-day" id="day-7"></div>
-                    </div>
-                    <div class="bio-age-footer">Biological Age Improvement</div>
-                </div>
-                `
+                text: `<div class="bio-age-container"><div class="bio-age-header">See What A Week Can Do</div><div class="bio-age-display"><span id="bio-age-value">42</span><span class="bio-age-unit">Years</span></div><div class="week-progress"><div class="week-day" id="day-1"></div><div class="week-day" id="day-2"></div><div class="week-day" id="day-3"></div><div class="week-day" id="day-4"></div><div class="week-day" id="day-5"></div><div class="week-day" id="day-6"></div><div class="week-day" id="day-7"></div></div><div class="bio-age-footer">Biological Age Improvement</div></div>`
             },
             { key: 'intro_privacy', type: 'message', text: "And just to be clear about your privacy 🛡️: your photo is deleted immediately after the AI analysis, and your answers are wiped as soon as you get your report." },
             { key: 'start_consent', type: 'question', text: "Ready to begin?", options: ["Yes, let's start!"], hideInput: true },
@@ -290,10 +199,13 @@
             { key: 'weight', type: 'question', text: "Thanks! And your current weight in pounds? ⚖️", options: ["Under 120 lbs", "120-150 lbs", "151-180 lbs", "181-220 lbs", "Over 220 lbs"], placeholder: "or type your weight in lbs..." },
             { key: 'bmi_calculation', type: 'message', text: "Calculating your BMI based on your stats..."},
             { key: 'sleep', type: 'question', text: "Sleep is crucial. 😴 How many hours of <i>quality</i> sleep do you get on an average night?", options: ["Less than 5 hours", "5-6 hours", "7-8 hours", "More than 8 hours"], placeholder: "or type your sleep hours..." },
+            { key: 'sleep_visual', type: 'message', text: 'Quality sleep recharges your mind and body.'},
             { key: 'activity', type: 'question', text: "Movement is key! 🏃‍♀️ How often do you engage in moderate physical activity (like a brisk walk) per week?", options: ["Rarely", "1-2 times", "3-4 times", "5+ times"], placeholder: "or type how many times..." },
+            { key: 'activity_visual', type: 'message', text: 'Every bit of movement counts!'},
             { key: 'nutrition', type: 'question', text: "Let's dive into nutrition. 🥦 How many servings of fruits or vegetables do you typically eat per day?", options: ["0-1", "2-3", "4-5", "More than 5"], placeholder: "or type number of servings..." },
             { key: 'processed_food', type: 'question', text: "Honesty is the best policy here. 😉 How often do you eat processed or fast food in a typical week?", options: ["Rarely", "1-2 times", "3-4 times", "Daily"], placeholder: "or type how often..." },
             { key: 'hydration', type: 'question', text: "Hydration check! 💧 How many glasses of water (approx. 8 oz) do you drink per day?", options: ["1-3 glasses", "4-6 glasses", "7-9 glasses", "10+ glasses"], placeholder: "or type number of glasses..." },
+            { key: 'hydration_visual', type: 'message', text: "Let's see your hydration level:"},
             { key: 'stress', type: 'question', text: "Now for the mind. 🧠 On a scale of 1 to 10, how would you rate your typical stress level?", options: ["1-3 (Low)", "4-6 (Moderate)", "7-8 (High)", "9-10 (Very High)"], placeholder: "or type a number from 1-10..." },
             { key: 'stress_gauge', type: 'message', text: "Thanks for sharing. Here's what that looks like:"},
             { key: 'mindfulness', type: 'question', text: "Finding calm is a superpower. 🧘‍♂️ How often do you practice mindfulness, meditation, or deep breathing?", options: ["Never", "Occasionally", "Weekly", "Daily"], placeholder: "or type how often..." },
@@ -309,142 +221,96 @@
         const isMobile = () => window.innerWidth <= 768;
         const scrollToBottom = () => { setTimeout(() => { chatContainer.scrollTop = chatContainer.scrollHeight; }, 0); };
         
-        // --- NEW Animation & Helper Functions ---
-
-        function playBiologicalAgeAnimation() {
-            const ageElement = document.getElementById('bio-age-value');
-            if (!ageElement) return;
-
-            let currentAge = 42;
-            const targetAge = 39;
-            const duration = 2800;
-            const steps = currentAge - targetAge;
-            const stepDuration = duration / steps;
-            const dayDuration = duration / 7;
-
-            for (let i = 1; i <= 7; i++) {
-                setTimeout(() => {
-                    const dayEl = document.getElementById(`day-${i}`);
-                    if (dayEl) dayEl.classList.add('active');
-                }, i * dayDuration);
-            }
+        // --- Animation & Helper Functions ---
+        function playBiologicalAgeAnimation() { const ageElement = document.getElementById('bio-age-value'); if (!ageElement) return; let currentAge = 42; const targetAge = 39; const duration = 2800; const steps = currentAge - targetAge; const stepDuration = duration / steps; const dayDuration = duration / 7; for (let i = 1; i <= 7; i++) { setTimeout(() => { const dayEl = document.getElementById(`day-${i}`); if (dayEl) dayEl.classList.add('active'); }, i * dayDuration); } setTimeout(() => { const countdownInterval = setInterval(() => { currentAge--; ageElement.textContent = currentAge; if (currentAge === targetAge) { clearInterval(countdownInterval); ageElement.style.color = '#16a34a'; } }, stepDuration); }, 500); }
+        function parseHeightToInches(heightStr) { if (!heightStr) return 68; let inches = 0; const feetMatch = heightStr.match(/(\d+)\s*(ft|')/); const inchesMatch = heightStr.match(/(\d+)\s*(in|")/); if (feetMatch) inches += parseInt(feetMatch[1]) * 12; if (inchesMatch) inches += parseInt(inchesMatch[1]); if (inches === 0 && !isNaN(parseFloat(heightStr))) { const parts = heightStr.split(/[\s.]+/); if(parts.length > 0) inches += parseInt(parts[0]) * 12; if(parts.length > 1) inches += parseInt(parts[1]); } return inches > 0 ? inches : 68; }
+        function playBmiAnimation() { const heightIn = parseHeightToInches(userAnswers.height); const weightLbs = parseInt(userAnswers.weight) || 160; if (heightIn && weightLbs) { const bmi = ((weightLbs / (heightIn * heightIn)) * 703).toFixed(1); let category = "Normal"; let percent = 50; if (bmi < 18.5) { category = "Underweight"; percent = (bmi / 18.5) * 25; } else if (bmi < 25) { category = "Normal"; percent = 25 + ((bmi - 18.5) / 6.5) * 50; } else if (bmi < 30) { category = "Overweight"; percent = 75 + ((bmi - 25) / 5) * 25; } else { category = "Obese"; percent = 100; } percent = Math.max(5, Math.min(95, percent)); const html = `<div class="bmi-widget"><div id="bmi-value-anim" class="bmi-value">0.0</div><div class="bmi-label">Your Estimated BMI</div><div class="bmi-scale"><div id="bmi-indicator-anim" class="bmi-indicator" style="left: 0%;"></div></div><div id="bmi-category-anim" class="bmi-category">&nbsp;</div></div>`; addBotMessage(html); setTimeout(() => { const valEl = document.getElementById('bmi-value-anim'); const catEl = document.getElementById('bmi-category-anim'); const indEl = document.getElementById('bmi-indicator-anim'); if(indEl) indEl.style.left = `${percent}%`; if(catEl) catEl.textContent = category; let start = 0; const end = parseFloat(bmi); const animDuration = 1500; const frameDuration = 1000 / 60; const totalFrames = Math.round(animDuration / frameDuration); let frame = 0; const countUp = setInterval(() => { frame++; const progress = frame / totalFrames; const currentVal = (start + (end - start) * progress).toFixed(1); if(valEl) valEl.textContent = currentVal; if (frame === totalFrames) { clearInterval(countUp); if(valEl) valEl.textContent = bmi; } }, frameDuration); }, 100); } }
+        function playStressGaugeAnimation() { const stressAnswer = userAnswers.stress || "1-3 (Low)"; const level = parseInt(stressAnswer.match(/\d+/)[0]); const rotation = (level / 10) * 180 - 90; let color = '#34d399'; if (level > 3) color = '#facc15'; if (level > 6) color = '#fbbf24'; if (level > 8) color = '#f87171'; const html = `<div class="stress-gauge-container"><div class="stress-gauge"><div class="gauge-arc"></div><div class="gauge-fill" id="gauge-fill-anim" style="border-color: ${color};"></div><div class="gauge-needle" id="gauge-needle-anim" style="transform: rotate(0deg);"></div></div><div class="gauge-value" style="color: ${color};">${level}/10</div><div class="gauge-label">Your Reported Stress Level</div></div>`; addBotMessage(html); setTimeout(() => { const needle = document.getElementById('gauge-needle-anim'); if (needle) needle.style.transform = `rotate(${rotation}deg)`; }, 100); }
+        
+        // --- NEW ANIMATIONS ---
+        function playSleepAnimation() {
+            const answer = userAnswers.sleep || "";
+            let quality = 2; // Default
+            if (answer.includes("Less than 5")) quality = 1;
+            if (answer.includes("5-6")) quality = 2;
+            if (answer.includes("7-8")) quality = 4;
+            if (answer.includes("More than 8")) quality = 5;
             
-            setTimeout(() => {
-                const countdownInterval = setInterval(() => {
-                    currentAge--;
-                    ageElement.textContent = currentAge;
-                    if (currentAge === targetAge) {
-                        clearInterval(countdownInterval);
-                        ageElement.style.color = '#16a34a';
-                    }
-                }, stepDuration);
-            }, 500);
-        }
-
-        function parseHeightToInches(heightStr) {
-            if (!heightStr) return 68; // Default to 5'8"
-            let inches = 0;
-            const feetMatch = heightStr.match(/(\d+)\s*(ft|')/);
-            const inchesMatch = heightStr.match(/(\d+)\s*(in|")/);
-            
-            if (feetMatch) inches += parseInt(feetMatch[1]) * 12;
-            if (inchesMatch) inches += parseInt(inchesMatch[1]);
-
-            // Simple case for numbers only e.g. "5.8"
-            if (inches === 0 && !isNaN(parseFloat(heightStr))) {
-                const parts = heightStr.split(/[\s.]+/);
-                if(parts.length > 0) inches += parseInt(parts[0]) * 12;
-                if(parts.length > 1) inches += parseInt(parts[1]);
-            }
-
-            return inches > 0 ? inches : 68;
-        }
-
-        function playBmiAnimation() {
-            const heightIn = parseHeightToInches(userAnswers.height);
-            const weightLbs = parseInt(userAnswers.weight) || 160;
-            
-            if (heightIn && weightLbs) {
-                const bmi = ((weightLbs / (heightIn * heightIn)) * 703).toFixed(1);
-                let category = "Normal";
-                let percent = 50;
-                
-                if (bmi < 18.5) { category = "Underweight"; percent = (bmi / 18.5) * 25; } 
-                else if (bmi < 25) { category = "Normal"; percent = 25 + ((bmi - 18.5) / 6.5) * 50; } 
-                else if (bmi < 30) { category = "Overweight"; percent = 75 + ((bmi - 25) / 5) * 25; } 
-                else { category = "Obese"; percent = 100; }
-                percent = Math.max(5, Math.min(95, percent));
-
-                const html = `
-                <div class="bmi-widget">
-                    <div id="bmi-value-anim" class="bmi-value">0.0</div>
-                    <div class="bmi-label">Your Estimated BMI</div>
-                    <div class="bmi-scale"><div id="bmi-indicator-anim" class="bmi-indicator" style="left: 0%;"></div></div>
-                    <div id="bmi-category-anim" class="bmi-category">&nbsp;</div>
-                </div>`;
-                addBotMessage(html);
-
-                setTimeout(() => {
-                    const valEl = document.getElementById('bmi-value-anim');
-                    const catEl = document.getElementById('bmi-category-anim');
-                    const indEl = document.getElementById('bmi-indicator-anim');
-
-                    if(indEl) indEl.style.left = `${percent}%`;
-                    if(catEl) catEl.textContent = category;
-
-                    let start = 0;
-                    const end = parseFloat(bmi);
-                    const animDuration = 1500;
-                    const frameDuration = 1000 / 60;
-                    const totalFrames = Math.round(animDuration / frameDuration);
-                    let frame = 0;
-                    const countUp = setInterval(() => {
-                        frame++;
-                        const progress = frame / totalFrames;
-                        const currentVal = (start + (end - start) * progress).toFixed(1);
-                        if(valEl) valEl.textContent = currentVal;
-                        if (frame === totalFrames) {
-                             clearInterval(countUp);
-                             if(valEl) valEl.textContent = bmi;
-                        }
-                    }, frameDuration);
-
-                }, 100);
-            }
-        }
-
-        function playStressGaugeAnimation() {
-            const stressAnswer = userAnswers.stress || "1-3 (Low)";
-            const level = parseInt(stressAnswer.match(/\d+/)[0]);
-            
-            const rotation = (level / 10) * 180 - 90; // Map 1-10 scale to -90 to +90 degrees
-            let color = '#34d399'; // green
-            if (level > 3) color = '#facc15'; // yellow
-            if (level > 6) color = '#fbbf24'; // amber
-            if (level > 8) color = '#f87171'; // red
-
-            const html = `
-            <div class="stress-gauge-container">
-                <div class="stress-gauge">
-                    <div class="gauge-arc"></div>
-                    <div class="gauge-fill" id="gauge-fill-anim" style="border-color: ${color};"></div>
-                    <div class="gauge-needle" id="gauge-needle-anim" style="transform: rotate(0deg);"></div>
-                </div>
-                <div class="gauge-value" style="color: ${color};">${level}/10</div>
-                <div class="gauge-label">Your Reported Stress Level</div>
-            </div>`;
+            const html = `<div class="sleep-widget"><svg class="w-24 h-24" viewBox="0 0 100 100"><path class="sleep-moon" d="M 50 0 A 50 50 0 1 0 50 100 A 40 40 0 1 1 50 0 Z" /><g class="sleep-stars-group" id="sleep-stars-group-anim"></g></svg></div>`;
             addBotMessage(html);
-
+            
             setTimeout(() => {
-                const needle = document.getElementById('gauge-needle-anim');
-                if (needle) needle.style.transform = `rotate(${rotation}deg)`;
+                const starsGroup = document.getElementById('sleep-stars-group-anim');
+                if(!starsGroup) return;
+                const starPositions = [[75,15], [85,35], [70,55], [85,75], [70,90]];
+                let starsHtml = '';
+                starPositions.forEach((pos, i) => {
+                    starsHtml += `<path id="star-${i}" class="sleep-star" d="M ${pos[0]} ${pos[1]-5} L ${pos[0]+2} ${pos[1]-1} L ${pos[0]+5} ${pos[1]} L ${pos[0]+2} ${pos[1]+1} L ${pos[0]} ${pos[1]+5} L ${pos[0]-2} ${pos[1]+1} L ${pos[0]-5} ${pos[1]} L ${pos[0]-2} ${pos[1]-1} Z" />`;
+                });
+                starsGroup.innerHTML = starsHtml;
+
+                for (let i = 0; i < quality; i++) {
+                    setTimeout(() => {
+                        const starEl = document.getElementById(`star-${i}`);
+                        if(starEl) starEl.classList.add('active');
+                    }, i * 200);
+                }
             }, 100);
         }
 
-        // --- Server & Core Functions (largely unchanged) ---
-        async function startQuizSession() {
-            try { sessionId = `session_${new Date().getTime()}`; } catch (error) { console.error('Failed to start session:', error); addBotMessage("Sorry, I'm having trouble connecting. Please refresh."); inputArea.style.display = 'none'; }
+        function playActivityAnimation() {
+            const answer = userAnswers.activity || "";
+            let days = 1;
+            if (answer.includes("1-2")) days = 2;
+            if (answer.includes("3-4")) days = 4;
+            if (answer.includes("5+")) days = 6;
+
+            const html = `<div class="activity-widget"><div class="activity-week" id="activity-week-anim"><div class="activity-day">M</div><div class="activity-day">T</div><div class="activity-day">W</div><div class="activity-day">T</div><div class="activity-day">F</div><div class="activity-day">S</div><div class="activity-day">S</div></div></div>`;
+            addBotMessage(html);
+            
+            setTimeout(() => {
+                const weekEl = document.getElementById('activity-week-anim');
+                if (!weekEl) return;
+                const dayElements = weekEl.children;
+                const daysToActivate = [0, 2, 4, 1, 3, 5, 6]; // Activate Mon, Wed, Fri first...
+
+                for (let i = 0; i < days; i++) {
+                    setTimeout(() => {
+                        dayElements[daysToActivate[i]].classList.add('active');
+                    }, i * 250);
+                }
+            }, 100);
         }
+
+        function playHydrationAnimation() {
+            const answer = userAnswers.hydration || "";
+            let level = 25; // Default
+            if (answer.includes("4-6")) level = 50;
+            if (answer.includes("7-9")) level = 75;
+            if (answer.includes("10+")) level = 100;
+
+            const html = `<div class="hydration-widget"><svg viewBox="0 0 80 120"><path class="hydration-glass-outline" d="M10,0 L0,120 L80,120 L70,0 Z" /><rect id="hydration-water-anim" class="hydration-water" x="2" y="118" width="76" height="116" transform="translate(0, 0)" style="transform: scaleY(0); transform-origin: bottom;"/><text id="hydration-text-anim" class="hydration-text" x="40" y="70">0%</text></svg></div>`;
+            addBotMessage(html);
+
+            setTimeout(() => {
+                const waterEl = document.getElementById('hydration-water-anim');
+                const textEl = document.getElementById('hydration-text-anim');
+                if (waterEl) waterEl.style.transform = `scaleY(${level / 100})`;
+                
+                let currentLevel = 0;
+                const levelUp = setInterval(() => {
+                    currentLevel++;
+                    if(textEl) textEl.textContent = `${currentLevel}%`;
+                    if (currentLevel >= level) {
+                        clearInterval(levelUp);
+                    }
+                }, 1500 / level);
+            }, 100);
+        }
+
+
+        // --- Server & Core Functions ---
+        async function startQuizSession() { try { sessionId = `session_${new Date().getTime()}`; } catch (error) { console.error('Failed to start session:', error); addBotMessage("Sorry, I'm having trouble connecting. Please refresh."); inputArea.style.display = 'none'; } }
         async function saveAnswerToServer(questionKey, answer) { if (!sessionId) return; try { console.log(`Saving: ${questionKey} = ${answer}`); } catch (error) { console.error('Failed to save answer:', error); } }
         async function proceedToAnalysis() { try { await saveAnswerToServer('faceAnalysis', { status: 'mocked success' }); showCompletionAnimation(); } catch (error) { console.error('Error during analysis:', error); addBotMessage("I had a little trouble with the photo analysis, but we can proceed."); showPaymentForm(); } }
         function updateProgressBar() { const questionKeys = quizQuestions.filter(q => q.type === 'question').map(q => q.key); const totalSteps = questionKeys.length + 1; const completedAnswers = Object.keys(userAnswers).filter(key => questionKeys.includes(key)).length; const photoStepCompleted = userAnswers['selfie'] ? 1 : 0; const progress = ((completedAnswers + photoStepCompleted) / totalSteps) * 100; progressBar.style.width = `${progress}%`; }
@@ -454,19 +320,7 @@
         function addUserMessage(text) { const d = document.createElement('div'); d.className = 'flex justify-end mb-4 chat-bubble'; d.innerHTML = `<div class="bg-purple-600 text-white p-3 rounded-tl-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${text}</div>`; chatContainer.appendChild(d); scrollToBottom(); }
         function showOptions(options, handlers) { optionsContainer.innerHTML = ''; if (options?.length > 0) { optionsContainerWrapper.classList.remove('hidden'); options.forEach((option, index) => { const button = document.createElement('button'); button.textContent = option.text; button.className = option.class; button.onclick = handlers[index]; optionsContainer.appendChild(button); }); } else { optionsContainerWrapper.classList.add('hidden'); } }
 
-        function handleAnswer(answer) {
-            if (!answer.trim()) return;
-            const currentQuestion = quizQuestions[currentQuestionIndex];
-            addUserMessage(answer);
-            userAnswers[currentQuestion.key] = answer.trim();
-            saveAnswerToServer(currentQuestion.key, answer.trim());
-            userInput.value = '';
-            inputArea.classList.add('hidden');
-            optionsContainerWrapper.classList.add('hidden');
-            currentQuestionIndex++;
-            updateProgressBar();
-            askNextQuestion();
-        }
+        function handleAnswer(answer) { if (!answer.trim()) return; const currentQuestion = quizQuestions[currentQuestionIndex]; addUserMessage(answer); userAnswers[currentQuestion.key] = answer.trim(); saveAnswerToServer(currentQuestion.key, answer.trim()); userInput.value = ''; inputArea.classList.add('hidden'); optionsContainerWrapper.classList.add('hidden'); currentQuestionIndex++; updateProgressBar(); askNextQuestion(); }
 
         function askNextQuestion() {
             if (currentQuestionIndex >= quizQuestions.length) return;
@@ -479,19 +333,16 @@
                 let questionText = typeof question.text === 'function' ? question.text(userAnswers.name || 'friend') : question.text;
 
                 if (question.type === 'message') {
-                    if (question.key === 'bmi_calculation') {
-                        addBotMessage(questionText); // Show the "Calculating..." message
-                        setTimeout(playBmiAnimation, 500); // Then play the animation
-                    } else if (question.key === 'stress_gauge') {
-                        addBotMessage(questionText); // Show the "Thanks for sharing..." message
-                        setTimeout(playStressGaugeAnimation, 500); // Then play the animation
-                    } else {
-                        addBotMessage(questionText);
-                    }
+                    addBotMessage(questionText);
                     
-                    if (question.key === 'intro_testimonial') {
-                        setTimeout(playBiologicalAgeAnimation, 500);
-                    }
+                    // Trigger animations based on key
+                    if (question.key === 'intro_testimonial') { setTimeout(playBiologicalAgeAnimation, 500); }
+                    else if (question.key === 'bmi_calculation') { setTimeout(playBmiAnimation, 100); }
+                    else if (question.key === 'stress_gauge') { setTimeout(playStressGaugeAnimation, 100); }
+                    else if (question.key === 'sleep_visual') { setTimeout(playSleepAnimation, 100); }
+                    else if (question.key === 'activity_visual') { setTimeout(playActivityAnimation, 100); }
+                    else if (question.key === 'hydration_visual') { setTimeout(playHydrationAnimation, 100); }
+                    
                     currentQuestionIndex++;
                     askNextQuestion();
                 } else if (question.type === 'question') {
@@ -499,19 +350,17 @@
                     const optionButtons = question.options.map(opt => ({ text: opt, class: 'option-btn bg-white border border-purple-300 text-purple-600 px-4 py-2 rounded-full text-sm flex-shrink-0 hover:bg-purple-50' }));
                     const handlers = question.options.map(opt => () => handleAnswer(opt));
                     showOptions(optionButtons, handlers);
-                    
-                    if (question.hideInput) { inputArea.classList.add('hidden'); } 
-                    else { inputArea.classList.remove('hidden'); userInput.placeholder = question.placeholder || "Type..."; }
+                    if (question.hideInput) { inputArea.classList.add('hidden'); } else { inputArea.classList.remove('hidden'); userInput.placeholder = question.placeholder || "Type..."; }
                     if (!isMobile()) { userInput.focus(); }
                 } else if (question.type === 'final_step') {
                     inputArea.classList.add('hidden');
                     addBotMessage(questionText);
                     showCameraStep();
                 }
-            }, messageDelay); // Use the increased messageDelay here
+            }, messageDelay);
         }
 
-        // --- Camera & Payment Logic (unchanged) ---
+        // --- Camera & Payment Logic ---
         function showCameraStep() { optionsContainerWrapper.classList.add('hidden'); inputArea.classList.remove('hidden'); inputArea.innerHTML = `<button id="open-camera-btn" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-full hover:bg-purple-700 transition-colors pulse-btn">Open Camera</button>`; document.getElementById('open-camera-btn').onclick = startCamera; }
         async function startCamera() { cameraModal.classList.add('active'); try { const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights'; await Promise.all([ faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL) ]); loaderText.textContent = "Requesting camera access..."; stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } }); video.srcObject = stream; video.onloadedmetadata = () => { cameraLoader.style.display = 'none'; startFaceDetection(); }; } catch (err) { console.error("Camera/Model Error:", err); loaderText.textContent = "Camera access denied or models failed to load. Please refresh and try again."; setTimeout(stopCamera, 3000); } }
         function stopCamera() { clearInterval(detectionInterval); stream?.getTracks().forEach(track => track.stop()); cameraModal.classList.remove('active'); video.srcObject = null; }
@@ -532,7 +381,6 @@
         window.addEventListener('resize', setAppHeight);
         inputArea.classList.add('hidden');
         initQuiz();
-
     </script>
 </body>
 </html>
