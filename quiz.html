@@ -110,7 +110,6 @@
             100% { box-shadow: 0 0 0 0 rgba(109, 40, 217, 0); }
         }
 
-        /* --- NEW STYLES FOR ANALYSIS ANIMATION --- */
         .analysis-container {
             display: flex;
             flex-direction: column;
@@ -135,16 +134,16 @@
             border: 2px solid;
         }
         .analysis-animation::before {
-            border-color: #c4b5fd; /* A light purple */
+            border-color: #c4b5fd;
             animation: analysis-pulse 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
         }
         .analysis-animation::after {
-            border-color: #8b5cf6; /* A darker purple */
+            border-color: #8b5cf6;
             border-top-color: transparent;
             animation: analysis-spin 1.2s linear infinite;
         }
         #analysis-text {
-            color: #4b5563; /* Gray-600 */
+            color: #4b5563;
             font-weight: 500;
             transition: opacity 0.5s ease-in-out;
         }
@@ -157,7 +156,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* --- END OF NEW STYLES --- */
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-50 to-indigo-100 md:flex md:items-center md:justify-center min-h-screen">
@@ -249,11 +247,10 @@
             },
             { key: 'intro_how', type: 'message', text: "To help you on your wellness journey, I need to get to know you a bit better—your lifestyle, habits, and a quick, secure look at you." },
             { key: 'intro_convo', type: 'message', text: "What makes this unique is our relaxed, conversational approach. I'll ask some questions, and you can use the quick-reply buttons or type your own answers. Every detail helps, so I appreciate you taking the time!" },
-            { key: 'intro_testimonial', type: 'message', text: "Our users often start feeling improvements within the first week of following their personalized recommendations. 📈" }, // Placeholder for graph animation
+            { key: 'intro_testimonial', type: 'message', text: "Our users often start feeling improvements within the first week of following their personalized recommendations. 📈" },
             { key: 'intro_privacy', type: 'message', text: "And just to be clear about your privacy 🛡️: your photo is deleted immediately after the AI analysis, and your answers are wiped as soon as you get your report." },
             { key: 'start_consent', type: 'question', text: "Ready to begin?", options: ["Yes, let's start!"], hideInput: true },
             
-            // --- Original Questions Start Here ---
             { key: 'age', type: 'question', text: (name) => `Perfect, ${name}! To start, what's your age? 🎂`, options: [], placeholder: "Type your exact age..." },
             { key: 'gender', type: 'question', text: "Great start! Now, what's your biological sex? 🧬", options: ['Male', 'Female'], placeholder: "or type your gender..." },
             { key: 'height', type: 'question', text: "Perfect. Let's talk about your height. 📏 (e.g., 5 ft 10 in)", options: ["Under 5 ft", "5'0\" - 5'5\"", "5'6\" - 5'11\"", "6'0\" - 6'5\"", "Over 6'5\""], placeholder: "or type your height..." },
@@ -292,17 +289,8 @@
         // --- SERVER COMMUNICATION ---
         async function startQuizSession() {
             try {
-                // Mocking session start for local testing
                 sessionId = `session_${new Date().getTime()}`;
                 console.log('Mock session started:', sessionId);
-                // const response = await fetch('/.netlify/functions/quiz', { 
-                //     method: 'POST', 
-                //     headers: { 'Content-Type': 'application/json' }, 
-                //     body: JSON.stringify({ action: 'startSession' }) 
-                // });
-                // if (!response.ok) throw new Error('Server error starting session');
-                // const data = await response.json();
-                // sessionId = data.sessionId;
             } catch (error) {
                 console.error('Failed to start session:', error);
                 addBotMessage("Sorry, I'm having trouble connecting to my brain right now. 🧠 Please try refreshing the page.");
@@ -314,11 +302,6 @@
             if (!sessionId) return;
             try {
                 console.log(`Saving answer: ${questionKey} = ${answer}`);
-                // await fetch('/.netlify/functions/quiz', { 
-                //     method: 'POST', 
-                //     headers: { 'Content-Type': 'application/json' }, 
-                //     body: JSON.stringify({ action: 'saveAnswer', sessionId, questionId: questionKey, answer }) 
-                // });
             } catch (error) { 
                 console.error('Failed to save answer:', error); 
             }
@@ -326,16 +309,14 @@
 
         async function proceedToAnalysis() {
             try {
-                // Mocking server analysis
                 console.log('Proceeding to analysis for session:', sessionId);
                 await saveAnswerToServer('faceAnalysis', { status: 'mocked success' });
                 showCompletionAnimation();
-
             } catch (error) {
                 console.error('Error during photo analysis step:', error);
                 addBotMessage("I had a little trouble with the photo analysis, but don't worry! I'll generate your report with the rest of your answers.");
                 await saveAnswerToServer('faceAnalysis', { error: error.message });
-                showCompletionAnimation();
+                showPaymentForm(); // Fallback to showing payment form directly
             }
         }
         
@@ -343,7 +324,7 @@
         
         function updateProgressBar() {
             const questionKeys = quizQuestions.filter(q => q.type === 'question').map(q => q.key);
-            const totalSteps = questionKeys.length + 1; // +1 for the final photo step
+            const totalSteps = questionKeys.length + 1;
             const completedAnswers = Object.keys(userAnswers).filter(key => questionKeys.includes(key)).length;
             const photoStepCompleted = userAnswers['selfie'] ? 1 : 0;
             const progress = ((completedAnswers + photoStepCompleted) / totalSteps) * 100;
@@ -472,8 +453,6 @@
             document.getElementById('open-camera-btn').onclick = startCamera;
         }
 
-        // --- Camera and Face Detection Logic ---
-
         async function startCamera() {
             cameraModal.classList.add('active');
             try {
@@ -523,11 +502,9 @@
                 if (detections.length > 0) {
                     const resizedDetections = faceapi.resizeResults(detections, displaySize);
                     const box = resizedDetections[0].detection.box;
-
                     context.strokeStyle = 'rgba(0, 255, 255, 0.4)';
                     context.lineWidth = 1;
                     faceapi.draw.drawFaceLandmarks(canvas, resizedDetections[0].landmarks, { drawLines: true });
-                    
                     context.strokeStyle = '#00FFFF';
                     context.lineWidth = 3;
                     context.shadowColor = '#00FFFF';
@@ -540,7 +517,6 @@
                     context.moveTo(box.x + box.width - cornerLength, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height - cornerLength);
                     context.stroke();
                     context.shadowBlur = 0;
-
 
                     const isGoodSize = box.width > canvas.width * 0.4;
                     if (isGoodSize) {
@@ -582,11 +558,18 @@
             showPhotoForConfirmation();
         }
 
+        function startAnalysisAndShowForm() {
+            addUserMessage("Looks Good!");
+            document.getElementById('photo-preview-wrapper')?.remove();
+            optionsContainerWrapper.classList.add('hidden');
+            inputArea.classList.add('hidden');
+            proceedToAnalysis();
+        }
+
         function showPhotoForConfirmation() {
             const messageWrapper = document.createElement('div');
             messageWrapper.id = 'photo-preview-wrapper';
             messageWrapper.className = 'flex justify-start mb-4 chat-bubble';
-
             const imageHtml = `<div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">
                 <p class="mb-2">Here's the photo. Happy with it?</p>
                 <img src="${capturedPhotoDataUrl}" alt="Your selfie" class="rounded-lg"/>
@@ -605,24 +588,20 @@
                 { text: 'Looks Good!', class: 'option-btn bg-green-500 border-green-600 text-white px-4 py-2 rounded-full text-sm flex-shrink-0 font-semibold' },
                 { text: 'Retake', class: 'option-btn bg-white border-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm flex-shrink-0' }
             ];
-            const handlers = [showPaymentForm, retakePhoto];
+            const handlers = [startAnalysisAndShowForm, retakePhoto];
             showOptions(confirmOptions, handlers);
             inputArea.classList.add('hidden');
         }
 
         function retakePhoto() {
             addUserMessage("Retake");
-            const photoPreview = document.getElementById('photo-preview-wrapper');
-            if (photoPreview) photoPreview.remove();
+            document.getElementById('photo-preview-wrapper')?.remove();
             optionsContainerWrapper.classList.add('hidden');
             inputArea.classList.add('hidden');
             startCamera();
         }
 
-        // --- Payment Form Logic ---
         function showPaymentForm() {
-            addUserMessage("Looks Good!");
-            document.getElementById('photo-preview-wrapper')?.remove();
             optionsContainerWrapper.classList.add('hidden');
             inputArea.classList.add('hidden');
             
@@ -678,7 +657,7 @@
         }
 
         function startCountdown() {
-            let duration = 10 * 60; // 10 minutes
+            let duration = 10 * 60; 
             const timerEl = document.getElementById('countdown-timer');
             countdownInterval = setInterval(() => {
                 const minutes = Math.floor(duration / 60).toString().padStart(2, '0');
@@ -698,67 +677,69 @@
             clearInterval(countdownInterval);
             paymentFormContainer.innerHTML = '';
             paymentFormContainer.classList.add('hidden');
-            proceedToAnalysis();
+            showTypingIndicator();
+            setTimeout(() => {
+                hideTypingIndicator();
+                addBotMessage("Thank you! Your payment is being processed. (This is a demo and no payment was taken).");
+            }, 1500);
         }
         
-        // --- MODIFIED FUNCTION ---
         function showCompletionAnimation() {
             confetti({
                 particleCount: 150,
                 spread: 100,
                 origin: { y: 0.6 }
             });
-
+            
+            showTypingIndicator();
             setTimeout(() => {
-                showTypingIndicator();
+                hideTypingIndicator();
+                addBotMessage("Awesome work! You've completed the assessment. 🥳 I'm now analyzing your results...");
+                
+                inputArea.innerHTML = `
+                    <div class="analysis-container">
+                        <div class="analysis-animation"></div>
+                        <p id="analysis-text">Initializing analysis...</p>
+                    </div>`;
+                inputArea.classList.remove('hidden');
+                scrollToBottom();
+                
+                const analysisSteps = [
+                    "Analyzing your data...",
+                    "Checking lifestyle factors...",
+                    "Scanning skin health...",
+                    "Calculating biological age...",
+                    "Almost ready..."
+                ];
+                
+                const analysisTextElement = document.getElementById('analysis-text');
+                let currentStep = 0;
+                
+                const intervalId = setInterval(() => {
+                    if (currentStep < analysisSteps.length) {
+                        analysisTextElement.style.opacity = '0';
+                        setTimeout(() => {
+                            analysisTextElement.textContent = analysisSteps[currentStep];
+                            analysisTextElement.style.opacity = '1';
+                        }, 500);
+                        currentStep++;
+                    } else {
+                        clearInterval(intervalId);
+                    }
+                }, 1600);
+
                 setTimeout(() => {
-                    hideTypingIndicator();
-                    addBotMessage("Awesome work! You've completed the assessment. 🥳 I'm now analyzing your results...");
-                    
-                    inputArea.innerHTML = `
-                        <div class="analysis-container">
-                            <div class="analysis-animation"></div>
-                            <p id="analysis-text">Initializing analysis...</p>
-                        </div>`;
-                    inputArea.classList.remove('hidden');
-                    scrollToBottom();
-                    
-                    const analysisSteps = [
-                        "Analyzing your data...",
-                        "Checking lifestyle factors...",
-                        "Scanning skin health...",
-                        "Calculating biological age...",
-                        "Almost ready..."
-                    ];
-                    
-                    const analysisTextElement = document.getElementById('analysis-text');
-                    let currentStep = 0;
-                    
-                    const intervalId = setInterval(() => {
-                        if (currentStep < analysisSteps.length) {
-                            analysisTextElement.style.opacity = '0';
-                            setTimeout(() => {
-                                analysisTextElement.textContent = analysisSteps[currentStep];
-                                analysisTextElement.style.opacity = '1';
-                            }, 500);
-                            currentStep++;
-                        } else {
-                            clearInterval(intervalId);
-                        }
-                    }, 1600); // Change text every 1.6 seconds
-
-                    // Total time for analysis animation: 1600ms * 5 steps = 8000ms
+                    inputArea.classList.add('hidden');
+                    showTypingIndicator();
                     setTimeout(() => {
-                        const resultUrl = `/results.html?sessionId=${sessionId}`; // In a real app, use the actual results page
-                        addBotMessage(`All done! Your personalized report is ready. 🚀 <br><a href="${resultUrl}" target="_blank" class="inline-block mt-2 bg-purple-600 text-white font-bold py-2 px-6 rounded-full hover:bg-purple-700 transition-colors">View My Report</a>`);
-                        inputArea.classList.add('hidden');
-                        scrollToBottom();
-                    }, analysisSteps.length * 1600 + 500);
+                        hideTypingIndicator();
+                        addBotMessage("Great! Your preliminary analysis is complete. Just one final step to unlock your full, personalized report.");
+                        showPaymentForm();
+                    }, 1200);
+                }, analysisSteps.length * 1600 + 500);
 
-                }, 1000);
-            }, 1500);
+            }, 1000);
         }
-        // --- END OF MODIFIED FUNCTION ---
 
         // --- Event Listeners & Initial Call ---
         async function initQuiz() {
