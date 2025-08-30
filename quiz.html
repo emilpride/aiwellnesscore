@@ -25,7 +25,7 @@
         .typing-indicator span:nth-of-type(2) { animation-delay: -0.32s; }
         .typing-indicator span:nth-of-type(3) { animation-delay: -0.16s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
-        .bot-avatar-lottie { animation: avatar-float 3s ease-in-out infinite; width: 40px; height: 40px; }
+        .bot-avatar-lottie { animation: avatar-float 3s ease-in-out infinite; width: 40px; height: 40px; background-color: black; border-radius: 50%; }
         #camera-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #camera-modal.active { opacity: 1; pointer-events: all; }
         #camera-container { position: relative; width: 90%; max-width: 400px; aspect-ratio: 3/4; overflow: hidden; border-radius: 1.5rem; background: #111; border: 1px solid rgba(255,255,255,0.2); }
@@ -36,21 +36,6 @@
         #progress-bar { animation: glow 2s ease-in-out infinite alternate; }
         @keyframes glow { from { box-shadow: 0 0 2px #a855f7, 0 0 4px #a855f7; } to { box-shadow: 0 0 6px #6366f1, 0 0 8px #6366f1; } }
         
-        /* -- Greeting Animation Container -- */
-        #assistant-container {
-            flex-shrink: 0;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            height: 0; /* Initially hidden */
-            opacity: 0;
-            transition: height 0.5s ease-in-out, opacity 0.5s ease-in-out;
-        }
-        #assistant-animation {
-            width: 100%;
-            max-width: 250px;
-        }
-
         /* -- Other animations -- */
         .widget-wrapper { max-width: 250px; margin: auto; text-align: center; padding: 1rem; background-color: #faf5ff; border-radius: 1rem; }
         .widget-label { font-weight: 600; color: #6b21a8; margin-bottom: 0.75rem; }
@@ -82,17 +67,12 @@
         .week-progress { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
         .week-day { width: 10px; height: 10px; background-color: #ddd6fe; border-radius: 50%; transition: all 0.5s; }
         .week-day.active { background-color: #7c3aed; transform: scale(1.3); box-shadow: 0 0 8px #a78bfa; }
-        .bio-age-footer { font-size: 0.75rem; color: #7e22ce; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-50 to-indigo-100 md:flex md:items-center md:justify-center min-h-screen">
     <div id="main-container" class="w-full md:h-[90vh] md:max-w-lg flex flex-col bg-white md:shadow-2xl md:rounded-2xl overflow-hidden">
         <div class="w-full bg-gray-200"><div id="progress-bar" class="h-2 bg-gradient-to-r from-purple-500 to-indigo-500" style="width: 0%; transition: width 0.5s ease-in-out;"></div></div>
         
-        <div id="assistant-container">
-            <div id="assistant-animation"></div>
-        </div>
-
         <div id="chat-container" class="flex-1 p-6 overflow-y-auto chat-container"></div>
         <div id="options-container-wrapper" class="px-4 pt-1 pb-2"><div id="options-container" class="flex gap-2 overflow-x-auto py-2 options-container"></div></div>
         <div id="input-area" class="p-4 border-t border-gray-200">
@@ -101,7 +81,7 @@
                 <button id="send-btn" class="bg-purple-600 text-white rounded-full p-3 hover:bg-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg></button>
             </div>
         </div>
-        <div id="payment-form-container" class="hidden"></div>
+        <div id="payment-form-container"></div>
     </div>
     <div id="camera-modal">
         <div id="camera-container">
@@ -113,7 +93,7 @@
 
     <script>
         // --- DOM Elements & State ---
-        const mainContainer = document.getElementById('main-container'), chatContainer = document.getElementById('chat-container'), userInput = document.getElementById('user-input'), sendBtn = document.getElementById('send-btn'), optionsContainer = document.getElementById('options-container'), optionsContainerWrapper = document.getElementById('options-container-wrapper'), inputArea = document.getElementById('input-area'), progressBar = document.getElementById('progress-bar'), cameraModal = document.getElementById('camera-modal'), video = document.getElementById('camera-video'), canvas = document.getElementById('camera-canvas'), cameraLoader = document.getElementById('camera-loader'), loaderText = document.getElementById('loader-text'), cameraStatus = document.getElementById('camera-status'), paymentFormContainer = document.getElementById('payment-form-container'), assistantContainer = document.getElementById('assistant-container'), assistantAnimation = document.getElementById('assistant-animation');
+        const mainContainer = document.getElementById('main-container'), chatContainer = document.getElementById('chat-container'), userInput = document.getElementById('user-input'), sendBtn = document.getElementById('send-btn'), optionsContainer = document.getElementById('options-container'), optionsContainerWrapper = document.getElementById('options-container-wrapper'), inputArea = document.getElementById('input-area'), progressBar = document.getElementById('progress-bar'), cameraModal = document.getElementById('camera-modal'), video = document.getElementById('camera-video'), canvas = document.getElementById('camera-canvas'), cameraLoader = document.getElementById('camera-loader'), loaderText = document.getElementById('loader-text'), cameraStatus = document.getElementById('camera-status'), paymentFormContainer = document.getElementById('payment-form-container');
         let sessionId = null, userAnswers = {}, currentQuestionIndex = 0, detectionInterval, stream, capturedPhotoDataUrl = null, countdownInterval;
         const messageDelay = 1800;
 
@@ -124,7 +104,7 @@
             { 
                 key: 'intro_purpose', type: 'message', text: (name) => `Great to meet you, ${name}! Here's a quick look at what we'll uncover together: <div class="mt-4 text-sm text-gray-800"><div class="animated-list-item" style="animation-delay: 0.2s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg></div><span>Calculate your Wellness Score</span></div><div class="animated-list-item" style="animation-delay: 0.6s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l3 3a1 1 0 001.414-1.414L11 9.586V6z" clip-rule="evenodd" /></svg></div><span>Reveal your Biological Age</span></div><div class="animated-list-item" style="animation-delay: 1.0s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h.01a1 1 0 100-2H10zm3 0a1 1 0 000 2h.01a1 1 0 100-2H13zm-3 4a1 1 0 000 2h.01a1 1 0 100-2H10z" clip-rule="evenodd" /></svg></div><span>Assess your energy & recovery</span></div><div class="animated-list-item" style="animation-delay: 1.4s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg></div><span>Measure stress & find solutions</span></div><div class="animated-list-item" style="animation-delay: 1.8s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></div><span>Analyze skin health with AI</span></div><div class="animated-list-item" style="animation-delay: 2.2s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L7 8.414V13a1 1 0 11-2 0V8.414L3.293 6.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h5a1 1 0 100-2h-5z" /></svg></div><span>Review nutrition, BMI & more</span></div></div>`
             },
-            { key: 'intro_how', type: 'message', text: "To help you on your wellness journey, I need to get to know you a bit better—your lifestyle, habits, and a quick, secure look at you." },
+            { key: 'intro_how', type: 'message', text: "To help you on your wellness journey, I need to get to know you a bit better—your lifestyle, habits, and a quick, secure look at you.", delayBefore: 3000 },
             { key: 'intro_convo', type: 'message', text: "What makes this unique is our relaxed, conversational approach. I'll ask some questions, and you can use the quick-reply buttons or type your own answers. Every detail helps, so I appreciate you taking the time!" },
             { key: 'intro_testimonial', type: 'message', text: `<div class="bio-age-container"><div class="bio-age-header">See What A Week Can Do</div><div class="bio-age-display"><span id="bio-age-value">42</span><span class="bio-age-unit">Years</span></div><div class="week-progress"><div class="week-day" id="day-1"></div><div class="week-day" id="day-2"></div><div class="week-day" id="day-3"></div><div class="week-day" id="day-4"></div><div class="week-day" id="day-5"></div><div class="week-day" id="day-6"></div><div class="week-day" id="day-7"></div></div><div class="bio-age-footer">Biological Age Improvement</div></div>`},
             { key: 'intro_privacy', type: 'message', text: "And just to be clear about your privacy 🛡️: your photo is deleted immediately after the AI analysis, and your answers are wiped as soon as you get your report.", delayBefore: 3000 },
@@ -182,13 +162,27 @@
             scrollToBottom();
         }
         function hideTypingIndicator() { document.getElementById('typing-indicator')?.remove(); }
-        function addBotMessage(html) {
+        function addBotMessage(html, key = '') {
             const messageDiv = document.createElement('div');
-            messageDiv.className = 'flex justify-start mb-4 chat-bubble';
-            const avatarId = `avatar-lottie-${Date.now()}`;
-            messageDiv.innerHTML = `<div id="${avatarId}" class="bot-avatar-lottie mr-3 flex-shrink-0"></div><div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${html}</div>`;
-            chatContainer.appendChild(messageDiv);
-            lottie.loadAnimation({ container: document.getElementById(avatarId), renderer: 'svg', loop: false, autoplay: true, path: 'avatar.json' });
+            if (key === 'intro_dave') {
+                messageDiv.className = 'mb-4 chat-bubble';
+                messageDiv.innerHTML = `
+                    <div id="greeting-animation" class="w-full max-w-[250px] mx-auto mb-[-40px] z-10 relative"></div>
+                    <div class="flex justify-start">
+                        <div id="greeting-avatar" class="bot-avatar-lottie mr-3 flex-shrink-0 self-end mb-1"></div>
+                        <div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${html}</div>
+                    </div>
+                `;
+                chatContainer.appendChild(messageDiv);
+                lottie.loadAnimation({ container: document.getElementById('greeting-animation'), renderer: 'svg', loop: false, autoplay: true, path: 'assistent.json' });
+                lottie.loadAnimation({ container: document.getElementById('greeting-avatar'), renderer: 'svg', loop: true, autoplay: true, path: 'avatar.json' });
+            } else {
+                messageDiv.className = 'flex justify-start mb-4 chat-bubble';
+                const avatarId = `avatar-lottie-${Date.now()}`;
+                messageDiv.innerHTML = `<div id="${avatarId}" class="bot-avatar-lottie mr-3 flex-shrink-0"></div><div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${html}</div>`;
+                chatContainer.appendChild(messageDiv);
+                lottie.loadAnimation({ container: document.getElementById(avatarId), renderer: 'svg', loop: true, autoplay: true, path: 'avatar.json' });
+            }
             scrollToBottom();
         }
         function addUserMessage(text) { const d = document.createElement('div'); d.className = 'flex justify-end mb-4 chat-bubble'; d.innerHTML = `<div class="bg-purple-600 text-white p-3 rounded-tl-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${text}</div>`; chatContainer.appendChild(d); scrollToBottom(); }
@@ -207,7 +201,7 @@
                 let postAnimationDelay = question.postAnimationDelay || 0;
 
                 if (question.type === 'message') {
-                    addBotMessage(questionText);
+                    addBotMessage(questionText, question.key);
                     if (question.key === 'intro_testimonial') { setTimeout(playBiologicalAgeAnimation, 500); }
                     else if (question.key === 'bmi_calculation') { setTimeout(playBmiAnimation, 100); }
                     else if (question.key === 'stress_gauge') { setTimeout(playStressGaugeAnimation, 100); }
@@ -218,14 +212,14 @@
                     currentQuestionIndex++;
                     setTimeout(askNextQuestion, postAnimationDelay);
                 } else if (question.type === 'question') {
-                    addBotMessage(questionText);
+                    addBotMessage(questionText, question.key);
                     const optionButtons = question.options.map(opt => ({ text: opt, class: 'option-btn bg-white border border-purple-300 text-purple-600 px-4 py-2 rounded-full text-sm flex-shrink-0 hover:bg-purple-50' }));
                     const handlers = question.options.map(opt => () => handleAnswer(opt));
                     showOptions(optionButtons, handlers);
                     if (question.hideInput) { inputArea.classList.add('hidden'); } else { inputArea.classList.remove('hidden'); userInput.placeholder = question.placeholder || "Type..."; }
                     if (!isMobile()) { userInput.focus(); }
                 } else if (question.type === 'final_step') {
-                    inputArea.classList.add('hidden'); addBotMessage(questionText); showCameraStep();
+                    inputArea.classList.add('hidden'); addBotMessage(questionText, question.key); showCameraStep();
                 }
             }, delay);
         }
@@ -239,38 +233,71 @@
         function startAnalysisAndShowForm() { addUserMessage("Looks Good!"); document.getElementById('photo-preview-wrapper')?.remove(); optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); proceedToAnalysis(); }
         function showPhotoForConfirmation() { const d = document.createElement('div'); d.id = 'photo-preview-wrapper'; d.className = 'flex justify-start mb-4 chat-bubble'; const i = `<div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs"><p class="mb-2">Here's the photo. Happy with it?</p><img src="${capturedPhotoDataUrl}" alt="Your selfie" class="rounded-lg"/></div>`; d.innerHTML = `<div class="w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 bot-avatar-lottie overflow-hidden" id="photo-confirm-avatar"></div>${i}`; chatContainer.appendChild(d); lottie.loadAnimation({ container: document.getElementById('photo-confirm-avatar'), renderer: 'svg', loop: false, autoplay: true, path: 'avatar.json' }); scrollToBottom(); const o = [ { text: 'Looks Good!', class: 'option-btn bg-green-500 border-green-600 text-white px-4 py-2 rounded-full text-sm flex-shrink-0 font-semibold' }, { text: 'Retake', class: 'option-btn bg-white border-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm flex-shrink-0' } ]; const h = [startAnalysisAndShowForm, retakePhoto]; showOptions(o, h); inputArea.classList.add('hidden'); }
         function retakePhoto() { addUserMessage("Retake"); document.getElementById('photo-preview-wrapper')?.remove(); optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); startCamera(); }
-        function showPaymentForm() { optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); const formHtml = `<div class="payment-form p-4 border-t border-gray-100 bg-gradient-to-br from-indigo-50 to-purple-50"><div class="relative bg-white/20 backdrop-blur-3xl border border-white/40 shadow-xl p-6 rounded-3xl overflow-hidden transform hover:scale-[1.01] transition-all duration-300"><div class="absolute inset-0 z-0 opacity-10"><div class="absolute top-1/4 left-1/4 w-32 h-32 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div><div class="absolute top-1/2 right-1/4 w-32 h-32 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div><div class="absolute bottom-1/4 left-1/2 w-32 h-32 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div></div><div class="sticky top-0 z-20 bg-white/30 backdrop-blur-xl -mx-6 -mt-6 mb-5 p-3 rounded-t-3xl text-center shadow-md"><p class="text-sm font-semibold text-gray-800 opacity-80">This exclusive offer ends in:</p><p id="countdown-timer" class="text-3xl font-extrabold text-purple-700 tracking-widest mt-1 drop-shadow-md">10:00</p></div><div class="relative z-10 text-center"><h3 class="text-3xl font-extrabold text-gray-900 mb-2 leading-tight">Unlock Your Full Report</h3><p class="text-gray-600 text-lg mb-6">Get your personalized wellness insights today!</p><div class="my-6"><span class="text-6xl font-extrabold text-purple-700">$9.99</span><span class="text-2xl font-medium text-gray-500 line-through ml-3">$24.99</span></div><div class="space-y-4 mb-6"><div class="bg-white/50 border border-white/60 rounded-xl p-4 flex items-center gap-4 text-base text-gray-800 shadow-inner focus-within:ring-2 focus-within:ring-purple-400 transition-all duration-200"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-purple-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H4a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg><input type="text" placeholder="Card Number" class="flex-1 bg-transparent border-none outline-none placeholder-gray-500 text-gray-900" /><input type="text" placeholder="MM/YY" class="w-20 bg-transparent border-none outline-none placeholder-gray-500 text-gray-900 text-right" /><input type="text" placeholder="CVC" class="w-16 bg-transparent border-none outline-none placeholder-gray-500 text-gray-900 text-right" /></div></div><button id="pay-btn" class="mt-4 w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 text-xl shadow-lg shadow-purple-500/30 transform hover:-translate-y-1 active:scale-95 pulse-btn-custom">Pay Now & Get Report</button><p class="text-sm text-gray-600 mt-4 flex items-center justify-center gap-2 opacity-80"><svg class="h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2.167 6.884a6.5 6.5 0 000 6.232c-.378 1.401-1.309 3.037-3.003 4.298C-.15 18.067 2.059 20 5 20h10c2.94 0 5.15-1.933 4.836-3.884-1.694-1.261-2.625-2.897-3.003-4.298a6.5 6.5 0 000-6.232c.378-1.401 1.309-3.037 3.003-4.298C19.85 1.933 17.94 0 15 0H5C2.06 0-.15 1.933.167 3.884c1.694 1.261 2.625 2.897 3.003 4.298zM9 10a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm3 0a1 1 0 011-1h.01a1 1 0 110 2H13a1 1 0 01-1-1zm-6 0a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>Your payment is secured by SSL encryption.</p></div></div></div>`; paymentFormContainer.innerHTML = formHtml; paymentFormContainer.classList.remove('hidden'); scrollToBottom(); document.getElementById('pay-btn').onclick = handlePayment; startCountdown(); }
-        function startCountdown() { let duration = 600; const timerEl = document.getElementById('countdown-timer'); countdownInterval = setInterval(() => { const minutes = Math.floor(duration / 60).toString().padStart(2, '0'); const seconds = (duration % 60).toString().padStart(2, '0'); timerEl.textContent = `${minutes}:${seconds}`; duration--; if (duration < 0) { clearInterval(countdownInterval); timerEl.textContent = "00:00"; document.getElementById('pay-btn').textContent = "Offer Expired"; document.getElementById('pay-btn').disabled = true; } }, 1000); }
+        function showPaymentForm() {
+            optionsContainerWrapper.classList.add('hidden');
+            inputArea.classList.add('hidden');
+            const formHtml = `
+            <div class="p-4 bg-gray-50 border-t">
+                <div class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Secure Checkout</h2>
+                        <p class="text-gray-500">Unlock your full wellness report</p>
+                    </div>
+                    <div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-6">
+                        <p class="text-sm font-medium">Special offer ends in:</p>
+                        <p id="countdown-timer" class="text-2xl font-bold tracking-wider">10:00</p>
+                    </div>
+                    <div class="flex justify-between items-center mb-6 pb-4 border-b">
+                        <span class="text-gray-600">Full Wellness Report</span>
+                        <div class="text-right">
+                            <span class="text-xl font-bold text-gray-800">$9.99</span>
+                            <span class="text-sm text-gray-400 line-through ml-2">$24.99</span>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="card-number" class="text-sm font-medium text-gray-700">Card Information</label>
+                            <div class="mt-1 flex items-center relative border border-gray-300 rounded-md shadow-sm focus-within:ring-1 focus-within:ring-purple-500 focus-within:border-purple-500">
+                                <input type="text" id="card-number" class="block w-full border-0 p-3 rounded-md placeholder-gray-400 focus:ring-0 sm:text-sm" placeholder="Card Number">
+                                <div class="absolute right-3 flex items-center space-x-1 pointer-events-none">
+                                    <img src="https://img.icons8.com/color/48/000000/visa.png" class="h-6"/>
+                                    <img src="https://img.icons8.com/color/48/000000/mastercard-logo.png" class="h-6"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex space-x-4">
+                            <div class="w-1/2">
+                                <label for="expiry-date" class="text-sm font-medium text-gray-700">Expiration</label>
+                                <input type="text" id="expiry-date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="MM / YY">
+                            </div>
+                            <div class="w-1/2">
+                                <label for="cvc" class="text-sm font-medium text-gray-700">CVC</label>
+                                <input type="text" id="cvc" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="123">
+                            </div>
+                        </div>
+                    </div>
+                    <button id="pay-btn" class="mt-8 w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                        Pay $9.99 Now
+                    </button>
+                    <div class="mt-4 flex items-center justify-center text-xs text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>
+                        Secure payment processing
+                    </div>
+                </div>
+            </div>`;
+            paymentFormContainer.innerHTML = formHtml;
+            paymentFormContainer.classList.remove('hidden');
+            scrollToBottom();
+            document.getElementById('pay-btn').onclick = handlePayment;
+            startCountdown();
+        }
+        function startCountdown() { let duration = 600; const timerEl = document.getElementById('countdown-timer'); if (!timerEl) return; countdownInterval = setInterval(() => { const minutes = Math.floor(duration / 60).toString().padStart(2, '0'); const seconds = (duration % 60).toString().padStart(2, '0'); timerEl.textContent = `${minutes}:${seconds}`; duration--; if (duration < 0) { clearInterval(countdownInterval); timerEl.textContent = "00:00"; const payBtn = document.getElementById('pay-btn'); if (payBtn) { payBtn.textContent = "Offer Expired"; payBtn.disabled = true; } } }, 1000); }
         function handlePayment() { clearInterval(countdownInterval); paymentFormContainer.innerHTML = ''; paymentFormContainer.classList.add('hidden'); showTypingIndicator(); setTimeout(() => { hideTypingIndicator(); addBotMessage("Thank you! Your payment is being processed. (This is a demo and no payment was taken)."); }, 1500); }
         function showCompletionAnimation() { confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } }); showTypingIndicator(); setTimeout(() => { hideTypingIndicator(); addBotMessage("Awesome work! You've completed the assessment. 🥳 I'm now analyzing your results..."); inputArea.innerHTML = `<div class="analysis-container"><div class="analysis-animation"></div><p id="analysis-text">Initializing analysis...</p></div>`; inputArea.classList.remove('hidden'); scrollToBottom(); const analysisSteps = [ "Analyzing your data...", "Checking lifestyle factors...", "Scanning skin health...", "Calculating biological age...", "Almost ready..." ]; const analysisTextElement = document.getElementById('analysis-text'); let currentStep = 0; const intervalId = setInterval(() => { if (currentStep < analysisSteps.length) { analysisTextElement.style.opacity = '0'; setTimeout(() => { analysisTextElement.textContent = analysisSteps[currentStep]; analysisTextElement.style.opacity = '1'; }, 500); currentStep++; } else { clearInterval(intervalId); } }, 1600); setTimeout(() => { inputArea.classList.add('hidden'); showTypingIndicator(); setTimeout(() => { hideTypingIndicator(); addBotMessage("Great! Your preliminary analysis is complete. Just one final step to unlock your full, personalized report."); showPaymentForm(); }, 1200); }, analysisSteps.length * 1600 + 500); }, 1000); }
-
-        function showGreetingAnimation() {
-            return new Promise((resolve) => {
-                assistantContainer.style.height = '180px';
-                assistantContainer.style.opacity = '1';
-
-                const anim = lottie.loadAnimation({
-                    container: assistantAnimation,
-                    renderer: 'svg',
-                    loop: false,
-                    autoplay: true,
-                    path: 'assistent.json'
-                });
-
-                anim.addEventListener('complete', () => {
-                    setTimeout(() => {
-                        assistantContainer.style.height = '0';
-                        assistantContainer.style.opacity = '0';
-                        setTimeout(resolve, 500); // Wait for CSS transition to finish
-                    }, 500); // Hold last frame for a moment
-                });
-            });
-        }
 
         // --- Initial Call ---
         async function initQuiz() {
             setAppHeight();
-            await showGreetingAnimation();
             await startQuizSession();
             if (sessionId) {
                 askNextQuestion();
