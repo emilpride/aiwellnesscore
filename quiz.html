@@ -37,8 +37,6 @@
         #camera-status { background-color: rgba(0,0,0,0.5); padding: 0.5rem 1rem; border-radius: 9999px; display: inline-block; color: white; font-weight: 500; transition: background-color 0.3s; }
         #progress-bar { animation: glow 2s ease-in-out infinite alternate; }
         @keyframes glow { from { box-shadow: 0 0 2px #a855f7, 0 0 4px #a855f7; } to { box-shadow: 0 0 6px #6366f1, 0 0 8px #6366f1; } }
-        
-        /* Стили для числового скроллера */
         .scroller-container { text-align: center; padding: 1rem 0; position: relative; }
         .scroller-wrapper { display: flex; overflow-x: scroll; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
         .scroller-wrapper::-webkit-scrollbar { display: none; }
@@ -53,11 +51,10 @@
 <body class="bg-gradient-to-br from-purple-50 to-indigo-100 md:flex md:items-center md:justify-center min-h-screen">
     <div id="main-container" class="w-full md:h-[90vh] md:max-w-lg flex flex-col bg-white md:shadow-2xl md:rounded-2xl overflow-hidden">
         <div class="w-full bg-gray-200"><div id="progress-bar" class="h-2 bg-gradient-to-r from-purple-500 to-indigo-500" style="width: 0%; transition: width 0.5s ease-in-out;"></div></div>
-        
         <div id="chat-container" class="flex-1 p-6 overflow-y-auto chat-container"></div>
         <div id="options-container-wrapper" class="px-4 pt-1 pb-2"><div id="options-container" class="flex gap-2 overflow-x-auto py-2 options-container"></div></div>
-         <div id="input-area" class="p-4 border-t border-gray-200"></div>
-         <div id="payment-form-container"></div>
+        <div id="input-area" class="p-4 border-t border-gray-200"></div>
+        <div id="payment-form-container"></div>
     </div>
     <div id="camera-modal">
         <div id="camera-container">
@@ -98,7 +95,6 @@
         ];
 
         // --- Core Quiz Logic ---
-        
         async function startQuizSession() {
             try {
                 const urlParams = new URLSearchParams(window.location.search);
@@ -167,7 +163,7 @@
                         }
                     } else if (question.type === 'scroller') {
                         addBotMessage(questionText, question.key);
-                        displayNumberScroller(question.key, question.min, question.max, question.initial, question.unit);
+                        displayNumberScroller(question.min, question.max, question.initial, question.unit);
                     } else if (question.type === 'final_step') {
                         inputArea.classList.add('hidden');
                         addBotMessage(questionText, question.key);
@@ -180,7 +176,7 @@
             }, delay);
         }
 
-        function displayNumberScroller(key, min, max, initial, unit) {
+        function displayNumberScroller(min, max, initial, unit) {
             let selectedValue = initial;
             optionsContainer.innerHTML = `<div class="scroller-container w-full"><div class="scroller-indicator"></div><div id="scroller-wrapper" class="scroller-wrapper"></div></div>`;
             const wrapper = document.getElementById('scroller-wrapper');
