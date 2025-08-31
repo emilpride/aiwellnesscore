@@ -38,7 +38,7 @@
         #progress-bar { animation: glow 2s ease-in-out infinite alternate; }
         @keyframes glow { from { box-shadow: 0 0 2px #a855f7, 0 0 4px #a855f7; } to { box-shadow: 0 0 6px #6366f1, 0 0 8px #6366f1; } }
         
-        /* -- НОВЫЕ СТИЛИ ДЛЯ СЛАЙДЕРА -- */
+        /* -- СТИЛИ ДЛЯ СЛАЙДЕРА -- */
         .slider-widget {
             padding: 1rem;
             background-color: #faf5ff;
@@ -168,7 +168,7 @@
         let sessionId = null, userAnswers = {}, currentQuestionIndex = 0, detectionInterval, stream, capturedPhotoDataUrl = null, countdownInterval;
         const messageDelay = 1800;
         
-        // --- Quiz Data (АДАПТИРОВАННАЯ ВЕРСИЯ) ---
+        // --- Quiz Data (ИСПРАВЛЕННАЯ ВЕРСИЯ) ---
         const quizQuestions = [
             { key: 'intro_dave', type: 'message', text: "Hey! I'm Dave, your personal AI wellness assistant today. 👋" },
             { key: 'name', type: 'question', text: "What should I call you?", options: [], placeholder: "Type your name..." },
@@ -181,7 +181,7 @@
             { key: 'intro_privacy', type: 'message', text: "And just to be clear about your privacy 🛡️: your photo is deleted immediately after the AI analysis, and your answers are wiped as soon as you get your report.", delayBefore: 3000 },
             { key: 'start_consent', type: 'question', text: "Ready to begin?", options: ["Yes, let's start!"], hideInput: true },
             
-            // --- ИЗМЕНЕННЫЕ ВОПРОСЫ ---
+            // --- Адаптированные вопросы ---
             { key: 'age', type: 'slider', text: (name) => `Perfect, ${name}! To start, what's your age? 🎂`, min: 18, max: 90, step: 1, defaultValue: 30, unit: 'years' },
             { key: 'gender', type: 'question', text: "Great start! Now, what's your biological sex? 🧬", options: ['Male', 'Female', 'Other'], hideInput: true },
             { key: 'height', type: 'slider', text: "Perfect. Let's talk about your height. 📏", min: 140, max: 220, step: 1, defaultValue: 175, unit: 'cm' },
@@ -203,8 +203,6 @@
             { key: 'smoking', type: 'question', text: "This is a safe space. 🚭 Do you smoke or use tobacco products?", options: ["No, never", "Used to, but quit", "Occasionally", "Yes, daily"], hideInput: true },
             { key: 'screen_time', type: 'question', text: "Last question before the final step! 📱 How much time do you spend on screens (phone, computer, TV) outside of work?", options: ["Less than 2 hours", "2-4 hours", "4-6 hours", "More than 6 hours"], hideInput: true },
             
-            // --- КОНЕЦ ИЗМЕНЕНИЙ В ВОПРОСАХ ---
-            
             { key: 'camera', type: 'final_step', text: "You did it! 🎉 That's all the questions. Now for the fun part: a quick selfie. This helps me analyze non-medical indicators of stress and fatigue. Your photo is processed on the fly and never stored. Please allow camera access and position your face within the frame." }
         ];
 
@@ -213,14 +211,11 @@
         const isMobile = () => window.innerWidth <= 768;
         const scrollToBottom = () => { setTimeout(() => { chatContainer.scrollTop = chatContainer.scrollHeight; }, 0); };
         
-        // Адаптируем функцию, чтобы она могла работать со значениями из слайдеров (числами)
         function parseHeightToInches(heightVal) {
             if (!heightVal) return 68;
-            // Если пришло число, считаем, что это сантиметры
             if (!isNaN(parseFloat(heightVal))) {
                 return parseFloat(heightVal) / 2.54;
             }
-            // Старая логика для обработки строк (оставляем для обратной совместимости, если понадобится)
             let inches = 0; const feetMatch = heightVal.match(/(\d+)\s*(ft|')/); const inchesMatch = heightVal.match(/(\d+)\s*(in|")/);
             if (feetMatch) inches += parseInt(feetMatch[1]) * 12; if (inchesMatch) inches += parseInt(inchesMatch[1]);
             return inches > 0 ? inches : 68;
@@ -245,15 +240,13 @@
         function addUserMessage(text) { const d = document.createElement('div'); d.className = 'flex justify-end mb-4 chat-bubble'; d.innerHTML = `<div class="bg-purple-600 text-white p-3 rounded-tl-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${text}</div>`; chatContainer.appendChild(d); scrollToBottom(); }
         function showOptions(options, handlers) { optionsContainer.innerHTML = ''; if (options?.length > 0) { optionsContainerWrapper.classList.remove('hidden'); options.forEach((option, index) => { const button = document.createElement('button'); button.textContent = option.text; button.className = option.class; button.onclick = handlers[index]; optionsContainer.appendChild(button); }); } else { optionsContainerWrapper.classList.add('hidden'); } }
         
-        // --- НОВАЯ ФУНКЦИЯ ДЛЯ ОТОБРАЖЕНИЯ СЛАЙДЕРА ---
         function showSlider(question) {
-            optionsContainer.innerHTML = ''; // Очищаем кнопки
+            optionsContainer.innerHTML = '';
             optionsContainerWrapper.classList.remove('hidden');
             
             const sliderWrapper = document.createElement('div');
             sliderWrapper.className = 'slider-widget w-full';
 
-            // Вспомогательная функция для форматирования отображаемого значения
             const formatDisplayValue = (value) => {
                 if (question.unit === 'cm') {
                     const feet = Math.floor(value / 30.48);
@@ -325,9 +318,8 @@
                     if (question.hideInput) { inputArea.classList.add('hidden'); } else { inputArea.classList.remove('hidden'); userInput.placeholder = question.placeholder || "Type..."; }
                     if (!isMobile()) { userInput.focus(); }
                 
-                // --- НОВЫЙ БЛОК ЛОГИКИ ДЛЯ СЛАЙДЕРА ---
                 } else if (question.type === 'slider') {
-                    addBotMessage(questionText.split('?')[0] + '?', question.key); // Показываем только текст вопроса
+                    addBotMessage(questionText.split('?')[0] + '?', question.key);
                     inputArea.classList.add('hidden');
                     showSlider(question);
                 
@@ -350,7 +342,7 @@
         function showPaymentForm() { optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); const formHtml = ` <div class="p-4 bg-gray-50 border-t"> <div class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6"> <div class="text-center mb-6"> <h2 class="text-2xl font-bold text-gray-800">Secure Checkout</h2> <p class="text-gray-500">Unlock your full wellness report</p> </div> <div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-6"> <p class="text-sm font-medium">Special offer ends in:</p> <p id="countdown-timer" class="text-2xl font-bold tracking-wider">10:00</p> </div> <div class="flex justify-between items-center mb-6 pb-4 border-b"> <span class="text-gray-600">Full Wellness Report</span> <div class="text-right"> <span class="text-xl font-bold text-gray-800">$9.99</span> <span class="text-sm text-gray-400 line-through ml-2">$24.99</span> </div> </div> <div class="space-y-4"> <div> <label for="card-number" class="text-sm font-medium text-gray-700">Card Information</label> <div class="mt-1 flex items-center relative border border-gray-300 rounded-md shadow-sm focus-within:ring-1 focus-within:ring-purple-500 focus-within:border-purple-500"> <input type="text" id="card-number" class="block w-full border-0 p-3 rounded-md placeholder-gray-400 focus:ring-0 sm:text-sm" placeholder="Card Number"> <div class="absolute right-3 flex items-center space-x-1 pointer-events-none"> <img src="https://img.icons8.com/color/48/000000/visa.png" class="h-6"/> <img src="https://img.icons8.com/color/48/000000/mastercard-logo.png" class="h-6"/> </div> </div> </div> <div class="flex space-x-4"> <div class="w-1/2"> <label for="expiry-date" class="text-sm font-medium text-gray-700">Expiration</label> <input type="text" id="expiry-date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="MM / YY"> </div> <div class="w-1/2"> <label for="cvc" class="text-sm font-medium text-gray-700">CVC</label> <input type="text" id="cvc" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="123"> </div> </div> </div> <button id="pay-btn" class="mt-8 w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"> Pay $9.99 Now </button> <div class="mt-4 flex items-center justify-center text-xs text-gray-400"> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002 2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg> Secure payment processing </div> </div> </div>`; paymentFormContainer.innerHTML = formHtml; paymentFormContainer.classList.remove('hidden'); scrollToBottom(); document.getElementById('pay-btn').onclick = handlePayment; startCountdown(); }
         function startCountdown() { let duration = 600; const timerEl = document.getElementById('countdown-timer'); if (!timerEl) return; countdownInterval = setInterval(() => { const minutes = Math.floor(duration / 60).toString().padStart(2, '0'); const seconds = (duration % 60).toString().padStart(2, '0'); timerEl.textContent = `${minutes}:${seconds}`; duration--; if (duration < 0) { clearInterval(countdownInterval); timerEl.textContent = "00:00"; const payBtn = document.getElementById('pay-btn'); if (payBtn) { payBtn.textContent = "Offer Expired"; payBtn.disabled = true; } } }, 1000); }
         function handlePayment() { clearInterval(countdownInterval); paymentFormContainer.innerHTML = ''; paymentFormContainer.classList.add('hidden'); showTypingIndicator(); setTimeout(() => { hideTypingIndicator(); addBotMessage("Thank you! Your payment is being processed. (This is a demo and no payment was taken)."); }, 1500); }
-        function showCompletionAnimation() { confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } }); showTypingIndicator(); setTimeout(() => { hideTypingIndicator(); addBotMessage("Awesome work! You've completed the assessment. 🥳 I'm now analyzing your results..."); inputArea.innerHTML = ` <div class="analysis-container"> <div id="analysis-animation" class="analysis-animation"></div> <p id="analysis-text">Initializing analysis...</p> </div>`; inputArea.classList.remove('hidden'); scrollToBottom(); lottie.loadAnimation({ container: document.getElementById('analysis-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'https://lottie.host/e5902521-107f-4a6c-90a2-a7d519a4e157/V92s2n3n1T.json' // Stylish circle loader }); const analysisSteps = [ "Analyzing your data...", "Checking lifestyle factors...", "Scanning skin health...", "Calculating biological age...", "Almost ready..." ]; const analysisTextElement = document.getElementById('analysis-text'); let currentStep = 0; const intervalId = setInterval(() => { if (currentStep < analysisSteps.length) { analysisTextElement.style.opacity = '0'; setTimeout(() => { analysisTextElement.textContent = analysisSteps[currentStep]; analysisTextElement.style.opacity = '1'; }, 500); currentStep++; } else { clearInterval(intervalId); } }, 1600); setTimeout(() => { inputArea.classList.add('hidden'); showTypingIndicator(); setTimeout(() => { hideTypingIndicator(); addBotMessage("Great! Your preliminary analysis is complete. Just one final step to unlock your full, personalized report."); showPaymentForm(); }, 1200); }, analysisSteps.length * 1600 + 500); }, 1000); }
+        function showCompletionAnimation() { confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } }); showTypingIndicator(); setTimeout(() => { hideTypingIndicator(); addBotMessage("Awesome work! You've completed the assessment. 🥳 I'm now analyzing your results..."); inputArea.innerHTML = ` <div class="analysis-container"> <div id="analysis-animation" class="analysis-animation"></div> <p id="analysis-text">Initializing analysis...</p> </div>`; inputArea.classList.remove('hidden'); scrollToBottom(); lottie.loadAnimation({ container: document.getElementById('analysis-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'https://lottie.host/e5902521-107f-4a6c-90a2-a7d519a4e157/V92s2n3n1T.json' }); const analysisSteps = [ "Analyzing your data...", "Checking lifestyle factors...", "Scanning skin health...", "Calculating biological age...", "Almost ready..." ]; const analysisTextElement = document.getElementById('analysis-text'); let currentStep = 0; const intervalId = setInterval(() => { if (currentStep < analysisSteps.length) { analysisTextElement.style.opacity = '0'; setTimeout(() => { analysisTextElement.textContent = analysisSteps[currentStep]; analysisTextElement.style.opacity = '1'; }, 500); currentStep++; } else { clearInterval(intervalId); } }, 1600); setTimeout(() => { inputArea.classList.add('hidden'); showTypingIndicator(); setTimeout(() => { hideTypingIndicator(); addBotMessage("Great! Your preliminary analysis is complete. Just one final step to unlock your full, personalized report."); showPaymentForm(); }, 1200); }, analysisSteps.length * 1600 + 500); }, 1000); }
 
         // --- Initial Call ---
         async function initQuiz() {
