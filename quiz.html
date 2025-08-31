@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         body { font-family: 'Inter', sans-serif; overflow: hidden; }
         .chat-container { scroll-behavior: smooth; -ms-overflow-style: none; scrollbar-width: none; }
@@ -158,9 +159,7 @@
         
         function parseHeightToInches(heightVal) {
             if (!heightVal) return 68;
-            if (!isNaN(parseFloat(heightVal))) {
-                return parseFloat(heightVal) / 2.54;
-            }
+            if (!isNaN(parseFloat(heightVal))) { return parseFloat(heightVal) / 2.54; }
             let inches = 0; const feetMatch = heightVal.match(/(\d+)\s*(ft|')/); const inchesMatch = heightVal.match(/(\d+)\s*(in|")/);
             if (feetMatch) inches += parseInt(feetMatch[1]) * 12; if (inchesMatch) inches += parseInt(inchesMatch[1]);
             return inches > 0 ? inches : 68;
@@ -175,12 +174,10 @@
         function playStressGaugeAnimation() { const stressAnswer = userAnswers.stress || "1"; const level = parseInt(stressAnswer.match(/\d+/)[0]); const percent = (level - 1) / 9 * 100; let color = '#4ade80'; if (level > 4) color = '#facc15'; if (level > 7) color = '#f87171'; const html = `<div class="widget-wrapper"><div class="widget-label">Reported Stress Level</div><div class="stress-bar-track"><div id="stress-bar-fill-anim" class="stress-bar-fill"></div></div><div id="stress-value-anim" class="stress-value">${level}/10</div></div>`; addBotMessage(html); setTimeout(() => { const fillEl = document.getElementById('stress-bar-fill-anim'); const textEl = document.getElementById('stress-value-anim'); if (!fillEl || !textEl) return; fillEl.style.width = `${percent}%`; textEl.style.color = color; }, 100); }
 
         // --- Core Quiz Logic ---
-        // --- ИЗМЕНЕНИЕ: Функции startQuizSession и saveAnswerToServer теперь отправляют реальные запросы ---
         async function startQuizSession() {
             try {
                 const response = await fetch('/.netlify/functions/quiz', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'startSession' })
                 });
                 if (!response.ok) throw new Error('Could not start session');
@@ -188,7 +185,7 @@
                 sessionId = data.sessionId;
             } catch (error) {
                 console.error('Failed to start session:', error);
-                addBotMessage("Sorry, I'm having trouble connecting to the server. Please try refreshing the page.");
+                addBotMessage("Sorry, I'm having trouble connecting. Please try refreshing the page.");
                 inputArea.style.display = 'none';
             }
         }
@@ -196,18 +193,10 @@
             if (!sessionId) return;
             try {
                 await fetch('/.netlify/functions/quiz', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'saveAnswer',
-                        sessionId: sessionId,
-                        questionId: questionKey,
-                        answer: answer
-                    })
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'saveAnswer', sessionId: sessionId, questionId: questionKey, answer: answer })
                 });
-            } catch (error) {
-                console.error('Failed to save answer:', error);
-            }
+            } catch (error) { console.error('Failed to save answer:', error); }
         }
 
         function updateProgressBar() { const questionKeys = quizQuestions.filter(q => q.type === 'question' || q.type === 'slider').map(q => q.key); const totalSteps = questionKeys.length + 1; const completedAnswers = Object.keys(userAnswers).filter(key => questionKeys.includes(key)).length; const photoStepCompleted = userAnswers['selfie'] ? 1 : 0; const progress = ((completedAnswers + photoStepCompleted) / totalSteps) * 100; progressBar.style.width = `${progress}%`; }
@@ -236,7 +225,7 @@
                 const finalValue = sliderInput.value; let displayAnswerText = '';
                 if (question.unit === 'stress') { if (finalValue <= 3) displayAnswerText = 'Low'; else if (finalValue <= 7) displayAnswerText = 'Medium'; else displayAnswerText = 'High';
                 } else if (question.unit === 'cm') { const feet = Math.floor(finalValue / 30.48); const inches = Math.round((finalValue % 30.48) / 2.54); displayAnswerText = `${feet}'${inches}"`;
-                } else if (question.unit === 'kg') { const lbs = (finalValue * 2.20462).toFixed(0); displayAnswerText = `${lbs} lbs`;
+                } else if (question.unit === 'kg') { const lbs = (value * 2.20462).toFixed(0); displayAnswerText = `${lbs} lbs`;
                 } else { displayAnswerText = `${finalValue} ${question.unit}`; }
                 handleAnswer(finalValue, displayAnswerText);
             };
@@ -304,24 +293,17 @@
             showCompletionAnimation();
             try {
                 const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ photoDataUrl: capturedPhotoDataUrl })
                 });
                 if (!analyzeResponse.ok) throw new Error('Skin analysis failed');
                 const analysisData = await analyzeResponse.json();
                 await fetch('/.netlify/functions/quiz', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'saveAnalysisData',
-                        sessionId: sessionId,
-                        analysisData: analysisData
-                    })
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'saveAnalysisData', sessionId: sessionId, analysisData: analysisData })
                 });
                 fetch('/.netlify/functions/result-background', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sessionId: sessionId })
                 });
             } catch (error) {
@@ -329,8 +311,7 @@
                 hideTypingIndicator();
                 addBotMessage("Sorry, an issue occurred. We'll use standard analysis for your report.");
                 fetch('/.netlify/functions/result-background', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sessionId: sessionId })
                 });
                 showPaymentForm();
@@ -340,26 +321,144 @@
         function showPhotoForConfirmation() { const d = document.createElement('div'); d.id = 'photo-preview-wrapper'; d.className = 'flex justify-start mb-4 chat-bubble'; const i = `<div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs"><p class="mb-2">Here's the photo. Happy with it?</p><img src="${capturedPhotoDataUrl}" alt="Your selfie" class="rounded-lg"/></div>`; d.innerHTML = `<div class="w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 bot-avatar-lottie overflow-hidden" id="photo-confirm-avatar"></div>${i}`; chatContainer.appendChild(d); lottie.loadAnimation({ container: document.getElementById('photo-confirm-avatar'), renderer: 'svg', loop: false, autoplay: true, path: 'avatar.json' }); scrollToBottom(); const o = [ { text: 'Looks Good!', class: 'option-btn bg-green-500 border-green-600 text-white px-4 py-2 rounded-full text-sm flex-shrink-0 font-semibold' }, { text: 'Retake', class: 'option-btn bg-white border-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm flex-shrink-0' } ]; const h = [startAnalysisAndShowForm, retakePhoto]; showOptions(o, h); inputArea.classList.add('hidden'); }
         function retakePhoto() { addUserMessage("Retake"); document.getElementById('photo-preview-wrapper')?.remove(); optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); startCamera(); }
         
-        function showPaymentForm() {
+        // --- НОВАЯ ЛОГИКА ОПЛАТЫ И РЕДИРЕКТА ---
+        async function showPaymentForm() {
             optionsContainerWrapper.classList.add('hidden');
             inputArea.classList.add('hidden');
-            const formHtml = `<div class="p-4 bg-gray-50 border-t"><div class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6"><div class="text-center mb-6"><h2 class="text-2xl font-bold text-gray-800">Secure Checkout</h2><p class="text-gray-500">Unlock your full wellness report</p></div><div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-6"><p class="text-sm font-medium">Special offer ends in:</p><p id="countdown-timer" class="text-2xl font-bold tracking-wider">10:00</p></div><div class="flex justify-between items-center mb-6 pb-4 border-b"><span class="text-gray-600">Full Wellness Report</span><div class="text-right"><span class="text-xl font-bold text-gray-800">$9.99</span><span class="text-sm text-gray-400 line-through ml-2">$24.99</span></div></div><div class="space-y-4"><div><label for="card-number" class="text-sm font-medium text-gray-700">Card Information</label><div class="mt-1 flex items-center relative border border-gray-300 rounded-md shadow-sm focus-within:ring-1 focus-within:ring-purple-500 focus-within:border-purple-500"><input type="text" id="card-number" class="block w-full border-0 p-3 rounded-md placeholder-gray-400 focus:ring-0 sm:text-sm" placeholder="Card Number"><div class="absolute right-3 flex items-center space-x-1 pointer-events-none"><img src="https://img.icons8.com/color/48/000000/visa.png" class="h-6"/><img src="https://img.icons8.com/color/48/000000/mastercard-logo.png" class="h-6"/></div></div></div><div class="flex space-x-4"><div class="w-1/2"><label for="expiry-date" class="text-sm font-medium text-gray-700">Expiration</label><input type="text" id="expiry-date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="MM / YY"></div><div class="w-1/2"><label for="cvc" class="text-sm font-medium text-gray-700">CVC</label><input type="text" id="cvc" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="123"></div></div></div><button id="pay-btn" class="mt-8 w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">Pay $9.99 Now</button><div class="mt-4 flex items-center justify-center text-xs text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002 2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>Secure payment processing</div></div></div>`;
+
+            const formHtml = `
+            <div class="p-4 bg-gray-50 border-t">
+                <div id="payment-wrapper" class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6">
+                    <div class="text-center mb-4">
+                        <h2 class="text-2xl font-bold text-gray-800">Unlock Full Report</h2>
+                        <p class="text-gray-500">Secure payment for $9.99</p>
+                    </div>
+                    <form id="payment-form">
+                        <div id="payment-request-button" class="mb-4"></div>
+                        <div id="payment-element"></div>
+                        <button id="submit-payment" class="mt-6 w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md">
+                            <span id="button-text">Pay now</span>
+                        </button>
+                        <div id="payment-message" class="hidden text-center text-red-500 mt-2"></div>
+                    </form>
+                </div>
+            </div>`;
             paymentFormContainer.innerHTML = formHtml;
             paymentFormContainer.classList.remove('hidden');
             scrollToBottom();
-            document.getElementById('pay-btn').onclick = handlePayment;
-            startCountdown();
+
+            // === ВАЖНО: ЗАМЕНИТЕ НА ВАШ ПУБЛИЧНЫЙ КЛЮЧ STRIPE ===
+            const stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY');
+            let elements;
+
+            try {
+                const response = await fetch('/.netlify/functions/payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: sessionId })
+                });
+                const { clientSecret } = await response.json();
+
+                elements = stripe.elements({ clientSecret });
+
+                // Payment Request Button (Google/Apple Pay)
+                const paymentRequest = stripe.paymentRequest({
+                    country: 'US',
+                    currency: 'usd',
+                    total: { label: 'AI Wellness Report', amount: 999 },
+                    requestPayerName: true,
+                    requestPayerEmail: true,
+                });
+
+                const prButton = elements.create('paymentRequestButton', {
+                    paymentRequest,
+                });
+
+                const prButtonElement = document.getElementById('payment-request-button');
+                const canMakePayment = await paymentRequest.canMakePayment();
+                if (canMakePayment) {
+                    prButton.mount(prButtonElement);
+                } else {
+                    prButtonElement.style.display = 'none';
+                }
+
+                paymentRequest.on('paymentmethod', async (ev) => {
+                    const { paymentIntent, error: confirmError } = await stripe.confirmCardPayment(
+                        clientSecret,
+                        { payment_method: ev.paymentMethod.id },
+                        { handleActions: false }
+                    );
+                    if (confirmError) {
+                        ev.complete('fail');
+                        document.getElementById('payment-message').textContent = confirmError.message;
+                    } else {
+                        ev.complete('success');
+                        if (paymentIntent.status === "requires_action") {
+                            const { error } = await stripe.confirmCardPayment(clientSecret);
+                            if (error) {
+                                document.getElementById('payment-message').textContent = error.message;
+                            } else {
+                                handleSuccessfulPayment();
+                            }
+                        } else {
+                            handleSuccessfulPayment();
+                        }
+                    }
+                });
+
+                // Card Element
+                const paymentElement = elements.create("payment");
+                paymentElement.mount("#payment-element");
+
+                document.getElementById('payment-form').addEventListener('submit', (e) => handlePayment(e, stripe, elements));
+
+            } catch (error) {
+                console.error("Failed to initialize payment form:", error);
+                document.getElementById('payment-wrapper').innerHTML = `<p class="text-center text-red-500">Could not load payment form. Please refresh the page.</p>`;
+            }
+        }
+
+        async function handlePayment(e, stripe, elements) {
+            e.preventDefault();
+            const submitButton = document.getElementById('submit-payment');
+            const messageDiv = document.getElementById('payment-message');
+            
+            submitButton.disabled = true;
+            messageDiv.classList.add('hidden');
+            
+            const { error } = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    return_url: window.location.href, // This page will handle the result
+                },
+            });
+
+            if (error) {
+                if (error.type === "card_error" || error.type === "validation_error") {
+                    messageDiv.textContent = error.message;
+                } else {
+                    messageDiv.textContent = "An unexpected error occurred.";
+                }
+                messageDiv.classList.remove('hidden');
+                submitButton.disabled = false;
+            } else {
+                handleSuccessfulPayment();
+            }
         }
         
-        function startCountdown() { let duration = 600; const timerEl = document.getElementById('countdown-timer'); if (!timerEl) return; countdownInterval = setInterval(() => { const minutes = Math.floor(duration / 60).toString().padStart(2, '0'); const seconds = (duration % 60).toString().padStart(2, '0'); timerEl.textContent = `${minutes}:${seconds}`; duration--; if (duration < 0) { clearInterval(countdownInterval); timerEl.textContent = "00:00"; const payBtn = document.getElementById('pay-btn'); if (payBtn) { payBtn.textContent = "Offer Expired"; payBtn.disabled = true; } } }, 1000); }
-        
-        function handlePayment() {
-            clearInterval(countdownInterval);
-            const payBtn = document.getElementById('pay-btn');
-            if (payBtn) { payBtn.textContent = "Redirecting..."; payBtn.disabled = true; }
-            window.location.href = `result.html?session_id=${sessionId}`;
+        function handleSuccessfulPayment() {
+            paymentFormContainer.innerHTML = `
+            <div class="p-8 text-center">
+                <svg class="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h3 class="text-2xl font-bold mt-4">Payment Successful!</h3>
+                <p class="text-gray-600 mt-2">Redirecting to your report...</p>
+            </div>`;
+            scrollToBottom();
+            setTimeout(() => {
+                window.location.href = `result.html?session_id=${sessionId}`;
+            }, 2500);
         }
-        
+
         function showCompletionAnimation() {
             const analysisAnimationPath = 'loader-animation.json';
             confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } }); 
