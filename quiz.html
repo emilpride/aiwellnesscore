@@ -151,10 +151,28 @@
         // --- Core Quiz Logic ---
         async function startQuizSession() {
             try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const utmSource = urlParams.get('utm_source');
+                const utmMedium = urlParams.get('utm_medium');
+                const referrer = document.referrer;
+                let trafficSource = 'direct';
+                if (utmSource) {
+                    trafficSource = `${utmSource}${utmMedium ? `/${utmMedium}` : ''}`;
+                } else if (referrer) {
+                    const referrerHost = new URL(referrer).hostname;
+                    if (referrerHost.includes('google') || referrerHost.includes('bing') || referrerHost.includes('yandex')) {
+                        trafficSource = 'organic';
+                    } else {
+                        trafficSource = referrerHost;
+                    }
+                }
                 const response = await fetch('/.netlify/functions/quiz', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'startSession' })
+                    body: JSON.stringify({ 
+                        action: 'startSession',
+                        source: trafficSource
+                    })
                 });
                 if (!response.ok) throw new Error('Server error starting session.');
                 const data = await response.json();
@@ -195,10 +213,8 @@
                 });
                 if (!analyzeResponse.ok) throw new Error('Skin analysis API returned an error.');
                 const analysisResult = await analyzeResponse.json();
-
                 await saveAnswerToServer('faceAnalysis', analysisResult);
                 hideTypingIndicator();
-
                 showCompletionAnimation();
             } catch (error) {
                 hideTypingIndicator();
@@ -287,7 +303,30 @@
         function stopCamera() { clearInterval(detectionInterval); stream?.getTracks().forEach(track => track.stop()); cameraModal.classList.remove('active'); video.srcObject = null; }
         function startFaceDetection() { let captureTimeout; const context = canvas.getContext('2d'); detectionInterval = setInterval(async () => { const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks(); const displaySize = { width: video.clientWidth, height: video.clientHeight }; faceapi.matchDimensions(canvas, displaySize); context.clearRect(0, 0, canvas.width, canvas.height); context.save(); context.translate(canvas.width, 0); context.scale(-1, 1); if (detections.length > 0) { const resizedDetections = faceapi.resizeResults(detections, displaySize); const box = resizedDetections[0].detection.box; context.strokeStyle = 'rgba(0, 255, 255, 0.4)'; context.lineWidth = 1; faceapi.draw.drawFaceLandmarks(canvas, resizedDetections[0].landmarks, { drawLines: true }); context.strokeStyle = '#00FFFF'; context.lineWidth = 3; context.shadowColor = '#00FFFF'; context.shadowBlur = 10; const cornerLength = box.width * 0.1; context.beginPath(); context.moveTo(box.x, box.y + cornerLength); context.lineTo(box.x, box.y); context.lineTo(box.x + cornerLength, box.y); context.moveTo(box.x + box.width - cornerLength, box.y); context.lineTo(box.x + box.width, box.y); context.lineTo(box.x + box.width, box.y + cornerLength); context.moveTo(box.x, box.y + box.height - cornerLength); context.lineTo(box.x, box.y + box.height); context.lineTo(box.x + cornerLength, box.y + box.height); context.moveTo(box.x + box.width - cornerLength, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height - cornerLength); context.stroke(); context.shadowBlur = 0; const isGoodSize = box.width > canvas.width * 0.4; if (isGoodSize) { cameraStatus.textContent = "Hold still..."; if (!captureTimeout) { captureTimeout = setTimeout(() => takePhoto(), 1500); } } else { cameraStatus.textContent = "Move closer"; clearTimeout(captureTimeout); captureTimeout = null; } } else { cameraStatus.textContent = "Position your face"; clearTimeout(captureTimeout); captureTimeout = null; } context.restore(); }, 100); }
         function takePhoto() { clearInterval(detectionInterval); cameraStatus.textContent = "Perfect!"; const photoCanvas = document.createElement('canvas'); photoCanvas.width = video.videoWidth; photoCanvas.height = video.videoHeight; const photoContext = photoCanvas.getContext('2d'); photoContext.translate(video.videoWidth, 0); photoContext.scale(-1, 1); photoContext.drawImage(video, 0, 0, video.videoWidth, video.videoHeight); capturedPhotoDataUrl = photoCanvas.toDataURL('image/jpeg', 0.9); userAnswers['selfie'] = 'Photo taken'; stopCamera(); updateProgressBar(); showPhotoForConfirmation(); }
-        function startAnalysisAndShowForm() { addUserMessage("Looks Good!"); document.getElementById('photo-preview-wrapper')?.remove(); optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); proceedToAnalysis(); }
+        
+        async function startAnalysisAndShowForm() {
+            addUserMessage("Looks Good!");
+            document.getElementById('photo-preview-wrapper')?.remove();
+            optionsContainerWrapper.classList.add('hidden');
+            inputArea.classList.add('hidden');
+            
+            // Записываем время окончания квиза
+            try {
+                await fetch('/.netlify/functions/quiz', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'endQuiz',
+                        sessionId: sessionId
+                    })
+                });
+            } catch (error) {
+                console.error('Failed to record quiz end time:', error);
+            }
+
+            proceedToAnalysis();
+        }
+
         function showPhotoForConfirmation() { const d = document.createElement('div'); d.id = 'photo-preview-wrapper'; d.className = 'flex justify-start mb-4 chat-bubble'; const i = `<div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs"><p class="mb-2">Here's the photo. Happy with it?</p><img src="${capturedPhotoDataUrl}" alt="Your selfie" class="rounded-lg"/></div>`; d.innerHTML = `<div class="w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 bot-avatar-lottie overflow-hidden" id="photo-confirm-avatar"></div>${i}`; chatContainer.appendChild(d); lottie.loadAnimation({ container: document.getElementById('photo-confirm-avatar'), renderer: 'svg', loop: false, autoplay: true, path: 'avatar.json' }); scrollToBottom(); const o = [ { text: 'Looks Good!', class: 'option-btn bg-green-500 border-green-600 text-white px-4 py-2 rounded-full text-sm flex-shrink-0 font-semibold' }, { text: 'Retake', class: 'option-btn bg-white border-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm flex-shrink-0' } ]; const h = [startAnalysisAndShowForm, retakePhoto]; showOptions(o, h); inputArea.classList.add('hidden'); }
         function retakePhoto() { addUserMessage("Retake"); document.getElementById('photo-preview-wrapper')?.remove(); optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); startCamera(); }
         function showPaymentForm() {
