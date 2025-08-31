@@ -3,7 +3,6 @@
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 
-// Правильная и безопасная инициализация Firebase
 if (!getApps().length) {
   try {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
@@ -30,7 +29,6 @@ exports.handler = async (event, context) => {
       const ipAddress = event.headers['x-nf-client-connection-ip'] || 'unknown';
       let countryCode = 'unknown';
 
-      // Декодируем геолокационные данные от Netlify
       const geoHeader = event.headers['x-nf-geo'];
       if (geoHeader) {
         try {
@@ -41,7 +39,6 @@ exports.handler = async (event, context) => {
         }
       }
 
-      // Получаем источник трафика от клиента
       const trafficSource = data.source || 'unknown';
       
       const newSessionRef = db.collection('sessions').doc();
@@ -50,7 +47,7 @@ exports.handler = async (event, context) => {
         ipAddress: ipAddress,
         countryCode: countryCode,
         trafficSource: trafficSource,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(), // Это время начала
         answers: {}
       });
       
@@ -75,6 +72,20 @@ exports.handler = async (event, context) => {
       return {
         statusCode: 200,
         body: JSON.stringify({ message: 'Answer saved' }),
+      };
+    
+    } else if (action === 'endQuiz') { //
+      const { sessionId } = data;
+      if (!sessionId) {
+        return { statusCode: 400, body: 'Missing sessionId' };
+      }
+      const sessionRef = db.collection('sessions').doc(sessionId);
+      await sessionRef.update({
+        quizEndedAt: new Date().toISOString() // Это время конца
+      });
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: 'Quiz end time recorded' })
       };
     }
 
