@@ -1,7 +1,8 @@
+// /netlify/functions/analyzeSkin.js
+
 const axios = require('axios');
 const querystring = require('querystring');
 
-// Используем стандартный detect API с атрибутами
 const FACE_DETECT_URL = 'https://api-us.faceplusplus.com/facepp/v3/detect';
 
 exports.handler = async (event) => {
@@ -10,33 +11,19 @@ exports.handler = async (event) => {
   }
 
   try {
+    // Проверяем наличие API ключей
+    if (!process.env.FACEPLUSPLUS_API_KEY || !process.env.FACEPLUSPLUS_API_SECRET) {
+      console.error('Face++ API keys are not configured.');
+      // --- ИЗМЕНЕНИЕ: Вместо заглушки возвращаем ошибку ---
+      return { 
+        statusCode: 500, 
+        body: JSON.stringify({ error: 'The face analysis service is not configured.' }) 
+      };
+    }
+
     const { photoDataUrl } = JSON.parse(event.body);
     if (!photoDataUrl) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Photo data is required' }) };
-    }
-
-    // Проверяем наличие API ключей
-    if (!process.env.FACEPLUSPLUS_API_KEY || !process.env.FACEPLUSPLUS_API_SECRET) {
-      console.log('Face++ API keys not configured, using mock data');
-      // Возвращаем mock данные вместо ошибки
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          faces: [{
-            attributes: {
-              age: { value: 30 },
-              gender: { value: 'None' },
-              emotion: { happiness: 50 },
-              skinstatus: {
-                health: 75,
-                dark_circle: 20,
-                acne: 10,
-                stain: 15
-              }
-            }
-          }]
-        })
-      };
     }
 
     const base64Image = photoDataUrl.split(';base64,').pop();
@@ -52,7 +39,7 @@ exports.handler = async (event) => {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       timeout: 10000 // 10 секунд таймаут
     });
-    
+
     return {
       statusCode: 200,
       body: JSON.stringify(response.data),
@@ -60,24 +47,12 @@ exports.handler = async (event) => {
 
   } catch (error) {
     console.error('Face++ API Error:', error.message);
-    // Возвращаем mock данные при ошибке
+    // --- ИЗМЕНЕНИЕ: Вместо заглушки возвращаем ошибку ---
     return {
-      statusCode: 200,
-      body: JSON.stringify({
-        faces: [{
-          attributes: {
-            age: { value: 30 },
-            gender: { value: 'None' },
-            emotion: { happiness: 50 },
-            skinstatus: {
-              health: 70,
-              dark_circle: 25,
-              acne: 15,
-              stain: 20
-            }
-          }
-        }],
-        error: error.message
+      statusCode: 500,
+      body: JSON.stringify({ 
+        error: 'Failed to analyze skin from the photo.',
+        details: error.message
       })
     };
   }
