@@ -151,6 +151,7 @@
         // --- Core Quiz Logic ---
         async function startQuizSession() {
             try {
+                // --- Определение источника трафика и устройства ---
                 const urlParams = new URLSearchParams(window.location.search);
                 const utmSource = urlParams.get('utm_source');
                 const utmMedium = urlParams.get('utm_medium');
@@ -166,14 +167,27 @@
                         trafficSource = referrerHost;
                     }
                 }
+                const getDeviceType = () => {
+                    const ua = navigator.userAgent;
+                    if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) return "tablet";
+                    if (/Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) {
+                        if (/iPhone|iPad|iPod/i.test(ua)) return "ios";
+                        if (/Android/i.test(ua)) return "android";
+                        return "mobile";
+                    }
+                    return "desktop";
+                };
+                
                 const response = await fetch('/.netlify/functions/quiz', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         action: 'startSession',
-                        source: trafficSource
+                        source: trafficSource,
+                        deviceType: getDeviceType() //
                     })
                 });
+
                 if (!response.ok) throw new Error('Server error starting session.');
                 const data = await response.json();
                 sessionId = data.sessionId;
@@ -309,8 +323,6 @@
             document.getElementById('photo-preview-wrapper')?.remove();
             optionsContainerWrapper.classList.add('hidden');
             inputArea.classList.add('hidden');
-            
-            // Записываем время окончания квиза
             try {
                 await fetch('/.netlify/functions/quiz', {
                     method: 'POST',
@@ -323,7 +335,6 @@
             } catch (error) {
                 console.error('Failed to record quiz end time:', error);
             }
-
             proceedToAnalysis();
         }
 
@@ -399,16 +410,30 @@
                 hideTypingIndicator();
                 addBotMessage("✅ Payment successful! (This was a demo, you were not charged). We are now generating your final report. You will be redirected shortly.");
                 try {
+                    //
+                    await fetch('/.netlify/functions/quiz', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'updatePayment',
+                            sessionId: sessionId,
+                            status: 'success',
+                            amountUSD: 9.99
+                        })
+                    });
+
                     // Запускаем фоновую функцию для генерации отчета.
                     await fetch('/.netlify/functions/result-background', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ sessionId: sessionId })
                     });
+                    
                     // Перенаправляем на страницу результата
                     setTimeout(() => {
                         window.location.href = `/result.html?session_id=${sessionId}`;
                     }, 2500);
+
                 } catch (error) {
                     console.error('Failed to trigger report generation:', error);
                     addBotMessage("Sorry, something went wrong after the payment step. Please try again.");
