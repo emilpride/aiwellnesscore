@@ -28,7 +28,6 @@ exports.handler = async (event, context) => {
     if (action === 'startSession') {
       const ipAddress = event.headers['x-nf-client-connection-ip'] || 'unknown';
       let countryCode = 'unknown';
-
       const geoHeader = event.headers['x-nf-geo'];
       if (geoHeader) {
         try {
@@ -40,7 +39,7 @@ exports.handler = async (event, context) => {
       }
 
       const trafficSource = data.source || 'unknown';
-      const deviceType = data.deviceType || 'unknown'; //
+      const deviceType = data.deviceType || 'unknown';
       
       const newSessionRef = db.collection('sessions').doc();
       await newSessionRef.set({
@@ -48,12 +47,12 @@ exports.handler = async (event, context) => {
         ipAddress: ipAddress,
         countryCode: countryCode,
         trafficSource: trafficSource,
-        deviceType: deviceType, //
-        paymentStatus: 'pending', //
+        deviceType: deviceType,
+        paymentStatus: 'pending',
         createdAt: new Date().toISOString(),
         answers: {}
       });
-      
+
       return {
         statusCode: 200,
         body: JSON.stringify({ sessionId: newSessionRef.id }),
@@ -70,11 +69,29 @@ exports.handler = async (event, context) => {
         updatedAt: new Date().toISOString(),
         dropOffPoint: `question_${questionId}`
       });
+
       return {
         statusCode: 200,
         body: JSON.stringify({ message: 'Answer saved' }),
       };
-    
+
+    // --- НОВЫЙ БЛОК ДЛЯ СОХРАНЕНИЯ РЕЗУЛЬТАТОВ АНАЛИЗА ---
+    } else if (action === 'saveAnalysisData') {
+      const { sessionId, analysisData } = data;
+      if (!sessionId || !analysisData) {
+        return { statusCode: 400, body: 'Missing required fields for saving analysis' };
+      }
+      const sessionRef = db.collection('sessions').doc(sessionId);
+      await sessionRef.update({
+        faceAnalysis: analysisData,
+        updatedAt: new Date().toISOString()
+      });
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: 'Analysis data saved successfully' })
+      };
+    // --- КОНЕЦ НОВОГО БЛОКА ---
+
     } else if (action === 'endQuiz') {
       const { sessionId } = data;
       if (!sessionId) return { statusCode: 400, body: 'Missing sessionId' };
@@ -82,12 +99,13 @@ exports.handler = async (event, context) => {
       await sessionRef.update({
         quizEndedAt: new Date().toISOString()
       });
+      
       return {
         statusCode: 200,
         body: JSON.stringify({ message: 'Quiz end time recorded' })
       };
 
-    } else if (action === 'updatePayment') { //
+    } else if (action === 'updatePayment') {
       const { sessionId, status, amountUSD } = data;
       if (!sessionId) return { statusCode: 400, body: 'Missing sessionId' };
       const sessionRef = db.collection('sessions').doc(sessionId);
@@ -102,7 +120,7 @@ exports.handler = async (event, context) => {
     }
 
     return { statusCode: 400, body: 'Invalid action' };
-    
+
   } catch (error) {
     console.error('Error in quiz.js handler:', error);
     return {
