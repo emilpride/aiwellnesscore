@@ -175,8 +175,41 @@
         function playStressGaugeAnimation() { const stressAnswer = userAnswers.stress || "1"; const level = parseInt(stressAnswer.match(/\d+/)[0]); const percent = (level - 1) / 9 * 100; let color = '#4ade80'; if (level > 4) color = '#facc15'; if (level > 7) color = '#f87171'; const html = `<div class="widget-wrapper"><div class="widget-label">Reported Stress Level</div><div class="stress-bar-track"><div id="stress-bar-fill-anim" class="stress-bar-fill"></div></div><div id="stress-value-anim" class="stress-value">${level}/10</div></div>`; addBotMessage(html); setTimeout(() => { const fillEl = document.getElementById('stress-bar-fill-anim'); const textEl = document.getElementById('stress-value-anim'); if (!fillEl || !textEl) return; fillEl.style.width = `${percent}%`; textEl.style.color = color; }, 100); }
 
         // --- Core Quiz Logic ---
-        async function startQuizSession() { try { sessionId = `session_${new Date().getTime()}`; } catch (error) { console.error('Failed to start session:', error); addBotMessage("Sorry, I'm having trouble connecting. Please refresh."); inputArea.style.display = 'none'; } }
-        async function saveAnswerToServer(questionKey, answer) { if (!sessionId) return; try { console.log(`Saving: ${questionKey} = ${answer}`); } catch (error) { console.error('Failed to save answer:', error); } }
+        // --- ИЗМЕНЕНИЕ: Функции startQuizSession и saveAnswerToServer теперь отправляют реальные запросы ---
+        async function startQuizSession() {
+            try {
+                const response = await fetch('/.netlify/functions/quiz', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'startSession' })
+                });
+                if (!response.ok) throw new Error('Could not start session');
+                const data = await response.json();
+                sessionId = data.sessionId;
+            } catch (error) {
+                console.error('Failed to start session:', error);
+                addBotMessage("Sorry, I'm having trouble connecting to the server. Please try refreshing the page.");
+                inputArea.style.display = 'none';
+            }
+        }
+        async function saveAnswerToServer(questionKey, answer) {
+            if (!sessionId) return;
+            try {
+                await fetch('/.netlify/functions/quiz', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'saveAnswer',
+                        sessionId: sessionId,
+                        questionId: questionKey,
+                        answer: answer
+                    })
+                });
+            } catch (error) {
+                console.error('Failed to save answer:', error);
+            }
+        }
+
         function updateProgressBar() { const questionKeys = quizQuestions.filter(q => q.type === 'question' || q.type === 'slider').map(q => q.key); const totalSteps = questionKeys.length + 1; const completedAnswers = Object.keys(userAnswers).filter(key => questionKeys.includes(key)).length; const photoStepCompleted = userAnswers['selfie'] ? 1 : 0; const progress = ((completedAnswers + photoStepCompleted) / totalSteps) * 100; progressBar.style.width = `${progress}%`; }
         function showTypingIndicator() { const typingDiv = document.createElement('div'); typingDiv.id = 'typing-indicator'; typingDiv.className = 'flex justify-start mb-4 chat-bubble'; const avatarId = `avatar-lottie-${Date.now()}`; typingDiv.innerHTML = `<div id="${avatarId}" class="bot-avatar-lottie mr-3 flex-shrink-0"></div><div class="bg-gray-200 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`; chatContainer.appendChild(typingDiv); lottie.loadAnimation({ container: document.getElementById(avatarId), renderer: 'svg', loop: true, autoplay: true, path: 'avatar.json' }); scrollToBottom(); }
         function hideTypingIndicator() { document.getElementById('typing-indicator')?.remove(); }
@@ -185,10 +218,8 @@
         function showOptions(options, handlers) { optionsContainer.innerHTML = ''; if (options?.length > 0) { optionsContainerWrapper.classList.remove('hidden'); options.forEach((option, index) => { const button = document.createElement('button'); button.textContent = option.text; button.className = option.class; button.onclick = handlers[index]; optionsContainer.appendChild(button); }); } else { optionsContainerWrapper.classList.add('hidden'); } }
         
         function showSlider(question) {
-            optionsContainer.innerHTML = '';
-            optionsContainerWrapper.classList.remove('hidden');
-            const sliderWrapper = document.createElement('div');
-            sliderWrapper.className = 'slider-widget w-full';
+            optionsContainer.innerHTML = ''; optionsContainerWrapper.classList.remove('hidden');
+            const sliderWrapper = document.createElement('div'); sliderWrapper.className = 'slider-widget w-full';
             const formatDisplayValue = (value) => {
                 if (question.unit === 'stress') { if (value <= 3) return `<span style="color: #22c55e;">Low</span>`; if (value <= 7) return `<span style="color: #f59e0b;">Medium</span>`; return `<span style="color: #ef4444;">High</span>`; }
                 if (question.unit === 'cm') { const feet = Math.floor(value / 30.48); const inches = Math.round((value % 30.48) / 2.54); return `${feet}'${inches}" <span class="text-lg ml-2 text-purple-400">(${value} cm)</span>`; }
@@ -312,55 +343,7 @@
         function showPaymentForm() {
             optionsContainerWrapper.classList.add('hidden');
             inputArea.classList.add('hidden');
-            const formHtml = `
-            <div class="p-4 bg-gray-50 border-t">
-                <div class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6">
-                    <div class="text-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">Secure Checkout</h2>
-                        <p class="text-gray-500">Unlock your full wellness report</p>
-                    </div>
-                    <div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-6">
-                        <p class="text-sm font-medium">Special offer ends in:</p>
-                        <p id="countdown-timer" class="text-2xl font-bold tracking-wider">10:00</p>
-                    </div>
-                    <div class="flex justify-between items-center mb-6 pb-4 border-b">
-                        <span class="text-gray-600">Full Wellness Report</span>
-                        <div class="text-right">
-                            <span class="text-xl font-bold text-gray-800">$9.99</span>
-                            <span class="text-sm text-gray-400 line-through ml-2">$24.99</span>
-                        </div>
-                    </div>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="card-number" class="text-sm font-medium text-gray-700">Card Information</label>
-                            <div class="mt-1 flex items-center relative border border-gray-300 rounded-md shadow-sm focus-within:ring-1 focus-within:ring-purple-500 focus-within:border-purple-500">
-                                <input type="text" id="card-number" class="block w-full border-0 p-3 rounded-md placeholder-gray-400 focus:ring-0 sm:text-sm" placeholder="Card Number">
-                                <div class="absolute right-3 flex items-center space-x-1 pointer-events-none">
-                                    <img src="https://img.icons8.com/color/48/000000/visa.png" class="h-6"/>
-                                    <img src="https://img.icons8.com/color/48/000000/mastercard-logo.png" class="h-6"/>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex space-x-4">
-                            <div class="w-1/2">
-                                <label for="expiry-date" class="text-sm font-medium text-gray-700">Expiration</label>
-                                <input type="text" id="expiry-date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="MM / YY">
-                            </div>
-                            <div class="w-1/2">
-                                <label for="cvc" class="text-sm font-medium text-gray-700">CVC</label>
-                                <input type="text" id="cvc" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="123">
-                            </div>
-                        </div>
-                    </div>
-                    <button id="pay-btn" class="mt-8 w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
-                        Pay $9.99 Now
-                    </button>
-                    <div class="mt-4 flex items-center justify-center text-xs text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002 2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>
-                        Secure payment processing
-                    </div>
-                </div>
-            </div>`;
+            const formHtml = `<div class="p-4 bg-gray-50 border-t"><div class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6"><div class="text-center mb-6"><h2 class="text-2xl font-bold text-gray-800">Secure Checkout</h2><p class="text-gray-500">Unlock your full wellness report</p></div><div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-6"><p class="text-sm font-medium">Special offer ends in:</p><p id="countdown-timer" class="text-2xl font-bold tracking-wider">10:00</p></div><div class="flex justify-between items-center mb-6 pb-4 border-b"><span class="text-gray-600">Full Wellness Report</span><div class="text-right"><span class="text-xl font-bold text-gray-800">$9.99</span><span class="text-sm text-gray-400 line-through ml-2">$24.99</span></div></div><div class="space-y-4"><div><label for="card-number" class="text-sm font-medium text-gray-700">Card Information</label><div class="mt-1 flex items-center relative border border-gray-300 rounded-md shadow-sm focus-within:ring-1 focus-within:ring-purple-500 focus-within:border-purple-500"><input type="text" id="card-number" class="block w-full border-0 p-3 rounded-md placeholder-gray-400 focus:ring-0 sm:text-sm" placeholder="Card Number"><div class="absolute right-3 flex items-center space-x-1 pointer-events-none"><img src="https://img.icons8.com/color/48/000000/visa.png" class="h-6"/><img src="https://img.icons8.com/color/48/000000/mastercard-logo.png" class="h-6"/></div></div></div><div class="flex space-x-4"><div class="w-1/2"><label for="expiry-date" class="text-sm font-medium text-gray-700">Expiration</label><input type="text" id="expiry-date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="MM / YY"></div><div class="w-1/2"><label for="cvc" class="text-sm font-medium text-gray-700">CVC</label><input type="text" id="cvc" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="123"></div></div></div><button id="pay-btn" class="mt-8 w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">Pay $9.99 Now</button><div class="mt-4 flex items-center justify-center text-xs text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002 2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>Secure payment processing</div></div></div>`;
             paymentFormContainer.innerHTML = formHtml;
             paymentFormContainer.classList.remove('hidden');
             scrollToBottom();
@@ -373,10 +356,7 @@
         function handlePayment() {
             clearInterval(countdownInterval);
             const payBtn = document.getElementById('pay-btn');
-            if (payBtn) {
-                payBtn.textContent = "Redirecting...";
-                payBtn.disabled = true;
-            }
+            if (payBtn) { payBtn.textContent = "Redirecting..."; payBtn.disabled = true; }
             window.location.href = `result.html?session_id=${sessionId}`;
         }
         
