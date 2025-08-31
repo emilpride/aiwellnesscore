@@ -273,7 +273,13 @@
                     showSlider(question);
                 } else if (question.type === 'final_step') {
                     inputArea.classList.add('hidden');
-                    addBotMessage(questionText, question.key); showCameraStep();
+                    addBotMessage(questionText, question.key);
+                    fetch('/.netlify/functions/quiz', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'endQuiz', sessionId: sessionId })
+                    });
+                    showCameraStep();
                 }
             }, delay);
         }
