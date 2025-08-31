@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - AI WellnessCore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        :root {
+            --bg-dark: #111827;
+            --bg-light: #1F2937;
+            --border-color: #374151;
+            --text-main: #F9FAFB;
+            --text-secondary: #9CA3AF;
+            --accent-purple: #8b5cf6;
+        }
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif; }
+        .table-custom th { background-color: var(--bg-light); }
+        .table-custom tr:hover { background-color: #374151; }
+        .form-input { background-color: var(--bg-light); border: 1px solid var(--border-color); }
+        .stat-card { background-color: var(--bg-light); border: 1px solid var(--border-color); }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="antialiased">
+
+    <div id="login-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-sm">
+            <h2 class="text-2xl font-bold text-white mb-6 text-center">Admin Panel Access</h2>
+            <form id="login-form">
+                <input type="password" id="password-input" placeholder="Enter Access Password" class="w-full form-input rounded-md p-3 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500" required>
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-md mt-4 transition-colors">
+                    Login
+                </button>
+                <p id="login-error" class="text-red-400 text-center mt-4 text-sm"></p>
+            </form>
+        </div>
+    </div>
+
+    <main id="admin-panel" class="hidden p-4 sm:p-6 lg:p-8">
+        <div class="max-w-7xl mx-auto">
+            <h1 class="text-3xl font-bold text-white">AI WellnessCore Dashboard</h1>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+                <div class="stat-card p-6 rounded-lg">
+                    <p class="text-sm font-medium text-gray-400">Total Sessions</p>
+                    <p id="stat-total-sessions" class="text-3xl font-bold mt-1">0</p>
+                </div>
+                <div class="stat-card p-6 rounded-lg">
+                    <p class="text-sm font-medium text-gray-400">Completed Payments</p>
+                    <p id="stat-completed-payments" class="text-3xl font-bold mt-1">0</p>
+                </div>
+                <div class="stat-card p-6 rounded-lg">
+                    <p class="text-sm font-medium text-gray-400">Total Revenue</p>
+                    <p id="stat-total-revenue" class="text-3xl font-bold mt-1">$0</p>
+                </div>
+                <div class="stat-card p-6 rounded-lg">
+                    <p class="text-sm font-medium text-gray-400">Avg. Completion Rate</p>
+                    <p id="stat-avg-completion" class="text-3xl font-bold mt-1">0%</p>
+                </div>
+            </div>
+
+            <div class="mt-8 flex flex-col sm:flex-row gap-4 items-center">
+                <input type="text" id="search-input" placeholder="Search by IP or Country..." class="w-full sm:w-1/3 form-input rounded-md p-2 text-white">
+                <select id="status-filter" class="w-full sm:w-auto form-input rounded-md p-2 text-white">
+                    <option value="">All Payment Statuses</option>
+                    <option value="succeeded">Succeeded</option>
+                    <option value="pending">Pending</option>
+                </select>
+            </div>
+
+            <div class="mt-4 overflow-x-auto rounded-lg border border-gray-700">
+                <table class="min-w-full divide-y divide-gray-700 table-custom">
+                    <thead class="bg-gray-800">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Device/Source</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">IP/Country</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Progress</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Duration</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Payment</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Link</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessions-table-body" class="bg-gray-900 divide-y divide-gray-700">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            const passwordInput = document.getElementById('password-input');
+            const loginError = document.getElementById('login-error');
+            const loginModal = document.getElementById('login-modal');
+            const adminPanel = document.getElementById('admin-panel');
+            
+            let allSessionsData = [];
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const password = passwordInput.value;
+                loginError.textContent = '';
+
+                try {
+                    const response = await fetch('/.netlify/functions/getAdminData', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password: password })
+                    });
+
+                    if (response.status === 401) {
+                        throw new Error('Incorrect password.');
+                    }
+                    if (!response.ok) {
+                        throw new Error('Could not fetch data from server.');
+                    }
+
+                    allSessionsData = await response.json();
+                    
+                    loginModal.classList.add('hidden');
+                    adminPanel.classList.remove('hidden');
+                    
+                    renderAll(allSessionsData);
+                    setupFilters();
+
+                } catch (error) {
+                    loginError.textContent = error.message;
+                }
+            });
+
+            function setupFilters() {
+                const searchInput = document.getElementById('search-input');
+                const statusFilter = document.getElementById('status-filter');
+                
+                const applyFilters = () => {
+                    const searchTerm = searchInput.value.toLowerCase();
+                    const statusValue = statusFilter.value;
+
+                    let filteredData = allSessionsData.filter(session => {
+                        const searchMatch = session.ipAddress.toLowerCase().includes(searchTerm) ||
+                                          session.countryCode.toLowerCase().includes(searchTerm);
+                        
+                        const statusMatch = statusValue ? session.paymentStatus === statusValue : true;
+
+                        return searchMatch && statusMatch;
+                    });
+                    
+                    renderTable(filteredData);
+                };
+
+                searchInput.addEventListener('input', applyFilters);
+                statusFilter.addEventListener('change', applyFilters);
+            }
+
+            function renderAll(data) {
+                renderStats(data);
+                renderTable(data);
+            }
+
+            function renderStats(data) {
+                document.getElementById('stat-total-sessions').textContent = data.length;
+
+                const completedPayments = data.filter(s => s.paymentStatus === 'succeeded');
+                document.getElementById('stat-completed-payments').textContent = completedPayments.length;
+
+                const totalRevenue = completedPayments.reduce((acc, s) => {
+                    const amount = parseFloat(s.paymentAmount.replace('$', ''));
+                    return acc + (isNaN(amount) ? 0 : amount);
+                }, 0);
+                document.getElementById('stat-total-revenue').textContent = `$${totalRevenue.toFixed(2)}`;
+
+                if (data.length > 0) {
+                    const avgCompletion = data.reduce((acc, s) => {
+                        const percent = parseInt(s.progress.match(/\((\d+)%\)/)[1]);
+                        return acc + (isNaN(percent) ? 0 : percent);
+                    }, 0) / data.length;
+                    document.getElementById('stat-avg-completion').textContent = `${Math.round(avgCompletion)}%`;
+                }
+            }
+
+            function renderTable(data) {
+                const tableBody = document.getElementById('sessions-table-body');
+                tableBody.innerHTML = ''; // Clear existing rows
+
+                if (data.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="8" class="text-center p-6 text-gray-400">No sessions found.</td></tr>`;
+                    return;
+                }
+
+                data.forEach(session => {
+                    const row = document.createElement('tr');
+                    
+                    const paymentStatusClass = session.paymentStatus === 'succeeded' 
+                        ? 'bg-green-500 text-green-100' 
+                        : 'bg-yellow-500 text-yellow-100';
+
+                    row.innerHTML = `
+                        <td class="px-4 py-3 whitespace-nowrap text-sm">${session.createdAt}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm">
+                            <div class="font-medium">${session.deviceType}</div>
+                            <div class="text-gray-400">${session.trafficSource}</div>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm">
+                            <div class="font-medium">${session.ipAddress}</div>
+                            <div class="text-gray-400">${session.countryCode.toUpperCase()}</div>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm">
+                            <div class="font-medium">${session.gender}</div>
+                            <div class="text-gray-400">Age: ${session.age}</div>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.progress}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.duration}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">
+                                ${session.paymentStatus}
+                            </span>
+                            <div class="text-gray-400">${session.paymentAmount}</div>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm">
+                            <a href="/${session.resultLink}" target="_blank" class="text-purple-400 hover:text-purple-300">View Report</a>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
