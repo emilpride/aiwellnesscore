@@ -111,9 +111,8 @@
             { key: 'name', type: 'question', text: "What should I call you?", placeholder: "Type your name..." },
             { key: 'intro_purpose', type: 'message', text: (name) => `Great to meet you, ${name}! Here's a quick look at what we'll uncover together...` },
             { key: 'intro_privacy', type: 'message', text: "To start, I'll ask a few questions about your lifestyle. Your answers are confidential and are deleted after the analysis." },
-            { key: 'start_consent', type: 'question', text: "Ready to begin?", options: ["Yes, let's start!"], hideInput: true },
+            { key: 'start_consent', type: 'question', text: "Ready to begin?", options: ["Yes, let's start!"] },
             
-            // НОВЫЕ ВОПРОСЫ С КРУТИЛКАМИ И РАСШИРЕННЫМИ ВАРИАНТАМИ
             { key: 'age', type: 'scroller', text: "To start, what's your age? 🎂", min: 16, max: 80, initial: 28, unit: 'years' },
             { key: 'gender', type: 'question', text: "Great start! Now, what's your biological sex? 🧬", options: ['Male', 'Female'] },
             { key: 'height', type: 'scroller', text: "Perfect. And what is your height? 📏", min: 140, max: 220, initial: 175, unit: 'cm' },
@@ -137,7 +136,6 @@
         // --- Core Quiz Logic ---
         
         async function startQuizSession() {
-            // Эта функция остается без изменений
             try {
                 const urlParams = new URLSearchParams(window.location.search);
                 const utmSource = urlParams.get('utm_source');
@@ -192,11 +190,15 @@
             addUserMessage(typeof answer === 'string' ? answer : `${answer} ${currentQuestion.unit || ''}`);
             userAnswers[currentQuestion.key] = answer;
             saveAnswerToServer(currentQuestion.key, answer);
-            userInput.value = '';
+            
+            // Очистка полей ввода и кнопок
+            const userInputEl = document.getElementById('user-input');
+            if (userInputEl) userInputEl.value = '';
             inputArea.innerHTML = '';
             inputArea.classList.add('hidden');
             optionsContainerWrapper.classList.add('hidden');
             optionsContainer.innerHTML = '';
+
             currentQuestionIndex++;
             updateProgressBar();
             askNextQuestion();
@@ -206,7 +208,7 @@
             if (currentQuestionIndex >= quizQuestions.length) return;
             const question = quizQuestions[currentQuestionIndex];
             showTypingIndicator();
-            const delay = question.delayBefore || 1500;
+            const delay = question.delayBefore || 1200;
             
             setTimeout(() => {
                 hideTypingIndicator();
@@ -215,12 +217,14 @@
                 if (question.type === 'message') {
                     addBotMessage(questionText, question.key);
                     currentQuestionIndex++;
-                    setTimeout(askNextQuestion, 0);
+                    askNextQuestion(); // Сразу переходим к следующему вопросу
                 } else if (question.type === 'question') {
                     addBotMessage(questionText, question.key);
-                    const optionButtons = question.options.map(opt => ({ text: opt, class: 'option-btn bg-white border border-purple-300 text-purple-600 px-4 py-2 rounded-full text-sm flex-shrink-0 hover:bg-purple-50' }));
-                    const handlers = question.options.map(opt => () => handleAnswer(opt));
-                    showOptions(optionButtons, handlers);
+                    if (question.options) {
+                        const optionButtons = question.options.map(opt => ({ text: opt, class: 'option-btn bg-white border border-purple-300 text-purple-600 px-4 py-2 rounded-full text-sm flex-shrink-0 hover:bg-purple-50' }));
+                        const handlers = question.options.map(opt => () => handleAnswer(opt));
+                        showOptions(optionButtons, handlers);
+                    }
                     if (question.placeholder) {
                         inputArea.innerHTML = `<div class="flex items-center gap-2"><input type="text" id="user-input" placeholder="${question.placeholder}" class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500"><button id="send-btn" class="bg-purple-600 text-white rounded-full p-3 hover:bg-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg></button></div>`;
                         inputArea.classList.remove('hidden');
@@ -238,7 +242,6 @@
             }, delay);
         }
 
-        // --- НОВАЯ ФУНКЦИЯ ДЛЯ СКРОЛЛЕРА ---
         function displayNumberScroller(key, min, max, initial, unit) {
             let selectedValue = initial;
             optionsContainer.innerHTML = `
@@ -248,7 +251,6 @@
                 </div>
             `;
             const wrapper = document.getElementById('scroller-wrapper');
-            // Добавляем пустые элементы для центрирования по краям
             wrapper.innerHTML += '<div style="flex: 0 0 50%;"></div>';
             for (let i = min; i <= max; i++) {
                 const item = document.createElement('div');
@@ -260,15 +262,13 @@
             }
             wrapper.innerHTML += '<div style="flex: 0 0 50%;"></div>';
             
-            // Прокрутка к начальному элементу
             const initialEl = wrapper.querySelector(`[data-value="${initial}"]`);
             if (initialEl) {
                 setTimeout(() => {
-                    initialEl.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+                    initialEl.scrollIntoView({ behavior: 'auto', inline: 'center' });
                 }, 100);
             }
 
-            // Логика определения активного элемента при скролле
             wrapper.addEventListener('scroll', () => {
                 clearTimeout(scrollerTimeout);
                 scrollerTimeout = setTimeout(() => {
@@ -293,23 +293,19 @@
                         closestEl.classList.add('active');
                         selectedValue = parseInt(closestEl.dataset.value);
                     }
-                }, 150); // Задержка для определения окончания скролла
+                }, 150);
             });
 
             optionsContainerWrapper.classList.remove('hidden');
             
-            // Кнопка подтверждения
-            inputArea.innerHTML = `<button id="confirm-btn" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-full hover:bg-purple-700 transition-colors">Confirm</button>`;
+            inputArea.innerHTML = `<button id="confirm-btn" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-full hover:bg-purple-700 transition-colors">Confirm ${unit}</button>`;
             inputArea.classList.remove('hidden');
             document.getElementById('confirm-btn').onclick = () => handleAnswer(selectedValue);
         }
 
         // --- Остальные функции (без изменений) ---
-        // (Здесь должны быть все остальные ваши функции: saveAnswerToServer, proceedToAnalysis, updateProgressBar, showTypingIndicator, hideTypingIndicator, addBotMessage, addUserMessage, showOptions, и т.д.)
-        // Копирую их без изменений для полноты файла.
-
         async function saveAnswerToServer(questionKey, answer) { if (!sessionId) return; try { await fetch('/.netlify/functions/quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'saveAnswer', sessionId: sessionId, questionId: questionKey, answer: answer }) }); } catch (error) { console.error('Failed to save answer:', error); } }
-        async function proceedToAnalysis() { addBotMessage("Analyzing your photo with our AI... This may take a moment."); showTypingIndicator(); try { const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photoDataUrl: capturedPhotoDataUrl }) }); if (!analyzeResponse.ok) throw new Error('Skin analysis API returned an error.'); const analysisResult = await analyzeResponse.json(); await saveAnswerToServer('faceAnalysis', analysisResult); hideTypingIndicator(); showCompletionAnimation(); } catch (error) { hideTypingIndicator(); console.error('Error during photo analysis:', error); addBotMessage("I had a little trouble with the photo analysis, but we can still generate a report from your answers. Continuing..."); showCompletionAnimation(); } }
+        async function proceedToAnalysis() { addBotMessage("Analyzing your photo with our AI... This may take a moment."); showTypingIndicator(); try { const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photoDataUrl: capturedPhotoDataUrl }) }); if (!analyzeResponse.ok) throw new Error('Skin analysis API returned an error.'); const analysisResult = await analyzeResponse.json(); await saveAnswerToServer('faceAnalysis', analysisResult); hideTypingIndicator(); /* Логика после анализа, например, переход к оплате или результатам */ } catch (error) { hideTypingIndicator(); console.error('Error during photo analysis:', error); addBotMessage("I had a little trouble with the photo analysis, but we can still generate a report from your answers. Continuing..."); } }
         function updateProgressBar() { const questionKeys = quizQuestions.filter(q => q.type === 'question' || q.type === 'scroller').map(q => q.key); const totalSteps = questionKeys.length + 1; const completedAnswers = Object.keys(userAnswers).filter(key => questionKeys.includes(key)).length; const photoStepCompleted = userAnswers['selfie'] ? 1 : 0; const progress = ((completedAnswers + photoStepCompleted) / totalSteps) * 100; progressBar.style.width = `${progress}%`; }
         function showTypingIndicator() { const typingDiv = document.createElement('div'); typingDiv.id = 'typing-indicator'; typingDiv.className = 'flex justify-start mb-4 chat-bubble'; const avatarId = `avatar-lottie-${Date.now()}`; typingDiv.innerHTML = `<div id="${avatarId}" class="bot-avatar-lottie mr-3 flex-shrink-0"></div><div class="bg-gray-200 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`; chatContainer.appendChild(typingDiv); lottie.loadAnimation({ container: document.getElementById(avatarId), renderer: 'svg', loop: true, autoplay: true, path: 'avatar.json' }); scrollToBottom(); }
         function hideTypingIndicator() { document.getElementById('typing-indicator')?.remove(); }
@@ -325,6 +321,7 @@
         function showPhotoForConfirmation() { const d = document.createElement('div'); d.id = 'photo-preview-wrapper'; d.className = 'flex justify-start mb-4 chat-bubble'; const i = `<div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs"><p class="mb-2">Here's the photo. Happy with it?</p><img src="${capturedPhotoDataUrl}" alt="Your selfie" class="rounded-lg"/></div>`; d.innerHTML = `<div class="w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 bot-avatar-lottie overflow-hidden" id="photo-confirm-avatar"></div>${i}`; chatContainer.appendChild(d); lottie.loadAnimation({ container: document.getElementById('photo-confirm-avatar'), renderer: 'svg', loop: false, autoplay: true, path: 'avatar.json' }); scrollToBottom(); const o = [ { text: 'Looks Good!', class: 'option-btn bg-green-500 border-green-600 text-white px-4 py-2 rounded-full text-sm flex-shrink-0 font-semibold' }, { text: 'Retake', class: 'option-btn bg-white border-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm flex-shrink-0' } ]; const h = [startAnalysisAndShowForm, retakePhoto]; showOptions(o, h); }
         function retakePhoto() { addUserMessage("Retake"); document.getElementById('photo-preview-wrapper')?.remove(); optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); startCamera(); }
         
+        // --- Initial Call ---
         async function initQuiz() {
             setAppHeight();
             await startQuizSession();
