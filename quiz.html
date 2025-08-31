@@ -68,6 +68,10 @@
         // --- DOM Elements & State ---
         const mainContainer = document.getElementById('main-container'), chatContainer = document.getElementById('chat-container'), optionsContainer = document.getElementById('options-container'), optionsContainerWrapper = document.getElementById('options-container-wrapper'), inputArea = document.getElementById('input-area'), progressBar = document.getElementById('progress-bar'), cameraModal = document.getElementById('camera-modal'), video = document.getElementById('camera-video'), canvas = document.getElementById('camera-canvas'), cameraLoader = document.getElementById('camera-loader'), loaderText = document.getElementById('loader-text'), cameraStatus = document.getElementById('camera-status'), paymentFormContainer = document.getElementById('payment-form-container');
         let sessionId = null, userAnswers = {}, currentQuestionIndex = 0, detectionInterval, stream, capturedPhotoDataUrl = null, scrollerTimeout, countdownInterval;
+        
+        // --- Utility Functions ---
+        const setAppHeight = () => { mainContainer.style.height = `${window.innerHeight}px`; };
+        const scrollToBottom = () => { setTimeout(() => { chatContainer.scrollTop = chatContainer.scrollHeight; }, 0); };
 
         // --- Quiz Data ---
         const quizQuestions = [
@@ -95,7 +99,6 @@
         ];
 
         // --- Core Quiz Logic ---
-        
         async function startQuizSession() {
             try {
                 const urlParams = new URLSearchParams(window.location.search);
@@ -123,27 +126,23 @@
             addUserMessage(typeof answer === 'string' ? answer : `${answer} ${currentQuestion.unit || ''}`);
             userAnswers[currentQuestion.key] = answer;
             saveAnswerToServer(currentQuestion.key, answer);
-            
             const userInputEl = document.getElementById('user-input');
             if (userInputEl) userInputEl.value = '';
             inputArea.innerHTML = '';
             inputArea.classList.add('hidden');
             optionsContainerWrapper.classList.add('hidden');
             optionsContainer.innerHTML = '';
-
             currentQuestionIndex++;
             updateProgressBar();
             askNextQuestion();
         }
 
-        // ПЕРЕПИСАННАЯ ФУНКЦИЯ ДЛЯ СТАБИЛЬНОЙ РАБОТЫ
         function askNextQuestion() {
             if (currentQuestionIndex >= quizQuestions.length) return;
             const question = quizQuestions[currentQuestionIndex];
-            const isInteractive = question.type === 'question' || question.type === 'scroller' || question.type === 'final_step';
-
             showTypingIndicator();
-
+            const delay = question.delayBefore || 1200;
+            
             setTimeout(() => {
                 try {
                     hideTypingIndicator();
@@ -152,7 +151,7 @@
 
                     if (question.type === 'message') {
                         currentQuestionIndex++;
-                        setTimeout(askNextQuestion, 600); // Небольшая задержка перед следующим сообщением
+                        setTimeout(askNextQuestion, 600);
                     } else if (question.type === 'question') {
                         if (question.options) {
                             const optionButtons = question.options.map(opt => ({ text: opt, class: 'option-btn bg-white border border-purple-300 text-purple-600 px-4 py-2 rounded-full text-sm flex-shrink-0 hover:bg-purple-50' }));
@@ -174,7 +173,7 @@
                     console.error("Error processing question:", error);
                     addBotMessage("An error occurred. Please refresh and try again.");
                 }
-            }, 1200);
+            }, delay);
         }
 
         function displayNumberScroller(min, max, initial, unit) {
@@ -217,7 +216,6 @@
 
         // --- Initial Call ---
         async function initQuiz() {
-            const setAppHeight = () => { mainContainer.style.height = `${window.innerHeight}px`; };
             setAppHeight();
             window.addEventListener('resize', setAppHeight);
             inputArea.classList.add('hidden');
