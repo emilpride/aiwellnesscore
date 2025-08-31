@@ -204,7 +204,7 @@
             { key: 'processed_food', type: 'question', text: "Honesty is the best policy here. 😉 How often do you eat processed or fast food in a typical week?", options: ["Rarely", "1-2 times", "3-4 times", "Daily"], hideInput: true },
             { key: 'hydration', type: 'question', text: "Hydration check! 💧 How many glasses of water (approx. 8 oz) do you drink per day?", options: ["1-3 glasses", "4-6 glasses", "7-9 glasses", "10+ glasses"], hideInput: true },
             { key: 'hydration_visual', type: 'message', text: "Let's see your hydration level:"},
-            { key: 'stress', type: 'slider', text: "Now for the mind. 🧠 On a scale of 1 to 10, how would you rate your typical stress level?", label: "Drag to indicate your stress level", min: 1, max: 10, step: 1, defaultValue: 5, unit: 'stress', isGradient: true },
+            { key: 'stress', type: 'slider', text: "Now for the mind. 🧠 How would you rate your typical stress level?", label: "Drag to indicate your stress level", min: 1, max: 10, step: 1, defaultValue: 5, unit: 'stress', isGradient: true },
             { key: 'stress_gauge', type: 'message', text: "Thanks for sharing. Here's what that looks like:"},
             { key: 'mindfulness', type: 'question', text: "Finding calm is a superpower. 🧘‍♂️ How often do you practice mindfulness, meditation, or deep breathing?", options: ["Never", "Occasionally", "Weekly", "Daily"], hideInput: true },
             { key: 'mood', type: 'question', text: "Let's check in with your emotions. ❤️ How would you describe your overall mood on a typical day?", options: ["Happy & Energetic", "Generally Content", "It varies a lot", "Often Stressed or Sad"], hideInput: true },
@@ -389,7 +389,64 @@
         function showPaymentForm() { optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); const formHtml = ` <div class="p-4 bg-gray-50 border-t"> <div class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6"> <div class="text-center mb-6"> <h2 class="text-2xl font-bold text-gray-800">Secure Checkout</h2> <p class="text-gray-500">Unlock your full wellness report</p> </div> <div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-6"> <p class="text-sm font-medium">Special offer ends in:</p> <p id="countdown-timer" class="text-2xl font-bold tracking-wider">10:00</p> </div> <div class="flex justify-between items-center mb-6 pb-4 border-b"> <span class="text-gray-600">Full Wellness Report</span> <div class="text-right"> <span class="text-xl font-bold text-gray-800">$9.99</span> <span class="text-sm text-gray-400 line-through ml-2">$24.99</span> </div> </div> <div class="space-y-4"> <div> <label for="card-number" class="text-sm font-medium text-gray-700">Card Information</label> <div class="mt-1 flex items-center relative border border-gray-300 rounded-md shadow-sm focus-within:ring-1 focus-within:ring-purple-500 focus-within:border-purple-500"> <input type="text" id="card-number" class="block w-full border-0 p-3 rounded-md placeholder-gray-400 focus:ring-0 sm:text-sm" placeholder="Card Number"> <div class="absolute right-3 flex items-center space-x-1 pointer-events-none"> <img src="https://img.icons8.com/color/48/000000/visa.png" class="h-6"/> <img src="https://img.icons8.com/color/48/000000/mastercard-logo.png" class="h-6"/> </div> </div> </div> <div class="flex space-x-4"> <div class="w-1/2"> <label for="expiry-date" class="text-sm font-medium text-gray-700">Expiration</label> <input type="text" id="expiry-date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="MM / YY"> </div> <div class="w-1/2"> <label for="cvc" class="text-sm font-medium text-gray-700">CVC</label> <input type="text" id="cvc" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="123"> </div> </div> </div> <button id="pay-btn" class="mt-8 w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"> Pay $9.99 Now </button> <div class="mt-4 flex items-center justify-center text-xs text-gray-400"> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002 2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg> Secure payment processing </div> </div> </div>`; paymentFormContainer.innerHTML = formHtml; paymentFormContainer.classList.remove('hidden'); scrollToBottom(); document.getElementById('pay-btn').onclick = handlePayment; startCountdown(); }
         function startCountdown() { let duration = 600; const timerEl = document.getElementById('countdown-timer'); if (!timerEl) return; countdownInterval = setInterval(() => { const minutes = Math.floor(duration / 60).toString().padStart(2, '0'); const seconds = (duration % 60).toString().padStart(2, '0'); timerEl.textContent = `${minutes}:${seconds}`; duration--; if (duration < 0) { clearInterval(countdownInterval); timerEl.textContent = "00:00"; const payBtn = document.getElementById('pay-btn'); if (payBtn) { payBtn.textContent = "Offer Expired"; payBtn.disabled = true; } } }, 1000); }
         function handlePayment() { clearInterval(countdownInterval); paymentFormContainer.innerHTML = ''; paymentFormContainer.classList.add('hidden'); showTypingIndicator(); setTimeout(() => { hideTypingIndicator(); addBotMessage("Thank you! Your payment is being processed. (This is a demo and no payment was taken)."); }, 1500); }
-        function showCompletionAnimation() { confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } }); showTypingIndicator(); setTimeout(() => { hideTypingIndicator(); addBotMessage("Awesome work! You've completed the assessment. 🥳 I'm now analyzing your results..."); inputArea.innerHTML = ` <div class="analysis-container"> <div id="analysis-animation" class="analysis-animation"></div> <p id="analysis-text">Initializing analysis...</p> </div>`; inputArea.classList.remove('hidden'); scrollToBottom(); lottie.loadAnimation({ container: document.getElementById('analysis-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'https://lottie.host/5ef99ece-46b7-41a8-8097-75a7c2e0b5e8/lQ8Ti3k82G.json' }); const analysisSteps = [ "Analyzing your data...", "Checking lifestyle factors...", "Scanning skin health...", "Calculating biological age...", "Almost ready..." ]; const analysisTextElement = document.getElementById('analysis-text'); let currentStep = 0; const intervalId = setInterval(() => { if (currentStep < analysisSteps.length) { analysisTextElement.style.opacity = '0'; setTimeout(() => { analysisTextElement.textContent = analysisSteps[currentStep]; analysisTextElement.style.opacity = '1'; }, 500); currentStep++; } else { clearInterval(intervalId); } }, 1600); setTimeout(() => { inputArea.classList.add('hidden'); showTypingIndicator(); setTimeout(() => { hideTypingIndicator(); addBotMessage("Great! Your preliminary analysis is complete. Just one final step to unlock your full, personalized report."); showPaymentForm(); }, 1200); }, analysisSteps.length * 1600 + 500); }, 1000); }
+        
+        // --- ИЗМЕНЕННАЯ ФУНКЦИЯ С ВСТРОЕННОЙ АНИМАЦИЕЙ ---
+        function showCompletionAnimation() {
+            const analysisAnimationData = {"v":"5.9.6","fr":60,"ip":0,"op":120,"w":200,"h":200,"nm":"loader","ddd":0,"assets":[],"layers":[{"ddd":0,"ind":1,"ty":4,"nm":"loading circle Outlines","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":0,"ix":10},"p":{"a":0,"k":[100,100,0],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":0,"k":{"i":[[-5.5,0],[0,0]],"o":[[0,0],[5.5,0]],"v":[[0,-25],[0,0]],"c":false},"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"tm","s":{"a":1,"k":[{"i":{"x":[0.833],"y":[0.833]},"o":{"x":[0.167],"y":[0.167]},"t":0,"s":[0],"e":[100]},{"t":59,"s":[100]}],"ix":1},"e":{"a":0,"k":360,"ix":2},"o":{"a":0,"k":0,"ix":3},"m":1,"ix":2,"nm":"Trim Paths 1"},{"ty":"st","c":{"a":0,"k":[0.49,0.275,0.941,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":4,"ix":5},"lc":2,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false}],"nm":"Shape 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false}],"ip":0,"op":180,"st":0,"bm":0}]};
+            
+            confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } }); 
+            showTypingIndicator(); 
+            setTimeout(() => { 
+                hideTypingIndicator(); 
+                addBotMessage("Awesome work! You've completed the assessment. 🥳 I'm now analyzing your results..."); 
+                inputArea.innerHTML = `
+                <div class="analysis-container">
+                    <div id="analysis-animation" class="analysis-animation"></div>
+                    <p id="analysis-text">Initializing analysis...</p>
+                </div>`; 
+                inputArea.classList.remove('hidden'); 
+                scrollToBottom(); 
+
+                lottie.loadAnimation({
+                    container: document.getElementById('analysis-animation'),
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    animationData: analysisAnimationData // Используем встроенные данные вместо ссылки
+                });
+
+                const analysisSteps = [ 
+                    "Analyzing your data...", 
+                    "Checking lifestyle factors...", 
+                    "Scanning skin health...", 
+                    "Calculating biological age...", 
+                    "Almost ready..." 
+                ];
+                const analysisTextElement = document.getElementById('analysis-text'); 
+                let currentStep = 0; 
+                const intervalId = setInterval(() => { 
+                    if (currentStep < analysisSteps.length) { 
+                        analysisTextElement.style.opacity = '0'; 
+                        setTimeout(() => { 
+                            analysisTextElement.textContent = analysisSteps[currentStep]; 
+                            analysisTextElement.style.opacity = '1'; 
+                        }, 500); 
+                        currentStep++; 
+                    } else { 
+                        clearInterval(intervalId); 
+                    } 
+                }, 1600);
+                setTimeout(() => { 
+                    inputArea.classList.add('hidden'); 
+                    showTypingIndicator(); 
+                    setTimeout(() => { 
+                        hideTypingIndicator(); 
+                        addBotMessage("Great! Your preliminary analysis is complete. Just one final step to unlock your full, personalized report."); 
+                        showPaymentForm(); 
+                    }, 1200); 
+                }, analysisSteps.length * 1600 + 500); 
+            }, 1000); 
+        }
 
         // --- Initial Call ---
         async function initQuiz() {
