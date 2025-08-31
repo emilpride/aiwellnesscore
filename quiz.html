@@ -168,7 +168,7 @@
         let sessionId = null, userAnswers = {}, currentQuestionIndex = 0, detectionInterval, stream, capturedPhotoDataUrl = null, countdownInterval;
         const messageDelay = 1800;
         
-        // --- Quiz Data (ИСПРАВЛЕННАЯ ВЕРСИЯ С ЗАПЯТЫМИ) ---
+        // --- Quiz Data ---
         const quizQuestions = [
             { key: 'intro_dave', type: 'message', text: "Hey! I'm Dave, your personal AI wellness assistant today. 👋" },
             { key: 'name', type: 'question', text: "What should I call you?", options: [], placeholder: "Type your name..." },
@@ -181,7 +181,6 @@
             { key: 'intro_privacy', type: 'message', text: "And just to be clear about your privacy 🛡️: your photo is deleted immediately after the AI analysis, and your answers are wiped as soon as you get your report.", delayBefore: 3000 },
             { key: 'start_consent', type: 'question', text: "Ready to begin?", options: ["Yes, let's start!"], hideInput: true },
             
-            // --- Адаптированные вопросы с добавленным свойством 'label' ---
             { key: 'age', type: 'slider', text: (name) => `Perfect, ${name}! To start, what's your age? 🎂`, label: "Select your age", min: 18, max: 90, step: 1, defaultValue: 30, unit: 'years' },
             { key: 'gender', type: 'question', text: "Great start! Now, what's your biological sex? 🧬", options: ['Male', 'Female', 'Other'], hideInput: true },
             { key: 'height', type: 'slider', text: "Perfect. Let's talk about your height. 📏", label: "Select your height", min: 140, max: 220, step: 1, defaultValue: 175, unit: 'cm' },
@@ -240,7 +239,6 @@
         function addUserMessage(text) { const d = document.createElement('div'); d.className = 'flex justify-end mb-4 chat-bubble'; d.innerHTML = `<div class="bg-purple-600 text-white p-3 rounded-tl-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${text}</div>`; chatContainer.appendChild(d); scrollToBottom(); }
         function showOptions(options, handlers) { optionsContainer.innerHTML = ''; if (options?.length > 0) { optionsContainerWrapper.classList.remove('hidden'); options.forEach((option, index) => { const button = document.createElement('button'); button.textContent = option.text; button.className = option.class; button.onclick = handlers[index]; optionsContainer.appendChild(button); }); } else { optionsContainerWrapper.classList.add('hidden'); } }
         
-        // --- ИСПРАВЛЕННАЯ ФУНКЦИЯ ДЛЯ СЛАЙДЕРА ---
         function showSlider(question) {
             optionsContainer.innerHTML = '';
             optionsContainerWrapper.classList.remove('hidden');
@@ -249,19 +247,19 @@
             sliderWrapper.className = 'slider-widget w-full';
 
             const formatDisplayValue = (value) => {
+                // --- ИЗМЕНЕННАЯ ЛОГИКА ОТОБРАЖЕНИЯ ---
                 if (question.unit === 'cm') {
                     const feet = Math.floor(value / 30.48);
                     const inches = Math.round((value % 30.48) / 2.54);
-                    return `${value} cm <span class="text-lg ml-2 text-purple-400">(${feet}'${inches}")</span>`;
+                    return `${feet}'${inches}" <span class="text-lg ml-2 text-purple-400">(${value} cm)</span>`;
                 }
                 if (question.unit === 'kg') {
                     const lbs = (value * 2.20462).toFixed(0);
-                    return `${value} kg <span class="text-lg ml-2 text-purple-400">(${lbs} lbs)</span>`;
+                    return `${lbs} lbs <span class="text-lg ml-2 text-purple-400">(${value} kg)</span>`;
                 }
                 return `${value} ${question.unit}`;
             };
 
-            // ИСПРАВЛЕНИЕ: Используем `question.label` для подписи внутри виджета.
             sliderWrapper.innerHTML = `
                 <div class="text-center">
                     <div id="slider-value-display" class="slider-value">${formatDisplayValue(question.defaultValue)}</div>
@@ -282,13 +280,45 @@
             });
             
             confirmBtn.onclick = () => {
-                const finalValue = sliderInput.value;
-                const answerText = question.unit === 'cm' || question.unit === 'kg' ? `${finalValue}` : `${finalValue} ${question.unit}`;
-                handleAnswer(answerText);
+                const finalValue = sliderInput.value; // Это всегда метрическое значение для расчетов
+                
+                // Формируем красивый ответ для отображения в чате
+                let displayAnswerText = '';
+                 if (question.unit === 'cm') {
+                    const feet = Math.floor(finalValue / 30.48);
+                    const inches = Math.round((finalValue % 30.48) / 2.54);
+                    displayAnswerText = `${feet}'${inches}"`;
+                } else if (question.unit === 'kg') {
+                    const lbs = (finalValue * 2.20462).toFixed(0);
+                    displayAnswerText = `${lbs} lbs`;
+                } else {
+                    displayAnswerText = `${finalValue} ${question.unit}`;
+                }
+                
+                // Передаем два значения: одно для хранения, другое для отображения
+                handleAnswer(finalValue, displayAnswerText);
             };
         }
 
-        function handleAnswer(answer) { if (!answer.trim()) return; const currentQuestion = quizQuestions[currentQuestionIndex]; addUserMessage(answer); userAnswers[currentQuestion.key] = answer.trim().split(' ')[0]; saveAnswerToServer(currentQuestion.key, answer.trim()); userInput.value = ''; inputArea.classList.add('hidden'); optionsContainerWrapper.classList.add('hidden'); currentQuestionIndex++; updateProgressBar(); askNextQuestion(); }
+        // Функция адаптирована для приема двух аргументов
+        function handleAnswer(answerToStore, answerToDisplay) {
+            const valueToStore = (answerToStore || '').toString();
+            if (!valueToStore.trim()) return;
+
+            const valueToDisplay = answerToDisplay || valueToStore;
+            
+            const currentQuestion = quizQuestions[currentQuestionIndex];
+            addUserMessage(valueToDisplay);
+            userAnswers[currentQuestion.key] = valueToStore.trim().split(' ')[0];
+            saveAnswerToServer(currentQuestion.key, valueToStore.trim());
+            
+            userInput.value = '';
+            inputArea.classList.add('hidden');
+            optionsContainerWrapper.classList.add('hidden');
+            currentQuestionIndex++;
+            updateProgressBar();
+            askNextQuestion();
+        }
 
         function askNextQuestion() {
             if (currentQuestionIndex >= quizQuestions.length) return;
@@ -297,7 +327,6 @@
             const delay = question.delayBefore || messageDelay;
             setTimeout(() => {
                 hideTypingIndicator();
-                // ИСПРАВЛЕНИЕ: эта логика теперь безопасна, так как мы проверяем тип question.text
                 let questionText = typeof question.text === 'function' ? question.text(userAnswers.name || 'friend') : question.text;
                 let postAnimationDelay = question.postAnimationDelay || 0;
 
