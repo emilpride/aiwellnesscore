@@ -321,93 +321,39 @@
         function showPhotoForConfirmation() { const d = document.createElement('div'); d.id = 'photo-preview-wrapper'; d.className = 'flex justify-start mb-4 chat-bubble'; const i = `<div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs"><p class="mb-2">Here's the photo. Happy with it?</p><img src="${capturedPhotoDataUrl}" alt="Your selfie" class="rounded-lg"/></div>`; d.innerHTML = `<div class="w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 bot-avatar-lottie overflow-hidden" id="photo-confirm-avatar"></div>${i}`; chatContainer.appendChild(d); lottie.loadAnimation({ container: document.getElementById('photo-confirm-avatar'), renderer: 'svg', loop: false, autoplay: true, path: 'avatar.json' }); scrollToBottom(); const o = [ { text: 'Looks Good!', class: 'option-btn bg-green-500 border-green-600 text-white px-4 py-2 rounded-full text-sm flex-shrink-0 font-semibold' }, { text: 'Retake', class: 'option-btn bg-white border-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm flex-shrink-0' } ]; const h = [startAnalysisAndShowForm, retakePhoto]; showOptions(o, h); inputArea.classList.add('hidden'); }
         function retakePhoto() { addUserMessage("Retake"); document.getElementById('photo-preview-wrapper')?.remove(); optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); startCamera(); }
         
-        // --- ОБНОВЛЕННАЯ ЛОГИКА ОПЛАТЫ ---
-        let stripe, elements; // Сделаем переменные глобальными для доступа
+        let stripe, elements, clientSecret;
 
         async function showPaymentForm() {
-            optionsContainerWrapper.classList.add('hidden');
-            inputArea.classList.add('hidden');
-
-            const formHtml = `
-            <div class="p-4 bg-gray-50 border-t">
-                <div id="payment-wrapper" class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6">
-                    <div class="text-center mb-4">
-                        <h2 class="text-2xl font-bold text-gray-800">Unlock Full Report</h2>
-                    </div>
-
-                    <div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-4">
-                        <p class="text-sm font-medium">Limited Time Offer (-30%)</p>
-                        <p id="countdown-timer" class="text-2xl font-bold tracking-wider">10:00</p>
-                    </div>
-
-                    <div class="text-center mb-4">
-                        <span class="text-3xl font-bold text-gray-800">$9.99</span>
-                        <span class="text-lg text-gray-400 line-through ml-2">$14.99</span>
-                    </div>
-
-                    <form id="payment-form" class="space-y-4">
-                        <div id="payment-request-button"></div>
-                        <div id="card-element" class="p-3 border border-gray-300 rounded-md shadow-sm"></div>
-                        <button id="submit-payment" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md">
-                            <span id="button-text">Pay now</span>
-                        </button>
-                        <div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div>
-                    </form>
-                </div>
-            </div>`;
-            paymentFormContainer.innerHTML = formHtml;
-            paymentFormContainer.classList.remove('hidden');
-            scrollToBottom();
-            startCountdown(); // Запускаем таймер
-
+            optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden');
+            const formHtml = `<div class="p-4 bg-gray-50 border-t"><div id="payment-wrapper" class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6"><div class="text-center mb-4"><h2 class="text-2xl font-bold text-gray-800">Unlock Full Report</h2></div><div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-4"><p class="text-sm font-medium">Limited Time Offer (-30%)</p><p id="countdown-timer" class="text-2xl font-bold tracking-wider">10:00</p></div><div class="text-center mb-4"><span class="text-3xl font-bold text-gray-800">$9.99</span><span class="text-lg text-gray-400 line-through ml-2">$14.99</span></div><form id="payment-form" class="space-y-4"><div id="payment-request-button"></div><div id="card-element" class="p-3 border border-gray-300 rounded-md shadow-sm"></div><button id="submit-payment" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md"><span id="button-text">Pay now</span></button><div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div></form></div></div>`;
+            paymentFormContainer.innerHTML = formHtml; paymentFormContainer.classList.remove('hidden'); scrollToBottom(); startCountdown();
             stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb');
-
             try {
                 const response = await fetch('/.netlify/functions/payment', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sessionId: sessionId })
                 });
-                const { clientSecret } = await response.json();
+                const data = await response.json();
+                clientSecret = data.clientSecret;
                 if (!clientSecret) throw new Error("Failed to get client secret");
-
                 elements = stripe.elements({ clientSecret });
-
-                // Google/Apple Pay Button
-                const paymentRequest = stripe.paymentRequest({
-                    country: 'US', currency: 'usd', total: { label: 'AI Wellness Report', amount: 999 },
-                    requestPayerName: true, requestPayerEmail: true,
-                });
-
+                const paymentRequest = stripe.paymentRequest({ country: 'US', currency: 'usd', total: { label: 'AI Wellness Report', amount: 999 }, requestPayerName: true, requestPayerEmail: true, });
                 const prButton = elements.create('paymentRequestButton', { paymentRequest });
                 const prButtonElement = document.getElementById('payment-request-button');
                 const canMakePayment = await paymentRequest.canMakePayment();
-                if (canMakePayment) {
-                    prButton.mount(prButtonElement);
-                } else {
-                    prButtonElement.style.display = 'none';
-                }
-
+                if (canMakePayment) { prButton.mount(prButtonElement); } else { prButtonElement.style.display = 'none'; }
                 paymentRequest.on('paymentmethod', async (ev) => {
                     const { paymentIntent, error: confirmError } = await stripe.confirmCardPayment(clientSecret, { payment_method: ev.paymentMethod.id }, { handleActions: false });
-                    if (confirmError) {
-                        ev.complete('fail');
-                        document.getElementById('payment-message').textContent = confirmError.message;
+                    if (confirmError) { ev.complete('fail'); document.getElementById('payment-message').textContent = confirmError.message;
                     } else {
                         ev.complete('success');
-                        if (paymentIntent.status === "requires_action") {
-                            const { error } = await stripe.confirmCardPayment(clientSecret);
-                            if (error) { document.getElementById('payment-message').textContent = error.message; } else { handleSuccessfulPayment(); }
+                        if (paymentIntent.status === "requires_action") { const { error } = await stripe.confirmCardPayment(clientSecret); if (error) { document.getElementById('payment-message').textContent = error.message; } else { handleSuccessfulPayment(); }
                         } else { handleSuccessfulPayment(); }
                     }
                 });
-
-                // Compact Card Element
                 const cardElement = elements.create("card");
                 cardElement.mount("#card-element");
-
                 document.getElementById('payment-form').addEventListener('submit', handlePayment);
-
             } catch (error) {
                 console.error("Failed to initialize payment form:", error);
                 document.getElementById('payment-wrapper').innerHTML = `<p class="text-center text-red-500">Could not load payment form. Please check Stripe configuration and refresh.</p>`;
@@ -418,29 +364,18 @@
             e.preventDefault();
             const submitButton = document.getElementById('submit-payment');
             const messageDiv = document.getElementById('payment-message');
-            
             submitButton.disabled = true;
             messageDiv.classList.add('hidden');
             
-            const cardElement = elements.getElement('card');
-
-            const { error } = await stripe.confirmPayment({
-                elements,
-                confirmParams: {
-                    // Убеждаемся, что Stripe знает, куда вернуться после 3D Secure
-                    return_url: window.location.href.split('?')[0],
-                },
+            const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: { card: elements.getElement('card') }
             });
 
             if (error) {
-                if (error.type === "card_error" || error.type === "validation_error") {
-                    messageDiv.textContent = error.message;
-                } else {
-                    messageDiv.textContent = "An unexpected error occurred.";
-                }
+                messageDiv.textContent = error.message;
                 messageDiv.classList.remove('hidden');
                 submitButton.disabled = false;
-            } else {
+            } else if (paymentIntent && paymentIntent.status === 'succeeded') {
                 handleSuccessfulPayment();
             }
         }
@@ -460,10 +395,7 @@
                 const seconds = (duration % 60).toString().padStart(2, '0');
                 timerEl.textContent = `${minutes}:${seconds}`;
                 duration--;
-                if (duration < 0) {
-                    clearInterval(countdownInterval);
-                    timerEl.textContent = "00:00";
-                }
+                if (duration < 0) { clearInterval(countdownInterval); timerEl.textContent = "00:00"; }
             }, 1000);
         }
         
