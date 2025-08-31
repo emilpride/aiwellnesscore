@@ -48,8 +48,8 @@
         .slider-value {
             font-size: 2.5rem;
             font-weight: 800;
-            color: #5b21b6;
             line-height: 1;
+            transition: color 0.3s ease;
         }
         .slider-label {
             font-size: 0.875rem;
@@ -68,26 +68,36 @@
             opacity: 0.7;
             transition: opacity .2s;
         }
+        .slider-input-gradient {
+            background: linear-gradient(to right, #22c55e, #facc15, #ef4444);
+        }
         .slider-input:hover { opacity: 1; }
         .slider-input::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
             width: 24px;
             height: 24px;
-            background: #8b5cf6;
+            background: white;
             cursor: pointer;
             border-radius: 50%;
-            border: 3px solid white;
+            border: 4px solid #8b5cf6;
             box-shadow: 0 0 5px rgba(0,0,0,0.2);
         }
         .slider-input::-moz-range-thumb {
             width: 24px;
             height: 24px;
-            background: #8b5cf6;
+            background: white;
             cursor: pointer;
             border-radius: 50%;
-            border: 3px solid white;
+            border: 4px solid #8b5cf6;
             box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+        .slider-markers {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin: 0.25rem 0.25rem 0;
         }
         .confirm-btn {
             margin-top: 1rem;
@@ -194,7 +204,7 @@
             { key: 'processed_food', type: 'question', text: "Honesty is the best policy here. 😉 How often do you eat processed or fast food in a typical week?", options: ["Rarely", "1-2 times", "3-4 times", "Daily"], hideInput: true },
             { key: 'hydration', type: 'question', text: "Hydration check! 💧 How many glasses of water (approx. 8 oz) do you drink per day?", options: ["1-3 glasses", "4-6 glasses", "7-9 glasses", "10+ glasses"], hideInput: true },
             { key: 'hydration_visual', type: 'message', text: "Let's see your hydration level:"},
-            { key: 'stress', type: 'slider', text: "Now for the mind. 🧠 On a scale of 1 to 10, how would you rate your typical stress level?", label: "Select stress level", min: 1, max: 10, step: 1, defaultValue: 5, unit: '/ 10' },
+            { key: 'stress', type: 'slider', text: "Now for the mind. 🧠 On a scale of 1 to 10, how would you rate your typical stress level?", label: "Drag to indicate your stress level", min: 1, max: 10, step: 1, defaultValue: 5, unit: 'stress', isGradient: true },
             { key: 'stress_gauge', type: 'message', text: "Thanks for sharing. Here's what that looks like:"},
             { key: 'mindfulness', type: 'question', text: "Finding calm is a superpower. 🧘‍♂️ How often do you practice mindfulness, meditation, or deep breathing?", options: ["Never", "Occasionally", "Weekly", "Daily"], hideInput: true },
             { key: 'mood', type: 'question', text: "Let's check in with your emotions. ❤️ How would you describe your overall mood on a typical day?", options: ["Happy & Energetic", "Generally Content", "It varies a lot", "Often Stressed or Sad"], hideInput: true },
@@ -247,6 +257,11 @@
             sliderWrapper.className = 'slider-widget w-full';
 
             const formatDisplayValue = (value) => {
+                if (question.unit === 'stress') {
+                    if (value <= 3) return `<span style="color: #22c55e;">Low</span>`;
+                    if (value <= 7) return `<span style="color: #f59e0b;">Medium</span>`;
+                    return `<span style="color: #ef4444;">High</span>`;
+                }
                 if (question.unit === 'cm') {
                     const feet = Math.floor(value / 30.48);
                     const inches = Math.round((value % 30.48) / 2.54);
@@ -259,12 +274,16 @@
                 return `${value} ${question.unit}`;
             };
 
+            const sliderInputClass = question.isGradient ? 'slider-input slider-input-gradient' : 'slider-input';
+            const markersHTML = question.isGradient ? `<div class="slider-markers"><span>Low</span><span>Medium</span><span>High</span></div>` : '';
+
             sliderWrapper.innerHTML = `
                 <div class="text-center">
                     <div id="slider-value-display" class="slider-value">${formatDisplayValue(question.defaultValue)}</div>
                     <div class="slider-label">${question.label}</div>
                 </div>
-                <input type="range" min="${question.min}" max="${question.max}" value="${question.defaultValue}" step="${question.step}" class="slider-input" id="slider-input-range">
+                <input type="range" min="${question.min}" max="${question.max}" value="${question.defaultValue}" step="${question.step}" class="${sliderInputClass}" id="slider-input-range">
+                ${markersHTML}
                 <button id="slider-confirm-btn" class="confirm-btn">Confirm</button>
             `;
 
@@ -281,7 +300,12 @@
             confirmBtn.onclick = () => {
                 const finalValue = sliderInput.value;
                 let displayAnswerText = '';
-                 if (question.unit === 'cm') {
+
+                if (question.unit === 'stress') {
+                    if (finalValue <= 3) displayAnswerText = 'Low';
+                    else if (finalValue <= 7) displayAnswerText = 'Medium';
+                    else displayAnswerText = 'High';
+                } else if (question.unit === 'cm') {
                     const feet = Math.floor(finalValue / 30.48);
                     const inches = Math.round((finalValue % 30.48) / 2.54);
                     displayAnswerText = `${feet}'${inches}"`;
@@ -291,6 +315,7 @@
                 } else {
                     displayAnswerText = `${finalValue} ${question.unit}`;
                 }
+                
                 handleAnswer(finalValue, displayAnswerText);
             };
         }
@@ -298,7 +323,6 @@
         function handleAnswer(answerToStore, answerToDisplay) {
             const valueToStore = (answerToStore || '').toString();
             if (!valueToStore.trim()) return;
-
             const valueToDisplay = answerToDisplay || valueToStore;
             
             const currentQuestion = quizQuestions[currentQuestionIndex];
@@ -335,7 +359,6 @@
                     
                     currentQuestionIndex++;
                     setTimeout(askNextQuestion, postAnimationDelay);
-
                 } else if (question.type === 'question') {
                     addBotMessage(questionText, question.key);
                     const optionButtons = question.options.map(opt => ({ text: opt, class: 'option-btn bg-white border border-purple-300 text-purple-600 px-4 py-2 rounded-full text-sm flex-shrink-0 hover:bg-purple-50' }));
@@ -343,12 +366,10 @@
                     showOptions(optionButtons, handlers);
                     if (question.hideInput) { inputArea.classList.add('hidden'); } else { inputArea.classList.remove('hidden'); userInput.placeholder = question.placeholder || "Type..."; }
                     if (!isMobile()) { userInput.focus(); }
-                
                 } else if (question.type === 'slider') {
                     addBotMessage(questionText, question.key);
                     inputArea.classList.add('hidden');
                     showSlider(question);
-                
                 } else if (question.type === 'final_step') {
                     inputArea.classList.add('hidden');
                     addBotMessage(questionText, question.key); showCameraStep();
