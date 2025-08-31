@@ -16,9 +16,7 @@
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧘</text></svg>">
     
-    <!-- PDF Generation Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- Chart.js for visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
@@ -31,20 +29,51 @@
         }
         .reveal.active { opacity: 1; transform: translateY(0); }
 
-        /* Styles for PDF output */
+        /* --- НОВЫЕ СТИЛИ ДЛЯ ЭКРАНА ЗАГРУЗКИ --- */
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            flex-direction: column;
+            transition: opacity 0.5s ease-out;
+        }
+        .spinner {
+            width: 56px;
+            height: 56px;
+            border: 5px solid #d1d5db;
+            border-bottom-color: #6366f1;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* --- КОНЕЦ СТИЛЕЙ ЗАГРУЗКИ --- */
+
         @media print {
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .no-print { display: none; }
-            .report-container {
-                box-shadow: none !important;
-                border: none !important;
-            }
+            .report-container { box-shadow: none !important; border: none !important; }
         }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased">
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <h2 id="loading-text" class="text-xl font-semibold text-gray-700 mt-6">Мы готовим ваш персональный отчет...</h2>
+        <p class="text-gray-500 mt-2">Это может занять до 20 секунд.</p>
+    </div>
+    
     <div class="relative overflow-hidden">
-        <!-- Background Gradient Blobs -->
         <div class="fixed -top-1/4 -left-32 w-[60rem] h-[60rem] bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 z-[-1] animate-pulse"></div>
         <div class="fixed -bottom-1/4 -right-32 w-[55rem] h-[55rem] bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 z-[-1] animate-pulse" style="animation-delay: 2s;"></div>
         
@@ -62,9 +91,8 @@
         </header>
 
         <main class="relative z-10">
-            <div id="report-content" class="container mx-auto px-6 py-12 md:py-20">
+            <div id="report-content" class="container mx-auto px-6 py-12 md:py-20" style="visibility: hidden;">
                 
-                <!-- Main Result Section -->
                 <section class="text-center report-container bg-white p-8 md:p-12 rounded-3xl shadow-2xl border border-gray-200 reveal">
                     <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Your Personalized Wellness Report</h1>
                     <p class="text-lg text-gray-600 mt-4">Hi <span id="user-name"></span>, here are the results from your analysis.</p>
@@ -84,12 +112,11 @@
                     </div>
                 </section>
                 
-                <!-- Main Score Gauge -->
                 <section id="gauge-section" class="mt-12 text-center bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-gray-200 reveal">
                     <h2 class="text-3xl font-bold text-center">Overall Wellness Score</h2>
                     <div class="relative w-full max-w-[280px] mx-auto mt-4">
                         <canvas id="wellnessGauge"></canvas>
-                        <div class="absolute inset-0 flex items-center justify-center">
+                         <div class="absolute inset-0 flex items-center justify-center">
                              <div class="text-center">
                                 <span id="gauge-score" class="text-5xl font-extrabold">0</span>
                                 <p class="font-semibold text-gray-600">out of 100</p>
@@ -99,36 +126,30 @@
                     <p id="wellness-score-desc" class="mt-4 text-gray-600 max-w-xl mx-auto"></p>
                 </section>
 
-
-                <!-- Age Factors Section -->
                 <section class="mt-12 grid md:grid-cols-2 gap-8 reveal" style="transition-delay: 0.2s;">
                     <div class="bg-white p-8 rounded-2xl border border-gray-200">
                         <div class="flex items-center gap-3">
                             <svg class="h-8 w-8 text-red-500"  fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
                             </svg>
                             <h3 class="text-2xl font-bold text-red-600">What's Increasing Your Age?</h3>
                         </div>
-                        <ul id="increasing-factors" class="mt-4 space-y-3 text-gray-700">
-                        </ul>
+                         <ul id="increasing-factors" class="mt-4 space-y-3 text-gray-700"></ul>
                     </div>
                      <div class="bg-white p-8 rounded-2xl border border-gray-200">
-                         <div class="flex items-center gap-3">
+                          <div class="flex items-center gap-3">
                             <svg class="h-8 w-8 text-green-500"  fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                             </svg>
                             <h3 class="text-2xl font-bold text-green-600">What's Decreasing Your Age?</h3>
                         </div>
-                         <ul id="decreasing-factors" class="mt-4 space-y-3 text-gray-700">
-                         </ul>
+                        <ul id="decreasing-factors" class="mt-4 space-y-3 text-gray-700"></ul>
                     </div>
                 </section>
 
-                <!-- Detailed Metrics -->
                 <section id="charts-section" class="mt-12 bg-white p-8 md:p-12 rounded-3xl border border-gray-200 reveal" style="transition-delay: 0.4s;">
                     <h2 class="text-3xl font-bold text-center">Detailed Metrics Breakdown</h2>
                     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <!-- Chart Card -->
                         <div class="text-center p-6 bg-gray-50 rounded-2xl">
                             <h4 class="text-lg font-bold">Energy</h4>
                             <div class="relative h-36 w-36 mx-auto mt-2">
@@ -136,35 +157,30 @@
                             </div>
                             <p id="energy-desc" class="mt-3 text-sm text-gray-600"></p>
                         </div>
-                         <!-- Chart Card -->
                         <div class="text-center p-6 bg-gray-50 rounded-2xl">
                              <h4 class="text-lg font-bold">Stress</h4>
                              <div class="relative h-36 w-36 mx-auto mt-2">
                                 <canvas id="stressChart"></canvas>
                              </div>
-                             <p id="stress-desc" class="mt-3 text-sm text-gray-600"></p>
+                            <p id="stress-desc" class="mt-3 text-sm text-gray-600"></p>
                         </div>
-                         <!-- Chart Card -->
-                        <div class="text-center p-6 bg-gray-50 rounded-2xl">
+                         <div class="text-center p-6 bg-gray-50 rounded-2xl">
                             <h4 class="text-lg font-bold">Skin Quality</h4>
                             <div class="relative h-36 w-36 mx-auto mt-2">
                                 <canvas id="skinChart"></canvas>
                             </div>
                             <p id="skin-quality-desc" class="mt-3 text-sm text-gray-600"></p>
                         </div>
-                        <!-- More Metrics with Icons -->
                         <div class="p-6 bg-gray-50 rounded-2xl flex items-center gap-4"><div class="text-3xl">⚖️</div><div><h4 id="bmi-value" class="font-bold"></h4><p id="bmi-desc" class="text-sm text-gray-600"></p></div></div>
                         <div class="p-6 bg-gray-50 rounded-2xl flex items-center gap-4"><div class="text-3xl">🥗</div><div><h4 id="nutrition-value" class="font-bold"></h4><p id="nutrition-desc" class="text-sm text-gray-600"></p></div></div>
                         <div class="p-6 bg-gray-50 rounded-2xl flex items-center gap-4"><div class="text-3xl">🏃‍♀️</div><div><h4 id="habits-value" class="font-bold"></h4><p id="habits-desc" class="text-sm text-gray-600"></p></div></div>
                     </div>
                 </section>
                 
-                <!-- Skin Analysis -->
                 <section class="mt-12 bg-white p-8 md:p-12 rounded-3xl border border-gray-200 reveal">
                     <h2 class="text-3xl font-bold text-center">Skin Analysis</h2>
                     <div class="mt-8 max-w-4xl mx-auto">
                         <div id="skin-analysis-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <!-- Skin analysis results will be dynamically inserted here -->
                         </div>
                         <div class="mt-8 bg-purple-50 p-6 rounded-xl border border-purple-200">
                             <h4 class="font-bold text-lg text-purple-800">Skin Condition Conclusion:</h4>
@@ -173,16 +189,13 @@
                     </div>
                 </section>
 
-                <!-- 7-Day Plan -->
                 <section class="mt-12 bg-gradient-to-br from-purple-600 to-indigo-700 text-white p-8 md:p-12 rounded-3xl reveal">
                     <h2 class="text-3xl font-bold text-center">Your 7-Day Improvement Plan</h2>
                     <p class="text-center mt-2 text-purple-200">Start with these small, actionable steps.</p>
                     <div id="seven-day-plan-grid" class="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- 7-day plan will be dynamically inserted here -->
                     </div>
                 </section>
 
-                <!-- CTA Download Section -->
                 <section class="mt-16 text-center reveal no-print">
                     <button class="download-pdf-btn bg-purple-600 text-white font-semibold px-8 py-4 rounded-full text-lg hover:bg-purple-700 transition-colors transform hover:scale-105">
                         Download Your Report as PDF
@@ -195,77 +208,68 @@
     <script>
         document.addEventListener("DOMContentLoaded", async function() {
 
-            // --- MOCK API DATA ---
-            // This object simulates the data received from the Gemini API.
-            const mockApiData = {
-                userName: "Jessica",
-                chronoAge: 35,
-                wellnessAge: 32,
-                ageReductionPrediction: "2-3 years",
-                increasingFactors: [
-                    "High stress levels from work are impacting sleep quality.",
-                    "Occasional lack of hydration affects skin elasticity.",
-                    "Limited variety in vegetable intake."
-                ],
-                decreasingFactors: [
-                    "Consistent weekly exercise routine.",
-                    "Healthy BMI and regular physical activity.",
-                    "Strong social connections and positive mindset."
-                ],
-                metrics: {
-                    wellnessScore: { value: 78, description: "This score provides a holistic measure of your current well-being, combining all lifestyle, physical, and skin health factors." },
-                    energy: { value: 65, description: "Reflects your vitality based on sleep, nutrition, and activity." },
-                    stress: { value: 75, description: "Your body's response to daily pressures. A lower score is better." },
-                    skinQuality: { value: 85, description: "Based on visual analysis of hydration, texture, and tone." },
-                    bmi: { value: "22.5 (Healthy)", description: "Your Body Mass Index is optimal." },
-                    nutrition: { value: "70/100", description: "Assessment of your dietary balance." },
-                    healthyHabits: { value: "80/100", description: "Consistency in positive lifestyle choices." }
-                },
-                skinAnalysis: {
-                    dark_circle: 1, eye_pouch: 0, forehead_wrinkle: 0, glabella_wrinkle: 0,
-                    nasolabial_fold: 0, eye_finelines: 1, crows_feet: 0,
-                    skin_type: 3, // 0: oily, 1: dry, 2: normal, 3: mixed
-                    skin_spot: 0, acne: 0, blackhead: 0, 
-                    pores: 1, // Simplified for this example
-                    mole: 0,
-                    conclusion: "Your skin is generally in good condition, showing good elasticity. Key areas for improvement are hydration to reduce fine lines and targeted care for the T-zone to manage mixed skin characteristics. Better sleep will also help reduce dark circles."
-                },
-                sevenDayPlan: [
-                    { day: 1, title: "Hydration", task: "Drink 8 glasses of water.", icon: "💧" },
-                    { day: 2, title: "Mindfulness", task: "5-minute morning meditation.", icon: "🧘" },
-                    { day: 3, title: "Digital Detox", task: "No screens 1 hour before bed.", icon: "🌙" },
-                    { day: 4, title: "Green Boost", task: "Add a large leafy green salad.", icon: "🥬" },
-                    { day: 5, title: "Active Break", task: "Take a 15-minute brisk walk.", icon: "👟" },
-                    { day: 6, title: "Skin Care", task: "Apply a hydrating face mask.", icon: "🧖‍♀️" },
-                    { day: 7, title: "Reflect & Plan", task: "Review your week and continue one new habit.", icon: "🗓️" },
-                ]
-            };
-            
-            // --- API FETCH FUNCTION ---
-            // In a real application, this function would make a `fetch` call to your API.
+            // --- ПОЛНОСТЬЮ ПЕРЕПИСАННАЯ ЛОГИКА ЗАГРУЗКИ ДАННЫХ ---
+
             async function fetchWellnessData() {
-                console.log("Fetching wellness data...");
-                // Simulate network delay
-                await new Promise(resolve => setTimeout(resolve, 500));
-                console.log("Data received:", mockApiData);
-                return mockApiData;
+                const params = new URLSearchParams(window.location.search);
+                const sessionId = params.get('session_id');
+
+                if (!sessionId) {
+                    throw new Error("Session ID is missing. Please complete the quiz first.");
+                }
+
+                const checkStatus = async () => {
+                    const response = await fetch('/.netlify/functions/checkResult', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sessionId: sessionId })
+                    });
+                    if (!response.ok) {
+                        throw new Error('Server error while checking report status.');
+                    }
+                    return response.json();
+                };
+
+                return new Promise((resolve, reject) => {
+                    let attempts = 0;
+                    const maxAttempts = 10; // ~30 секунд
+                    const intervalId = setInterval(async () => {
+                        attempts++;
+                        try {
+                            const result = await checkStatus();
+                            if (result.status === 'complete') {
+                                clearInterval(intervalId);
+                                resolve(result.data);
+                            } else if (result.status === 'error') {
+                                clearInterval(intervalId);
+                                reject(new Error(result.message));
+                            } else if (attempts >= maxAttempts) {
+                                clearInterval(intervalId);
+                                reject(new Error("Report generation timed out."));
+                            }
+                            // Если статус 'pending', просто ждем следующей попытки
+                        } catch (error) {
+                            clearInterval(intervalId);
+                            reject(error);
+                        }
+                    }, 3000); // Опрашиваем каждые 3 секунды
+                });
             }
+            
+            // --- КОНЕЦ НОВОЙ ЛОГИКИ ---
 
-            // --- RENDER FUNCTIONS ---
+            // --- RENDER FUNCTIONS (без изменений) ---
 
-            // Main function to populate the entire report
             function populateReport(data) {
-                // Populate simple text fields
+                document.getElementById('report-content').style.visibility = 'visible';
                 document.getElementById('user-name').textContent = data.userName;
                 document.getElementById('chrono-age').textContent = data.chronoAge;
                 document.getElementById('wellness-age').textContent = data.wellnessAge;
                 document.getElementById('age-reduction-prediction').textContent = data.ageReductionPrediction;
                 document.getElementById('wellness-score-desc').textContent = data.metrics.wellnessScore.description;
-
-                // Populate lists
                 const populateList = (elementId, items) => {
                     const list = document.getElementById(elementId);
-                    list.innerHTML = ''; // Clear existing items
+                    list.innerHTML = '';
                     items.forEach(item => {
                         const li = document.createElement('li');
                         const icon = elementId === 'increasing-factors' ? '→' : '→';
@@ -278,7 +282,6 @@
                 populateList('increasing-factors', data.increasingFactors);
                 populateList('decreasing-factors', data.decreasingFactors);
 
-                // Populate detailed metrics
                 document.getElementById('energy-desc').textContent = data.metrics.energy.description;
                 document.getElementById('stress-desc').textContent = data.metrics.stress.description;
                 document.getElementById('skin-quality-desc').textContent = data.metrics.skinQuality.description;
@@ -289,17 +292,15 @@
                 document.getElementById('habits-value').textContent = `Healthy Habits: ${data.metrics.healthyHabits.value}`;
                 document.getElementById('habits-desc').textContent = data.metrics.healthyHabits.description;
                 
-                // Populate Skin Analysis
                 populateSkinAnalysis(data.skinAnalysis);
                 document.getElementById('skin-conclusion').textContent = data.skinAnalysis.conclusion;
 
-                // Populate 7-Day Plan
                 populateSevenDayPlan(data.sevenDayPlan);
             }
             
             function populateSkinAnalysis(skinData) {
                 const grid = document.getElementById('skin-analysis-grid');
-                grid.innerHTML = ''; // Clear previous data
+                grid.innerHTML = '';
                 
                 const skinMap = {
                     dark_circle: { icon: '👁️', title: 'Dark Circles', desc: 'A sign of fatigue or stress.' },
@@ -308,7 +309,7 @@
                     glabella_wrinkle: { icon: '😠', title: 'Frown Lines', desc: 'Can appear from tension or stress.' },
                     nasolabial_fold: { icon: '😊', title: 'Smile Lines', desc: 'A natural result of smiling and aging.' },
                     eye_finelines: { icon: '✨', title: 'Fine Lines', desc: 'Often from squinting or dehydration.' },
-                    crows_feet: { icon: '🐦', title: 'Crow\'s Feet', desc: 'Linked to smiling and sun exposure.' },
+                    crows_feet: { icon: '🐦', title: "Crow's Feet", desc: "Linked to smiling and sun exposure." },
                     skin_spot: { icon: '🟤', title: 'Skin Spots', desc: 'Caused by sun exposure or hormones.' },
                     acne: { icon: '🔴', title: 'Acne', desc: 'Influenced by hormones, diet, or stress.' },
                     blackhead: { icon: '⚫', title: 'Blackheads', desc: 'Clogged pores with oil and skin cells.' },
@@ -325,8 +326,6 @@
                         grid.appendChild(div);
                     }
                 }
-
-                // Handle skin type separately
                 const skinTypes = ['Oily Skin', 'Dry Skin', 'Normal Skin', 'Mixed Skin'];
                 const skinTypeDescriptions = ['Oily T-zone, shiny appearance.', 'Can feel tight, flaky, or rough.', 'Balanced with minimal imperfections.', 'Oily T-zone and dry cheeks.'];
                 const typeIndex = skinData.skin_type;
@@ -349,9 +348,8 @@
                 });
             }
 
-            // --- CHART RENDERING ---
+            // --- CHART RENDERING (без изменений) ---
             let chartData = {};
-
             function getScoreColor(value) {
                 if (value >= 75) return '#22c55e';
                 if (value >= 50) return '#f59e0b';
@@ -364,11 +362,7 @@
                     if (!startTimestamp) startTimestamp = timestamp;
                     const progress = Math.min((timestamp - startTimestamp) / duration, 1);
                     obj.innerHTML = Math.floor(progress * (end - start) + start);
-                    if (progress < 1) {
-                        window.requestAnimationFrame(step);
-                    } else {
-                        obj.innerHTML = end;
-                    }
+                    if (progress < 1) { window.requestAnimationFrame(step); } else { obj.innerHTML = end; }
                 };
                 window.requestAnimationFrame(step);
             }
@@ -378,7 +372,7 @@
                 data: { datasets: [{ data: [data, 100 - data], backgroundColor: [color, '#e5e7eb'], borderColor: ['#ffffff'], borderWidth: 2, circumference: 180, rotation: 270, }] },
                 options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: false }, }, animation: { duration: 1500, easing: 'easeOutQuart' } }
             });
-            
+
             const createTextPlugin = (text) => ({
                 id: 'centerText',
                 beforeDraw: function(chart) {
@@ -442,12 +436,22 @@
                     html2pdf().set(opt).from(element).save();
                 });
             });
-
-            // --- INITIALIZATION ---
+            
+            // --- ИЗМЕНЕННАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ ---
             async function initializeReport() {
-                const reportData = await fetchWellnessData();
-                chartData = reportData; // Make data available for charts
-                populateReport(reportData);
+                const loadingOverlay = document.getElementById('loading-overlay');
+                const loadingText = document.getElementById('loading-text');
+
+                try {
+                    const reportData = await fetchWellnessData();
+                    chartData = reportData; 
+                    populateReport(reportData);
+                    loadingOverlay.style.opacity = 0;
+                    setTimeout(() => { loadingOverlay.style.display = 'none'; }, 500);
+                } catch (error) {
+                    console.error("Failed to get report:", error);
+                    loadingText.textContent = `Error: ${error.message}`;
+                }
             }
 
             initializeReport();
