@@ -168,7 +168,7 @@
         let sessionId = null, userAnswers = {}, currentQuestionIndex = 0, detectionInterval, stream, capturedPhotoDataUrl = null, countdownInterval;
         const messageDelay = 1800;
         
-        // --- Quiz Data (ИСПРАВЛЕННАЯ ВЕРСИЯ) ---
+        // --- Quiz Data (ИСПРАВЛЕННАЯ ВЕРСИЯ С ЗАПЯТЫМИ) ---
         const quizQuestions = [
             { key: 'intro_dave', type: 'message', text: "Hey! I'm Dave, your personal AI wellness assistant today. 👋" },
             { key: 'name', type: 'question', text: "What should I call you?", options: [], placeholder: "Type your name..." },
@@ -181,11 +181,11 @@
             { key: 'intro_privacy', type: 'message', text: "And just to be clear about your privacy 🛡️: your photo is deleted immediately after the AI analysis, and your answers are wiped as soon as you get your report.", delayBefore: 3000 },
             { key: 'start_consent', type: 'question', text: "Ready to begin?", options: ["Yes, let's start!"], hideInput: true },
             
-            // --- Адаптированные вопросы ---
-            { key: 'age', type: 'slider', text: (name) => `Perfect, ${name}! To start, what's your age? 🎂`, min: 18, max: 90, step: 1, defaultValue: 30, unit: 'years' },
+            // --- Адаптированные вопросы с добавленным свойством 'label' ---
+            { key: 'age', type: 'slider', text: (name) => `Perfect, ${name}! To start, what's your age? 🎂`, label: "Select your age", min: 18, max: 90, step: 1, defaultValue: 30, unit: 'years' },
             { key: 'gender', type: 'question', text: "Great start! Now, what's your biological sex? 🧬", options: ['Male', 'Female', 'Other'], hideInput: true },
-            { key: 'height', type: 'slider', text: "Perfect. Let's talk about your height. 📏", min: 140, max: 220, step: 1, defaultValue: 175, unit: 'cm' },
-            { key: 'weight', type: 'slider', text: "Thanks! And your current weight? ⚖️", min: 40, max: 150, step: 1, defaultValue: 70, unit: 'kg' },
+            { key: 'height', type: 'slider', text: "Perfect. Let's talk about your height. 📏", label: "Select your height", min: 140, max: 220, step: 1, defaultValue: 175, unit: 'cm' },
+            { key: 'weight', type: 'slider', text: "Thanks! And your current weight? ⚖️", label: "Select your weight", min: 40, max: 150, step: 1, defaultValue: 70, unit: 'kg' },
             { key: 'bmi_calculation', type: 'message', text: "Calculating your BMI based on your stats...", postAnimationDelay: 2000},
             { key: 'sleep', type: 'question', text: "Sleep is crucial. 😴 How many hours of <i>quality</i> sleep do you get on an average night?", options: ["Less than 5 hours", "5-6 hours", "7-8 hours", "More than 8 hours"], hideInput: true },
             { key: 'sleep_visual', type: 'message', text: 'Quality sleep recharges your mind and body.'},
@@ -195,7 +195,7 @@
             { key: 'processed_food', type: 'question', text: "Honesty is the best policy here. 😉 How often do you eat processed or fast food in a typical week?", options: ["Rarely", "1-2 times", "3-4 times", "Daily"], hideInput: true },
             { key: 'hydration', type: 'question', text: "Hydration check! 💧 How many glasses of water (approx. 8 oz) do you drink per day?", options: ["1-3 glasses", "4-6 glasses", "7-9 glasses", "10+ glasses"], hideInput: true },
             { key: 'hydration_visual', type: 'message', text: "Let's see your hydration level:"},
-            { key: 'stress', type: 'slider', text: "Now for the mind. 🧠 On a scale of 1 to 10, how would you rate your typical stress level?", min: 1, max: 10, step: 1, defaultValue: 5, unit: '/ 10' },
+            { key: 'stress', type: 'slider', text: "Now for the mind. 🧠 On a scale of 1 to 10, how would you rate your typical stress level?", label: "Select stress level", min: 1, max: 10, step: 1, defaultValue: 5, unit: '/ 10' },
             { key: 'stress_gauge', type: 'message', text: "Thanks for sharing. Here's what that looks like:"},
             { key: 'mindfulness', type: 'question', text: "Finding calm is a superpower. 🧘‍♂️ How often do you practice mindfulness, meditation, or deep breathing?", options: ["Never", "Occasionally", "Weekly", "Daily"], hideInput: true },
             { key: 'mood', type: 'question', text: "Let's check in with your emotions. ❤️ How would you describe your overall mood on a typical day?", options: ["Happy & Energetic", "Generally Content", "It varies a lot", "Often Stressed or Sad"], hideInput: true },
@@ -221,7 +221,7 @@
             return inches > 0 ? inches : 68;
         }
 
-        // --- Animation Functions (БЕЗ ИЗМЕНЕНИЙ) ---
+        // --- Animation Functions ---
         function playBiologicalAgeAnimation() { const ageElement = document.getElementById('bio-age-value'); if (!ageElement) return; let currentAge = 42; const targetAge = 39; const duration = 2800; const steps = currentAge - targetAge; const stepDuration = duration / steps; const dayDuration = duration / 7; for (let i = 1; i <= 7; i++) { setTimeout(() => { const dayEl = document.getElementById(`day-${i}`); if (dayEl) dayEl.classList.add('active'); }, i * dayDuration); } setTimeout(() => { const countdownInterval = setInterval(() => { currentAge--; ageElement.textContent = currentAge; if (currentAge === targetAge) { clearInterval(countdownInterval); ageElement.style.color = '#16a34a'; } }, stepDuration); }, 500); }
         function playBmiAnimation() { const heightIn = parseHeightToInches(userAnswers.height); const weightLbs = (parseInt(userAnswers.weight) || 70) * 2.20462; if (heightIn && weightLbs) { const bmi = ((weightLbs / (heightIn * heightIn)) * 703).toFixed(1); let category = "Normal"; let percent = 50; if (bmi < 18.5) { category = "Underweight"; percent = (bmi / 18.5) * 25; } else if (bmi < 25) { category = "Normal"; percent = 25 + ((bmi - 18.5) / 6.5) * 50; } else if (bmi < 30) { category = "Overweight"; percent = 75 + ((bmi - 25) / 5) * 25; } else { category = "Obese"; percent = 100; } percent = Math.max(5, Math.min(95, percent)); const html = `<div class="bmi-widget"><div id="bmi-value-anim" class="bmi-value">0.0</div><div class="bmi-label">Your Estimated BMI</div><div class="bmi-scale"><div id="bmi-indicator-anim" class="bmi-indicator" style="left: 0%;"></div></div><div id="bmi-category-anim" class="bmi-category">&nbsp;</div></div>`; addBotMessage(html); setTimeout(() => { const valEl = document.getElementById('bmi-value-anim'); const catEl = document.getElementById('bmi-category-anim'); const indEl = document.getElementById('bmi-indicator-anim'); if(indEl) indEl.style.left = `${percent}%`; if(catEl) catEl.textContent = category; let start = 0; const end = parseFloat(bmi); const animDuration = 1500; const frameDuration = 1000 / 60; const totalFrames = Math.round(animDuration / frameDuration); let frame = 0; const countUp = setInterval(() => { frame++; const progress = frame / totalFrames; const currentVal = (start + (end - start) * progress).toFixed(1); if(valEl) valEl.textContent = currentVal; if (frame === totalFrames) { clearInterval(countUp); if(valEl) valEl.textContent = bmi; } }, frameDuration); }, 100); } }
         function playSleepAnimation() { const answer = userAnswers.sleep || ""; let level = 25; if (answer.includes("5-6")) level = 50; if (answer.includes("7-8")) level = 90; if (answer.includes("More than 8")) level = 100; const html = `<div class="widget-wrapper"><div class="widget-label">Sleep Recharge</div><svg class="w-16 h-16 mx-auto text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg><div class="sleep-battery mt-2"><div id="sleep-battery-level-anim" class="sleep-battery-level"></div></div></div>`; addBotMessage(html); setTimeout(() => { const levelEl = document.getElementById('sleep-battery-level-anim'); if (!levelEl) return; let color = '#ef4444'; if (level > 40) color = '#f59e0b'; if (level > 75) color = '#22c55e'; levelEl.style.backgroundColor = color; levelEl.style.width = `${level}%`; }, 100); }
@@ -240,6 +240,7 @@
         function addUserMessage(text) { const d = document.createElement('div'); d.className = 'flex justify-end mb-4 chat-bubble'; d.innerHTML = `<div class="bg-purple-600 text-white p-3 rounded-tl-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${text}</div>`; chatContainer.appendChild(d); scrollToBottom(); }
         function showOptions(options, handlers) { optionsContainer.innerHTML = ''; if (options?.length > 0) { optionsContainerWrapper.classList.remove('hidden'); options.forEach((option, index) => { const button = document.createElement('button'); button.textContent = option.text; button.className = option.class; button.onclick = handlers[index]; optionsContainer.appendChild(button); }); } else { optionsContainerWrapper.classList.add('hidden'); } }
         
+        // --- ИСПРАВЛЕННАЯ ФУНКЦИЯ ДЛЯ СЛАЙДЕРА ---
         function showSlider(question) {
             optionsContainer.innerHTML = '';
             optionsContainerWrapper.classList.remove('hidden');
@@ -260,10 +261,11 @@
                 return `${value} ${question.unit}`;
             };
 
+            // ИСПРАВЛЕНИЕ: Используем `question.label` для подписи внутри виджета.
             sliderWrapper.innerHTML = `
                 <div class="text-center">
                     <div id="slider-value-display" class="slider-value">${formatDisplayValue(question.defaultValue)}</div>
-                    <div class="slider-label">${question.text(userAnswers.name || 'friend').split('!')[1] || ''}</div>
+                    <div class="slider-label">${question.label}</div>
                 </div>
                 <input type="range" min="${question.min}" max="${question.max}" value="${question.defaultValue}" step="${question.step}" class="slider-input" id="slider-input-range">
                 <button id="slider-confirm-btn" class="confirm-btn">Confirm</button>
@@ -295,6 +297,7 @@
             const delay = question.delayBefore || messageDelay;
             setTimeout(() => {
                 hideTypingIndicator();
+                // ИСПРАВЛЕНИЕ: эта логика теперь безопасна, так как мы проверяем тип question.text
                 let questionText = typeof question.text === 'function' ? question.text(userAnswers.name || 'friend') : question.text;
                 let postAnimationDelay = question.postAnimationDelay || 0;
 
@@ -319,7 +322,7 @@
                     if (!isMobile()) { userInput.focus(); }
                 
                 } else if (question.type === 'slider') {
-                    addBotMessage(questionText.split('?')[0] + '?', question.key);
+                    addBotMessage(questionText, question.key);
                     inputArea.classList.add('hidden');
                     showSlider(question);
                 
