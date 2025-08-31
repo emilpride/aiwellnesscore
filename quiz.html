@@ -95,6 +95,7 @@
         ];
 
         // --- Core Quiz Logic ---
+        
         async function startQuizSession() {
             try {
                 const urlParams = new URLSearchParams(window.location.search);
@@ -122,34 +123,37 @@
             addUserMessage(typeof answer === 'string' ? answer : `${answer} ${currentQuestion.unit || ''}`);
             userAnswers[currentQuestion.key] = answer;
             saveAnswerToServer(currentQuestion.key, answer);
+            
             const userInputEl = document.getElementById('user-input');
             if (userInputEl) userInputEl.value = '';
             inputArea.innerHTML = '';
             inputArea.classList.add('hidden');
             optionsContainerWrapper.classList.add('hidden');
             optionsContainer.innerHTML = '';
+
             currentQuestionIndex++;
             updateProgressBar();
             askNextQuestion();
         }
 
+        // ПЕРЕПИСАННАЯ ФУНКЦИЯ ДЛЯ СТАБИЛЬНОЙ РАБОТЫ
         function askNextQuestion() {
             if (currentQuestionIndex >= quizQuestions.length) return;
             const question = quizQuestions[currentQuestionIndex];
+            const isInteractive = question.type === 'question' || question.type === 'scroller' || question.type === 'final_step';
+
             showTypingIndicator();
-            const delay = question.delayBefore || 1200;
-            
+
             setTimeout(() => {
                 try {
                     hideTypingIndicator();
-                    let questionText = typeof question.text === 'function' ? question.text(userAnswers.name || 'friend') : question.text;
-                    
+                    const questionText = typeof question.text === 'function' ? question.text(userAnswers.name || 'friend') : question.text;
+                    addBotMessage(questionText, question.key);
+
                     if (question.type === 'message') {
-                        addBotMessage(questionText, question.key);
                         currentQuestionIndex++;
-                        askNextQuestion();
+                        setTimeout(askNextQuestion, 600); // Небольшая задержка перед следующим сообщением
                     } else if (question.type === 'question') {
-                        addBotMessage(questionText, question.key);
                         if (question.options) {
                             const optionButtons = question.options.map(opt => ({ text: opt, class: 'option-btn bg-white border border-purple-300 text-purple-600 px-4 py-2 rounded-full text-sm flex-shrink-0 hover:bg-purple-50' }));
                             const handlers = question.options.map(opt => () => handleAnswer(opt));
@@ -162,18 +166,15 @@
                             document.getElementById('user-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAnswer(document.getElementById('user-input').value); });
                         }
                     } else if (question.type === 'scroller') {
-                        addBotMessage(questionText, question.key);
                         displayNumberScroller(question.min, question.max, question.initial, question.unit);
                     } else if (question.type === 'final_step') {
-                        inputArea.classList.add('hidden');
-                        addBotMessage(questionText, question.key);
                         showCameraStep();
                     }
                 } catch (error) {
-                    console.error("Error in askNextQuestion:", error);
+                    console.error("Error processing question:", error);
                     addBotMessage("An error occurred. Please refresh and try again.");
                 }
-            }, delay);
+            }, 1200);
         }
 
         function displayNumberScroller(min, max, initial, unit) {
@@ -216,16 +217,17 @@
 
         // --- Initial Call ---
         async function initQuiz() {
+            const setAppHeight = () => { mainContainer.style.height = `${window.innerHeight}px`; };
             setAppHeight();
+            window.addEventListener('resize', setAppHeight);
+            inputArea.classList.add('hidden');
+            
             await startQuizSession();
             if (sessionId) {
                 askNextQuestion();
             }
         }
         
-        const setAppHeight = () => { mainContainer.style.height = `${window.innerHeight}px`; };
-        window.addEventListener('resize', setAppHeight);
-        inputArea.classList.add('hidden');
         initQuiz();
     </script>
 </body>
