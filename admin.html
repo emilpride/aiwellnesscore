@@ -8,18 +8,19 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         :root {
-            --bg-dark: #111827;
-            --bg-light: #1F2937;
-            --border-color: #374151;
-            --text-main: #F9FAFB;
-            --text-secondary: #9CA3AF;
-            --accent-purple: #8b5cf6;
+            --bg-dark: #111827; --bg-light: #1F2937; --border-color: #374151;
+            --text-main: #F9FAFB; --text-secondary: #9CA3AF; --accent-purple: #8b5cf6;
         }
         body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif; }
         .table-custom th { background-color: var(--bg-light); }
         .table-custom tr:hover { background-color: #374151; }
         .form-input { background-color: var(--bg-light); border: 1px solid var(--border-color); }
         .stat-card { background-color: var(--bg-light); border: 1px solid var(--border-color); }
+        .tab-button { transition: all 0.2s; }
+        .tab-button.active { color: var(--accent-purple); border-color: var(--accent-purple); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .bar-chart-bar { background-color: var(--accent-purple); transition: width 0.5s ease-out; }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,9 +33,7 @@
             <h2 class="text-2xl font-bold text-white mb-6 text-center">Admin Panel Access</h2>
             <form id="login-form">
                 <input type="password" id="password-input" placeholder="Enter Access Password" class="w-full form-input rounded-md p-3 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500" required>
-                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-md mt-4 transition-colors">
-                    Login
-                </button>
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-md mt-4 transition-colors">Login</button>
                 <p id="login-error" class="text-red-400 text-center mt-4 text-sm"></p>
             </form>
         </div>
@@ -44,51 +43,78 @@
         <div class="max-w-7xl mx-auto">
             <h1 class="text-3xl font-bold text-white">AI WellnessCore Dashboard</h1>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-                <div class="stat-card p-6 rounded-lg">
-                    <p class="text-sm font-medium text-gray-400">Total Sessions</p>
-                    <p id="stat-total-sessions" class="text-3xl font-bold mt-1">0</p>
-                </div>
-                <div class="stat-card p-6 rounded-lg">
-                    <p class="text-sm font-medium text-gray-400">Completed Payments</p>
-                    <p id="stat-completed-payments" class="text-3xl font-bold mt-1">0</p>
-                </div>
-                <div class="stat-card p-6 rounded-lg">
-                    <p class="text-sm font-medium text-gray-400">Total Revenue</p>
-                    <p id="stat-total-revenue" class="text-3xl font-bold mt-1">$0</p>
-                </div>
-                <div class="stat-card p-6 rounded-lg">
-                    <p class="text-sm font-medium text-gray-400">Avg. Completion Rate</p>
-                    <p id="stat-avg-completion" class="text-3xl font-bold mt-1">0%</p>
+            <div class="border-b border-gray-700 mt-6">
+                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                    <button id="tab-stats" class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Statistics</button>
+                    <button id="tab-sessions" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-400 border-transparent hover:text-gray-200 hover:border-gray-500">Sessions</button>
+                </nav>
+            </div>
+
+            <div id="content-stats" class="tab-content active mt-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-1 space-y-6">
+                        <div class="stat-card p-6 rounded-lg">
+                            <p class="text-sm font-medium text-gray-400">Total Revenue</p>
+                            <p id="stat-total-revenue" class="text-3xl font-bold mt-1">$0.00</p>
+                        </div>
+                        <div class="stat-card p-6 rounded-lg">
+                            <p class="text-sm font-medium text-gray-400">Average Check</p>
+                            <p id="stat-avg-check" class="text-3xl font-bold mt-1">$0.00</p>
+                        </div>
+                        <div class="stat-card p-6 rounded-lg">
+                            <p class="text-sm font-medium text-gray-400">Conversion Rate</p>
+                            <p id="stat-conversion" class="text-3xl font-bold mt-1">0%</p>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 space-y-6">
+                        <div class="stat-card p-6 rounded-lg">
+                            <p class="text-lg font-bold text-white mb-4">Conversion Funnel</p>
+                            <div class="space-y-4">
+                                <div id="funnel-start"></div>
+                                <div id="funnel-finish"></div>
+                                <div id="funnel-paid"></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="stat-card p-6 rounded-lg">
+                                <p class="text-lg font-bold text-white mb-4">Top Traffic Sources</p>
+                                <ul id="stat-top-sources" class="space-y-2"></ul>
+                            </div>
+                            <div class="stat-card p-6 rounded-lg">
+                                <p class="text-lg font-bold text-white mb-4">Top Countries</p>
+                                <ul id="stat-top-countries" class="space-y-2"></ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="mt-8 flex flex-col sm:flex-row gap-4 items-center">
-                <input type="text" id="search-input" placeholder="Search by IP or Country..." class="w-full sm:w-1/3 form-input rounded-md p-2 text-white">
-                <select id="status-filter" class="w-full sm:w-auto form-input rounded-md p-2 text-white">
-                    <option value="">All Payment Statuses</option>
-                    <option value="succeeded">Succeeded</option>
-                    <option value="pending">Pending</option>
-                </select>
-            </div>
-
-            <div class="mt-4 overflow-x-auto rounded-lg border border-gray-700">
-                <table class="min-w-full divide-y divide-gray-700 table-custom">
-                    <thead class="bg-gray-800">
-                        <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Device/Source</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">IP/Country</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Progress</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Duration</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Payment</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Link</th>
-                        </tr>
-                    </thead>
-                    <tbody id="sessions-table-body" class="bg-gray-900 divide-y divide-gray-700">
-                        </tbody>
-                </table>
+            <div id="content-sessions" class="tab-content mt-6">
+                <div class="flex flex-col sm:flex-row gap-4 items-center">
+                    <input type="text" id="search-input" placeholder="Search by IP or Country..." class="w-full sm:w-1/3 form-input rounded-md p-2 text-white">
+                    <select id="status-filter" class="w-full sm:w-auto form-input rounded-md p-2 text-white">
+                        <option value="">All Payment Statuses</option>
+                        <option value="succeeded">Succeeded</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
+                <div class="mt-4 overflow-x-auto rounded-lg border border-gray-700">
+                    <table class="min-w-full divide-y divide-gray-700 table-custom">
+                        <thead class="bg-gray-800">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Device/Source</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">IP/Country</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Progress</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Duration</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Payment</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Link</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sessions-table-body" class="bg-gray-900 divide-y divide-gray-700"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
@@ -102,56 +128,55 @@
             const adminPanel = document.getElementById('admin-panel');
             
             let allSessionsData = [];
+            let statisticsData = {};
 
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const password = passwordInput.value;
                 loginError.textContent = '';
-
                 try {
                     const response = await fetch('/.netlify/functions/getAdminData', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ password: password })
                     });
-
-                    if (response.status === 401) {
-                        throw new Error('Incorrect password.');
-                    }
-                    if (!response.ok) {
-                        throw new Error('Could not fetch data from server.');
-                    }
-
-                    allSessionsData = await response.json();
-                    
+                    if (response.status === 401) throw new Error('Incorrect password.');
+                    if (!response.ok) throw new Error('Could not fetch data from server.');
+                    const { sessions, statistics } = await response.json();
+                    allSessionsData = sessions;
+                    statisticsData = statistics;
                     loginModal.classList.add('hidden');
                     adminPanel.classList.remove('hidden');
-                    
-                    renderAll(allSessionsData);
-                    setupFilters();
-
+                    renderAll();
+                    setupFiltersAndTabs();
                 } catch (error) {
                     loginError.textContent = error.message;
                 }
             });
 
-            function setupFilters() {
+            function setupFiltersAndTabs() {
                 const searchInput = document.getElementById('search-input');
                 const statusFilter = document.getElementById('status-filter');
+                const tabs = document.querySelectorAll('.tab-button');
+                const tabContents = document.querySelectorAll('.tab-content');
+
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        tabs.forEach(t => t.classList.remove('active', 'text-purple-400', 'border-purple-400'));
+                        tab.classList.add('active', 'text-purple-400', 'border-purple-400');
+                        tabContents.forEach(content => content.classList.remove('active'));
+                        document.getElementById(tab.id.replace('tab-', 'content-')).classList.add('active');
+                    });
+                });
                 
                 const applyFilters = () => {
                     const searchTerm = searchInput.value.toLowerCase();
                     const statusValue = statusFilter.value;
-
                     let filteredData = allSessionsData.filter(session => {
-                        const searchMatch = session.ipAddress.toLowerCase().includes(searchTerm) ||
-                                          session.countryCode.toLowerCase().includes(searchTerm);
-                        
+                        const searchMatch = session.ipAddress.toLowerCase().includes(searchTerm) || session.country.toLowerCase().includes(searchTerm);
                         const statusMatch = statusValue ? session.paymentStatus === statusValue : true;
-
                         return searchMatch && statusMatch;
                     });
-                    
                     renderTable(filteredData);
                 };
 
@@ -159,73 +184,69 @@
                 statusFilter.addEventListener('change', applyFilters);
             }
 
-            function renderAll(data) {
-                renderStats(data);
-                renderTable(data);
+            function renderAll() {
+                renderStats(statisticsData);
+                renderTable(allSessionsData);
             }
 
-            function renderStats(data) {
-                document.getElementById('stat-total-sessions').textContent = data.length;
+            function renderStats(stats) {
+                document.getElementById('stat-total-revenue').textContent = `$${stats.totalRevenue}`;
+                document.getElementById('stat-avg-check').textContent = `$${stats.avgCheck}`;
+                document.getElementById('stat-conversion').textContent = `${stats.conversionRate}%`;
 
-                const completedPayments = data.filter(s => s.paymentStatus === 'succeeded');
-                document.getElementById('stat-completed-payments').textContent = completedPayments.length;
+                // Funnel
+                const funnelStart = stats.totalSessions || 0;
+                const funnelFinish = Math.round(stats.totalSessions * (stats.quizCompletionRate / 100));
+                const funnelPaid = stats.successfulPayments || 0;
+                
+                document.getElementById('funnel-start').innerHTML = createFunnelStep('Sessions Started', funnelStart, funnelStart, '#6366f1');
+                document.getElementById('funnel-finish').innerHTML = createFunnelStep('Quiz Finished', funnelFinish, funnelStart, '#7c3aed');
+                document.getElementById('funnel-paid').innerHTML = createFunnelStep('Payment Completed', funnelPaid, funnelStart, '#a855f7');
+                
+                // Top Lists
+                renderTopList('stat-top-sources', stats.topTrafficSources);
+                renderTopList('stat-top-countries', stats.topCountries);
+            }
+            
+            function createFunnelStep(label, value, total, color) {
+                const percent = total > 0 ? (value / total * 100).toFixed(1) : 0;
+                return `<div class="flex items-center justify-between text-sm"><p class="text-gray-300">${label}</p><p class="font-bold text-white">${value}</p></div><div class="w-full bg-gray-700 rounded-full h-2.5 mt-1"><div class="bar-chart-bar h-2.5 rounded-full" style="width: ${percent}%; background-color:${color};"></div></div>`;
+            }
 
-                const totalRevenue = completedPayments.reduce((acc, s) => {
-                    const amount = parseFloat(s.paymentAmount.replace('$', ''));
-                    return acc + (isNaN(amount) ? 0 : amount);
-                }, 0);
-                document.getElementById('stat-total-revenue').textContent = `$${totalRevenue.toFixed(2)}`;
-
-                if (data.length > 0) {
-                    const avgCompletion = data.reduce((acc, s) => {
-                        const percent = parseInt(s.progress.match(/\((\d+)%\)/)[1]);
-                        return acc + (isNaN(percent) ? 0 : percent);
-                    }, 0) / data.length;
-                    document.getElementById('stat-avg-completion').textContent = `${Math.round(avgCompletion)}%`;
+            function renderTopList(elementId, data) {
+                const ul = document.getElementById(elementId);
+                ul.innerHTML = '';
+                if (!data || data.length === 0) {
+                    ul.innerHTML = `<li class="text-sm text-gray-500">No data available</li>`;
+                    return;
                 }
+                data.forEach(([name, count]) => {
+                    const li = document.createElement('li');
+                    li.className = 'flex justify-between items-center text-sm';
+                    li.innerHTML = `<span class="text-gray-300">${name}</span><span class="font-semibold text-white">${count}</span>`;
+                    ul.appendChild(li);
+                });
             }
 
             function renderTable(data) {
                 const tableBody = document.getElementById('sessions-table-body');
-                tableBody.innerHTML = ''; // Clear existing rows
-
+                tableBody.innerHTML = '';
                 if (data.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="8" class="text-center p-6 text-gray-400">No sessions found.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="8" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`;
                     return;
                 }
-
                 data.forEach(session => {
                     const row = document.createElement('tr');
-                    
-                    const paymentStatusClass = session.paymentStatus === 'succeeded' 
-                        ? 'bg-green-500 text-green-100' 
-                        : 'bg-yellow-500 text-yellow-100';
-
+                    const paymentStatusClass = session.paymentStatus === 'succeeded' ? 'bg-green-500 text-green-100' : 'bg-yellow-500 text-yellow-100';
                     row.innerHTML = `
                         <td class="px-4 py-3 whitespace-nowrap text-sm">${session.createdAt}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm">
-                            <div class="font-medium">${session.deviceType}</div>
-                            <div class="text-gray-400">${session.trafficSource}</div>
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm">
-                            <div class="font-medium">${session.ipAddress}</div>
-                            <div class="text-gray-400">${session.countryCode.toUpperCase()}</div>
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm">
-                            <div class="font-medium">${session.gender}</div>
-                            <div class="text-gray-400">Age: ${session.age}</div>
-                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.deviceType}</div><div class="text-gray-400">${session.trafficSource}</div></td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.ipAddress}</div><div class="text-gray-400">${session.country}</div></td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.gender}</div><div class="text-gray-400">Age: ${session.age}</div></td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.progress}</td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.duration}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">
-                                ${session.paymentStatus}
-                            </span>
-                            <div class="text-gray-400">${session.paymentAmount}</div>
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm">
-                            <a href="/${session.resultLink}" target="_blank" class="text-purple-400 hover:text-purple-300">View Report</a>
-                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">${session.paymentStatus}</span><div class="text-gray-400">${session.paymentAmount}</div></td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm"><a href="/${session.resultLink}" target="_blank" class="text-purple-400 hover:text-purple-300">View</a></td>
                     `;
                     tableBody.appendChild(row);
                 });
