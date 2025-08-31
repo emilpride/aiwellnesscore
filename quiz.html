@@ -46,6 +46,12 @@
         .analysis-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; text-align: center; }
         .analysis-animation { width: 80px; height: 80px; margin-bottom: 1rem; }
         #analysis-text { font-size: 1rem; font-weight: 500; color: #4b5563; transition: opacity 0.5s ease-in-out; min-height: 1.5rem; }
+        .bmi-widget { background-color: #faf5ff; border: 1px solid #e9d5ff; border-radius: 1rem; padding: 1rem; text-align: center; max-width: 250px; margin: auto; }
+        .bmi-value { font-size: 2.5rem; font-weight: 800; color: #5b21b6; line-height: 1; }
+        .bmi-label { font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; }
+        .bmi-scale { position: relative; height: 10px; background-image: linear-gradient(to right, #60a5fa, #34d399, #facc15, #f87171); border-radius: 9999px; margin: 0.5rem 0; }
+        .bmi-indicator { position: absolute; top: 50%; width: 16px; height: 16px; background-color: white; border: 3px solid #5b21b6; border-radius: 50%; transform: translate(-50%, -50%); transition: left 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
+        .bmi-category { font-size: 0.75rem; font-weight: 500; color: #7e22ce; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-50 to-indigo-100 md:flex md:items-center md:justify-center min-h-screen">
@@ -72,13 +78,10 @@
         // --- Utility Functions ---
         const setAppHeight = () => { mainContainer.style.height = `${window.innerHeight}px`; };
         const scrollToBottom = () => { setTimeout(() => { chatContainer.scrollTop = chatContainer.scrollHeight; }, 0); };
-        const inchesToFeetAndInches = (inches) => {
-            const ft = Math.floor(inches / 12);
-            const inch = inches % 12;
-            return `${ft}' ${inch}"`;
-        };
+        const inchesToFeetAndInches = (inches) => { const ft = Math.floor(inches / 12); const inch = inches % 12; return `${ft}' ${inch}"`; };
+        function parseHeightToInches(heightStr) { if (!heightStr) return 69; let inches = 0; const feetMatch = heightStr.match(/(\d+)'/); const inchesMatch = heightStr.match(/(\d+)"/); if (feetMatch) inches += parseInt(feetMatch[1]) * 12; if (inchesMatch) inches += parseInt(inchesMatch[1]); return inches > 0 ? inches : 69; }
 
-        // --- Quiz Data (Adapted for US) ---
+        // --- Quiz Data ---
         const quizQuestions = [
             { key: 'intro_dave', type: 'message', text: "Hey! I'm Dave, your personal AI wellness assistant today. 👋" },
             { key: 'name', type: 'question', text: "What should I call you?", placeholder: "Type your name..." },
@@ -87,8 +90,9 @@
             { key: 'start_consent', type: 'question', text: "Ready to begin?", options: ["Yes, let's start!"] },
             { key: 'age', type: 'scroller', text: "To start, what's your age? 🎂", min: 16, max: 80, initial: 28, unit: 'years' },
             { key: 'gender', type: 'question', text: "Great start! Now, what's your biological sex? 🧬", options: ['Male', 'Female'] },
-            { key: 'height', type: 'scroller', text: "Perfect. And what is your height? 📏", min: 58, max: 84, initial: 69, unit: "ft/in" }, // 4'10" to 7'0", initial 5'9"
+            { key: 'height', type: 'scroller', text: "Perfect. And what is your height? 📏", min: 58, max: 84, initial: 69, unit: "ft/in" },
             { key: 'weight', type: 'scroller', text: "Thanks! And your current weight? ⚖️", min: 90, max: 350, initial: 160, unit: 'lbs' },
+            { key: 'bmi_calculation', type: 'message', text: "Calculating your BMI based on your stats...", postAnimationDelay: 2000 },
             { key: 'sleep', type: 'question', text: "Sleep is crucial. 😴 How many hours of <i>quality</i> sleep do you get on an average night?", options: ["Less than 5 hours", "5-6 hours", "7-8 hours", "More than 8 hours"] },
             { key: 'activity', type: 'question', text: "Movement is key! 🏃‍♀️ How often do you engage in moderate physical activity per week?", options: ["Rarely or never", "1-2 times", "3-4 times", "5+ times"] },
             { key: 'nutrition', type: 'question', text: "Let's dive into nutrition. 🥦 How many servings of fruits or vegetables do you typically eat per day?", options: ["0-1", "2-3", "4-5", "More than 5"] },
@@ -102,6 +106,47 @@
             { key: 'screen_time', type: 'question', text: "How much time do you spend on screens (phone, computer, TV) outside of work?", options: ["Less than 2 hours", "2-4 hours", "4-6 hours", "More than 6 hours"] },
             { key: 'camera', type: 'final_step', text: "You did it! 🎉 That's all the questions. Now for the fun part: a quick selfie. This helps me analyze non-medical indicators of stress and fatigue. Your photo is processed on the fly and never stored. Please allow camera access and position your face within the frame." }
         ];
+
+        // --- Animation Functions (ВОССТАНОВЛЕНЫ) ---
+        function playBmiAnimation() {
+            const heightIn = parseHeightToInches(userAnswers.height);
+            const weightLbs = parseInt(userAnswers.weight) || 160;
+            if (heightIn && weightLbs) {
+                const bmi = ((weightLbs / (heightIn * heightIn)) * 703).toFixed(1);
+                let category = "Normal";
+                let percent = 50;
+                if (bmi < 18.5) { category = "Underweight"; percent = (bmi / 18.5) * 25;
+                } else if (bmi < 25) { category = "Normal"; percent = 25 + ((bmi - 18.5) / 6.5) * 50;
+                } else if (bmi < 30) { category = "Overweight"; percent = 75 + ((bmi - 25) / 5) * 25; } else { category = "Obese"; percent = 100;
+                }
+                percent = Math.max(5, Math.min(95, percent));
+                const html = `<div class="bmi-widget"><div id="bmi-value-anim" class="bmi-value">0.0</div><div class="bmi-label">Your Estimated BMI</div><div class="bmi-scale"><div id="bmi-indicator-anim" class="bmi-indicator" style="left: 0%;"></div></div><div id="bmi-category-anim" class="bmi-category">&nbsp;</div></div>`;
+                addBotMessage(html);
+                setTimeout(() => {
+                    const valEl = document.getElementById('bmi-value-anim');
+                    const catEl = document.getElementById('bmi-category-anim');
+                    const indEl = document.getElementById('bmi-indicator-anim');
+                    if (indEl) indEl.style.left = `${percent}%`;
+                    if (catEl) catEl.textContent = category;
+                    let start = 0;
+                    const end = parseFloat(bmi);
+                    const animDuration = 1500;
+                    const frameDuration = 1000 / 60;
+                    const totalFrames = Math.round(animDuration / frameDuration);
+                    let frame = 0;
+                    const countUp = setInterval(() => {
+                        frame++;
+                        const progress = frame / totalFrames;
+                        const currentVal = (start + (end - start) * progress).toFixed(1);
+                        if (valEl) valEl.textContent = currentVal;
+                        if (frame === totalFrames) {
+                            clearInterval(countUp);
+                            if (valEl) valEl.textContent = bmi;
+                        }
+                    }, frameDuration);
+                }, 100);
+            }
+        }
 
         // --- Core Quiz Logic ---
         async function startQuizSession() {
@@ -159,8 +204,9 @@
                     addBotMessage(questionText, question.key);
 
                     if (question.type === 'message') {
+                        if (question.key === 'bmi_calculation') setTimeout(playBmiAnimation, 100);
                         currentQuestionIndex++;
-                        setTimeout(askNextQuestion, 600);
+                        setTimeout(askNextQuestion, question.postAnimationDelay || 600);
                     } else if (question.type === 'question') {
                         if (question.options) {
                             const optionButtons = question.options.map(opt => ({ text: opt, class: 'option-btn bg-white border border-purple-300 text-purple-600 px-4 py-2 rounded-full text-sm flex-shrink-0 hover:bg-purple-50' }));
