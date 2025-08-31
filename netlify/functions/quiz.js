@@ -40,6 +40,7 @@ exports.handler = async (event, context) => {
       }
 
       const trafficSource = data.source || 'unknown';
+      const deviceType = data.deviceType || 'unknown'; //
       
       const newSessionRef = db.collection('sessions').doc();
       await newSessionRef.set({
@@ -47,7 +48,9 @@ exports.handler = async (event, context) => {
         ipAddress: ipAddress,
         countryCode: countryCode,
         trafficSource: trafficSource,
-        createdAt: new Date().toISOString(), // Это время начала
+        deviceType: deviceType, //
+        paymentStatus: 'pending', //
+        createdAt: new Date().toISOString(),
         answers: {}
       });
       
@@ -61,31 +64,40 @@ exports.handler = async (event, context) => {
       if (!sessionId || !questionId || answer === undefined) {
           return { statusCode: 400, body: 'Missing required fields' };
       }
-
       const sessionRef = db.collection('sessions').doc(sessionId);
       await sessionRef.update({
         [`answers.${questionId}`]: answer,
         updatedAt: new Date().toISOString(),
         dropOffPoint: `question_${questionId}`
       });
-      
       return {
         statusCode: 200,
         body: JSON.stringify({ message: 'Answer saved' }),
       };
     
-    } else if (action === 'endQuiz') { //
+    } else if (action === 'endQuiz') {
       const { sessionId } = data;
-      if (!sessionId) {
-        return { statusCode: 400, body: 'Missing sessionId' };
-      }
+      if (!sessionId) return { statusCode: 400, body: 'Missing sessionId' };
       const sessionRef = db.collection('sessions').doc(sessionId);
       await sessionRef.update({
-        quizEndedAt: new Date().toISOString() // Это время конца
+        quizEndedAt: new Date().toISOString()
       });
       return {
         statusCode: 200,
         body: JSON.stringify({ message: 'Quiz end time recorded' })
+      };
+
+    } else if (action === 'updatePayment') { //
+      const { sessionId, status, amountUSD } = data;
+      if (!sessionId) return { statusCode: 400, body: 'Missing sessionId' };
+      const sessionRef = db.collection('sessions').doc(sessionId);
+      await sessionRef.update({
+        paymentStatus: status,
+        paymentAmountUSD: amountUSD
+      });
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: 'Payment details updated' })
       };
     }
 
