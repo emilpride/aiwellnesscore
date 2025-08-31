@@ -1,3 +1,5 @@
+// /netlify/functions/result-background.js
+
 'use strict';
 
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
@@ -16,12 +18,11 @@ if (!getApps().length) {
 const db = getFirestore();
 
 function createFullPrompt(answers = {}, faceAnalysis) {
+  // ... (эта функция без изменений)
   const quizData = Object.entries(answers)
     .filter(([k]) => !['selfie','faceAnalysis','skinAnalysis','reportData','reportStatus','reportError'].includes(k))
     .map(([k, v]) => `${k}: ${v}`)
     .join('\n') || "No quiz answers provided.";
-
-  // Include detailed skin status from face analysis if available
   const skinStatus = faceAnalysis?.faces?.[0]?.attributes?.skinstatus;
   const faceData = faceAnalysis ? `
 Face Analysis Data:
@@ -38,16 +39,13 @@ Face Analysis Data:
 - Eye finelines score (1-100): ${skinStatus?.eye_finelines || 'N/A'}
 - Crow's feet score (1-100): ${skinStatus?.crows_feet || 'N/A'}
 ` : "No face analysis available";
-
   return `You are an AI wellness and dermatology analyst. Create a personalized wellness report based on the user's quiz answers and face analysis data.
-
 USER DATA:
 ${quizData}
 
 ${faceData}
 
 Generate a complete, personalized JSON report. Be specific and base all calculations and text on the provided user data.
-
 REQUIRED JSON STRUCTURE (return ONLY valid JSON, no other text):
 {
   "userName": "[Extract user's name if provided, otherwise use a friendly placeholder like 'there']",
@@ -118,97 +116,22 @@ REQUIRED JSON STRUCTURE (return ONLY valid JSON, no other text):
 }`;
 }
 
-function buildCompleteFallback(sessionData = {}, faceAnalysis = null) {
-    const answers = sessionData.answers || {};
-    let age = 35;
-    if (answers.age) {
-        const ageMatch = answers.age.match(/\d+/);
-        if (ageMatch) age = parseInt(ageMatch[0]);
-    }
-    
-    // Simplified calculations for fallback
-    let wellnessScore = 68;
-    let wellnessAge = age + 3;
-    if (answers.sleep?.includes('7-8')) {
-        wellnessScore += 5;
-        wellnessAge -= 2;
-    }
-    if (answers.activity?.includes('3-4')) {
-        wellnessScore += 7;
-        wellnessAge -= 3;
-    }
-    if (answers.stress?.includes('Low')) {
-        wellnessScore += 10;
-        wellnessAge -= 2;
-    }
-
-    const skinStatus = faceAnalysis?.faces?.[0]?.attributes?.skinstatus || {};
-
-    return {
-        userName: "Jessica",
-        chronoAge: age,
-        wellnessAge: wellnessAge,
-        ageReductionPrediction: "2-3 years",
-        increasingFactors: [
-            "High stress levels from work are impacting sleep quality.",
-            "Occasional lack of hydration affects skin elasticity."
-        ],
-        decreasingFactors: [
-            "Consistent weekly exercise routine.",
-            "Healthy BMI and regular physical activity."
-        ],
-        metrics: {
-            wellnessScore: { value: Math.min(95, wellnessScore), description: "This score provides a holistic measure of your current well-being, combining all lifestyle, physical, and skin health factors." },
-            energy: { value: 65, description: "Reflects your vitality based on sleep, nutrition, and activity." },
-            stress: { value: 75, description: "Your body's response to daily pressures. A lower score is better." },
-            skinQuality: { value: skinStatus.health || 85, description: "Based on visual analysis of hydration, texture, and tone." },
-            bmi: { value: "22.5 (Healthy)", description: "Your Body Mass Index is optimal." },
-            nutrition: { value: "70", description: "Assessment of your dietary balance." },
-            healthyHabits: { value: "80", description: "Consistency in positive lifestyle choices." }
-        },
-        skinAnalysis: {
-            dark_circle: (skinStatus.dark_circle > 30) ? 1 : 0,
-            eye_pouch: (skinStatus.eye_pouch > 30) ? 1 : 0,
-            forehead_wrinkle: (skinStatus.forehead_wrinkle > 20) ? 1 : 0,
-            glabella_wrinkle: (skinStatus.glabella_wrinkle > 20) ? 1 : 0,
-            nasolabial_fold: (skinStatus.nasolabial_fold > 20) ? 1 : 0,
-            eye_finelines: (skinStatus.eye_finelines > 20) ? 1 : 0,
-            crows_feet: (skinStatus.crows_feet > 20) ? 1 : 0,
-            skin_type: 3, // Default to mixed
-            skin_spot: (skinStatus.skin_spot > 10) ? 1 : 0,
-            acne: (skinStatus.acne > 10) ? 1 : 0,
-            blackhead: (skinStatus.blackhead > 10) ? 1 : 0,
-            pores: 1,
-            mole: 0,
-            conclusion: "Your skin shows good elasticity. Key areas for improvement are hydration to reduce fine lines and targeted care for the T-zone. Better sleep will also help reduce dark circles."
-        },
-        sevenDayPlan: [
-            { day: 1, title: "Hydration", task: "Drink 8 glasses of water.", icon: "💧" },
-            { day: 2, title: "Mindfulness", task: "5-minute morning meditation.", icon: "🧘" },
-            { day: 3, title: "Digital Detox", task: "No screens 1 hour before bed.", icon: "🌙" },
-            { day: 4, title: "Green Boost", task: "Add a large leafy green salad.", icon: "🥬" },
-            { day: 5, title: "Active Break", task: "Take a 15-minute brisk walk.", icon: "👟" },
-            { day: 6, title: "Skin Care", task: "Apply a hydrating face mask.", icon: "🧖‍♀️" },
-            { day: 7, title: "Reflect & Plan", task: "Review your week and continue one new habit.", icon: "🗓️" },
-        ]
-    };
-}
-
+// --- ИЗМЕНЕНИЕ: Функция buildCompleteFallback полностью удалена ---
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
   
+  const { sessionId } = JSON.parse(event.body);
+  if (!sessionId) {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Session ID is required' }) };
+  }
+  
+  const sessionRef = db.collection('sessions').doc(sessionId);
+    
   try {
-    const { sessionId } = JSON.parse(event.body);
-    if (!sessionId) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Session ID is required' }) };
-    }
-    
     console.log(`[${sessionId}] Starting report generation`);
-    const sessionRef = db.collection('sessions').doc(sessionId);
-    
     const doc = await sessionRef.get();
     if (!doc.exists) {
       return { statusCode: 404, body: JSON.stringify({ error: 'Session not found' }) };
@@ -216,10 +139,11 @@ exports.handler = async (event) => {
     
     const sessionData = doc.data();
     await sessionRef.update({ reportStatus: 'processing' });
-    
+
+    // --- ИЗМЕНЕНИЕ: Блок try/catch теперь обрабатывает ошибки, а не генерирует фейковые данные ---
     try {
       if (!process.env.GEMINI_API_KEY) {
-        throw new Error('Gemini API key not configured');
+        throw new Error('Gemini API key is not configured on the server.');
       }
       
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -228,10 +152,9 @@ exports.handler = async (event) => {
       console.log(`[${sessionId}] Calling Gemini API`);
       const prompt = createFullPrompt(sessionData.answers, sessionData.faceAnalysis);
       
-      // Timeout for API call
       const result = await Promise.race([
         model.generateContent(prompt),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('API Timeout')), 8000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('API Timeout after 8 seconds')), 8000))
       ]);
       
       const response = result.response;
@@ -240,12 +163,10 @@ exports.handler = async (event) => {
       
       const cleaned = text.replace(/```json\s*/gi, '').replace(/```/gi, '').trim();
       const jsonMatch = cleaned.match(/\{[\s\S]*\}$/);
-      if (!jsonMatch) throw new Error('No valid JSON in response');
+      if (!jsonMatch) throw new Error('No valid JSON in Gemini response');
       
       const reportData = JSON.parse(jsonMatch[0]);
-      
-      // Validate structure
-      if (!reportData.metrics?.wellnessScore) throw new Error('Invalid report structure');
+      if (!reportData.metrics?.wellnessScore) throw new Error('Invalid report structure from AI');
       
       await sessionRef.update({ 
         reportData, 
@@ -259,22 +180,28 @@ exports.handler = async (event) => {
       };
       
     } catch (error) {
-      console.error(`[${sessionId}] Using fallback due to:`, error.message);
-      const fallbackReport = buildCompleteFallback(sessionData, sessionData.faceAnalysis);
-      
+      // Вместо создания фейкового отчета, записываем ошибку в Firestore
+      console.error(`[${sessionId}] Error during report generation:`, error.message);
       await sessionRef.update({ 
-        reportData: fallbackReport, 
-        reportStatus: 'complete'
+        reportStatus: 'error',
+        reportError: error.message 
       });
-      
+      // Возвращаем ошибку, чтобы Netlify залогировал сбой функции
       return {
-        statusCode: 200,
-        body: JSON.stringify({ message: 'Report generated (fallback)', sessionId })
+        statusCode: 500,
+        body: JSON.stringify({ message: 'Failed to generate report', error: error.message, sessionId })
       };
     }
     
   } catch (error) {
+    // Этот catch ловит ошибки за пределами логики Gemini (например, чтение из Firestore)
     console.error('Handler error:', error);
+    // Также записываем ошибку в Firestore, если это возможно
+    await sessionRef.update({ 
+        reportStatus: 'error',
+        reportError: 'A critical handler error occurred.' 
+    }).catch(e => console.error("Failed to write final error state:", e));
+
     return { 
       statusCode: 500, 
       body: JSON.stringify({ error: error.message }) 
