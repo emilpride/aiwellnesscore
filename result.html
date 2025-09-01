@@ -482,20 +482,26 @@ setTimeout(checkPaymentStatus, 2000);
             
             // --- ИЗМЕНЕННАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ ---
             async function initializeReport() {
-                const loadingOverlay = document.getElementById('loading-overlay');
-                const loadingText = document.getElementById('loading-text');
+    // Отправка события покупки в Meta Pixel
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') {
+        fbq('track', 'Purchase', {value: 9.99, currency: 'USD'});
+    }
 
-                try {
-                    const reportData = await fetchWellnessData();
-                    chartData = reportData; 
-                    populateReport(reportData);
-                    loadingOverlay.style.opacity = 0;
-                    setTimeout(() => { loadingOverlay.style.display = 'none'; }, 500);
-                } catch (error) {
-                    console.error("Failed to get report:", error);
-                    loadingText.textContent = `Error: ${error.message}`;
-                }
-            }
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const loadingText = document.getElementById('loading-text');
+
+    try {
+        const reportData = await fetchWellnessData();
+        chartData = reportData; 
+        populateReport(reportData);
+        loadingOverlay.style.opacity = 0;
+        setTimeout(() => { loadingOverlay.style.display = 'none'; }, 500);
+    } catch (error) {
+        console.error("Failed to get report:", error);
+        loadingText.textContent = `Error: ${error.message}`;
+    }
+}
 
             initializeReport();
         });
