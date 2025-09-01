@@ -127,3 +127,20 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: JSON.stringify({ error: 'Internal Server Error' }) };
   }
 };
+return {
+    id: doc.id,
+    createdAt: new Date(data.createdAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }),
+    deviceType: data.deviceType || 'N/A',
+    trafficSource: source,
+    ipAddress: data.ipAddress || 'N/A',
+    country: country,
+    email: answers.email || 'N/A', // ДОБАВЬТЕ ЭТУ СТРОКУ
+    gender: answers.gender || 'N/A',
+    age: answers.age || 'N/A',
+    progress: progress,
+    duration: duration,
+    paymentStatus: data.paymentStatus || 'pending',
+    paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A',
+    paymentMethod: data.paymentStatus === 'succeeded' ? 'Card/Wallet' : 'N/A',
+    resultLink: `result.html?session_id=${data.sessionId}`
+};
