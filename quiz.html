@@ -334,25 +334,21 @@
 
 // --- Вставьте этот код в <script> в файле /quiz.html ---
 
+// --- Вставьте этот код в <script> в файле /quiz.html ---
+
 let stripe, elements, clientSecret;
 
 async function showPaymentForm() {
     optionsContainerWrapper.classList.add('hidden');
     inputArea.classList.add('hidden');
-    // Используем payment-element для универсальной формы от Stripe
-    const formHtml = `<div class="p-4 bg-gray-50 border-t"><div id="payment-wrapper" class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6"><div class="text-center mb-4"><h2 class="text-2xl font-bold text-gray-800">Unlock Full Report</h2></div><div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-4"><p class="text-sm font-medium">Limited Time Offer (-30%)</p><p id="countdown-timer" class="text-2xl font-bold tracking-wider">10:00</p></div><div class="text-center mb-4"><span class="text-3xl font-bold text-gray-800">$9.99</span><span class="text-lg text-gray-400 line-through ml-2">$14.99</span></div><form id="payment-form" class="space-y-4"><div id="payment-element"></div><button id="submit-payment" type="submit" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md"><span id="button-text">Pay now</span></button><div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div></form></div></div>`;
+    // HTML-структура для кнопки Apple/Google Pay и отдельного поля для карты
+    const formHtml = `<div class="p-4 bg-gray-50 border-t"><div id="payment-wrapper" class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6"><div class="text-center mb-4"><h2 class="text-2xl font-bold text-gray-800">Unlock Full Report</h2></div><div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-4"><p class="text-sm font-medium">Limited Time Offer (-30%)</p><p id="countdown-timer" class="text-2xl font-bold tracking-wider">10:00</p></div><div class="text-center mb-4"><span class="text-3xl font-bold text-gray-800">$9.99</span><span class="text-lg text-gray-400 line-through ml-2">$14.99</span></div><form id="payment-form" class="space-y-4"><div id="payment-request-button"></div><div id="card-element" class="p-3 border border-gray-300 rounded-md shadow-sm"></div><button id="submit-payment" type="submit" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md"><span id="button-text">Pay now</span></button><div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div></form></div></div>`;
     paymentFormContainer.innerHTML = formHtml;
     paymentFormContainer.classList.remove('hidden');
     scrollToBottom();
     startCountdown();
 
-    if (!window.Stripe) {
-        console.error('Stripe SDK not loaded');
-        document.getElementById('payment-wrapper').innerHTML = `<p class="text-center text-red-500">Payment system is not available. Please refresh the page.</p>`;
-        return;
-    }
-
-    stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb'); // Ваш publishable key
+    stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb');
 
     try {
         const response = await fetch('/.netlify/functions/payment', {
@@ -360,22 +356,45 @@ async function showPaymentForm() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sessionId: sessionId })
         });
-
-        if (!response.ok) {
-            throw new Error(`Server responded with status: ${response.status}`);
-        }
-        
         const data = await response.json();
         clientSecret = data.clientSecret;
-
-        // Эта проверка теперь будет работать, так как бэкенд возвращает clientSecret
-        if (!clientSecret) {
-            throw new Error("Did not receive a valid client secret from server.");
-        }
+        if (!clientSecret) throw new Error("Client secret not received.");
 
         elements = stripe.elements({ clientSecret });
-        const paymentElement = elements.create("payment"); // "payment" элемент включает в себя все (карта, Apple Pay и т.д.)
-        paymentElement.mount("#payment-element");
+
+        // 1. Создаем кнопку Apple/Google Pay
+        const paymentRequest = stripe.paymentRequest({
+            country: 'US',
+            currency: 'usd',
+            total: { label: 'AI Wellness Report', amount: 999 },
+            requestPayerName: true,
+            requestPayerEmail: true,
+        });
+        
+        const prButton = elements.create('paymentRequestButton', { paymentRequest });
+        const canMakePayment = await paymentRequest.canMakePayment();
+        if (canMakePayment) {
+            prButton.mount('#payment-request-button');
+        } else {
+            document.getElementById('payment-request-button').style.display = 'none';
+        }
+
+        paymentRequest.on('paymentmethod', async (ev) => {
+            const { paymentIntent, error: confirmError } = await stripe.confirmCardPayment(clientSecret, { payment_method: ev.paymentMethod.id }, { handleActions: false });
+            if (confirmError) {
+                ev.complete('fail');
+                document.getElementById('payment-message').textContent = confirmError.message;
+            } else {
+                ev.complete('success');
+                if (paymentIntent.status === "succeeded") {
+                    handleSuccessfulPayment();
+                }
+            }
+        });
+
+        // 2. Создаем компактное поле для карты
+        const cardElement = elements.create("card", { style: { base: { fontSize: '16px' } } });
+        cardElement.mount("#card-element");
 
         const paymentForm = document.getElementById('payment-form');
         paymentForm.addEventListener('submit', handlePayment);
@@ -391,40 +410,26 @@ async function handlePayment(e) {
     const submitButton = document.getElementById('submit-payment');
     const messageDiv = document.getElementById('payment-message');
     submitButton.disabled = true;
-    messageDiv.classList.add('hidden');
 
-    try {
-        const { error } = await stripe.confirmPayment({
-            elements,
-            confirmParams: {
-                // Убедитесь, что этот URL ведет на вашу страницу результатов
-                return_url: `${window.location.origin}/result.html?session_id=${sessionId}&payment=success`,
-            },
-        });
-
-        // Эта часть кода будет выполнена, только если произошла немедленная ошибка
-        // (например, неверный номер карты). Если требуется 3D-Secure, Stripe автоматически
-        // перенаправит пользователя на `return_url` после подтверждения.
-        if (error.type === "card_error" || error.type === "validation_error") {
-            messageDiv.textContent = error.message;
-        } else {
-            messageDiv.textContent = "An unexpected error occurred.";
+    // Используем confirmCardPayment для классического поля карты
+    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+            card: elements.getElement('card'),
         }
+    });
+
+    if (error) {
+        messageDiv.textContent = error.message;
         messageDiv.classList.remove('hidden');
         submitButton.disabled = false;
-        
-    } catch (err) {
-        console.error("Payment submission error:", err);
-        messageDiv.textContent = "A critical error occurred. Please try again.";
-        messageDiv.classList.remove('hidden');
-        submitButton.disabled = false;
+    } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+        handleSuccessfulPayment();
     }
 }
 
 function handleSuccessfulPayment() {
     paymentFormContainer.innerHTML = `<div class="p-8 text-center"><svg class="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><h3 class="text-2xl font-bold mt-4">Payment Successful!</h3><p class="text-gray-600 mt-2">Finalizing your report...</p></div>`;
     scrollToBottom();
-    // Перенаправляем на страницу результатов, так как успешная оплата подтверждена
     setTimeout(() => { window.location.href = `result.html?session_id=${sessionId}&payment=success`; }, 2500);
 }
 // P.S. Замените `#card-element` на `#payment-element` в HTML-шаблоне `formHtml` в функции showPaymentForm, если вы этого еще не сделали. Я уже сделал это в коде выше.
