@@ -14,39 +14,77 @@ if (!getApps().length) {
 }
 const db = getFirestore();
 
-exports.handler = async ({ body, headers }) => {
+exports.handler = async (event) => {
+  // Добавляем логирование
+  console.log('Webhook called with method:', event.httpMethod);
+  console.log('Headers:', JSON.stringify(event.headers));
+  
+  // ВАЖНО: Stripe требует raw body
+  const sig = event.headers['stripe-signature'];
+  
+  if (!sig) {
+    console.error('No stripe signature found');
+    return {
+      statusCode: 400,
+      body: 'No signature',
+    };
+  }
+
+  let stripeEvent;
+  
   try {
-    const stripeEvent = stripe.webhooks.constructEvent(
-      body,
-      headers['stripe-signature'],
+    // ВАЖНО: используем event.body напрямую
+    stripeEvent = stripe.webhooks.constructEvent(
+      event.body,
+      sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
-
-    if (stripeEvent.type === 'payment_intent.succeeded') {
-      const paymentIntent = stripeEvent.data.object;
-      const sessionId = paymentIntent.metadata.sessionId;
-      const paymentAmount = (paymentIntent.amount / 100).toFixed(2); // в долларах
-
-      if (sessionId) {
-        const sessionRef = db.collection('sessions').doc(sessionId);
-        await sessionRef.update({
-          paymentStatus: 'succeeded',
-          paymentAmountUSD: paymentAmount,
-          // Можно добавить и другие детали, например, paymentMethod
-        });
-        console.log(`Successfully updated payment status for session: ${sessionId}`);
-      }
-    }
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ received: true }),
-    };
+    
+    console.log('Event type:', stripeEvent.type);
+    console.log('Event ID:', stripeEvent.id);
+    
   } catch (err) {
-    console.log(`Stripe webhook failed with ${err}`);
+    console.error(`Webhook signature verification failed:`, err.message);
     return {
       statusCode: 400,
       body: `Webhook Error: ${err.message}`,
     };
   }
+
+  // Обработка события
+  if (stripeEvent.type === 'payment_intent.succeeded') {
+    const paymentIntent = stripeEvent.data.object;
+    console.log('Payment succeeded for amount:', paymentIntent.amount);
+    console.log('Metadata:', paymentIntent.metadata);
+    
+    const sessionId = paymentIntent.metadata?.sessionId;
+    
+    if (sessionId) {
+      try {
+        const paymentAmount = (paymentIntent.amount / 100).toFixed(2);
+        
+        const sessionRef = db.collection('sessions').doc(sessionId);
+        await sessionRef.update({
+          paymentStatus: 'succeeded',
+          paymentAmountUSD: paymentAmount,
+          stripePaymentIntentId: paymentIntent.id,
+          paymentMethod: paymentIntent.payment_method_types[0] || 'card',
+          updatedAt: new Date().toISOString()
+        });
+        
+        console.log(`Successfully updated payment status for session: ${sessionId}`);
+      } catch (dbError) {
+        console.error('Database update failed:', dbError);
+        // Не возвращаем ошибку Stripe, чтобы не вызвать повторную отправку
+      }
+    } else {
+      console.warn('No sessionId in payment metadata');
+    }
+  }
+
+  // Всегда возвращаем 200 для Stripe
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ received: true }),
+  };
 };
