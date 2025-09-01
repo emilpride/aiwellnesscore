@@ -10,21 +10,21 @@ if (!getApps().length) {
   } catch (e) { console.error("Firebase init error in getAdminData.js:", e); }
 }
 const db = getFirestore();
-// --- ИЗМЕНЕНИЕ: Список ключей вопросов для точного подсчета прогресса ---
+
+// --- ИЗМЕНЕНИЕ 1: Добавляем 'email' в массив ключей ---
 const QUESTION_KEYS = [
-    'age', 'gender', 'height', 'weight', 'sleep', 'activity', 'nutrition', 
+    'email', 'age', 'gender', 'height', 'weight', 'sleep', 'activity', 'nutrition', 
     'processed_food', 'hydration', 'stress', 'mindfulness', 'mood', 
     'alcohol', 'smoking', 'screen_time'
 ];
-const TOTAL_QUESTIONS = QUESTION_KEYS.length;
+const TOTAL_QUESTIONS = QUESTION_KEYS.length; // Теперь это 16
 
-// --- ИЗМЕНЕНИЕ: Утилита для преобразования кода страны в название ---
 const countryCodeToName = {
     US: "United States", DE: "Germany", FR: "France", GB: "United Kingdom", CA: "Canada", 
     AU: "Australia", JP: "Japan", CN: "China", IN: "India", BR: "Brazil", RU: "Russia",
     UA: "Ukraine", PL: "Poland", IT: "Italy", ES: "Spain", NL: "Netherlands", SE: "Sweden",
-    // Добавьте другие страны по мере необходимости
 };
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -42,7 +42,6 @@ exports.handler = async (event) => {
       return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: {} }) };
     }
 
-    // --- ИЗМЕНЕНИЕ: Обработка данных и расчет статистики ---
     let totalRevenue = 0;
     let successfulPayments = 0;
     let totalCompletionPercentage = 0;
@@ -61,8 +60,9 @@ exports.handler = async (event) => {
 
       let duration = 'N/A';
       if (data.createdAt && data.quizEndedAt) {
-   
-       completedQuizzes++;
+        if(progressPercent === 100) {
+            completedQuizzes++;
+        }
         const start = new Date(data.createdAt);
         const end = new Date(data.quizEndedAt);
         const diffMs = end - start;
@@ -72,7 +72,6 @@ exports.handler = async (event) => {
       }
 
       if (data.paymentStatus === 'succeeded' && data.paymentAmountUSD) {
- 
         successfulPayments++;
         totalRevenue += parseFloat(data.paymentAmountUSD);
       }
@@ -90,10 +89,11 @@ exports.handler = async (event) => {
         trafficSource: source,
         ipAddress: data.ipAddress || 'N/A',
         country: country,
-        email: answers.email || 'N/A', // ИЗМЕНЕНИЕ ДОБАВЛЕНО
+        email: answers.email || 'N/A',
         gender: answers.gender || 'N/A',
         age: answers.age || 'N/A',
         progress: progress,
+        progressPercent: progressPercent, // --- ИЗМЕНЕНИЕ 2: Добавляем это поле для логики в админке ---
         duration: duration,
         paymentStatus: data.paymentStatus || 'pending',
         paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A',
@@ -101,6 +101,7 @@ exports.handler = async (event) => {
         resultLink: `result.html?session_id=${data.sessionId}`
       };
     });
+
     const statistics = {
         totalSessions: snapshot.size,
         totalRevenue: totalRevenue.toFixed(2),
@@ -111,6 +112,7 @@ exports.handler = async (event) => {
         topTrafficSources: Object.entries(trafficSourceCounts).sort((a, b) => b[1] - a[1]).slice(0, 5),
         topCountries: Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 5),
     };
+
     return {
       statusCode: 200,
       body: JSON.stringify({ sessions: sessionsData, statistics }),
