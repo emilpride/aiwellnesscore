@@ -332,44 +332,59 @@
        
        let stripe, elements, clientSecret;
        async function showPaymentForm() {
-           optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden');
-           const formHtml = `<div class="p-4 bg-gray-50 border-t"><div id="payment-wrapper" class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6"><div class="text-center mb-4"><h2 class="text-2xl font-bold text-gray-800">Unlock Full Report</h2></div><div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-4"><p class="text-sm font-medium">Limited Time Offer (-30%)</p><p id="countdown-timer" class="text-2xl font-bold tracking-wider">10:00</p></div><div class="text-center mb-4"><span class="text-3xl font-bold text-gray-800">$9.99</span><span class="text-lg text-gray-400 line-through ml-2">$14.99</span></div><form id="payment-form" class="space-y-4"><div id="payment-request-button"></div><div id="card-element" class="p-3 border border-gray-300 rounded-md shadow-sm"></div><button id="submit-payment" type="submit" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md"><span id="button-text">Pay now</span></button><div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div></form></div></div>`;
-           paymentFormContainer.innerHTML = formHtml; 
-           paymentFormContainer.classList.remove('hidden'); 
-           scrollToBottom(); 
-           startCountdown();
-           
-           if (!window.Stripe) {
-               console.error('Stripe SDK not loaded');
-               document.getElementById('payment-wrapper').innerHTML = `<p class="text-center text-red-500">Payment system is not available. Please refresh the page.</p>`;
-               return;
-           }
-           
-           stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb'); // Replace with your key
-           
-           try {
-               const response = await fetch('/.netlify/functions/payment', {
-                   method: 'POST', headers: { 'Content-Type': 'application/json' },
-                   body: JSON.stringify({ sessionId: sessionId })
-               });
-               const { id: clientSecret } = await response.json(); // Assuming the server returns { id: '...' } for the checkout session
-               
-               // Stripe Checkout redirection logic
-               const submitButton = document.getElementById('submit-payment');
-               submitButton.addEventListener('click', () => {
-                   stripe.redirectToCheckout({ sessionId: clientSecret });
-               });
-               
-               // The rest of this function might need adjustment if you are using Checkout instead of Elements
-               // For now, let's assume the main goal is redirection
-               document.getElementById('card-element').style.display = 'none'; // Hide card element if using checkout
-               document.getElementById('payment-request-button').style.display = 'none'; // Hide wallet button too
+    optionsContainerWrapper.classList.add('hidden');
+    inputArea.classList.add('hidden');
+    const formHtml = `<div class="p-4 bg-gray-50 border-t"><div id="payment-wrapper" class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6"><div class="text-center mb-4"><h2 class="text-2xl font-bold text-gray-800">Unlock Full Report</h2></div><div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-4"><p class="text-sm font-medium">Limited Time Offer (-30%)</p><p id="countdown-timer" class="text-2xl font-bold tracking-wider">10:00</p></div><div class="text-center mb-4"><span class="text-3xl font-bold text-gray-800">$9.99</span><span class="text-lg text-gray-400 line-through ml-2">$14.99</span></div><div class="space-y-4"><button id="submit-payment" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md"><span id="button-text">Pay with Card or Wallet</span></button><div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div></div></div></div>`;
+    paymentFormContainer.innerHTML = formHtml;
+    paymentFormContainer.classList.remove('hidden');
+    scrollToBottom();
+    startCountdown();
 
-           } catch (error) {
-               console.error("Failed to initialize payment form:", error);
-               document.getElementById('payment-wrapper').innerHTML = `<p class="text-center text-red-500">Could not load payment form. Error: ${error.message}</p>`;
-           }
-       }
+    if (!window.Stripe) {
+        console.error('Stripe SDK not loaded');
+        document.getElementById('payment-wrapper').innerHTML = `<p class="text-center text-red-500">Payment system is not available. Please refresh the page.</p>`;
+        return;
+    }
+
+    // Initialize Stripe with your publishable key
+    const stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb');
+
+    const submitButton = document.getElementById('submit-payment');
+    const messageDiv = document.getElementById('payment-message');
+    submitButton.disabled = true; // Disable button until we get session ID
+
+    try {
+        // Fetch the Checkout Session ID from your backend
+        const response = await fetch('/.netlify/functions/payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: sessionId })
+        });
+
+        if (!response.ok) {
+            // Handle non-500 errors from the server, if any
+            throw new Error('Failed to create payment session.');
+        }
+
+        const { id: checkoutSessionId } = await response.json();
+
+        if (!checkoutSessionId) {
+            throw new Error('Did not receive a valid session ID.');
+        }
+
+        submitButton.disabled = false; // Re-enable button
+
+        // Add a click listener to redirect to Stripe when the button is clicked
+        submitButton.addEventListener('click', () => {
+            stripe.redirectToCheckout({ sessionId: checkoutSessionId });
+        });
+
+    } catch (error) {
+        console.error("Failed to initialize payment form:", error);
+        messageDiv.textContent = `Error: ${error.message}`;
+        messageDiv.classList.remove('hidden');
+    }
+}
        
        // This function would be called on the success_url page, not here.
        function handleSuccessfulPayment() {
