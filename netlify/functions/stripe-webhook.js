@@ -12,6 +12,7 @@ if (!getApps().length) {
     console.error("Firebase init error in stripe-webhook.js:", e);
   }
 }
+
 const db = getFirestore();
 
 exports.handler = async (event) => {
@@ -51,19 +52,28 @@ exports.handler = async (event) => {
     };
   }
 
-  // Обработка события
-  if (stripeEvent.type === 'payment_intent.succeeded') {
-    const paymentIntent = stripeEvent.data.object;
-    console.log('Payment succeeded for amount:', paymentIntent.amount);
-    console.log('Metadata:', paymentIntent.metadata);
-    
-    const sessionId = paymentIntent.metadata?.sessionId;
-    
-    if (sessionId) {
-      try {
+  // Обработка различных событий
+  const paymentIntent = stripeEvent.data.object;
+  const sessionId = paymentIntent.metadata?.sessionId;
+  
+  if (!sessionId) {
+    console.warn('No sessionId in payment metadata');
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ received: true }),
+    };
+  }
+
+  const sessionRef = db.collection('sessions').doc(sessionId);
+
+  try {
+    switch (stripeEvent.type) {
+      case 'payment_intent.succeeded':
+        console.log('Payment succeeded for amount:', paymentIntent.amount);
+        console.log('Metadata:', paymentIntent.metadata);
+        
         const paymentAmount = (paymentIntent.amount / 100).toFixed(2);
         
-        const sessionRef = db.collection('sessions').doc(sessionId);
         await sessionRef.update({
           paymentStatus: 'succeeded',
           paymentAmountUSD: paymentAmount,
@@ -73,13 +83,50 @@ exports.handler = async (event) => {
         });
         
         console.log(`Successfully updated payment status for session: ${sessionId}`);
-      } catch (dbError) {
-        console.error('Database update failed:', dbError);
-        // Не возвращаем ошибку Stripe, чтобы не вызвать повторную отправку
-      }
-    } else {
-      console.warn('No sessionId in payment metadata');
+        break;
+
+      case 'payment_intent.payment_failed':
+        console.log('Payment failed:', paymentIntent.last_payment_error?.message);
+        
+        await sessionRef.update({
+          paymentStatus: 'failed',
+          paymentAmountUSD: '0',
+          failureReason: paymentIntent.last_payment_error?.message || 'Payment failed',
+          updatedAt: new Date().toISOString()
+        });
+        
+        console.log(`Payment failed for session: ${sessionId}`);
+        break;
+
+      case 'payment_intent.canceled':
+        console.log('Payment canceled');
+        
+        await sessionRef.update({
+          paymentStatus: 'canceled',
+          paymentAmountUSD: '0',
+          updatedAt: new Date().toISOString()
+        });
+        
+        console.log(`Payment canceled for session: ${sessionId}`);
+        break;
+
+      case 'payment_intent.processing':
+        console.log('Payment processing');
+        
+        await sessionRef.update({
+          paymentStatus: 'processing',
+          updatedAt: new Date().toISOString()
+        });
+        
+        console.log(`Payment processing for session: ${sessionId}`);
+        break;
+
+      default:
+        console.log(`Unhandled event type: ${stripeEvent.type}`);
     }
+  } catch (dbError) {
+    console.error('Database update failed:', dbError);
+    // Не возвращаем ошибку Stripe, чтобы не вызвать повторную отправку
   }
 
   // Всегда возвращаем 200 для Stripe
