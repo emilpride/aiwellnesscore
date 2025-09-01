@@ -10,10 +10,7 @@ exports.handler = async (event) => {
   try {
     const { sessionId } = JSON.parse(event.body);
     const session = await stripe.checkout.sessions.create({
-      // ИСПРАВЛЕНИЕ: Удаляем payment_method_types и добавляем automatic_payment_methods
-      automatic_payment_methods: {
-        enabled: true,
-      },
+      // ИСПРАВЛЕНИЕ: Блок automatic_payment_methods удален, так как он невалиден для Checkout Sessions
       line_items: [
         {
           price_data: {
