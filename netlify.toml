@@ -13,3 +13,10 @@
 # Увеличиваем время ожидания для нашей ФОНОВОЙ функции
 [functions."result-background"]
   timeout = 90 # Теперь это правило применяется к правильной функции
+  [functions."stripe-webhook"]
+  external_node_modules = ["stripe"]
+
+[[headers]]
+  for = "/.netlify/functions/stripe-webhook"
+  [headers.values]
+    Content-Type = "application/json"
