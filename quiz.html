@@ -150,43 +150,50 @@
             { key: 'camera', type: 'final_step', text: "You did it! 🎉 That's all the questions. Now for the fun part: a quick selfie. This helps me analyze non-medical indicators of stress and fatigue. Your photo is processed on the fly and never stored. Please allow camera access and position your face within the frame." }
         ];
 
-        // --- Utility & Helper Functions ---
-        const setAppHeight = () => { mainContainer.style.height = `${window.innerHeight}px`; };
-        const isMobile = () => window.innerWidth <= 768;
-        const scrollToBottom = () => { setTimeout(() => { chatContainer.scrollTop = chatContainer.scrollHeight; }, 0); };
+       // --- Core Quiz Logic ---
+async function startQuizSession() {
+    // Определение устройства
+    const getDeviceType = () => {
+        const width = window.innerWidth;
+        if (width < 768) return 'Mobile';
+        if (width < 1024) return 'Tablet';
+        return 'Desktop';
+    };
+    
+    // Получение источника трафика
+    const getTrafficSource = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const utm_source = urlParams.get('utm_source');
+        const ref = document.referrer;
         
-        function parseHeightToInches(heightVal) {
-            if (!heightVal) return 68;
-            if (!isNaN(parseFloat(heightVal))) { return parseFloat(heightVal) / 2.54; }
-            let inches = 0; const feetMatch = heightVal.match(/(\d+)\s*(ft|')/); const inchesMatch = heightVal.match(/(\d+)\s*(in|")/);
-            if (feetMatch) inches += parseInt(feetMatch[1]) * 12; if (inchesMatch) inches += parseInt(inchesMatch[1]);
-            return inches > 0 ? inches : 68;
-        }
+        if (utm_source) return utm_source;
+        if (ref.includes('google')) return 'Google';
+        if (ref.includes('facebook')) return 'Facebook';
+        if (ref.includes('instagram')) return 'Instagram';
+        if (ref === '') return 'Direct';
+        return 'Referral';
+    };
 
-        // --- Animation Functions ---
-        function playBiologicalAgeAnimation() { const ageElement = document.getElementById('bio-age-value'); if (!ageElement) return; let currentAge = 42; const targetAge = 39; const duration = 2800; const steps = currentAge - targetAge; const stepDuration = duration / steps; const dayDuration = duration / 7; for (let i = 1; i <= 7; i++) { setTimeout(() => { const dayEl = document.getElementById(`day-${i}`); if (dayEl) dayEl.classList.add('active'); }, i * dayDuration); } setTimeout(() => { const countdownInterval = setInterval(() => { currentAge--; ageElement.textContent = currentAge; if (currentAge === targetAge) { clearInterval(countdownInterval); ageElement.style.color = '#16a34a'; } }, stepDuration); }, 500); }
-        function playBmiAnimation() { const heightIn = parseHeightToInches(userAnswers.height); const weightLbs = (parseInt(userAnswers.weight) || 70) * 2.20462; if (heightIn && weightLbs) { const bmi = ((weightLbs / (heightIn * heightIn)) * 703).toFixed(1); let category = "Normal"; let percent = 50; if (bmi < 18.5) { category = "Underweight"; percent = (bmi / 18.5) * 25; } else if (bmi < 25) { category = "Normal"; percent = 25 + ((bmi - 18.5) / 6.5) * 50; } else if (bmi < 30) { category = "Overweight"; percent = 75 + ((bmi - 25) / 5) * 25; } else { category = "Obese"; percent = 100; } percent = Math.max(5, Math.min(95, percent)); const html = `<div class="bmi-widget"><div id="bmi-value-anim" class="bmi-value">0.0</div><div class="bmi-label">Your Estimated BMI</div><div class="bmi-scale"><div id="bmi-indicator-anim" class="bmi-indicator" style="left: 0%;"></div></div><div id="bmi-category-anim" class="bmi-category">&nbsp;</div></div>`; addBotMessage(html); setTimeout(() => { const valEl = document.getElementById('bmi-value-anim'); const catEl = document.getElementById('bmi-category-anim'); const indEl = document.getElementById('bmi-indicator-anim'); if(indEl) indEl.style.left = `${percent}%`; if(catEl) catEl.textContent = category; let start = 0; const end = parseFloat(bmi); const animDuration = 1500; const frameDuration = 1000 / 60; const totalFrames = Math.round(animDuration / frameDuration); let frame = 0; const countUp = setInterval(() => { frame++; const progress = frame / totalFrames; const currentVal = (start + (end - start) * progress).toFixed(1); if(valEl) valEl.textContent = currentVal; if (frame === totalFrames) { clearInterval(countUp); if(valEl) valEl.textContent = bmi; } }, frameDuration); }, 100); } }
-        function playSleepAnimation() { const answer = userAnswers.sleep || ""; let level = 25; if (answer.includes("5-6")) level = 50; if (answer.includes("7-8")) level = 90; if (answer.includes("More than 8")) level = 100; const html = `<div class="widget-wrapper"><div class="widget-label">Sleep Recharge</div><svg class="w-16 h-16 mx-auto text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg><div class="sleep-battery mt-2"><div id="sleep-battery-level-anim" class="sleep-battery-level"></div></div></div>`; addBotMessage(html); setTimeout(() => { const levelEl = document.getElementById('sleep-battery-level-anim'); if (!levelEl) return; let color = '#ef4444'; if (level > 40) color = '#f59e0b'; if (level > 75) color = '#22c55e'; levelEl.style.backgroundColor = color; levelEl.style.width = `${level}%`; }, 100); }
-        function playActivityAnimation() { const answer = userAnswers.activity || ""; let days = 1; if (answer.includes("1-2")) days = 2; if (answer.includes("3-4")) days = 4; if (answer.includes("5+")) days = 6; const html = `<div class="widget-wrapper"><div class="widget-label">Your Active Week</div><div class="activity-week" id="activity-week-anim"><div class="activity-day">M</div><div class="activity-day">T</div><div class="activity-day">W</div><div class="activity-day">T</div><div class="activity-day">F</div><div class="activity-day">S</div><div class="activity-day">S</div></div></div>`; addBotMessage(html); setTimeout(() => { const weekEl = document.getElementById('activity-week-anim'); if (!weekEl) return; const dayElements = weekEl.children; const daysToActivate = [0, 2, 4, 1, 3, 5, 6]; for (let i = 0; i < days; i++) { setTimeout(() => { dayElements[daysToActivate[i]].classList.add('active'); }, i * 250); } }, 100); }
-        function playHydrationAnimation() { const answer = userAnswers.hydration || ""; let level = 25; if (answer.includes("4-6")) level = 50; if (answer.includes("7-9")) level = 75; if (answer.includes("10+")) level = 100; const html = `<div class="widget-wrapper"><div class="widget-label">Body Hydration</div><svg class="w-20 h-24 mx-auto" viewBox="0 0 120 160"><defs><clipPath id="humanoid-clip"><path d="M60,20 C40,20 20,40 20,60 C20,80 40,100 60,100 C80,100 100,80 100,60 C100,40 80,20 60,20 M60,105 C40,105 20,120 20,140 L100,140 C100,120 80,105 60,105 Z"></path></clipPath></defs><g clip-path="url(#humanoid-clip)"><rect x="0" y="0" width="120" height="160" fill="#ede9fe"/><rect id="hydration-water-fill" x="0" y="0" width="120" height="160" fill="#818cf8" style="transform: translateY(160px);"/></g><path d="M60,20 C40,20 20,40 20,60 C20,80 40,100 60,100 C80,100 100,80 100,60 C100,40 80,20 60,20 M60,105 C40,105 20,120 20,140 L100,140 C100,120 80,105 60,105 Z" fill="none" stroke="#a78bfa" stroke-width="6"/></svg><div id="hydration-percentage" class="font-bold text-xl text-indigo-600 mt-2">0%</div></div>`; addBotMessage(html); setTimeout(() => { const waterEl = document.getElementById('hydration-water-fill'); const textEl = document.getElementById('hydration-percentage'); if (!waterEl || !textEl) return; const yPos = 160 - (160 * (level / 100)); waterEl.style.transform = `translateY(${yPos}px)`; textEl.style.opacity = '1'; let currentLevel = 0; const levelUp = setInterval(() => { currentLevel++; textEl.textContent = `${currentLevel}%`; if (currentLevel >= level) clearInterval(levelUp); }, 1500 / level); }, 100); }
-        function playStressGaugeAnimation() { const stressAnswer = userAnswers.stress || "1"; const level = parseInt(stressAnswer.match(/\d+/)[0]); const percent = (level - 1) / 9 * 100; let color = '#4ade80'; if (level > 4) color = '#facc15'; if (level > 7) color = '#f87171'; const html = `<div class="widget-wrapper"><div class="widget-label">Reported Stress Level</div><div class="stress-bar-track"><div id="stress-bar-fill-anim" class="stress-bar-fill"></div></div><div id="stress-value-anim" class="stress-value">${level}/10</div></div>`; addBotMessage(html); setTimeout(() => { const fillEl = document.getElementById('stress-bar-fill-anim'); const textEl = document.getElementById('stress-value-anim'); if (!fillEl || !textEl) return; fillEl.style.width = `${percent}%`; textEl.style.color = color; }, 100); }
+    try {
+        const response = await fetch('/.netlify/functions/quiz', {
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                action: 'startSession',
+                source: getTrafficSource(),
+                deviceType: getDeviceType()
+            })
+        });
+        if (!response.ok) throw new Error('Could not start session');
+        const data = await response.json();
+        sessionId = data.sessionId;
+    } catch (error) {
+        console.error('Failed to start session:', error);
+        addBotMessage("Sorry, I'm having trouble connecting. Please try refreshing the page.");
+        inputArea.style.display = 'none';
+    }
+}
 
-        // --- Core Quiz Logic ---
-        async function startQuizSession() {
-            try {
-                const response = await fetch('/.netlify/functions/quiz', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'startSession' })
-                });
-                if (!response.ok) throw new Error('Could not start session');
-                const data = await response.json();
-                sessionId = data.sessionId;
-            } catch (error) {
-                console.error('Failed to start session:', error);
-                addBotMessage("Sorry, I'm having trouble connecting. Please try refreshing the page.");
-                inputArea.style.display = 'none';
-            }
-        }
         async function saveAnswerToServer(questionKey, answer) {
             if (!sessionId) return;
             try {
