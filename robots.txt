@@ -1,0 +1,9 @@
+# Allow all friendly robots
+User-agent: *
+Allow: /
+
+# Disallow admin page
+Disallow: /admin.html
+
+# Sitemap location
+Sitemap: https://aiwellnesscore.com/sitemap.xml
