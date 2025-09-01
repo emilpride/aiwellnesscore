@@ -3,7 +3,6 @@
 'use strict';
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
-
 if (!getApps().length) {
   try {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
@@ -11,7 +10,6 @@ if (!getApps().length) {
   } catch (e) { console.error("Firebase init error in getAdminData.js:", e); }
 }
 const db = getFirestore();
-
 // --- ИЗМЕНЕНИЕ: Список ключей вопросов для точного подсчета прогресса ---
 const QUESTION_KEYS = [
     'age', 'gender', 'height', 'weight', 'sleep', 'activity', 'nutrition', 
@@ -27,8 +25,6 @@ const countryCodeToName = {
     UA: "Ukraine", PL: "Poland", IT: "Italy", ES: "Spain", NL: "Netherlands", SE: "Sweden",
     // Добавьте другие страны по мере необходимости
 };
-
-
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -36,14 +32,12 @@ exports.handler = async (event) => {
 
   try {
     const { password } = JSON.parse(event.body);
-
     if (password !== process.env.SHAURMA) {
       return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
     }
 
     const sessionsRef = db.collection('sessions');
     const snapshot = await sessionsRef.orderBy('createdAt', 'desc').get();
-
     if (snapshot.empty) {
       return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: {} }) };
     }
@@ -55,7 +49,6 @@ exports.handler = async (event) => {
     let completedQuizzes = 0;
     const trafficSourceCounts = {};
     const countryCounts = {};
-
     const sessionsData = snapshot.docs.map(doc => {
       const data = doc.data();
       const answers = data.answers || {};
@@ -68,7 +61,8 @@ exports.handler = async (event) => {
 
       let duration = 'N/A';
       if (data.createdAt && data.quizEndedAt) {
-        completedQuizzes++;
+   
+       completedQuizzes++;
         const start = new Date(data.createdAt);
         const end = new Date(data.quizEndedAt);
         const diffMs = end - start;
@@ -78,6 +72,7 @@ exports.handler = async (event) => {
       }
 
       if (data.paymentStatus === 'succeeded' && data.paymentAmountUSD) {
+ 
         successfulPayments++;
         totalRevenue += parseFloat(data.paymentAmountUSD);
       }
@@ -95,6 +90,7 @@ exports.handler = async (event) => {
         trafficSource: source,
         ipAddress: data.ipAddress || 'N/A',
         country: country,
+        email: answers.email || 'N/A', // ИЗМЕНЕНИЕ ДОБАВЛЕНО
         gender: answers.gender || 'N/A',
         age: answers.age || 'N/A',
         progress: progress,
@@ -105,7 +101,6 @@ exports.handler = async (event) => {
         resultLink: `result.html?session_id=${data.sessionId}`
       };
     });
-
     const statistics = {
         totalSessions: snapshot.size,
         totalRevenue: totalRevenue.toFixed(2),
@@ -116,31 +111,12 @@ exports.handler = async (event) => {
         topTrafficSources: Object.entries(trafficSourceCounts).sort((a, b) => b[1] - a[1]).slice(0, 5),
         topCountries: Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 5),
     };
-
     return {
       statusCode: 200,
       body: JSON.stringify({ sessions: sessionsData, statistics }),
     };
-
   } catch (error) {
     console.error('Error in getAdminData function:', error);
     return { statusCode: 500, body: JSON.stringify({ error: 'Internal Server Error' }) };
   }
-};
-return {
-    id: doc.id,
-    createdAt: new Date(data.createdAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }),
-    deviceType: data.deviceType || 'N/A',
-    trafficSource: source,
-    ipAddress: data.ipAddress || 'N/A',
-    country: country,
-    email: answers.email || 'N/A', // ДОБАВЬТЕ ЭТУ СТРОКУ
-    gender: answers.gender || 'N/A',
-    age: answers.age || 'N/A',
-    progress: progress,
-    duration: duration,
-    paymentStatus: data.paymentStatus || 'pending',
-    paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A',
-    paymentMethod: data.paymentStatus === 'succeeded' ? 'Card/Wallet' : 'N/A',
-    resultLink: `result.html?session_id=${data.sessionId}`
 };
