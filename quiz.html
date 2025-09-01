@@ -171,49 +171,117 @@
             { key: 'camera', type: 'final_step', text: "You did it! 🎉 That's all the questions. Now for the fun part: a quick selfie. This helps me analyze non-medical indicators of stress and fatigue. Your photo is processed on the fly and never stored. Please allow camera access and position your face within the frame." }
         ];
 
-        // --- Core Quiz Logic ---
-        async function startQuizSession() {
-            // Определение устройства
-            const getDeviceType = () => {
-                const width = window.innerWidth;
-                if (width < 768) return 'Mobile';
-                if (width < 1024) return 'Tablet';
-                return 'Desktop';
-            };
-            
-            // Получение источника трафика
-            const getTrafficSource = () => {
-                const urlParams = new URLSearchParams(window.location.search);
-                const utm_source = urlParams.get('utm_source');
-                const ref = document.referrer;
-                
-                if (utm_source) return utm_source;
-                if (ref.includes('google')) return 'Google';
-                if (ref.includes('facebook')) return 'Facebook';
-                if (ref.includes('instagram')) return 'Instagram';
-                if (ref === '') return 'Direct';
-                return 'Referral';
-            };
-
-            try {
-                const response = await fetch('/.netlify/functions/quiz', {
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        action: 'startSession',
-                        source: getTrafficSource(),
-                        deviceType: getDeviceType()
-                    })
-                });
-                if (!response.ok) throw new Error('Could not start session');
-                const data = await response.json();
-                sessionId = data.sessionId;
-            } catch (error) {
-                console.error('Failed to start session:', error);
-                addBotMessage("Sorry, I'm having trouble connecting. Please try refreshing the page.");
-                inputArea.style.display = 'none';
-            }
+       // --- Core Quiz Logic ---
+async function startQuizSession() {
+    // Определение устройства с ОС
+    const getDeviceType = () => {
+        const userAgent = navigator.userAgent.toLowerCase();
+        const width = window.innerWidth;
+        
+        // Определяем ОС
+        let os = 'Unknown';
+        if (/iphone|ipad|ipod/.test(userAgent)) {
+            os = 'iOS';
+        } else if (/android/.test(userAgent)) {
+            os = 'Android';
+        } else if (/windows phone/.test(userAgent)) {
+            os = 'Windows Phone';
+        } else if (/mac os x/.test(userAgent)) {
+            os = 'macOS';
+        } else if (/windows/.test(userAgent)) {
+            os = 'Windows';
+        } else if (/linux/.test(userAgent)) {
+            os = 'Linux';
         }
+        
+        // Определяем тип устройства
+        let device = 'Desktop';
+        if (width < 768) {
+            device = 'Mobile';
+        } else if (width < 1024) {
+            device = 'Tablet';
+        }
+        
+        // Комбинируем результат
+        if (device === 'Mobile' || device === 'Tablet') {
+            return `${device}/${os}`;
+        }
+        return `${device}/${os}`;
+    };
+    
+    // Улучшенное получение источника трафика
+    const getTrafficSource = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const utm_source = urlParams.get('utm_source');
+        const utm_medium = urlParams.get('utm_medium');
+        const utm_campaign = urlParams.get('utm_campaign');
+        const ref = document.referrer.toLowerCase();
+        
+        // Приоритет UTM меткам
+        if (utm_source) {
+            if (utm_campaign) {
+                return `${utm_source}/${utm_campaign}`;
+            }
+            if (utm_medium) {
+                return `${utm_source}/${utm_medium}`;
+            }
+            return utm_source;
+        }
+        
+        // Определяем по referrer
+        if (ref === '') return 'Direct';
+        
+        // Поисковые системы
+        if (ref.includes('google.')) return 'Google Search';
+        if (ref.includes('bing.')) return 'Bing';
+        if (ref.includes('yahoo.')) return 'Yahoo';
+        if (ref.includes('duckduckgo.')) return 'DuckDuckGo';
+        if (ref.includes('yandex.')) return 'Yandex';
+        
+        // Социальные сети
+        if (ref.includes('facebook.com') || ref.includes('fb.com')) return 'Facebook';
+        if (ref.includes('instagram.com')) return 'Instagram';
+        if (ref.includes('twitter.com') || ref.includes('t.co')) return 'Twitter/X';
+        if (ref.includes('linkedin.com')) return 'LinkedIn';
+        if (ref.includes('pinterest.com')) return 'Pinterest';
+        if (ref.includes('reddit.com')) return 'Reddit';
+        if (ref.includes('tiktok.com')) return 'TikTok';
+        if (ref.includes('youtube.com') || ref.includes('youtu.be')) return 'YouTube';
+        if (ref.includes('telegram.')) return 'Telegram';
+        if (ref.includes('whatsapp.')) return 'WhatsApp';
+        
+        // Рекламные платформы
+        if (ref.includes('googleads.') || ref.includes('doubleclick.')) return 'Google Ads';
+        if (ref.includes('facebook.com') && ref.includes('fbclid')) return 'Facebook Ads';
+        
+        // Если не определено, показываем домен
+        try {
+            const refUrl = new URL(ref);
+            return `Referral/${refUrl.hostname.replace('www.', '')}`;
+        } catch {
+            return 'Referral';
+        }
+    };
+
+    try {
+        const response = await fetch('/.netlify/functions/quiz', {
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                action: 'startSession',
+                source: getTrafficSource(),
+                deviceType: getDeviceType()
+            })
+        });
+        if (!response.ok) throw new Error('Could not start session');
+        const data = await response.json();
+        sessionId = data.sessionId;
+    } catch (error) {
+        console.error('Failed to start session:', error);
+        addBotMessage("Sorry, I'm having trouble connecting. Please try refreshing the page.");
+        inputArea.style.display = 'none';
+    }
+}
         
         async function saveAnswerToServer(questionKey, answer) {
             if (!sessionId) return;
