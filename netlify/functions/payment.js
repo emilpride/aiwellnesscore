@@ -9,37 +9,31 @@ exports.handler = async (event) => {
 
   try {
     const { sessionId } = JSON.parse(event.body);
-    const session = await stripe.checkout.sessions.create({
-      // ИСПРАВЛЕНИЕ: Блок automatic_payment_methods удален, так как он невалиден для Checkout Sessions
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: 'AI WELLNESSCORE Premium Report',
-            },
-            unit_amount: 999, // $9.99 в центах
-          },
-          quantity: 1,
-        },
-      ],
-      mode: 'payment',
-      success_url: `${process.env.URL}/result.html?session_id=${sessionId}&payment=success`,
-      cancel_url: `${process.env.URL}/result.html?session_id=${sessionId}&payment=cancel`,
+
+    // Создаем PaymentIntent вместо Checkout Session
+    // Это позволит нам использовать встроенную форму (Stripe Elements)
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: 999, // $9.99 в центах
+      currency: 'usd',
+      automatic_payment_methods: {
+        enabled: true,
+      },
       metadata: {
         sessionId: sessionId
       }
     });
 
+    // Отправляем на фронтенд client_secret, который необходим для Stripe Elements
     return {
       statusCode: 200,
-      body: JSON.stringify({ id: session.id }),
+      body: JSON.stringify({ clientSecret: paymentIntent.client_secret }),
     };
+
   } catch (error) {
     console.error('Stripe Error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Could not create payment session' }),
+      body: JSON.stringify({ error: 'Could not create payment intent' }),
     };
   }
 };
