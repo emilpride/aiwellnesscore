@@ -330,11 +330,14 @@
         function showPhotoForConfirmation() { const d = document.createElement('div'); d.id = 'photo-preview-wrapper'; d.className = 'flex justify-start mb-4 chat-bubble'; const i = `<div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs"><p class="mb-2">Here's the photo. Happy with it?</p><img src="${capturedPhotoDataUrl}" alt="Your selfie" class="rounded-lg"/></div>`; d.innerHTML = `<div class="w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 bot-avatar-lottie overflow-hidden" id="photo-confirm-avatar"></div>${i}`; chatContainer.appendChild(d); lottie.loadAnimation({ container: document.getElementById('photo-confirm-avatar'), renderer: 'svg', loop: false, autoplay: true, path: 'avatar.json' }); scrollToBottom(); const o = [ { text: 'Looks Good!', class: 'option-btn bg-green-500 border-green-600 text-white px-4 py-2 rounded-full text-sm flex-shrink-0 font-semibold' }, { text: 'Retake', class: 'option-btn bg-white border-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm flex-shrink-0' } ]; const h = [startAnalysisAndShowForm, retakePhoto]; showOptions(o, h); inputArea.classList.add('hidden'); }
         function retakePhoto() { addUserMessage("Retake"); document.getElementById('photo-preview-wrapper')?.remove(); optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); startCamera(); }
        
-       let stripe, elements, clientSecret;
-       async function showPaymentForm() {
+       // --- Вставьте этот код в <script> в файле /quiz.html ---
+
+let stripe, elements, clientSecret;
+
+async function showPaymentForm() {
     optionsContainerWrapper.classList.add('hidden');
     inputArea.classList.add('hidden');
-    const formHtml = `<div class="p-4 bg-gray-50 border-t"><div id="payment-wrapper" class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6"><div class="text-center mb-4"><h2 class="text-2xl font-bold text-gray-800">Unlock Full Report</h2></div><div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-4"><p class="text-sm font-medium">Limited Time Offer (-30%)</p><p id="countdown-timer" class="text-2xl font-bold tracking-wider">10:00</p></div><div class="text-center mb-4"><span class="text-3xl font-bold text-gray-800">$9.99</span><span class="text-lg text-gray-400 line-through ml-2">$14.99</span></div><div class="space-y-4"><button id="submit-payment" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md"><span id="button-text">Pay with Card or Wallet</span></button><div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div></div></div></div>`;
+    const formHtml = `<div class="p-4 bg-gray-50 border-t"><div id="payment-wrapper" class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6"><div class="text-center mb-4"><h2 class="text-2xl font-bold text-gray-800">Unlock Full Report</h2></div><div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-4"><p class="text-sm font-medium">Limited Time Offer (-30%)</p><p id="countdown-timer" class="text-2xl font-bold tracking-wider">10:00</p></div><div class="text-center mb-4"><span class="text-3xl font-bold text-gray-800">$9.99</span><span class="text-lg text-gray-400 line-through ml-2">$14.99</span></div><form id="payment-form" class="space-y-4"><div id="payment-element"></div><button id="submit-payment" type="submit" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md"><span id="button-text">Pay now</span></button><div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div></form></div></div>`;
     paymentFormContainer.innerHTML = formHtml;
     paymentFormContainer.classList.remove('hidden');
     scrollToBottom();
@@ -346,52 +349,79 @@
         return;
     }
 
-    // Initialize Stripe with your publishable key
-    const stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb');
-
-    const submitButton = document.getElementById('submit-payment');
-    const messageDiv = document.getElementById('payment-message');
-    submitButton.disabled = true; // Disable button until we get session ID
+    stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb'); // Ваш publishable key
 
     try {
-        // Fetch the Checkout Session ID from your backend
         const response = await fetch('/.netlify/functions/payment', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sessionId: sessionId })
         });
+        
+        const data = await response.json();
+        clientSecret = data.clientSecret;
 
-        if (!response.ok) {
-            // Handle non-500 errors from the server, if any
-            throw new Error('Failed to create payment session.');
+        if (!clientSecret) {
+            throw new Error("Failed to get client secret from server");
         }
 
-        const { id: checkoutSessionId } = await response.json();
+        elements = stripe.elements({ clientSecret });
+        const paymentElement = elements.create("payment");
+        paymentElement.mount("#payment-element");
 
-        if (!checkoutSessionId) {
-            throw new Error('Did not receive a valid session ID.');
-        }
-
-        submitButton.disabled = false; // Re-enable button
-
-        // Add a click listener to redirect to Stripe when the button is clicked
-        submitButton.addEventListener('click', () => {
-            stripe.redirectToCheckout({ sessionId: checkoutSessionId });
-        });
+        const paymentForm = document.getElementById('payment-form');
+        paymentForm.addEventListener('submit', handlePayment);
 
     } catch (error) {
         console.error("Failed to initialize payment form:", error);
-        messageDiv.textContent = `Error: ${error.message}`;
-        messageDiv.classList.remove('hidden');
+        document.getElementById('payment-wrapper').innerHTML = `<p class="text-center text-red-500">Could not load payment form. Error: ${error.message}</p>`;
     }
 }
-       
-       // This function would be called on the success_url page, not here.
-       function handleSuccessfulPayment() {
-           paymentFormContainer.innerHTML = `<div class="p-8 text-center"><svg class="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><h3 class="text-2xl font-bold mt-4">Payment Successful!</h3><p class="text-gray-600 mt-2">Redirecting to your report...</p></div>`;
-           scrollToBottom();
-           setTimeout(() => { window.location.href = `result.html?session_id=${sessionId}`; }, 2500);
-       }
+
+async function handlePayment(e) {
+    e.preventDefault();
+    const submitButton = document.getElementById('submit-payment');
+    const messageDiv = document.getElementById('payment-message');
+    submitButton.disabled = true;
+    messageDiv.classList.add('hidden');
+
+    try {
+        const { error, paymentIntent } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                return_url: `${window.location.origin}/result.html?session_id=${sessionId}`,
+            },
+            redirect: 'if_required' // Важно: не перенаправлять, если не требуется 3D-Secure
+        });
+
+        if (error) {
+            // Эта ошибка будет показана пользователю (например, неверный номер карты)
+            messageDiv.textContent = error.message;
+            messageDiv.classList.remove('hidden');
+            submitButton.disabled = false;
+        } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+            // Если оплата прошла успешно без перенаправления
+            handleSuccessfulPayment();
+        } else {
+             // Если требуется 3D Secure, Stripe сам откроет модальное окно.
+             // После подтверждения пользователь будет перенаправлен на return_url.
+        }
+    } catch (err) {
+        console.error("Payment error:", err);
+        messageDiv.textContent = "An unexpected error occurred. Please try again.";
+        messageDiv.classList.remove('hidden');
+        submitButton.disabled = false;
+    }
+}
+
+// Убедитесь, что у вас есть эта функция для обработки успешной оплаты
+function handleSuccessfulPayment() {
+    paymentFormContainer.innerHTML = `<div class="p-8 text-center"><svg class="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><h3 class="text-2xl font-bold mt-4">Payment Successful!</h3><p class="text-gray-600 mt-2">Redirecting to your report...</p></div>`;
+    scrollToBottom();
+    setTimeout(() => { window.location.href = `result.html?session_id=${sessionId}`; }, 2500);
+}
+
+// P.S. Замените `#card-element` на `#payment-element` в HTML-шаблоне `formHtml` в функции showPaymentForm, если вы этого еще не сделали. Я уже сделал это в коде выше.
        
        function startCountdown() {
            let duration = 600;
