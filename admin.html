@@ -306,6 +306,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // File: admin.html (внутри тега <script>)
 
+// File: admin.html (внутри тега <script>)
+
 function renderTable(data) {
     const tableBody = document.getElementById('sessions-table-body');
     tableBody.innerHTML = '';
@@ -317,7 +319,6 @@ function renderTable(data) {
         const row = document.createElement('tr');
         const paymentStatusClass = session.paymentStatus === 'succeeded' ? 'bg-green-500 text-green-100' : 'bg-yellow-500 text-yellow-100';
         
-        // --- БЛОК НИЖЕ БЫЛ ИЗМЕНЕН ---
         row.innerHTML = `
             <td class="px-4 py-3 whitespace-nowrap text-sm">${session.createdAt}</td>
             <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.deviceType}</div><div class="text-gray-400">${session.trafficSource}</div></td>
@@ -327,14 +328,14 @@ function renderTable(data) {
             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.progress}</td>
             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.duration}</td>
             <td class="px-4 py-3 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">${session.paymentStatus}</span><div class="text-gray-400">${session.paymentAmount}</div></td>
+            
             <td class="px-4 py-3 whitespace-nowrap text-sm text-center">
-                ${session.paymentStatus === 'succeeded'
+                ${session.progressPercent === 100
                     ? `<a href="/${session.resultLink}" target="_blank" class="text-purple-400 hover:text-purple-300">View</a>`
                     : '<span class="text-gray-500 text-lg">❌</span>'
                 }
             </td>
         `;
-        // --- КОНЕЦ ИЗМЕНЕНИЙ ---
 
         tableBody.appendChild(row);
     });
