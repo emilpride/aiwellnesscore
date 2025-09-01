@@ -8,19 +8,30 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         :root {
-            --bg-dark: #111827; --bg-light: #1F2937; --border-color: #374151;
+            --bg-dark: #111827;
+            --bg-light: #1F2937; --border-color: #374151;
             --text-main: #F9FAFB; --text-secondary: #9CA3AF; --accent-purple: #8b5cf6;
         }
-        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif; }
-        .table-custom th { background-color: var(--bg-light); }
-        .table-custom tr:hover { background-color: #374151; }
-        .form-input { background-color: var(--bg-light); border: 1px solid var(--border-color); }
-        .stat-card { background-color: var(--bg-light); border: 1px solid var(--border-color); }
-        .tab-button { transition: all 0.2s; }
-        .tab-button.active { color: var(--accent-purple); border-color: var(--accent-purple); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .bar-chart-bar { background-color: var(--accent-purple); transition: width 0.5s ease-out; }
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif;
+        }
+        .table-custom th { background-color: var(--bg-light);
+        }
+        .table-custom tr:hover { background-color: #374151;
+        }
+        .form-input { background-color: var(--bg-light); border: 1px solid var(--border-color);
+        }
+        .stat-card { background-color: var(--bg-light); border: 1px solid var(--border-color);
+        }
+        .tab-button { transition: all 0.2s;
+        }
+        .tab-button.active { color: var(--accent-purple); border-color: var(--accent-purple);
+        }
+        .tab-content { display: none;
+        }
+        .tab-content.active { display: block;
+        }
+        .bar-chart-bar { background-color: var(--accent-purple); transition: width 0.5s ease-out;
+        }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +43,8 @@
         <div class="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-sm">
             <h2 class="text-2xl font-bold text-white mb-6 text-center">Admin Panel Access</h2>
             <form id="login-form">
-                <input type="password" id="password-input" placeholder="Enter Access Password" class="w-full form-input rounded-md p-3 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500" required>
+                <input 
+                    type="password" id="password-input" placeholder="Enter Access Password" class="w-full form-input rounded-md p-3 text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500" required>
                 <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-md mt-4 transition-colors">Login</button>
                 <p id="login-error" class="text-red-400 text-center mt-4 text-sm"></p>
             </form>
@@ -40,79 +52,100 @@
     </div>
 
     <main id="admin-panel" class="hidden p-4 sm:p-6 lg:p-8">
-        <div class="max-w-7xl mx-auto">
+      
+       <div class="max-w-7xl mx-auto">
             <h1 class="text-3xl font-bold text-white">AI WellnessCore Dashboard</h1>
             
             <div class="border-b border-gray-700 mt-6">
                 <nav class="-mb-px flex space-x-8" aria-label="Tabs">
                     <button id="tab-stats" class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Statistics</button>
-                    <button id="tab-sessions" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-400 border-transparent hover:text-gray-200 hover:border-gray-500">Sessions</button>
+   
+                     <button id="tab-sessions" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-400 border-transparent hover:text-gray-200 hover:border-gray-500">Sessions</button>
                 </nav>
             </div>
 
             <div id="content-stats" class="tab-content active mt-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="md:col-span-1 space-y-6">
+       
+                     <div class="md:col-span-1 space-y-6">
                         <div class="stat-card p-6 rounded-lg">
                             <p class="text-sm font-medium text-gray-400">Total Revenue</p>
-                            <p id="stat-total-revenue" class="text-3xl font-bold mt-1">$0.00</p>
+                          
+                       <p id="stat-total-revenue" class="text-3xl font-bold mt-1">$0.00</p>
                         </div>
                         <div class="stat-card p-6 rounded-lg">
                             <p class="text-sm font-medium text-gray-400">Average Check</p>
-                            <p id="stat-avg-check" class="text-3xl font-bold mt-1">$0.00</p>
+           
+                         <p id="stat-avg-check" class="text-3xl font-bold mt-1">$0.00</p>
                         </div>
                         <div class="stat-card p-6 rounded-lg">
+                            
                             <p class="text-sm font-medium text-gray-400">Conversion Rate</p>
                             <p id="stat-conversion" class="text-3xl font-bold mt-1">0%</p>
                         </div>
                     </div>
+                    
                     <div class="md:col-span-2 space-y-6">
                         <div class="stat-card p-6 rounded-lg">
                             <p class="text-lg font-bold text-white mb-4">Conversion Funnel</p>
                             <div class="space-y-4">
-                                <div id="funnel-start"></div>
+         
+                               <div id="funnel-start"></div>
                                 <div id="funnel-finish"></div>
                                 <div id="funnel-paid"></div>
-                            </div>
+          
+                           </div>
                         </div>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="stat-card p-6 rounded-lg">
+                            <div class="stat-card 
+                                p-6 rounded-lg">
                                 <p class="text-lg font-bold text-white mb-4">Top Traffic Sources</p>
                                 <ul id="stat-top-sources" class="space-y-2"></ul>
-                            </div>
+                           
+                             </div>
                             <div class="stat-card p-6 rounded-lg">
                                 <p class="text-lg font-bold text-white mb-4">Top Countries</p>
+                               
                                 <ul id="stat-top-countries" class="space-y-2"></ul>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+         
+           </div>
 
             <div id="content-sessions" class="tab-content mt-6">
                 <div class="flex flex-col sm:flex-row gap-4 items-center">
                     <input type="text" id="search-input" placeholder="Search by IP or Country..." class="w-full sm:w-1/3 form-input rounded-md p-2 text-white">
                     <select id="status-filter" class="w-full sm:w-auto form-input rounded-md p-2 text-white">
-                        <option value="">All Payment Statuses</option>
+ 
+                       <option value="">All Payment Statuses</option>
                         <option value="succeeded">Succeeded</option>
                         <option value="pending">Pending</option>
                     </select>
-                </div>
+    
+                 </div>
                 <div class="mt-4 overflow-x-auto rounded-lg border border-gray-700">
                     <table class="min-w-full divide-y divide-gray-700 table-custom">
                         <thead class="bg-gray-800">
-                            <tr>
+                  
+                           <tr>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Device/Source</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">IP/Country</th>
+          
+                               <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">IP/Country</th>
+                               <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Progress</th>
+                              
+                               <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Progress</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Duration</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Payment</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Link</th>
+          
+                               <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Link</th>
                             </tr>
                         </thead>
-                        <tbody id="sessions-table-body" class="bg-gray-900 divide-y divide-gray-700"></tbody>
+                  
+                       <tbody id="sessions-table-body" class="bg-gray-900 divide-y divide-gray-700"></tbody>
                     </table>
                 </div>
             </div>
@@ -121,12 +154,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const loginForm = document.getElementById('login-form');
+            const loginForm = 
+                document.getElementById('login-form');
             const passwordInput = document.getElementById('password-input');
             const loginError = document.getElementById('login-error');
             const loginModal = document.getElementById('login-modal');
             const adminPanel = document.getElementById('admin-panel');
-            
             let allSessionsData = [];
             let statisticsData = {};
 
@@ -135,15 +168,18 @@
                 const password = passwordInput.value;
                 loginError.textContent = '';
                 try {
-                    const response = await fetch('/.netlify/functions/getAdminData', {
+                  
+                   const response = await fetch('/.netlify/functions/getAdminData', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ password: password })
-                    });
+            
+                     });
                     if (response.status === 401) throw new Error('Incorrect password.');
                     if (!response.ok) throw new Error('Could not fetch data from server.');
                     const { sessions, statistics } = await response.json();
-                    allSessionsData = sessions;
+         
+                   allSessionsData = sessions;
                     statisticsData = statistics;
                     loginModal.classList.add('hidden');
                     adminPanel.classList.remove('hidden');
@@ -153,35 +189,21 @@
                     loginError.textContent = error.message;
                 }
             });
-            <thead class="bg-gray-800">
-    <tr>
-        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
-        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Device/Source</th>
-        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">IP/Country</th>
-        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th> <!-- ДОБАВЬТЕ -->
-        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
-        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Progress</th>
-        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Duration</th>
-        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Payment</th>
-        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Link</th>
-    </tr>
-</thead>
 
             function setupFiltersAndTabs() {
                 const searchInput = document.getElementById('search-input');
                 const statusFilter = document.getElementById('status-filter');
                 const tabs = document.querySelectorAll('.tab-button');
                 const tabContents = document.querySelectorAll('.tab-content');
-
                 tabs.forEach(tab => {
                     tab.addEventListener('click', () => {
                         tabs.forEach(t => t.classList.remove('active', 'text-purple-400', 'border-purple-400'));
                         tab.classList.add('active', 'text-purple-400', 'border-purple-400');
-                        tabContents.forEach(content => content.classList.remove('active'));
+                     
+                       tabContents.forEach(content => content.classList.remove('active'));
                         document.getElementById(tab.id.replace('tab-', 'content-')).classList.add('active');
                     });
                 });
-                
                 const applyFilters = () => {
                     const searchTerm = searchInput.value.toLowerCase();
                     const statusValue = statusFilter.value;
@@ -189,7 +211,8 @@
                         const searchMatch = session.ipAddress.toLowerCase().includes(searchTerm) || session.country.toLowerCase().includes(searchTerm);
                         const statusMatch = statusValue ? session.paymentStatus === statusValue : true;
                         return searchMatch && statusMatch;
-                    });
+  
+                   });
                     renderTable(filteredData);
                 };
 
@@ -211,7 +234,6 @@
                 const funnelStart = stats.totalSessions || 0;
                 const funnelFinish = Math.round(stats.totalSessions * (stats.quizCompletionRate / 100));
                 const funnelPaid = stats.successfulPayments || 0;
-                
                 document.getElementById('funnel-start').innerHTML = createFunnelStep('Sessions Started', funnelStart, funnelStart, '#6366f1');
                 document.getElementById('funnel-finish').innerHTML = createFunnelStep('Quiz Finished', funnelFinish, funnelStart, '#7c3aed');
                 document.getElementById('funnel-paid').innerHTML = createFunnelStep('Payment Completed', funnelPaid, funnelStart, '#a855f7');
@@ -237,7 +259,8 @@
                     const li = document.createElement('li');
                     li.className = 'flex justify-between items-center text-sm';
                     li.innerHTML = `<span class="text-gray-300">${name}</span><span class="font-semibold text-white">${count}</span>`;
-                    ul.appendChild(li);
+       
+                     ul.appendChild(li);
                 });
             }
 
@@ -245,7 +268,7 @@
                 const tableBody = document.getElementById('sessions-table-body');
                 tableBody.innerHTML = '';
                 if (data.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="8" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="9" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`; // Changed colspan to 9
                     return;
                 }
                 data.forEach(session => {
@@ -255,27 +278,18 @@
                         <td class="px-4 py-3 whitespace-nowrap text-sm">${session.createdAt}</td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.deviceType}</div><div class="text-gray-400">${session.trafficSource}</div></td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.ipAddress}</div><div class="text-gray-400">${session.country}</div></td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-purple-400">${session.email}</td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.gender}</div><div class="text-gray-400">Age: ${session.age}</div></td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.progress}</td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.duration}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">${session.paymentStatus}</span><div class="text-gray-400">${session.paymentAmount}</div></td>
+                        <td class="px-4 py-3 whitespace-nowrap 
+                        text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">${session.paymentStatus}</span><div class="text-gray-400">${session.paymentAmount}</div></td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm"><a href="/${session.resultLink}" target="_blank" class="text-purple-400 hover:text-purple-300">View</a></td>
                     `;
                     tableBody.appendChild(row);
                 });
             }
         });
-        row.innerHTML = `
-    <td class="px-4 py-3 whitespace-nowrap text-sm">${session.createdAt}</td>
-    <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.deviceType}</div><div class="text-gray-400">${session.trafficSource}</div></td>
-    <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.ipAddress}</div><div class="text-gray-400">${session.country}</div></td>
-    <td class="px-4 py-3 whitespace-nowrap text-sm text-purple-400">${session.email}</td> <!-- ДОБАВЬТЕ -->
-    <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.gender}</div><div class="text-gray-400">Age: ${session.age}</div></td>
-    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.progress}</td>
-    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.duration}</td>
-    <td class="px-4 py-3 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">${session.paymentStatus}</span><div class="text-gray-400">${session.paymentAmount}</div></td>
-    <td class="px-4 py-3 whitespace-nowrap text-sm"><a href="/${session.resultLink}" target="_blank" class="text-purple-400 hover:text-purple-300">View</a></td>
-`;
     </script>
 </body>
 </html>
