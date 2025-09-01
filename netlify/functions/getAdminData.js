@@ -11,13 +11,12 @@ if (!getApps().length) {
 }
 const db = getFirestore();
 
-// --- ИЗМЕНЕНИЕ 1: Добавляем 'email' в массив ключей ---
 const QUESTION_KEYS = [
     'email', 'age', 'gender', 'height', 'weight', 'sleep', 'activity', 'nutrition', 
     'processed_food', 'hydration', 'stress', 'mindfulness', 'mood', 
     'alcohol', 'smoking', 'screen_time'
 ];
-const TOTAL_QUESTIONS = QUESTION_KEYS.length; // Теперь это 16
+const TOTAL_QUESTIONS = QUESTION_KEYS.length;
 
 const countryCodeToName = {
     US: "United States", DE: "Germany", FR: "France", GB: "United Kingdom", CA: "Canada", 
@@ -36,10 +35,19 @@ exports.handler = async (event) => {
       return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
     }
 
+    // 1. Загружаем сессии (как и раньше)
     const sessionsRef = db.collection('sessions');
-    const snapshot = await sessionsRef.orderBy('createdAt', 'desc').get();
-    if (snapshot.empty) {
-      return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: {} }) };
+    const sessionsSnapshot = await sessionsRef.orderBy('createdAt', 'desc').get();
+
+    // --- НОВЫЙ БЛОК: Загружаем сообщения из контактной формы ---
+    const messagesRef = db.collection('contact_submissions');
+    const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').limit(50).get(); // Загружаем последние 50
+    const messagesData = messagesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // --- КОНЕЦ НОВОГО БЛОКА ---
+
+    if (sessionsSnapshot.empty) {
+      // Возвращаем пустые сессии, но с загруженными сообщениями
+      return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: {}, messages: messagesData }) };
     }
 
     let totalRevenue = 0;
@@ -48,7 +56,7 @@ exports.handler = async (event) => {
     let completedQuizzes = 0;
     const trafficSourceCounts = {};
     const countryCounts = {};
-    const sessionsData = snapshot.docs.map(doc => {
+    const sessionsData = sessionsSnapshot.docs.map(doc => {
       const data = doc.data();
       const answers = data.answers || {};
 
@@ -82,6 +90,7 @@ exports.handler = async (event) => {
       const country = countryCodeToName[data.countryCode] || data.countryCode || 'Unknown';
       countryCounts[country] = (countryCounts[country] || 0) + 1;
 
+      // ВОТ ЭТОТ БЛОК ТЕПЕРЬ С ПОЛНЫМ ФОРМАТИРОВАНИЕМ
       return {
         id: doc.id,
         createdAt: new Date(data.createdAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }),
@@ -93,7 +102,7 @@ exports.handler = async (event) => {
         gender: answers.gender || 'N/A',
         age: answers.age || 'N/A',
         progress: progress,
-        progressPercent: progressPercent, // --- ИЗМЕНЕНИЕ 2: Добавляем это поле для логики в админке ---
+        progressPercent: progressPercent,
         duration: duration,
         paymentStatus: data.paymentStatus || 'pending',
         paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A',
@@ -102,20 +111,22 @@ exports.handler = async (event) => {
       };
     });
 
+    // И ЭТОТ БЛОК ТОЖЕ С ПОЛНЫМ ФОРМАТИРОВАНИЕМ
     const statistics = {
-        totalSessions: snapshot.size,
+        totalSessions: sessionsSnapshot.size,
         totalRevenue: totalRevenue.toFixed(2),
         successfulPayments,
         avgCheck: successfulPayments > 0 ? (totalRevenue / successfulPayments).toFixed(2) : "0.00",
-        conversionRate: snapshot.size > 0 ? ((successfulPayments / snapshot.size) * 100).toFixed(2) : "0.00",
-        quizCompletionRate: snapshot.size > 0 ? ((completedQuizzes / snapshot.size) * 100).toFixed(2) : "0.00",
+        conversionRate: sessionsSnapshot.size > 0 ? ((successfulPayments / sessionsSnapshot.size) * 100).toFixed(2) : "0.00",
+        quizCompletionRate: sessionsSnapshot.size > 0 ? ((completedQuizzes / sessionsSnapshot.size) * 100).toFixed(2) : "0.00",
         topTrafficSources: Object.entries(trafficSourceCounts).sort((a, b) => b[1] - a[1]).slice(0, 5),
         topCountries: Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 5),
     };
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ sessions: sessionsData, statistics }),
+      // Добавляем сообщения в финальный ответ
+      body: JSON.stringify({ sessions: sessionsData, statistics, messages: messagesData }),
     };
   } catch (error) {
     console.error('Error in getAdminData function:', error);
