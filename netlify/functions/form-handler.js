@@ -1,54 +1,55 @@
+// /netlify/functions/form-handler.js
+
 'use strict';
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
+const querystring = require('querystring'); // Используем для парсинга данных формы
 
-// Инициализация Firebase Admin
 if (!getApps().length) {
   try {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
     initializeApp({ credential: cert(serviceAccount) });
   } catch (e) {
-    console.error("Firebase init error in submission-created.js:", e);
+    console.error("Firebase init error in form-handler.js:", e);
   }
 }
 const db = getFirestore();
 
 exports.handler = async (event) => {
   try {
-    // Netlify передает данные формы в виде строки JSON в теле запроса
-    const payload = JSON.parse(event.body).payload;
+    // При вызове через action, данные приходят в URL-кодированном виде
+    const data = querystring.parse(event.body);
 
-    console.log("Received submission for form:", payload.form_name);
+    console.log("Received submission for form:", data['form-name']);
 
-    // Убедимся, что это наша контактная форма
-    if (payload.form_name !== 'contact') {
-      return { statusCode: 200, body: 'Not a contact form submission.' };
+    if (data['form-name'] !== 'contact') {
+      return { statusCode: 400, body: 'Invalid form name.' };
     }
 
-    const { name, email, subject, message } = payload.data;
-
-    // Сохраняем сообщение в новую коллекцию 'contact_submissions' в Firestore
+    // Сохраняем сообщение в Firestore
     await db.collection('contact_submissions').add({
-      name: name || 'N/A',
-      email: email || 'N/A',
-      subject: subject || 'N/A',
-      message: message || 'N/A',
+      name: data.name || 'N/A',
+      email: data.email || 'N/A',
+      subject: data.subject || 'N/A',
+      message: data.message || 'N/A',
       createdAt: new Date().toISOString(),
-      isRead: false // Добавляем флаг, чтобы отмечать прочитанные сообщения
+      isRead: false
     });
 
     console.log('Contact form submission saved to Firestore.');
     
-    // Возвращаем Netlify успешный ответ
+    // После успешной обработки, перенаправляем пользователя на страницу "Спасибо"
     return {
-      statusCode: 200,
-      body: 'Submission processed and saved to Firestore.',
+      statusCode: 302, // 302 - это код для временного редиректа
+      headers: {
+        Location: '/thank-you.html',
+      },
     };
   } catch (error) {
     console.error('Error handling form submission:', error);
     return {
       statusCode: 500,
-      body: 'Error processing submission.',
+      body: `Error: ${error.message}`,
     };
   }
 };
