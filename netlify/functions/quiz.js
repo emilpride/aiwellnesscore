@@ -106,20 +106,40 @@ exports.handler = async (event, context) => {
       };
 
     } else if (action === 'updatePayment') {
-      const { sessionId, status, amountUSD } = data;
-      if (!sessionId) return { statusCode: 400, body: 'Missing sessionId' };
-      const sessionRef = db.collection('sessions').doc(sessionId);
-      await sessionRef.update({
+    const { sessionId, status, amountUSD } = data;
+    if (!sessionId) return { statusCode: 400, body: 'Missing sessionId' };
+    const sessionRef = db.collection('sessions').doc(sessionId);
+    await sessionRef.update({
         paymentStatus: status,
         paymentAmountUSD: amountUSD
-      });
-      return {
+    });
+    return {
         statusCode: 200,
         body: JSON.stringify({ message: 'Payment details updated' })
-      };
-    }
+    };
 
-    return { statusCode: 400, body: 'Invalid action' };
+} else if (action === 'checkPaymentStatus') {
+    const { sessionId } = data;
+    if (!sessionId) return { statusCode: 400, body: 'Missing sessionId' };
+    
+    const sessionRef = db.collection('sessions').doc(sessionId);
+    const doc = await sessionRef.get();
+    
+    if (!doc.exists) {
+        return { statusCode: 404, body: JSON.stringify({ status: 'not_found' }) };
+    }
+    
+    const sessionData = doc.data();
+    return {
+        statusCode: 200,
+        body: JSON.stringify({ 
+            status: sessionData.paymentStatus || 'pending',
+            amount: sessionData.paymentAmountUSD || null
+        })
+    };
+}
+
+return { statusCode: 400, body: 'Invalid action' };
 
   } catch (error) {
     console.error('Error in quiz.js handler:', error);
