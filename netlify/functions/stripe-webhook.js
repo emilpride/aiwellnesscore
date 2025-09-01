@@ -3,7 +3,9 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
+const axios = require('axios');
 
+// Инициализация Firebase
 if (!getApps().length) {
   try {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
@@ -12,56 +14,73 @@ if (!getApps().length) {
     console.error("Firebase init error in stripe-webhook.js:", e);
   }
 }
-
 const db = getFirestore();
 
-exports.handler = async (event) => {
-  // Добавляем логирование
-  console.log('Webhook called with method:', event.httpMethod);
-  console.log('Headers:', JSON.stringify(event.headers));
-  
-  // ВАЖНО: Stripe требует raw body
-  const sig = event.headers['stripe-signature'];
-  
-  if (!sig) {
-    console.error('No stripe signature found');
-    return {
-      statusCode: 400,
-      body: 'No signature',
+// Функция для отправки события в Meta CAPI
+const sendPurchaseEventToMeta = async (paymentIntent, sessionData) => {
+    const pixelId = process.env.META_PIXEL_ID;
+    const accessToken = process.env.META_ACCESS_TOKEN;
+
+    if (!pixelId || !accessToken) {
+        console.warn('Meta Pixel ID or Access Token is not configured. Skipping CAPI event.');
+        return;
+    }
+
+    const url = `https://graph.facebook.com/v18.0/${pixelId}/events`;
+    
+    const eventData = {
+        event_name: 'Purchase',
+        event_time: Math.floor(Date.now() / 1000),
+        action_source: 'website',
+        user_data: {
+            em: [sessionData.answers?.email?.toLowerCase()],
+            client_ip_address: sessionData.ipAddress,
+        },
+        custom_data: {
+            value: (paymentIntent.amount / 100).toFixed(2),
+            currency: 'USD',
+        },
+        event_id: paymentIntent.id
     };
+
+    const payload = {
+        data: [eventData],
+    };
+
+    try {
+        await axios.post(url, payload, {
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        console.log(`Successfully sent CAPI Purchase event for session: ${sessionData.sessionId}`);
+    } catch (error) {
+        console.error('Failed to send CAPI event:', error.response ? error.response.data : error.message);
+    }
+};
+
+
+exports.handler = async (event) => {
+  const sig = event.headers['stripe-signature'];
+  if (!sig) {
+    return { statusCode: 400, body: 'No signature' };
   }
 
   let stripeEvent;
-  
   try {
-    // ВАЖНО: используем event.body напрямую
     stripeEvent = stripe.webhooks.constructEvent(
       event.body,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
-    
-    console.log('Event type:', stripeEvent.type);
-    console.log('Event ID:', stripeEvent.id);
-    
   } catch (err) {
     console.error(`Webhook signature verification failed:`, err.message);
-    return {
-      statusCode: 400,
-      body: `Webhook Error: ${err.message}`,
-    };
+    return { statusCode: 400, body: `Webhook Error: ${err.message}` };
   }
 
-  // Обработка различных событий
   const paymentIntent = stripeEvent.data.object;
   const sessionId = paymentIntent.metadata?.sessionId;
-  
   if (!sessionId) {
     console.warn('No sessionId in payment metadata');
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ received: true }),
-    };
+    return { statusCode: 200, body: JSON.stringify({ received: true }) };
   }
 
   const sessionRef = db.collection('sessions').doc(sessionId);
@@ -69,67 +88,30 @@ exports.handler = async (event) => {
   try {
     switch (stripeEvent.type) {
       case 'payment_intent.succeeded':
-        console.log('Payment succeeded for amount:', paymentIntent.amount);
-        console.log('Metadata:', paymentIntent.metadata);
-        
-        const paymentAmount = (paymentIntent.amount / 100).toFixed(2);
-        
-        await sessionRef.update({
-          paymentStatus: 'succeeded',
-          paymentAmountUSD: paymentAmount,
-          stripePaymentIntentId: paymentIntent.id,
-          paymentMethod: paymentIntent.payment_method_types[0] || 'card',
-          updatedAt: new Date().toISOString()
-        });
-        
-        console.log(`Successfully updated payment status for session: ${sessionId}`);
+        const docSnapshot = await sessionRef.get();
+        if (docSnapshot.exists) {
+            await sessionRef.update({
+                paymentStatus: 'succeeded',
+                paymentAmountUSD: (paymentIntent.amount / 100).toFixed(2),
+                stripePaymentIntentId: paymentIntent.id,
+                paymentMethod: paymentIntent.payment_method_types[0] || 'card',
+                updatedAt: new Date().toISOString()
+            });
+            console.log(`Successfully updated payment status for session: ${sessionId}`);
+            
+            // Отправляем серверное событие после обновления статуса
+            await sendPurchaseEventToMeta(paymentIntent, docSnapshot.data());
+        } else {
+            console.error(`Session not found for ID: ${sessionId}, cannot send CAPI event.`);
+        }
         break;
 
-      case 'payment_intent.payment_failed':
-        console.log('Payment failed:', paymentIntent.last_payment_error?.message);
-        
-        await sessionRef.update({
-          paymentStatus: 'failed',
-          paymentAmountUSD: '0',
-          failureReason: paymentIntent.last_payment_error?.message || 'Payment failed',
-          updatedAt: new Date().toISOString()
-        });
-        
-        console.log(`Payment failed for session: ${sessionId}`);
-        break;
-
-      case 'payment_intent.canceled':
-        console.log('Payment canceled');
-        
-        await sessionRef.update({
-          paymentStatus: 'canceled',
-          paymentAmountUSD: '0',
-          updatedAt: new Date().toISOString()
-        });
-        
-        console.log(`Payment canceled for session: ${sessionId}`);
-        break;
-
-      case 'payment_intent.processing':
-        console.log('Payment processing');
-        
-        await sessionRef.update({
-          paymentStatus: 'processing',
-          updatedAt: new Date().toISOString()
-        });
-        
-        console.log(`Payment processing for session: ${sessionId}`);
-        break;
-
-      default:
-        console.log(`Unhandled event type: ${stripeEvent.type}`);
+      // ... можно добавить обработку других статусов (failed, canceled)
     }
   } catch (dbError) {
     console.error('Database update failed:', dbError);
-    // Не возвращаем ошибку Stripe, чтобы не вызвать повторную отправку
   }
 
-  // Всегда возвращаем 200 для Stripe
   return {
     statusCode: 200,
     body: JSON.stringify({ received: true }),
