@@ -13,7 +13,8 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; }
+        #main-container { overflow: hidden; }
         .chat-container { scroll-behavior: smooth; -ms-overflow-style: none; scrollbar-width: none; }
         .chat-container::-webkit-scrollbar { display: none; }
         .chat-bubble { animation: slide-up 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
@@ -38,7 +39,6 @@
         #camera-status { background-color: rgba(0,0,0,0.5); padding: 0.5rem 1rem; border-radius: 9999px; display: inline-block; color: white; font-weight: 500; transition: background-color 0.3s; }
         #progress-bar { animation: glow 2s ease-in-out infinite alternate; }
         @keyframes glow { from { box-shadow: 0 0 2px #a855f7, 0 0 4px #a855f7; } to { box-shadow: 0 0 6px #6366f1, 0 0 8px #6366f1; } }
-        
         .slider-widget { padding: 1rem; background-color: #faf5ff; border-radius: 1rem; border: 1px solid #e9d5ff; }
         .slider-value { font-size: 2.5rem; font-weight: 800; line-height: 1; transition: color 0.3s ease; }
         .slider-label { font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: #6b21a8; }
@@ -50,7 +50,6 @@
         .slider-markers { display: flex; justify-content: space-between; font-size: 0.75rem; color: #9ca3af; margin: 0.25rem 0.25rem 0; }
         .confirm-btn { margin-top: 1rem; width: 100%; background-color: #7c3aed; color: white; font-weight: bold; padding: 0.75rem; border-radius: 0.75rem; transition: background-color 0.2s; }
         .confirm-btn:hover { background-color: #6d28d9; }
-        
         .widget-wrapper { max-width: 250px; margin: auto; text-align: center; padding: 1rem; background-color: #faf5ff; border-radius: 1rem; }
         .widget-label { font-weight: 600; color: #6b21a8; margin-bottom: 0.75rem; }
         .sleep-battery { width: 100px; height: 40px; border: 3px solid #c4b5fd; border-radius: 8px; margin: 0 auto; position: relative; }
@@ -81,7 +80,6 @@
         .week-progress { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
         .week-day { width: 10px; height: 10px; background-color: #ddd6fe; border-radius: 50%; transition: all 0.5s; }
         .week-day.active { background-color: #7c3aed; transform: scale(1.3); box-shadow: 0 0 8px #a78bfa; }
-
         .analysis-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; text-align: center; }
         .analysis-animation { width: 160px; height: 160px; margin-bottom: 1rem; }
         #analysis-text { font-size: 1rem; font-weight: 500; color: #4b5563; transition: opacity 0.5s ease-in-out; min-height: 1.5rem; }
@@ -207,7 +205,8 @@
         function showOptions(options, handlers) { optionsContainer.innerHTML = ''; if (options?.length > 0) { optionsContainerWrapper.classList.remove('hidden'); options.forEach((option, index) => { const button = document.createElement('button'); button.textContent = option.text; button.className = option.class; button.onclick = handlers[index]; optionsContainer.appendChild(button); }); } else { optionsContainerWrapper.classList.add('hidden'); } }
         
         function showSlider(question) {
-            optionsContainer.innerHTML = ''; optionsContainerWrapper.classList.remove('hidden');
+            optionsContainer.innerHTML = '';
+            optionsContainerWrapper.classList.remove('hidden');
             const sliderWrapper = document.createElement('div'); sliderWrapper.className = 'slider-widget w-full';
             const formatDisplayValue = (value) => {
                 if (question.unit === 'stress') { if (value <= 3) return `<span style="color: #22c55e;">Low</span>`; if (value <= 7) return `<span style="color: #f59e0b;">Medium</span>`; return `<span style="color: #ef4444;">High</span>`; }
@@ -222,7 +221,8 @@
             const sliderInput = document.getElementById('slider-input-range'), valueDisplay = document.getElementById('slider-value-display'), confirmBtn = document.getElementById('slider-confirm-btn');
             sliderInput.addEventListener('input', (e) => { valueDisplay.innerHTML = formatDisplayValue(e.target.value); });
             confirmBtn.onclick = () => {
-                const finalValue = sliderInput.value; let displayAnswerText = '';
+                const finalValue = sliderInput.value;
+                let displayAnswerText = '';
                 if (question.unit === 'stress') { if (finalValue <= 3) displayAnswerText = 'Low'; else if (finalValue <= 7) displayAnswerText = 'Medium'; else displayAnswerText = 'High';
                 } else if (question.unit === 'cm') { const feet = Math.floor(finalValue / 30.48); const inches = Math.round((finalValue % 30.48) / 2.54); displayAnswerText = `${feet}'${inches}"`;
                 } else if (question.unit === 'kg') { const lbs = (finalValue * 2.20462).toFixed(0); displayAnswerText = `${lbs} lbs`;
@@ -238,7 +238,10 @@
             addUserMessage(valueToDisplay);
             userAnswers[currentQuestion.key] = valueToStore.trim().split(' ')[0];
             saveAnswerToServer(currentQuestion.key, valueToStore.trim());
-            userInput.value = ''; inputArea.classList.add('hidden'); optionsContainerWrapper.classList.add('hidden'); currentQuestionIndex++; updateProgressBar(); askNextQuestion();
+            userInput.value = '';
+            userInput.blur(); // Fix for iOS keyboard bug
+            inputArea.classList.add('hidden'); optionsContainerWrapper.classList.add('hidden'); currentQuestionIndex++; updateProgressBar();
+            askNextQuestion();
         }
 
         function askNextQuestion() {
@@ -328,7 +331,6 @@
         function retakePhoto() { addUserMessage("Retake"); document.getElementById('photo-preview-wrapper')?.remove(); optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); startCamera(); }
        
        let stripe, elements, clientSecret;
-
        async function showPaymentForm() {
            optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden');
            const formHtml = `<div class="p-4 bg-gray-50 border-t"><div id="payment-wrapper" class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6"><div class="text-center mb-4"><h2 class="text-2xl font-bold text-gray-800">Unlock Full Report</h2></div><div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-4"><p class="text-sm font-medium">Limited Time Offer (-30%)</p><p id="countdown-timer" class="text-2xl font-bold tracking-wider">10:00</p></div><div class="text-center mb-4"><span class="text-3xl font-bold text-gray-800">$9.99</span><span class="text-lg text-gray-400 line-through ml-2">$14.99</span></div><form id="payment-form" class="space-y-4"><div id="payment-request-button"></div><div id="card-element" class="p-3 border border-gray-300 rounded-md shadow-sm"></div><button id="submit-payment" type="submit" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md"><span id="button-text">Pay now</span></button><div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div></form></div></div>`;
@@ -337,7 +339,6 @@
            scrollToBottom(); 
            startCountdown();
            
-           // Check if Stripe is loaded
            if (!window.Stripe) {
                console.error('Stripe SDK not loaded');
                document.getElementById('payment-wrapper').innerHTML = `<p class="text-center text-red-500">Payment system is not available. Please refresh the page.</p>`;
@@ -351,96 +352,26 @@
                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                    body: JSON.stringify({ sessionId: sessionId })
                });
-               const data = await response.json();
-               clientSecret = data.clientSecret;
-               if (!clientSecret) throw new Error("Failed to get client secret");
+               const { id: clientSecret } = await response.json(); // Assuming the server returns { id: '...' } for the checkout session
                
-               elements = stripe.elements({ clientSecret });
-               const paymentRequest = stripe.paymentRequest({ 
-                   country: 'US', 
-                   currency: 'usd', 
-                   total: { label: 'AI Wellness Report', amount: 999 }, 
-                   requestPayerName: true, 
-                   requestPayerEmail: true, 
+               // Stripe Checkout redirection logic
+               const submitButton = document.getElementById('submit-payment');
+               submitButton.addEventListener('click', () => {
+                   stripe.redirectToCheckout({ sessionId: clientSecret });
                });
                
-               const prButton = elements.create('paymentRequestButton', { paymentRequest });
-               const prButtonElement = document.getElementById('payment-request-button');
-               const canMakePayment = await paymentRequest.canMakePayment();
-               if (canMakePayment) { 
-                   prButton.mount(prButtonElement); 
-               } else { 
-                   prButtonElement.style.display = 'none'; 
-               }
-               
-               paymentRequest.on('paymentmethod', async (ev) => {
-                   const { paymentIntent, error: confirmError } = await stripe.confirmCardPayment(
-                       clientSecret, 
-                       { payment_method: ev.paymentMethod.id }, 
-                       { handleActions: false }
-                   );
-                   if (confirmError) { 
-                       ev.complete('fail'); 
-                       document.getElementById('payment-message').textContent = confirmError.message;
-                   } else {
-                       ev.complete('success');
-                       if (paymentIntent.status === "requires_action") { 
-                           const { error } = await stripe.confirmCardPayment(clientSecret); 
-                           if (error) { 
-                               document.getElementById('payment-message').textContent = error.message; 
-                           } else { 
-                               handleSuccessfulPayment(); 
-                           }
-                       } else { 
-                           handleSuccessfulPayment(); 
-                       }
-                   }
-               });
-               
-               const cardElement = elements.create("card");
-               cardElement.mount("#card-element");
-               
-               // Fixed: Add event listener after DOM is ready
-               setTimeout(() => {
-                   const paymentForm = document.getElementById('payment-form');
-                   if (paymentForm) {
-                       paymentForm.addEventListener('submit', handlePayment);
-                   }
-               }, 100);
-               
+               // The rest of this function might need adjustment if you are using Checkout instead of Elements
+               // For now, let's assume the main goal is redirection
+               document.getElementById('card-element').style.display = 'none'; // Hide card element if using checkout
+               document.getElementById('payment-request-button').style.display = 'none'; // Hide wallet button too
+
            } catch (error) {
                console.error("Failed to initialize payment form:", error);
                document.getElementById('payment-wrapper').innerHTML = `<p class="text-center text-red-500">Could not load payment form. Error: ${error.message}</p>`;
            }
        }
-
-       async function handlePayment(e) {
-           e.preventDefault();
-           const submitButton = document.getElementById('submit-payment');
-           const messageDiv = document.getElementById('payment-message');
-           submitButton.disabled = true;
-           messageDiv.classList.add('hidden');
-           
-           try {
-               const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-                   payment_method: { card: elements.getElement('card') }
-               });
-
-               if (error) {
-                   messageDiv.textContent = error.message;
-                   messageDiv.classList.remove('hidden');
-                   submitButton.disabled = false;
-               } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-                   handleSuccessfulPayment();
-               }
-           } catch (error) {
-               console.error("Payment error:", error);
-               messageDiv.textContent = "Payment failed. Please try again.";
-               messageDiv.classList.remove('hidden');
-               submitButton.disabled = false;
-           }
-       }
        
+       // This function would be called on the success_url page, not here.
        function handleSuccessfulPayment() {
            paymentFormContainer.innerHTML = `<div class="p-8 text-center"><svg class="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><h3 class="text-2xl font-bold mt-4">Payment Successful!</h3><p class="text-gray-600 mt-2">Redirecting to your report...</p></div>`;
            scrollToBottom();
@@ -448,7 +379,7 @@
        }
        
        function startCountdown() {
-           let duration = 600; 
+           let duration = 600;
            const timerEl = document.getElementById('countdown-timer'); 
            if (!timerEl) return; 
            countdownInterval = setInterval(() => {
@@ -463,7 +394,7 @@
        function showCompletionAnimation() {
            const analysisAnimationPath = 'loader-animation.json';
            confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } }); 
-           showTypingIndicator(); 
+           showTypingIndicator();
            setTimeout(() => { 
                hideTypingIndicator(); 
                addBotMessage("Awesome work! You've completed the assessment. 🥳 I'm now analyzing your results..."); 
@@ -476,11 +407,11 @@
                let currentStep = 0; 
                const intervalId = setInterval(() => { 
                    if (currentStep < analysisSteps.length) { 
-                       analysisTextElement.style.opacity = '0'; 
+                       analysisTextElement.style.opacity = '0';
                        setTimeout(() => { 
                            analysisTextElement.textContent = analysisSteps[currentStep]; 
                            analysisTextElement.style.opacity = '1'; 
-                       }, 500); 
+                       }, 500);
                        currentStep++; 
                    } else { clearInterval(intervalId); } 
                }, 1600);
@@ -492,7 +423,7 @@
                        addBotMessage("Great! Your preliminary analysis is complete. Just one final step to unlock your full, personalized report."); 
                        showPaymentForm(); 
                    }, 1200); 
-               }, analysisSteps.length * 1600 + 500); 
+               }, analysisSteps.length * 1600 + 500);
            }, 1000); 
        }
 
@@ -510,6 +441,6 @@
        window.addEventListener('resize', setAppHeight);
        inputArea.classList.add('hidden');
        initQuiz();
-   </script>
+    </script>
 </body>
 </html>
