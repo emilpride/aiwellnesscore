@@ -4,6 +4,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const axios = require('axios');
+const crypto = require('crypto'); // Импорт crypto
 
 // Инициализация Firebase
 if (!getApps().length) {
@@ -16,7 +17,16 @@ if (!getApps().length) {
 }
 const db = getFirestore();
 
-// Функция для отправки события в Meta CAPI
+// Функция для хеширования email
+const hashEmail = (email) => {
+    if (!email) return undefined;
+    // Приводим к нижнему регистру и убираем пробелы
+    const normalized = email.toLowerCase().trim();
+    // Хешируем SHA256
+    return crypto.createHash('sha256').update(normalized).digest('hex');
+};
+
+// Исправленная функция sendPurchaseEventToMeta
 const sendPurchaseEventToMeta = async (paymentIntent, sessionData) => {
     const pixelId = process.env.META_PIXEL_ID;
     const accessToken = process.env.META_ACCESS_TOKEN;
@@ -28,13 +38,17 @@ const sendPurchaseEventToMeta = async (paymentIntent, sessionData) => {
 
     const url = `https://graph.facebook.com/v18.0/${pixelId}/events`;
     
+    // Хешируем email перед отправкой
+    const hashedEmail = sessionData.answers?.email ? hashEmail(sessionData.answers.email) : undefined;
+    
     const eventData = {
         event_name: 'Purchase',
         event_time: Math.floor(Date.now() / 1000),
         action_source: 'website',
         user_data: {
-            em: [sessionData.answers?.email?.toLowerCase()],
+            em: hashedEmail ? [hashedEmail] : undefined, // Используем хешированный email
             client_ip_address: sessionData.ipAddress,
+            country: sessionData.countryCode ? sessionData.countryCode.toLowerCase() : undefined
         },
         custom_data: {
             value: (paymentIntent.amount / 100).toFixed(2),
@@ -43,14 +57,20 @@ const sendPurchaseEventToMeta = async (paymentIntent, sessionData) => {
         event_id: paymentIntent.id
     };
 
+    // Удаляем undefined поля из user_data
+    Object.keys(eventData.user_data).forEach(key => {
+        if (eventData.user_data[key] === undefined) {
+            delete eventData.user_data[key];
+        }
+    });
+
     const payload = {
         data: [eventData],
+        access_token: accessToken // Добавляем токен в payload
     };
 
     try {
-        await axios.post(url, payload, {
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
+        await axios.post(url, payload);
         console.log(`Successfully sent CAPI Purchase event for session: ${sessionData.sessionId}`);
     } catch (error) {
         console.error('Failed to send CAPI event:', error.response ? error.response.data : error.message);
@@ -88,25 +108,55 @@ exports.handler = async (event) => {
   try {
     switch (stripeEvent.type) {
       case 'payment_intent.succeeded':
-        const docSnapshot = await sessionRef.get();
-        if (docSnapshot.exists) {
-            await sessionRef.update({
-                paymentStatus: 'succeeded',
-                paymentAmountUSD: (paymentIntent.amount / 100).toFixed(2),
-                stripePaymentIntentId: paymentIntent.id,
-                paymentMethod: paymentIntent.payment_method_types[0] || 'card',
-                updatedAt: new Date().toISOString()
-            });
-            console.log(`Successfully updated payment status for session: ${sessionId}`);
-            
-            // Отправляем серверное событие после обновления статуса
-            await sendPurchaseEventToMeta(paymentIntent, docSnapshot.data());
-        } else {
-            console.error(`Session not found for ID: ${sessionId}, cannot send CAPI event.`);
+        console.log('Payment succeeded for amount:', paymentIntent.amount);
+        
+        const paymentAmount = (paymentIntent.amount / 100).toFixed(2);
+        
+        await sessionRef.update({
+          paymentStatus: 'succeeded',
+          paymentAmountUSD: paymentAmount,
+          stripePaymentIntentId: paymentIntent.id,
+          paymentMethod: paymentIntent.payment_method_types[0] || 'card',
+          updatedAt: new Date().toISOString()
+        });
+        console.log(`Successfully updated payment status for session: ${sessionId}`);
+
+        // Отправка серверного события
+        const doc = await sessionRef.get();
+        if (doc.exists) {
+            await sendPurchaseEventToMeta(paymentIntent, doc.data());
         }
         break;
 
-      // ... можно добавить обработку других статусов (failed, canceled)
+      case 'payment_intent.payment_failed':
+        await sessionRef.update({
+          paymentStatus: 'failed',
+          paymentAmountUSD: '0',
+          failureReason: paymentIntent.last_payment_error?.message || 'Payment failed',
+          updatedAt: new Date().toISOString()
+        });
+        console.log(`Payment failed for session: ${sessionId}`);
+        break;
+
+      case 'payment_intent.canceled':
+        await sessionRef.update({
+          paymentStatus: 'canceled',
+          paymentAmountUSD: '0',
+          updatedAt: new Date().toISOString()
+        });
+        console.log(`Payment canceled for session: ${sessionId}`);
+        break;
+
+      case 'payment_intent.processing':
+        await sessionRef.update({
+          paymentStatus: 'processing',
+          updatedAt: new Date().toISOString()
+        });
+        console.log(`Payment processing for session: ${sessionId}`);
+        break;
+
+      default:
+        console.log(`Unhandled event type: ${stripeEvent.type}`);
     }
   } catch (dbError) {
     console.error('Database update failed:', dbError);
