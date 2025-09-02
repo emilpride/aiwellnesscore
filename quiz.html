@@ -694,32 +694,12 @@ async function startQuizSession() {
        
         let stripe, elements, clientSecret;
         async function showPaymentForm() {
-    // Событие "Начало оформления заказа"
+    // События Meta Pixel
     fbq('track', 'InitiateCheckout', {value: 9.99, currency: 'USD'});
-
-    // Флаг, чтобы событие AddPaymentInfo отправлялось только один раз
     let hasSentAddPaymentInfo = false;
-            // Проверка на встроенный браузер
-if (isInAppBrowser()) {
-    const currentUrl = window.location.href + `?session=${sessionId}`;
-    paymentFormContainer.innerHTML = `
-        <div class="p-6 bg-yellow-50 border-2 border-yellow-200 rounded-lg text-center">
-            <svg class="w-12 h-12 mx-auto mb-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-            </svg>
-            <h3 class="text-lg font-bold mb-2">Payment Security Notice</h3>
-            <p class="text-sm mb-4">For secure payment processing, please open this page in your regular browser (Chrome, Safari, etc.)</p>
-            <button onclick="navigator.clipboard.writeText('${currentUrl}')" 
-                    class="bg-purple-600 text-white px-6 py-3 rounded-lg mb-2 w-full">
-                Copy Link to Clipboard
-            </button>
-            <p class="text-xs text-gray-600 mt-2">Your progress has been saved. Use the copied link to continue.</p>
-        </div>
-    `;
-    paymentFormContainer.classList.remove('hidden');
-    scrollToBottom();
-    return;
-}
+    
+    // УБИРАЕМ ПРОВЕРКУ - сразу переходим к показу формы оплаты
+    
     const sendAddPaymentInfoEvent = () => {
         if (!hasSentAddPaymentInfo) {
             fbq('track', 'AddPaymentInfo');
