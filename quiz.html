@@ -214,8 +214,15 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 
     <script>
         // --- DOM Elements & State ---
-        const mainContainer = document.getElementById('main-container'), chatContainer = document.getElementById('chat-container'), userInput = document.getElementById('user-input'), sendBtn = document.getElementById('send-btn'), optionsContainer = document.getElementById('options-container'), optionsContainerWrapper = 
+        const mainContainer = document.getElementById('main-container'), chatContainer = document.getElementById('chat-container'), optionsContainer = document.getElementById('options-container'), optionsContainerWrapper = 
             document.getElementById('options-container-wrapper'), inputArea = document.getElementById('input-area'), progressBar = document.getElementById('progress-bar'), cameraModal = document.getElementById('camera-modal'), video = document.getElementById('camera-video'), canvas = document.getElementById('camera-canvas'), cameraLoader = document.getElementById('camera-loader'), loaderText = document.getElementById('loader-text'), cameraStatus = document.getElementById('camera-status'), paymentFormContainer = document.getElementById('payment-form-container');
+        
+        // <<-- ИСПРАВЛЕНИЕ 1: Меняем const на let, чтобы переменные можно было переназначить
+        let userInput = document.getElementById('user-input'), sendBtn = document.getElementById('send-btn');
+        
+        // <<-- ИСПРАВЛЕНИЕ 2: Сохраняем исходный HTML поля ввода
+        const originalInputAreaHTML = inputArea.innerHTML;
+
         let sessionId = null, userAnswers = {}, currentQuestionIndex = 0, detectionInterval, stream, capturedPhotoDataUrl = null, countdownInterval;
         
 class EventManager {
@@ -254,16 +261,11 @@ class AnimationManager {
     }
     
     add(containerId, options) {
-        // Удаляем старую анимацию если есть
         this.remove(containerId);
-        
-        // Создаем новую анимацию
         const anim = lottie.loadAnimation({
             container: document.getElementById(containerId),
             ...options
         });
-        
-        // Сохраняем ссылку на анимацию
         this.animations.set(containerId, anim);
         return anim;
     }
@@ -271,13 +273,12 @@ class AnimationManager {
     remove(containerId) {
         const anim = this.animations.get(containerId);
         if (anim) {
-            anim.destroy(); // Уничтожаем анимацию
+            anim.destroy();
             this.animations.delete(containerId);
         }
     }
     
     clear() {
-        // Уничтожаем все анимации
         this.animations.forEach(anim => anim.destroy());
         this.animations.clear();
     }
@@ -300,7 +301,6 @@ function loadQuizState() {
     const savedIndex = localStorage.getItem('quiz_current_index');
     const savedTimestamp = localStorage.getItem('quiz_timestamp');
     
-    // Проверяем, что сессия не старше 24 часов
     if (savedSessionId && savedTimestamp) {
         const age = Date.now() - parseInt(savedTimestamp);
         if (age < 24 * 60 * 60 * 1000) { // 24 часа
@@ -321,7 +321,6 @@ function clearQuizState() {
     localStorage.removeItem('quiz_timestamp');
 }
 
-// Детектор встроенных браузеров
 function isInAppBrowser() {
     const ua = navigator.userAgent || navigator.vendor || window.opera;
     return ua.includes('FBAN') || ua.includes('FBAV') || 
@@ -416,46 +415,32 @@ const quizQuestions = [
 
        // --- Core Quiz Logic ---
 async function startQuizSession() {
-    // Сначала пробуем восстановить существующую сессию
     const savedState = loadQuizState();
     if (savedState) {
         sessionId = savedState.sessionId;
         userAnswers = savedState.answers;
         currentQuestionIndex = savedState.currentIndex;
         console.log('Restored session:', sessionId);
-        return true; // Сессия восстановлена
+        return true; 
     }
     
-    // Если нет сохранённой сессии, создаём новую
     const getDeviceType = () => {
         const userAgent = navigator.userAgent.toLowerCase();
         const width = window.innerWidth;
         
         let os = 'Unknown';
-        if (/iphone|ipad|ipod/.test(userAgent)) {
-            os = 'iOS';
-        } else if (/android/.test(userAgent)) {
-            os = 'Android';
-        } else if (/windows phone/.test(userAgent)) {
-            os = 'Windows Phone';
-        } else if (/mac os x/.test(userAgent)) {
-            os = 'macOS';
-        } else if (/windows/.test(userAgent)) {
-            os = 'Windows';
-        } else if (/linux/.test(userAgent)) {
-            os = 'Linux';
-        }
+        if (/iphone|ipad|ipod/.test(userAgent)) { os = 'iOS'; } 
+        else if (/android/.test(userAgent)) { os = 'Android'; } 
+        else if (/windows phone/.test(userAgent)) { os = 'Windows Phone'; } 
+        else if (/mac os x/.test(userAgent)) { os = 'macOS'; } 
+        else if (/windows/.test(userAgent)) { os = 'Windows'; } 
+        else if (/linux/.test(userAgent)) { os = 'Linux'; }
         
         let device = 'Desktop';
-        if (width < 768) {
-            device = 'Mobile';
-        } else if (width < 1024) {
-            device = 'Tablet';
-        }
+        if (width < 768) { device = 'Mobile'; } 
+        else if (width < 1024) { device = 'Tablet'; }
         
-        if (device === 'Mobile' || device === 'Tablet') {
-            return `${device}/${os}`;
-        }
+        if (device === 'Mobile' || device === 'Tablet') { return `${device}/${os}`; }
         return `${device}/${os}`;
     };
     
@@ -467,34 +452,17 @@ async function startQuizSession() {
         const ref = document.referrer.toLowerCase();
         
         if (utm_source) {
-            if (utm_campaign) {
-                return `${utm_source}/${utm_campaign}`;
-            }
-            if (utm_medium) {
-                return `${utm_source}/${utm_medium}`;
-            }
+            if (utm_campaign) { return `${utm_source}/${utm_campaign}`; }
+            if (utm_medium) { return `${utm_source}/${utm_medium}`; }
             return utm_source;
         }
         
         if (ref === '') return 'Direct';
         if (ref.includes('google.')) return 'Google Search';
         if (ref.includes('bing.')) return 'Bing';
-        if (ref.includes('yahoo.')) return 'Yahoo';
-        if (ref.includes('duckduckgo.')) return 'DuckDuckGo';
-        if (ref.includes('yandex.')) return 'Yandex';
-        if (ref.includes('facebook.com') || ref.includes('fb.com')) return 'Facebook';
+        if (ref.includes('facebook.com')) return 'Facebook';
         if (ref.includes('instagram.com')) return 'Instagram';
-        if (ref.includes('twitter.com') || ref.includes('t.co')) return 'Twitter/X';
-        if (ref.includes('linkedin.com')) return 'LinkedIn';
-        if (ref.includes('pinterest.com')) return 'Pinterest';
-        if (ref.includes('reddit.com')) return 'Reddit';
-        if (ref.includes('tiktok.com')) return 'TikTok';
-        if (ref.includes('youtube.com') || ref.includes('youtu.be')) return 'YouTube';
-        if (ref.includes('telegram.')) return 'Telegram';
-        if (ref.includes('whatsapp.')) return 'WhatsApp';
-        if (ref.includes('googleads.') || ref.includes('doubleclick.')) return 'Google Ads';
-        if (ref.includes('facebook.com') && ref.includes('fbclid')) return 'Facebook Ads';
-        
+
         try {
             const refUrl = new URL(ref);
             return `Referral/${refUrl.hostname.replace('www.', '')}`;
@@ -516,8 +484,8 @@ async function startQuizSession() {
         if (!response.ok) throw new Error('Could not start session');
         const data = await response.json();
         sessionId = data.sessionId;
-        saveQuizState(); // Сохраняем состояние
-        return false; // Новая сессия
+        saveQuizState();
+        return false;
     } catch (error) {
         console.error('Failed to start session:', error);
         addBotMessage("Sorry, I'm having trouble connecting. Please try refreshing the page.");
@@ -526,16 +494,13 @@ async function startQuizSession() {
     }
 }
         
-        async function saveAnswerToServer(questionKey, answer) {
+async function saveAnswerToServer(questionKey, answer) {
     if (!sessionId) {
         console.error('No session ID available');
         return false;
     }
-    
-    // Сохраняем локально
     userAnswers[questionKey] = answer;
     saveQuizState();
-    
     try {
         const response = await fetch('/.netlify/functions/quiz', {
             method: 'POST',
@@ -547,15 +512,10 @@ async function startQuizSession() {
                 answer: answer
             })
         });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
+        if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
         return true;
     } catch (error) {
         console.error('Failed to save answer:', error);
-        // Продолжаем работу даже при ошибке сервера
         return false;
     }
 }
@@ -567,39 +527,28 @@ async function startQuizSession() {
         function showTypingIndicator() { const typingDiv = document.createElement('div'); typingDiv.id = 'typing-indicator';
             typingDiv.className = 'flex justify-start mb-4 chat-bubble'; const avatarId = `avatar-lottie-${Date.now()}`;
             typingDiv.innerHTML = `<div id="${avatarId}" class="bot-avatar-lottie mr-3 flex-shrink-0"></div><div class="bg-gray-200 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`; chatContainer.appendChild(typingDiv);
-           animationManager.add(avatarId, {
-    renderer: 'svg',
-    loop: true,
-    autoplay: true,
-    path: 'avatar.json'
-});
+           animationManager.add(avatarId, { renderer: 'svg', loop: true, autoplay: true, path: 'avatar.json' });
+           scrollToBottom();
         }
         function hideTypingIndicator() { document.getElementById('typing-indicator')?.remove();
         }
-        function addBotMessage(html, key = '') { const messageDiv = document.createElement('div');
-            if (key === 'intro_dave') { messageDiv.className = 'mb-4 chat-bubble'; messageDiv.innerHTML = ` <div id="greeting-animation" class="w-full max-w-[250px] mx-auto mb-[-40px] z-10 relative"></div> <div class="flex justify-start"> <div id="greeting-avatar" class="bot-avatar-lottie mr-3 flex-shrink-0 self-end mb-1"></div> <div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${html}</div> </div> `;
-                chatContainer.appendChild(messageDiv); animationManager.add('greeting-animation', {
-    renderer: 'svg',
-    loop: false,
-    autoplay: true,
-    path: 'assistent.json'
-});
-                animationManager.add('greeting-avatar', {
-    renderer: 'svg',
-    loop: true,
-    autoplay: true,
-    path: 'avatar.json'
-});
-            } else { messageDiv.className = 'flex justify-start mb-4 chat-bubble'; const avatarId = `avatar-lottie-${Date.now()}`;
-                messageDiv.innerHTML = `<div id="${avatarId}" class="bot-avatar-lottie mr-3 flex-shrink-0"></div><div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${html}</div>`; chatContainer.appendChild(messageDiv);
-                animationManager.add(avatarId, {
-    renderer: 'svg',
-    loop: true,
-    autoplay: true,
-    path: 'avatar.json'
-});
+        function addBotMessage(html, key = '') {
+            const messageDiv = document.createElement('div');
+            if (key === 'intro_dave') {
+                messageDiv.className = 'mb-4 chat-bubble';
+                messageDiv.innerHTML = ` <div id="greeting-animation" class="w-full max-w-[250px] mx-auto mb-[-40px] z-10 relative"></div> <div class="flex justify-start"> <div id="greeting-avatar" class="bot-avatar-lottie mr-3 flex-shrink-0 self-end mb-1"></div> <div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${html}</div> </div> `;
+                chatContainer.appendChild(messageDiv);
+                animationManager.add('greeting-animation', { renderer: 'svg', loop: false, autoplay: true, path: 'assistent.json' });
+                animationManager.add('greeting-avatar', { renderer: 'svg', loop: true, autoplay: true, path: 'avatar.json' });
+            } else {
+                messageDiv.className = 'flex justify-start mb-4 chat-bubble';
+                const avatarId = `avatar-lottie-${Date.now()}`;
+                messageDiv.innerHTML = `<div id="${avatarId}" class="bot-avatar-lottie mr-3 flex-shrink-0"></div><div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${html}</div>`;
+                chatContainer.appendChild(messageDiv);
+                animationManager.add(avatarId, { renderer: 'svg', loop: true, autoplay: true, path: 'avatar.json' });
+            }
+            scrollToBottom();
         }
-    }
         function addUserMessage(text) { const d = document.createElement('div');
             d.className = 'flex justify-end mb-4 chat-bubble'; d.innerHTML = `<div class="bg-purple-600 text-white p-3 rounded-tl-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${text}</div>`; chatContainer.appendChild(d); scrollToBottom();
         }
@@ -638,22 +587,18 @@ async function startQuizSession() {
                 } else { displayAnswerText = `${finalValue} ${question.unit}`; }
                 handleAnswer(finalValue, displayAnswerText);
             };
-       
            }
 
         function handleAnswer(answerToStore, answerToDisplay) {
             const valueToStore = (answerToStore || '').toString();
             if (!valueToStore.trim()) return;
-
             const currentQuestion = quizQuestions[currentQuestionIndex];
-            
             const valueToDisplay = answerToDisplay || valueToStore;
             addUserMessage(valueToDisplay);
             userAnswers[currentQuestion.key] = valueToStore.trim();
-        
             saveAnswerToServer(currentQuestion.key, valueToStore.trim());
             userInput.value = '';
-            userInput.blur(); // Fix for iOS keyboard bug
+            userInput.blur();
             inputArea.classList.add('hidden'); optionsContainerWrapper.classList.add('hidden');
             currentQuestionIndex++; updateProgressBar();
             askNextQuestion();
@@ -669,16 +614,13 @@ async function startQuizSession() {
                 let questionText = typeof question.text === 'function' ? question.text(userAnswers.name || 'friend') : question.text;
                 let postAnimationDelay = question.postAnimationDelay || 0;
                 if (question.type === 'message') {
-            
                     addBotMessage(questionText, question.key);
                     if (question.key === 'intro_testimonial') { setTimeout(playBiologicalAgeAnimation, 500); }
                     else if (question.key === 'bmi_calculation') { setTimeout(playBmiAnimation, 100); }
                     else if (question.key === 'stress_gauge') { setTimeout(playStressGaugeAnimation, 100); }
-        
-                        else if (question.key === 'sleep_visual') { setTimeout(playSleepAnimation, 100); }
+                    else if (question.key === 'sleep_visual') { setTimeout(playSleepAnimation, 100); }
                     else if (question.key === 'activity_visual') { setTimeout(playActivityAnimation, 100); }
-                    else if (question.key === 'hydration_visual') { setTimeout(playHydrationAnimation, 100);
-                    }
+                    else if (question.key === 'hydration_visual') { setTimeout(playHydrationAnimation, 100); }
                     currentQuestionIndex++;
                     setTimeout(askNextQuestion, postAnimationDelay);
                 } else if (question.type === 'question') {
@@ -688,8 +630,7 @@ async function startQuizSession() {
                     showOptions(optionButtons, handlers);
                     if (question.hideInput) { inputArea.classList.add('hidden'); } else { inputArea.classList.remove('hidden');
                     userInput.placeholder = question.placeholder || "Type..."; }
-                    if (!isMobile()) { userInput.focus();
-                    }
+                    if (!isMobile()) { userInput.focus(); }
                 } else if (question.type === 'slider') {
                     addBotMessage(questionText, question.key);
                     inputArea.classList.add('hidden');
@@ -701,7 +642,6 @@ async function startQuizSession() {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ action: 'endQuiz', sessionId: sessionId })
-                   
                     });
                     showCameraStep();
                 }
@@ -733,10 +673,9 @@ async function startQuizSession() {
             photoCanvas.width = video.videoWidth; photoCanvas.height = video.videoHeight; const photoContext = photoCanvas.getContext('2d'); photoContext.translate(video.videoWidth, 0); photoContext.scale(-1, 1); photoContext.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
             capturedPhotoDataUrl = photoCanvas.toDataURL('image/jpeg', 0.9); userAnswers['selfie'] = 'Photo taken'; stopCamera(); updateProgressBar(); showPhotoForConfirmation();
         }
-// Новая функция для запроса email после фото и перед анализом
+
 function askForEmailAfterPhoto() {
     return new Promise((resolve) => {
-        // Проверяем, не был ли email уже собран
         if (userAnswers.email) {
             console.log('Email already collected:', userAnswers.email);
             resolve();
@@ -744,13 +683,17 @@ function askForEmailAfterPhoto() {
         }
 
         addBotMessage("One last crucial step! Please enter your email to receive the report summary.");
+        
+        // <<-- ИСПРАВЛЕНИЕ 3: Восстанавливаем поле ввода и переназначаем переменные
+        inputArea.innerHTML = originalInputAreaHTML;
+        userInput = document.getElementById('user-input');
+        sendBtn = document.getElementById('send-btn');
 
         inputArea.classList.remove('hidden');
-        userInput.value = ''; // Очищаем поле
+        userInput.value = '';
         userInput.placeholder = "your@email.com";
         userInput.type = 'email';
         
-        // Удаляем старые обработчики
         eventManager.remove(sendBtn, 'click', 'email_submit');
         eventManager.remove(userInput, 'keypress', 'email_keypress');
         
@@ -761,34 +704,24 @@ function askForEmailAfterPhoto() {
         const emailSubmitHandler = async () => {
             const email = userInput.value.trim();
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
             if (!emailRegex.test(email)) {
                 addBotMessage("Hmm, that doesn't look like a valid email. Could you please double-check it?");
                 userInput.focus();
                 return;
             }
-
-            // Сохраняем email
             userAnswers.email = email;
             addUserMessage(email);
-            
-            // Отправляем на сервер с обработкой ошибок
             try {
                 await saveAnswerToServer('email', email);
             } catch (error) {
                 console.error('Failed to save email:', error);
             }
-
-            // Очищаем обработчики
             eventManager.remove(sendBtn, 'click', 'email_submit');
             eventManager.remove(userInput, 'keypress', 'email_keypress');
-
-            // Сбрасываем UI
             inputArea.classList.add('hidden');
             userInput.value = '';
             userInput.type = 'text';
             userInput.placeholder = "Type your answer...";
-            
             resolve();
         };
 
@@ -799,7 +732,6 @@ function askForEmailAfterPhoto() {
             }
         };
 
-        // Добавляем новые обработчики с уникальными ключами
         eventManager.add(sendBtn, 'click', emailSubmitHandler, 'email_submit');
         eventManager.add(userInput, 'keypress', keyPressHandler, 'email_keypress');
     });
@@ -810,7 +742,7 @@ function askForEmailAfterPhoto() {
     optionsContainerWrapper.classList.add('hidden');
     inputArea.classList.add('hidden');
 
-    await askForEmailAfterPhoto(); // <--- ВОТ ЭТА НОВАЯ СТРОКА
+    await askForEmailAfterPhoto(); 
 
     showCompletionAnimation();
     try {
@@ -843,12 +775,9 @@ function askForEmailAfterPhoto() {
         function showPhotoForConfirmation() { const d = document.createElement('div');
             d.id = 'photo-preview-wrapper'; d.className = 'flex justify-start mb-4 chat-bubble'; const i = `<div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs"><p class="mb-2">Here's the photo.
             Happy with it?</p><img src="${capturedPhotoDataUrl}" alt="Your selfie" class="rounded-lg"/></div>`; d.innerHTML = `<div class="w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 bot-avatar-lottie overflow-hidden" id="photo-confirm-avatar"></div>${i}`;
-            chatContainer.appendChild(d); animationManager.add('photo-confirm-avatar', {
-    renderer: 'svg',
-    loop: false,
-    autoplay: true,
-    path: 'avatar.json'
-});
+            chatContainer.appendChild(d);
+            scrollToBottom();
+            animationManager.add('photo-confirm-avatar', { renderer: 'svg', loop: false, autoplay: true, path: 'avatar.json' });
             const o = [ { text: 'Looks Good!', class: 'option-btn bg-green-500 border-green-600 text-white px-4 py-2 rounded-full text-sm flex-shrink-0 font-semibold' }, { text: 'Retake', class: 'option-btn bg-white border-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm flex-shrink-0' } ];
             const h = [startAnalysisAndShowForm, retakePhoto]; showOptions(o, h); inputArea.classList.add('hidden'); }
         function retakePhoto() { addUserMessage("Retake");
@@ -856,11 +785,8 @@ function askForEmailAfterPhoto() {
         
         let stripe, elements, clientSecret;
         async function showPaymentForm() {
-    // События Meta Pixel
     fbq('track', 'InitiateCheckout', {value: 9.99, currency: 'USD'});
     let hasSentAddPaymentInfo = false;
-    
-    // УБИРАЕМ ПРОВЕРКУ - сразу переходим к показу формы оплаты
     
     const sendAddPaymentInfoEvent = () => {
         if (!hasSentAddPaymentInfo) {
@@ -911,7 +837,6 @@ function askForEmailAfterPhoto() {
 
         paymentRequest.on('paymentmethod', async (ev) => {
             sendAddPaymentInfoEvent();
-
             const { paymentIntent, error: confirmError } = await stripe.confirmCardPayment(clientSecret, { payment_method: ev.paymentMethod.id }, { handleActions: false });
             if (confirmError) {
                 ev.complete('fail');
@@ -926,14 +851,9 @@ function askForEmailAfterPhoto() {
         
         const cardElement = elements.create("card", { style: { base: { fontSize: '16px' } } });
         cardElement.mount("#card-element");
-
-        cardElement.on('focus', () => {
-            sendAddPaymentInfoEvent();
-        });
-
+        cardElement.on('focus', () => { sendAddPaymentInfoEvent(); });
         const paymentForm = document.getElementById('payment-form');
         paymentForm.addEventListener('submit', handlePayment);
-
     } catch (error) {
         console.error("Failed to initialize payment form:", error);
         document.getElementById('payment-wrapper').innerHTML = `<p class="text-center text-red-500">Could not load payment form. Error: ${error.message}</p>`;
@@ -946,46 +866,26 @@ function askForEmailAfterPhoto() {
     const messageDiv = document.getElementById('payment-message');
     submitButton.disabled = true;
     const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-            card: elements.getElement('card'),
-        }
+        payment_method: { card: elements.getElement('card'), }
     });
     if (error) {
-        // Платеж отклонен или ошибка
         messageDiv.textContent = error.message;
         messageDiv.classList.remove('hidden');
         submitButton.disabled = false;
-        
-        // Обновляем статус в БД
         await fetch('/.netlify/functions/quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'updatePayment',
-                sessionId: sessionId,
-           
-                status: 'failed',
-                amountUSD: '0'
-            })
+            body: JSON.stringify({ action: 'updatePayment', sessionId: sessionId, status: 'failed', amountUSD: '0' })
         });
     } else if (paymentIntent) {
         if (paymentIntent.status === 'succeeded') {
-            // Обновляем статус успешного платежа
             await fetch('/.netlify/functions/quiz', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: 
-                    JSON.stringify({
-                    action: 'updatePayment',
-                    sessionId: sessionId,
-                    status: 'succeeded',
-                    amountUSD: '9.99'
-                
-                })
+                body: JSON.stringify({ action: 'updatePayment', sessionId: sessionId, status: 'succeeded', amountUSD: '9.99' })
             });
             handleSuccessfulPayment();
         } else if (paymentIntent.status === 'requires_action') {
-            // 3D Secure или дополнительная аутентификация
             messageDiv.textContent = 'Additional authentication required';
             messageDiv.classList.remove('hidden');
         }
@@ -1008,7 +908,6 @@ function askForEmailAfterPhoto() {
                 const seconds = (duration % 60).toString().padStart(2, '0');
                 timerEl.textContent = `${minutes}:${seconds}`;
                 duration--;
-            
                 if (duration < 0) { clearInterval(countdownInterval); timerEl.textContent = "00:00"; }
             }, 1000);
         }
@@ -1022,17 +921,10 @@ function askForEmailAfterPhoto() {
                 addBotMessage("Awesome work! You've completed the assessment. 🥳 I'm now analyzing your results..."); 
                 inputArea.innerHTML = `<div class="analysis-container"><div id="analysis-animation" class="analysis-animation"></div><p id="analysis-text">Initializing analysis...</p></div>`; 
                 inputArea.classList.remove('hidden'); 
-            
                 scrollToBottom(); 
-                animationManager.add('analysis-animation', {
-    renderer: 'svg',
-    loop: true,
-    autoplay: true,
-    path: analysisAnimationPath
-});
+                animationManager.add('analysis-animation', { renderer: 'svg', loop: true, autoplay: true, path: analysisAnimationPath });
                 const analysisSteps = [ "Analyzing your data...", "Checking lifestyle factors...", "Scanning skin health...", "Calculating biological age...", "Almost ready..." ];
                 const analysisTextElement = document.getElementById('analysis-text'); 
-            
                let currentStep = 0; 
                 const intervalId = setInterval(() => { 
                     if (currentStep < analysisSteps.length) { 
@@ -1049,49 +941,34 @@ function askForEmailAfterPhoto() {
                     showTypingIndicator(); 
                     setTimeout(() => { 
                         hideTypingIndicator(); 
-        
                         addBotMessage("Great! Your preliminary analysis is complete. Just one final step to unlock your full, personalized report."); 
                         showPaymentForm(); 
                     }, 1200); 
-                }, analysisSteps.length * 1600 
-                    + 500);
+                }, analysisSteps.length * 1600 + 500);
             }, 1000); 
         }
 
-        // --- Initial Call ---
        async function initQuiz() {
     setAppHeight();
-    
     const urlParams = new URLSearchParams(window.location.search);
     const urlSessionId = urlParams.get('session');
     
     if (urlSessionId) {
         sessionId = urlSessionId;
-        
-        // Загружаем данные сессии с сервера
         try {
             const response = await fetch('/.netlify/functions/quiz', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'getSession',
-                    sessionId: sessionId
-                })
+                body: JSON.stringify({ action: 'getSession', sessionId: sessionId })
             });
-            
             if (response.ok) {
                 const data = await response.json();
                 if (data.answers) {
                     userAnswers = data.answers;
-                    // Сохраняем локально
                     saveQuizState();
                 }
             }
-        } catch (error) {
-            console.error('Failed to load session data:', error);
-        }
-        
-        // Показываем форму оплаты
+        } catch (error) { console.error('Failed to load session data:', error); }
         showCompletionAnimation();
         setTimeout(() => {
             inputArea.classList.add('hidden');
@@ -1108,35 +985,29 @@ function askForEmailAfterPhoto() {
     const isNewSession = await startQuizSession();
     
     if (!isNewSession && currentQuestionIndex > 0) {
-        // Восстанавливаем прогресс
         addBotMessage("Welcome back! Let's continue where you left off.");
         updateProgressBar();
         askNextQuestion();
     } else {
-        // Начинаем с начала
         if (sessionId) {
             askNextQuestion();
         }
     }
 }
 
-// Обработчики событий - только один раз
 let globalHandlersActive = false;
 
 function setupGlobalHandlers() {
     if (globalHandlersActive) return;
     
     const globalClickHandler = () => {
-        if (!inputArea.classList.contains('hidden') && 
-            userInput.type !== 'email') {
+        if (!inputArea.classList.contains('hidden') && userInput.type !== 'email') {
             handleAnswer(userInput.value);
         }
     };
     
     const globalKeyHandler = (e) => {
-        if (e.key === 'Enter' && 
-            !inputArea.classList.contains('hidden') && 
-            userInput.type !== 'email') {
+        if (e.key === 'Enter' && !inputArea.classList.contains('hidden') && userInput.type !== 'email') {
             e.preventDefault();
             handleAnswer(userInput.value);
         }
@@ -1150,25 +1021,13 @@ function setupGlobalHandlers() {
 function cleanup() {
     eventManager.removeAll();
     animationManager.clear();
-    if (detectionInterval) {
-        clearInterval(detectionInterval);
-        detectionInterval = null;
-    }
-    if (countdownInterval) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-    }
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        stream = null;
-    }
-    if (video && video.srcObject) {
-        video.srcObject = null;
-    }
+    if (detectionInterval) { clearInterval(detectionInterval); detectionInterval = null; }
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
+    if (video && video.srcObject) { video.srcObject = null; }
 }
 window.addEventListener('beforeunload', cleanup);
 
-// Вызываем при инициализации
 window.addEventListener('resize', setAppHeight);
 inputArea.classList.add('hidden');
 setupGlobalHandlers();
