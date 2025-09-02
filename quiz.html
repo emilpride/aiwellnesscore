@@ -219,6 +219,49 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         const mainContainer = document.getElementById('main-container'), chatContainer = document.getElementById('chat-container'), userInput = document.getElementById('user-input'), sendBtn = document.getElementById('send-btn'), optionsContainer = document.getElementById('options-container'), optionsContainerWrapper = 
             document.getElementById('options-container-wrapper'), inputArea = document.getElementById('input-area'), progressBar = document.getElementById('progress-bar'), cameraModal = document.getElementById('camera-modal'), video = document.getElementById('camera-video'), canvas = document.getElementById('camera-canvas'), cameraLoader = document.getElementById('camera-loader'), loaderText = document.getElementById('loader-text'), cameraStatus = document.getElementById('camera-status'), paymentFormContainer = document.getElementById('payment-form-container');
         let sessionId = null, userAnswers = {}, currentQuestionIndex = 0, detectionInterval, stream, capturedPhotoDataUrl = null, countdownInterval;
+        // Функции для работы с localStorage
+function saveQuizState() {
+    if (sessionId) {
+        localStorage.setItem('quiz_session_id', sessionId);
+        localStorage.setItem('quiz_answers', JSON.stringify(userAnswers));
+        localStorage.setItem('quiz_current_index', currentQuestionIndex);
+        localStorage.setItem('quiz_timestamp', Date.now());
+    }
+}
+
+function loadQuizState() {
+    const savedSessionId = localStorage.getItem('quiz_session_id');
+    const savedAnswers = localStorage.getItem('quiz_answers');
+    const savedIndex = localStorage.getItem('quiz_current_index');
+    const savedTimestamp = localStorage.getItem('quiz_timestamp');
+    
+    // Проверяем, что сессия не старше 24 часов
+    if (savedSessionId && savedTimestamp) {
+        const age = Date.now() - parseInt(savedTimestamp);
+        if (age < 24 * 60 * 60 * 1000) { // 24 часа
+            return {
+                sessionId: savedSessionId,
+                answers: savedAnswers ? JSON.parse(savedAnswers) : {},
+                currentIndex: parseInt(savedIndex) || 0
+            };
+        }
+    }
+    return null;
+}
+
+function clearQuizState() {
+    localStorage.removeItem('quiz_session_id');
+    localStorage.removeItem('quiz_answers');
+    localStorage.removeItem('quiz_current_index');
+    localStorage.removeItem('quiz_timestamp');
+}
+
+// Детектор встроенных браузеров
+function isInAppBrowser() {
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    return ua.includes('FBAN') || ua.includes('FBAV') || 
+           ua.includes('Instagram') || ua.includes('Telegram');
+}
         const messageDelay = 1800;
         // --- Utility & Helper Functions ---
         const setAppHeight = () => { mainContainer.style.height = `${window.innerHeight}px`;
@@ -313,14 +356,22 @@ const quizQuestions = [
 
        // --- Core Quiz Logic ---
 async function startQuizSession() {
-    // Определение устройства с ОС
+    // Сначала пробуем восстановить существующую сессию
+    const savedState = loadQuizState();
+    if (savedState) {
+        sessionId = savedState.sessionId;
+        userAnswers = savedState.answers;
+        currentQuestionIndex = savedState.currentIndex;
+        console.log('Restored session:', sessionId);
+        return true; // Сессия восстановлена
+    }
+    
+    // Если нет сохранённой сессии, создаём новую
     const getDeviceType = () => {
         const userAgent = navigator.userAgent.toLowerCase();
         const width = window.innerWidth;
         
-        // Определяем ОС
-        let 
-            os = 'Unknown';
+        let os = 'Unknown';
         if (/iphone|ipad|ipod/.test(userAgent)) {
             os = 'iOS';
         } else if (/android/.test(userAgent)) {
@@ -328,37 +379,33 @@ async function startQuizSession() {
         } else if (/windows phone/.test(userAgent)) {
             os = 'Windows Phone';
         } else if (/mac os x/.test(userAgent)) {
-      
-           os = 'macOS';
+            os = 'macOS';
         } else if (/windows/.test(userAgent)) {
             os = 'Windows';
         } else if (/linux/.test(userAgent)) {
             os = 'Linux';
         }
         
-        // Определяем тип устройства
         let device = 'Desktop';
-  
-           if (width < 768) {
+        if (width < 768) {
             device = 'Mobile';
         } else if (width < 1024) {
             device = 'Tablet';
-            }
+        }
         
-        // Комбинируем результат
         if (device === 'Mobile' || device === 'Tablet') {
             return `${device}/${os}`;
-            }
+        }
         return `${device}/${os}`;
     };
-    // Улучшенное получение источника трафика
+    
     const getTrafficSource = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const utm_source = urlParams.get('utm_source');
         const utm_medium = urlParams.get('utm_medium');
         const utm_campaign = urlParams.get('utm_campaign');
         const ref = document.referrer.toLowerCase();
-        // Приоритет UTM меткам
+        
         if (utm_source) {
             if (utm_campaign) {
                 return `${utm_source}/${utm_campaign}`;
@@ -369,15 +416,12 @@ async function startQuizSession() {
             return utm_source;
         }
         
-        // Определяем по referrer
         if (ref === '') return 'Direct';
-        // Поисковые системы
         if (ref.includes('google.')) return 'Google Search';
         if (ref.includes('bing.')) return 'Bing';
         if (ref.includes('yahoo.')) return 'Yahoo';
         if (ref.includes('duckduckgo.')) return 'DuckDuckGo';
         if (ref.includes('yandex.')) return 'Yandex';
-        // Социальные сети
         if (ref.includes('facebook.com') || ref.includes('fb.com')) return 'Facebook';
         if (ref.includes('instagram.com')) return 'Instagram';
         if (ref.includes('twitter.com') || ref.includes('t.co')) return 'Twitter/X';
@@ -388,11 +432,9 @@ async function startQuizSession() {
         if (ref.includes('youtube.com') || ref.includes('youtu.be')) return 'YouTube';
         if (ref.includes('telegram.')) return 'Telegram';
         if (ref.includes('whatsapp.')) return 'WhatsApp';
-        // Рекламные платформы
         if (ref.includes('googleads.') || ref.includes('doubleclick.')) return 'Google Ads';
         if (ref.includes('facebook.com') && ref.includes('fbclid')) return 'Facebook Ads';
         
-        // Если не определено, показываем домен
         try {
             const refUrl = new URL(ref);
             return `Referral/${refUrl.hostname.replace('www.', '')}`;
@@ -403,34 +445,48 @@ async function startQuizSession() {
 
     try {
         const response = await fetch('/.netlify/functions/quiz', {
-            method: 'POST', 
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 action: 'startSession',
                 source: getTrafficSource(),
-   
-                 deviceType: getDeviceType()
+                deviceType: getDeviceType()
             })
         });
         if (!response.ok) throw new Error('Could not start session');
         const data = await response.json();
         sessionId = data.sessionId;
+        saveQuizState(); // Сохраняем состояние
+        return false; // Новая сессия
     } catch (error) {
         console.error('Failed to start session:', error);
         addBotMessage("Sorry, I'm having trouble connecting. Please try refreshing the page.");
         inputArea.style.display = 'none';
+        return false;
     }
 }
         
         async function saveAnswerToServer(questionKey, answer) {
-            if (!sessionId) return;
-            try {
-                await fetch('/.netlify/functions/quiz', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'saveAnswer', sessionId: sessionId, questionId: questionKey, answer: answer })
-                });
-            } catch (error) { console.error('Failed to save answer:', error); }
-        }
+    if (!sessionId) return;
+    
+    // Сохраняем состояние локально после каждого ответа
+    saveQuizState();
+    
+    try {
+        await fetch('/.netlify/functions/quiz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'saveAnswer',
+                sessionId: sessionId,
+                questionId: questionKey,
+                answer: answer
+            })
+        });
+    } catch (error) {
+        console.error('Failed to save answer:', error);
+    }
+}
 
         function updateProgressBar() { const questionKeys = quizQuestions.filter(q => q.type === 'question' || q.type === 'slider').map(q => q.key);
             const totalSteps = questionKeys.length + 1; const completedAnswers = Object.keys(userAnswers).filter(key => questionKeys.includes(key)).length; const photoStepCompleted = userAnswers['selfie'] ? 1 : 0;
@@ -643,6 +699,27 @@ async function startQuizSession() {
 
     // Флаг, чтобы событие AddPaymentInfo отправлялось только один раз
     let hasSentAddPaymentInfo = false;
+            // Проверка на встроенный браузер
+if (isInAppBrowser()) {
+    const currentUrl = window.location.href + `?session=${sessionId}`;
+    paymentFormContainer.innerHTML = `
+        <div class="p-6 bg-yellow-50 border-2 border-yellow-200 rounded-lg text-center">
+            <svg class="w-12 h-12 mx-auto mb-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <h3 class="text-lg font-bold mb-2">Payment Security Notice</h3>
+            <p class="text-sm mb-4">For secure payment processing, please open this page in your regular browser (Chrome, Safari, etc.)</p>
+            <button onclick="navigator.clipboard.writeText('${currentUrl}')" 
+                    class="bg-purple-600 text-white px-6 py-3 rounded-lg mb-2 w-full">
+                Copy Link to Clipboard
+            </button>
+            <p class="text-xs text-gray-600 mt-2">Your progress has been saved. Use the copied link to continue.</p>
+        </div>
+    `;
+    paymentFormContainer.classList.remove('hidden');
+    scrollToBottom();
+    return;
+}
     const sendAddPaymentInfoEvent = () => {
         if (!hasSentAddPaymentInfo) {
             fbq('track', 'AddPaymentInfo');
@@ -774,6 +851,7 @@ async function startQuizSession() {
 }
 
         function handleSuccessfulPayment() {
+            clearQuizState();
             paymentFormContainer.innerHTML = `<div class="p-8 text-center"><svg class="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><h3 class="text-2xl font-bold mt-4">Payment Successful!</h3><p class="text-gray-600 mt-2">Finalizing your report...</p></div>`;
             scrollToBottom();
             setTimeout(() => { window.location.href = `result.html?session_id=${sessionId}&payment=success`; }, 2500);
@@ -834,22 +912,63 @@ async function startQuizSession() {
         }
 
         // --- Initial Call ---
-        async function initQuiz() {
-            setAppHeight();
-            await startQuizSession();
-            if (sessionId) {
-                askNextQuestion();
-            }
+       async function initQuiz() {
+    setAppHeight();
+    
+    // Проверяем URL параметры
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlSessionId = urlParams.get('session');
+    
+    if (urlSessionId) {
+        // Если есть session в URL, используем его
+        sessionId = urlSessionId;
+        // Пытаемся загрузить состояние из localStorage
+        const savedState = loadQuizState();
+        if (savedState && savedState.sessionId === urlSessionId) {
+            userAnswers = savedState.answers;
+            currentQuestionIndex = savedState.currentIndex;
         }
-       
-        sendBtn.addEventListener('click', () => handleAnswer(userInput.value));
-        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAnswer(userInput.value); });
-        window.addEventListener('resize', setAppHeight);
-        inputArea.classList.add('hidden');
-        initQuiz();
+        // Сразу показываем форму оплаты
+        showCompletionAnimation();
+        setTimeout(() => {
+            inputArea.classList.add('hidden');
+            showTypingIndicator();
+            setTimeout(() => {
+                hideTypingIndicator();
+                addBotMessage("Welcome back! Let's complete your payment to get your full report.");
+                showPaymentForm();
+            }, 1200);
+        }, 1000);
+        return;
+    }
+    
+    const isNewSession = await startQuizSession();
+    
+    if (!isNewSession && currentQuestionIndex > 0) {
+        // Восстанавливаем прогресс
+        addBotMessage("Welcome back! Let's continue where you left off.");
+        updateProgressBar();
+        askNextQuestion();
+    } else {
+        // Начинаем с начала
+        if (sessionId) {
+            askNextQuestion();
+        }
+    }
+}
+
+// Обработчики событий - только один раз
+sendBtn.addEventListener('click', () => handleAnswer(userInput.value));
+userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAnswer(userInput.value); });
+window.addEventListener('resize', setAppHeight);
+inputArea.classList.add('hidden');
+initQuiz();
     </script>
     <script>
-  fbq('track', 'ViewContent');
-</script>
+        fbq('track', 'ViewContent');
+        if (isInAppBrowser()) {
+            console.log('In-app browser detected:', navigator.userAgent);
+        }
+    </script>
 </body>
 </html>
