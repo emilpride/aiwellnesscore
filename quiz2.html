@@ -421,7 +421,7 @@
         renderer: 'svg',
         loop: true,
         autoplay: true,
-        path: 'arrow.json' 
+        path: 'arrow.json'
     });
     const swiperWrapper = document.getElementById('swiper-wrapper');
     const slides = document.querySelectorAll('.swiper-slide');
@@ -572,7 +572,6 @@
             initializeGlobalErrorHandlers();
             return true;
         }
-
         const getDeviceType = () => {
             const userAgent = navigator.userAgent.toLowerCase();
             const width = window.innerWidth;
@@ -614,7 +613,6 @@
                 return 'Referral';
             }
         };
-
         try {
             const response = await fetch('/.netlify/functions/quiz', {
                 method: 'POST',
@@ -626,9 +624,10 @@
                 })
             });
             if (!response.ok) throw new Error('Could not start session');
-
             const data = await response.json();
             sessionId = data.sessionId;
+            // IMPORTANT: Add a small delay to allow the document to be created in Firestore
+            await new Promise(resolve => setTimeout(resolve, 1000));
             saveQuizState();
             initializeGlobalErrorHandlers();
             return false;
@@ -640,15 +639,13 @@
         }
     }
 
-    async function saveAnswerToServer(questionKey, answer) {
+    async function saveAnswerToServer(questionKey, answer, retryCount = 0) {
         if (!sessionId) {
             console.error('No session ID available');
             return false;
         }
-
         userAnswers[questionKey] = answer;
         saveQuizState();
-
         try {
             const response = await fetch('/.netlify/functions/quiz', {
                 method: 'POST',
@@ -666,9 +663,19 @@
             return true;
         } catch (error) {
             console.error('Failed to save answer:', error);
+            // If it's the first attempt and a 500 error, try again after a second
+            if (retryCount === 0 && error.message.includes('500')) {
+                console.log('Retrying save after delay...');
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                return saveAnswerToServer(questionKey, answer, 1);
+            }
+            // If the retry didn't help, just continue
+            // Data is saved locally in localStorage
+            console.log('Answer saved locally, server sync failed');
             return false;
         }
     }
+
 
     // --- UI FUNCTIONS ---
     function updateProgressBar() {
@@ -1314,7 +1321,7 @@ displaySize);
                 return;
             }
 
-            addBotMessage("One last crucial step! Please enter your email to receive the report summary.");
+            addBotMessage("Enter your email to get your personalized report summary. We respect your privacy and are committed to protecting your personal data.");
             inputArea.innerHTML = originalInputAreaHTML;
             userInput = document.getElementById('user-input');
             sendBtn = document.getElementById('send-btn');
