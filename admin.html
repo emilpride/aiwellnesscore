@@ -403,7 +403,6 @@
                     return sourceMatch && startDateMatch && endDateMatch;
                 });
 
-                const funnelSteps = [
                     const funnelSteps = [
     { name: 'Quiz Started', condition: session => true },
     { name: '1. Answered Name', condition: session => session.answers.hasOwnProperty('name') },
