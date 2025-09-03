@@ -10,18 +10,20 @@ if (!getApps().length) {
 }
 const db = getFirestore();
 
+// --- ИСПРАВЛЕНИЕ 1: Удален дублирующийся и неиспользуемый код ---
+// Оставляем только один, правильный список всех вопросов.
 const ALL_QUESTION_KEYS = [
-    'name', 'start_consent', 'age', 'gender', 'height', 'weight', 
-    'sleep', 'activity', 'nutrition', 'processed_food', 'hydration', 'stress', 
+    'name', 'start_consent', 'age', 'gender', 'height', 'weight',
+    'sleep', 'activity', 'nutrition', 'processed_food', 'hydration', 'stress',
     'mindfulness', 'mood', 'alcohol', 'smoking', 'screen_time',
-    'selfie', // Шаг с фотографией (в ответах сохраняется как 'selfie')
+    'selfie', // Шаг с фотографией
     'email'   // Шаг с вводом email
 ];
+// Оставляем только одно объявление TOTAL_QUESTIONS.
 const TOTAL_QUESTIONS = ALL_QUESTION_KEYS.length;
-const TOTAL_QUESTIONS = QUESTION_KEYS.length;
 
 const countryCodeToName = {
-    US: "United States", DE: "Germany", FR: "France", GB: "United Kingdom", CA: "Canada", 
+    US: "United States", DE: "Germany", FR: "France", GB: "United Kingdom", CA: "Canada",
     AU: "Australia", JP: "Japan", CN: "China", IN: "India", BR: "Brazil", RU: "Russia",
     UA: "Ukraine", PL: "Poland", IT: "Italy", ES: "Spain", NL: "Netherlands", SE: "Sweden",
 };
@@ -39,10 +41,10 @@ exports.handler = async (event) => {
 
     const sessionsRef = db.collection('sessions');
     const sessionsSnapshot = await sessionsRef.orderBy('createdAt', 'desc').limit(200).get();
-    
+
     const messagesRef = db.collection('contact_submissions');
-const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').get();
-    
+    const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').get();
+
     let messagesData = [];
     if (!messagesSnapshot.empty) {
         messagesData = messagesSnapshot.docs.map(doc => {
@@ -59,13 +61,13 @@ const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').get();
     }
 
     if (sessionsSnapshot.empty) {
-      return { 
-        statusCode: 200, 
-        body: JSON.stringify({ 
-          sessions: [], 
-          statistics: {}, 
-          messages: messagesData 
-        }) 
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          sessions: [],
+          statistics: {},
+          messages: messagesData
+        })
       };
     }
 
@@ -78,13 +80,12 @@ const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').get();
     const sessionsData = sessionsSnapshot.docs.map(doc => {
       const data = doc.data();
       const answers = data.answers || {};
-      // Теперь мы проверяем ответы по полному списку ВСЕХ вопросов
+      
       const answeredKeys = Object.keys(answers).filter(key => ALL_QUESTION_KEYS.includes(key));
       const answeredCount = answeredKeys.length;
       const progressPercent = Math.round((answeredCount / TOTAL_QUESTIONS) * 100);
       const progress = `${answeredCount} of ${TOTAL_QUESTIONS} (${progressPercent}%)`;
 
-      // НА ЭТОТ БОЛЕЕ НАДЕЖНЫЙ БЛОК:
       let duration = 'N/A';
       if (data.createdAt && data.quizEndedAt) {
         if (progressPercent === 100) {
@@ -93,10 +94,8 @@ const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').get();
         const start = new Date(data.createdAt);
         const end = new Date(data.quizEndedAt);
 
-        // Проверяем, что даты валидны, прежде чем выполнять вычисления
         if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
             const diffMs = end - start;
-            // Проверяем, что разница не отрицательная и является числом
             if (diffMs >= 0) {
                 const diffMins = Math.floor(diffMs / 60000);
                 const diffSecs = ((diffMs % 60000) / 1000).toFixed(0);
@@ -109,16 +108,17 @@ const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').get();
         successfulPayments++;
         totalRevenue += parseFloat(data.paymentAmountUSD);
       }
-      
+
       const source = data.trafficSource || 'Direct';
       trafficSourceCounts[source] = (trafficSourceCounts[source] || 0) + 1;
 
       const country = countryCodeToName[data.countryCode] || data.countryCode || 'Unknown';
       countryCounts[country] = (countryCounts[country] || 0) + 1;
 
+      // --- ИСПРАВЛЕНИЕ 2: Удалены дублирующиеся ключи (`duration`, `paymentStatus`) ---
       return {
         id: doc.id,
-        createdAt: data.createdAt, // Отправляем в ISO формате для фильтрации по дате
+        createdAt: data.createdAt,
         deviceType: data.deviceType || 'N/A',
         trafficSource: source,
         ipAddress: data.ipAddress || 'N/A',
@@ -128,15 +128,13 @@ const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').get();
         age: answers.age || 'N/A',
         progress: progress,
         progressPercent: progressPercent,
-dropOffPoint: String(data.dropOffPoint || 'N/A').replace('question_', ''),
-        duration: duration,
-        paymentStatus: data.paymentStatus || 'pending',
+        dropOffPoint: String(data.dropOffPoint || 'N/A').replace('question_', ''),
         duration: duration,
         paymentStatus: data.paymentStatus || 'pending',
         paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A',
         paymentMethod: data.paymentStatus === 'succeeded' ? 'Card/Wallet' : 'N/A',
         errors: data.errors || [],
-        answers: answers, // <-- ВАЖНОЕ ИЗМЕНЕНИЕ: Отправляем все ответы
+        answers: answers,
         resultLink: `result.html?session_id=${data.sessionId}`
       };
     });
@@ -154,10 +152,10 @@ dropOffPoint: String(data.dropOffPoint || 'N/A').replace('question_', ''),
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ 
-        sessions: sessionsData, 
-        statistics, 
-        messages: messagesData 
+      body: JSON.stringify({
+        sessions: sessionsData,
+        statistics,
+        messages: messagesData
       }),
     };
   } catch (error) {
