@@ -10,16 +10,13 @@ if (!getApps().length) {
 }
 const db = getFirestore();
 
-// --- ИСПРАВЛЕНИЕ 1: Удален дублирующийся и неиспользуемый код ---
-// Оставляем только один, правильный список всех вопросов.
 const ALL_QUESTION_KEYS = [
     'name', 'start_consent', 'age', 'gender', 'height', 'weight',
     'sleep', 'activity', 'nutrition', 'processed_food', 'hydration', 'stress',
     'mindfulness', 'mood', 'alcohol', 'smoking', 'screen_time',
-    'selfie', // Шаг с фотографией
-    'email'   // Шаг с вводом email
+    'selfie',
+    'email'
 ];
-// Оставляем только одно объявление TOTAL_QUESTIONS.
 const TOTAL_QUESTIONS = ALL_QUESTION_KEYS.length;
 
 const countryCodeToName = {
@@ -86,14 +83,15 @@ exports.handler = async (event) => {
       const progressPercent = Math.round((answeredCount / TOTAL_QUESTIONS) * 100);
       const progress = `${answeredCount} of ${TOTAL_QUESTIONS} (${progressPercent}%)`;
 
+      // ИСПРАВЛЕНИЕ: Считаем квиз завершенным, если пользователь ответил на последний вопрос о стиле жизни ('screen_time').
+      if (answers.hasOwnProperty('screen_time')) {
+        completedQuizzes++;
+      }
+
       let duration = 'N/A';
       if (data.createdAt && data.quizEndedAt) {
-        if (progressPercent === 100) {
-            completedQuizzes++;
-        }
         const start = new Date(data.createdAt);
         const end = new Date(data.quizEndedAt);
-
         if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
             const diffMs = end - start;
             if (diffMs >= 0) {
@@ -115,7 +113,6 @@ exports.handler = async (event) => {
       const country = countryCodeToName[data.countryCode] || data.countryCode || 'Unknown';
       countryCounts[country] = (countryCounts[country] || 0) + 1;
 
-      // --- ИСПРАВЛЕНИЕ 2: Удалены дублирующиеся ключи (`duration`, `paymentStatus`) ---
       return {
         id: doc.id,
         createdAt: data.createdAt,
@@ -163,3 +160,4 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: JSON.stringify({ error: 'Internal Server Error' }) };
   }
 };
+
