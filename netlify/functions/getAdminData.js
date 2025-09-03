@@ -40,8 +40,8 @@ exports.handler = async (event) => {
     const sessionsRef = db.collection('sessions');
     const sessionsSnapshot = await sessionsRef.orderBy('createdAt', 'desc').get();
     
-    const messagesRef = db.collection('contactMessages');
-    const messagesSnapshot = await messagesRef.orderBy('receivedAt', 'desc').get();
+    const messagesRef = db.collection('contact_submissions');
+const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').get();
     
     let messagesData = [];
     if (!messagesSnapshot.empty) {
@@ -53,7 +53,7 @@ exports.handler = async (event) => {
                 email: data.email,
                 subject: data.subject,
                 message: data.message,
-                receivedAt: new Date(data.receivedAt).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })
+                receivedAt: new Date(data.createdAt).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })
             };
         });
     }
