@@ -38,7 +38,7 @@ exports.handler = async (event) => {
     }
 
     const sessionsRef = db.collection('sessions');
-    const sessionsSnapshot = await sessionsRef.orderBy('createdAt', 'desc').get();
+    const sessionsSnapshot = await sessionsRef.orderBy('createdAt', 'desc').limit(200).get();
     
     const messagesRef = db.collection('contact_submissions');
 const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').get();
