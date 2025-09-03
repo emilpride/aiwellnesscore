@@ -6,9 +6,7 @@ if (!getApps().length) {
   try {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
     initializeApp({ credential: cert(serviceAccount) });
-  } catch (e) {
-    console.error("Firebase init error in getAdminData.js:", e);
-  }
+  } catch (e) { console.error("Firebase init error in getAdminData.js:", e); }
 }
 const db = getFirestore();
 
@@ -36,11 +34,9 @@ exports.handler = async (event) => {
       return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
     }
 
-    // 1. Fetch sessions
     const sessionsRef = db.collection('sessions');
     const sessionsSnapshot = await sessionsRef.orderBy('createdAt', 'desc').get();
-
-    // 2. Fetch contact messages
+    
     const messagesRef = db.collection('contactMessages');
     const messagesSnapshot = await messagesRef.orderBy('receivedAt', 'desc').get();
     
@@ -110,7 +106,7 @@ exports.handler = async (event) => {
 
       return {
         id: doc.id,
-        createdAt: new Date(data.createdAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }),
+        createdAt: data.createdAt, // Отправляем в ISO формате для фильтрации по дате
         deviceType: data.deviceType || 'N/A',
         trafficSource: source,
         ipAddress: data.ipAddress || 'N/A',
@@ -125,6 +121,7 @@ exports.handler = async (event) => {
         paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A',
         paymentMethod: data.paymentStatus === 'succeeded' ? 'Card/Wallet' : 'N/A',
         errors: data.errors || [],
+        answers: answers, // <-- ВАЖНОЕ ИЗМЕНЕНИЕ: Отправляем все ответы
         resultLink: `result.html?session_id=${data.sessionId}`
       };
     });
