@@ -371,6 +371,7 @@
     
         async function startAnalysisAndShowForm() {
             addUserMessage("Looks Good!");
+            await saveAnswerToServer('selfie', 'Photo taken');
             document.getElementById('photo-preview-wrapper')?.remove();
             optionsContainerWrapper.classList.add('hidden');
             inputArea.classList.add('hidden');
