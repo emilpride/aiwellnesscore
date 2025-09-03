@@ -138,59 +138,38 @@ exports.handler = async (event, context) => {
         })
     };
 }
-<script>
-    // --- НОВЫЙ БЛОК: ГЛОБАЛЬНЫЙ ПЕРЕХВАТ ОШИБОК ---
+// /netlify/functions/quiz.js
+// ... (после блока 'checkPaymentStatus')
 
-    // Функция для отправки ошибок на сервер
-    async function logErrorToServer(errorDetails) {
-        // Убедимся, что у нас есть sessionId, чтобы было куда логировать
-        if (!sessionId) {
-            console.error("Cannot log error: no sessionId.", errorDetails);
-            return;
-        }
-
-        try {
-            await fetch('/.netlify/functions/quiz', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'logError',
-                    sessionId: sessionId,
-                    error: {
-                        source: 'frontend',
-                        message: errorDetails.message,
-                        details: errorDetails.details || 'N/A'
-                    }
-                })
-            });
-        } catch (e) {
-            console.error("Failed to even send the error log:", e);
-        }
+// --- НОВЫЙ БЛОК ДЛЯ ЛОГИРОВАНИЯ ОШИБОК ---
+} else if (action === 'logError') {
+    const { sessionId, error } = data;
+    if (!sessionId || !error) {
+        return { statusCode: 400, body: 'Session ID and error object are required' };
     }
+    
+    // Используем FieldValue.arrayUnion для атомарного добавления ошибки в массив
+    const { FieldValue } = require('firebase-admin/firestore');
+    const sessionRef = db.collection('sessions').doc(sessionId);
 
-    // Перехватчик для стандартных ошибок JS
-    window.onerror = function(message, source, lineno, colno, error) {
-        logErrorToServer({
-            message: `Uncaught Error: ${message}`,
-            details: `at ${source}:${lineno}:${colno}`
-        });
-        return false; // Позволяем стандартному обработчику тоже сработать
+    const errorEntry = {
+        ...error,
+        timestamp: new Date().toISOString()
     };
 
-    // Перехватчик для ошибок в промисах (например, в fetch)
-    window.addEventListener('unhandledrejection', event => {
-        logErrorToServer({
-            message: 'Unhandled Promise Rejection',
-            details: event.reason?.message || 'No details available'
-        });
+    await sessionRef.update({
+        errors: FieldValue.arrayUnion(errorEntry)
     });
 
-    // --- КОНЕЦ НОВОГО БЛОКА ---
+    return {
+        statusCode: 200,
+        body: JSON.stringify({ message: 'Error logged' })
+    };
+// --- КОНЕЦ НОВОГО БЛОКА ---
 
-    // --- DOM Elements & State ---
-    const mainContainer = document.getElementById('main-container');
-    // ... остальной код
-</script>
+}
+
+return { statusCode: 400, body: 'Invalid action' };
 return { statusCode: 400, body: 'Invalid action' };
 
   } catch (error) {
