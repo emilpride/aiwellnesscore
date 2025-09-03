@@ -125,6 +125,7 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Progress</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Duration</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Drop-off Point</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Payment</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Errors</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Link</th>
@@ -323,6 +324,7 @@
                             <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.gender}</div><div class="text-gray-400">Age: ${session.age}</div></td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.progress}</td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.duration}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-yellow-400 font-mono">${session.dropOffPoint}</td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">${session.paymentStatus}</span><div class="text-gray-400">${session.paymentAmount}</div></td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm">
                                 ${session.errors && session.errors.length > 0 
@@ -402,15 +404,20 @@
                 });
 
                 const funnelSteps = [
-                    { name: 'Quiz Started', condition: session => true },
-                    { name: 'Answered Name', condition: session => session.answers.hasOwnProperty('name') },
-                    { name: 'Answered Age', condition: session => session.answers.hasOwnProperty('age') },
-                    { name: 'Answered Gender', condition: session => session.answers.hasOwnProperty('gender') },
-                    { name: 'Took Photo', condition: session => session.answers.hasOwnProperty('selfie') },
-                    { name: 'Answered Email', condition: session => session.answers.hasOwnProperty('email') },
-                    { name: 'Quiz Completed', condition: session => session.progressPercent === 100 },
-                    { name: 'Reached Payment', condition: session => session.paymentStatus !== 'pending' },
-                    { name: 'Purchased', condition: session => session.paymentStatus === 'succeeded' }
+                    const funnelSteps = [
+    { name: 'Quiz Started', condition: session => true },
+    { name: '1. Answered Name', condition: session => session.answers.hasOwnProperty('name') },
+    { name: '2. Answered Age', condition: session => session.answers.hasOwnProperty('age') },
+    { name: '3. Answered Gender', condition: session => session.answers.hasOwnProperty('gender') },
+    { name: '4. Answered Weight/Height', condition: session => session.answers.hasOwnProperty('weight') && session.answers.hasOwnProperty('height') },
+    { name: '5. Answered Lifestyle (_Sleep_)', condition: session => session.answers.hasOwnProperty('sleep') },
+    { name: '6. Answered Lifestyle (_Stress_)', condition: session => session.answers.hasOwnProperty('stress') },
+    { name: '7. Answered Lifestyle (Final)', condition: session => session.answers.hasOwnProperty('screen_time') },
+    { name: '8. Took Photo', condition: session => session.answers.hasOwnProperty('selfie') },
+    { name: '9. Answered Email', condition: session => session.answers.hasOwnProperty('email') },
+    { name: '10. Quiz Completed', condition: session => session.progressPercent === 100 },
+    { name: '11. Reached Payment', condition: session => session.paymentStatus !== 'pending' || (session.errors && session.errors.some(e => e.message.includes('Payment'))) },
+    { name: '12. Purchased', condition: session => session.paymentStatus === 'succeeded' }
                 ];
                 
                 let results = [];
