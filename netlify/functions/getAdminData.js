@@ -120,7 +120,7 @@ exports.handler = async (event) => {
         age: answers.age || 'N/A',
         progress: progress,
         progressPercent: progressPercent,
-        dropOffPoint: (data.dropOffPoint || 'N/A').replace('question_', ''),
+dropOffPoint: String(data.dropOffPoint || 'N/A').replace('question_', ''),
         duration: duration,
         paymentStatus: data.paymentStatus || 'pending',
         duration: duration,
