@@ -1,13 +1,14 @@
-// /netlify/functions/getAdminData.js
-
 'use strict';
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
+
 if (!getApps().length) {
   try {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
     initializeApp({ credential: cert(serviceAccount) });
-  } catch (e) { console.error("Firebase init error in getAdminData.js:", e); }
+  } catch (e) {
+    console.error("Firebase init error in getAdminData.js:", e);
+  }
 }
 const db = getFirestore();
 
@@ -35,36 +36,53 @@ exports.handler = async (event) => {
       return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
     }
 
-    // 1. Загружаем сессии (как и раньше)
+    // 1. Fetch sessions
     const sessionsRef = db.collection('sessions');
     const sessionsSnapshot = await sessionsRef.orderBy('createdAt', 'desc').get();
 
-    // --- НОВЫЙ БЛОК: Загружаем сообщения из контактной формы ---
-    const messagesRef = db.collection('contact_submissions');
-    const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').limit(50).get(); // Загружаем последние 50
-    const messagesData = messagesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    // --- КОНЕЦ НОВОГО БЛОКА ---
+    // 2. Fetch contact messages
+    const messagesRef = db.collection('contactMessages');
+    const messagesSnapshot = await messagesRef.orderBy('receivedAt', 'desc').get();
+    
+    let messagesData = [];
+    if (!messagesSnapshot.empty) {
+        messagesData = messagesSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                name: data.name,
+                email: data.email,
+                subject: data.subject,
+                message: data.message,
+                receivedAt: new Date(data.receivedAt).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })
+            };
+        });
+    }
 
     if (sessionsSnapshot.empty) {
-      // Возвращаем пустые сессии, но с загруженными сообщениями
-      return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: {}, messages: messagesData }) };
+      return { 
+        statusCode: 200, 
+        body: JSON.stringify({ 
+          sessions: [], 
+          statistics: {}, 
+          messages: messagesData 
+        }) 
+      };
     }
 
     let totalRevenue = 0;
     let successfulPayments = 0;
-    let totalCompletionPercentage = 0;
     let completedQuizzes = 0;
     const trafficSourceCounts = {};
     const countryCounts = {};
+
     const sessionsData = sessionsSnapshot.docs.map(doc => {
       const data = doc.data();
       const answers = data.answers || {};
-
       const answeredKeys = Object.keys(answers).filter(key => QUESTION_KEYS.includes(key));
       const answeredCount = answeredKeys.length;
       const progressPercent = Math.round((answeredCount / TOTAL_QUESTIONS) * 100);
       const progress = `${answeredCount} of ${TOTAL_QUESTIONS} (${progressPercent}%)`;
-      totalCompletionPercentage += progressPercent;
 
       let duration = 'N/A';
       if (data.createdAt && data.quizEndedAt) {
@@ -90,7 +108,6 @@ exports.handler = async (event) => {
       const country = countryCodeToName[data.countryCode] || data.countryCode || 'Unknown';
       countryCounts[country] = (countryCounts[country] || 0) + 1;
 
-      // ВОТ ЭТОТ БЛОК ТЕПЕРЬ С ПОЛНЫМ ФОРМАТИРОВАНИЕМ
       return {
         id: doc.id,
         createdAt: new Date(data.createdAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }),
@@ -107,11 +124,11 @@ exports.handler = async (event) => {
         paymentStatus: data.paymentStatus || 'pending',
         paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A',
         paymentMethod: data.paymentStatus === 'succeeded' ? 'Card/Wallet' : 'N/A',
+        errors: data.errors || [],
         resultLink: `result.html?session_id=${data.sessionId}`
       };
     });
 
-    // И ЭТОТ БЛОК ТОЖЕ С ПОЛНЫМ ФОРМАТИРОВАНИЕМ
     const statistics = {
         totalSessions: sessionsSnapshot.size,
         totalRevenue: totalRevenue.toFixed(2),
@@ -125,8 +142,11 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      // Добавляем сообщения в финальный ответ
-      body: JSON.stringify({ sessions: sessionsData, statistics, messages: messagesData }),
+      body: JSON.stringify({ 
+        sessions: sessionsData, 
+        statistics, 
+        messages: messagesData 
+      }),
     };
   } catch (error) {
     console.error('Error in getAdminData function:', error);
