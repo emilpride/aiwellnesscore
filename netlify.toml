@@ -1,6 +1,6 @@
 # /netlify.toml
 
-# Этот файл указывает Netlify, где находятся ваши серверные функции.
+# Этот раздел указывает Netlify, где находятся ваши серверные функции.
 [functions]
   directory = "netlify/functions/"
 
@@ -12,9 +12,14 @@
 
 # Увеличиваем время ожидания для нашей ФОНОВОЙ функции
 [functions."result-background"]
-  timeout = 90 # Теперь это правило применяется к правильной функции
-  [functions."stripe-webhook"]
+  timeout = 90
+  
+[functions."stripe-webhook"]
   external_node_modules = ["stripe"]
+
+# НОВОЕ ПРАВИЛО: Увеличиваем время ожидания для функции админ-панели
+[functions."getAdminData"]
+  timeout = 25 # Увеличиваем лимит до 25 секунд
 
 [[headers]]
   for = "/.netlify/functions/stripe-webhook"
