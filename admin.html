@@ -12,9 +12,10 @@
             --text-main: #F9FAFB; --text-secondary: #9CA3AF; --accent-purple: #8b5cf6;
         }
         body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif; }
-        .table-custom th, .message-card { background-color: var(--bg-light); }
+        .table-custom th { background-color: var(--bg-light); }
         .table-custom tr:hover { background-color: #374151; }
-        .form-input, .stat-card { background-color: var(--bg-light); border: 1px solid var(--border-color); }
+        .form-input { background-color: var(--bg-light); border: 1px solid var(--border-color); }
+        .stat-card { background-color: var(--bg-light); border: 1px solid var(--border-color); }
         .tab-button { transition: all 0.2s; }
         .tab-button.active { color: var(--accent-purple); border-color: var(--accent-purple); }
         .tab-content { display: none; }
@@ -39,11 +40,13 @@
     </div>
 
     <main id="admin-panel" class="hidden p-4 sm:p-6 lg:p-8">
-       <div class="max-w-7xl mx-auto">
+        <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-center">
                 <h1 class="text-3xl font-bold text-white">AI WellnessCore Dashboard</h1>
-                <button id="refresh-data-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
-                    <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 20v-5h-5M20 4h-5v5M4 20h5v-5M2 12a10 10 0 1120 0 10 10 0 01-20 0z" /></svg>
+                <button id="refresh-data-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50">
+                    <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 20v-5h-5M20 4h-5v5M4 20h5v-5M2 12a10 10 0 1120 0 10 10 0 01-20 0z" />
+                    </svg>
                     Refresh
                 </button>
             </div>
@@ -58,14 +61,14 @@
 
             <div id="content-stats" class="tab-content active mt-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                     <div class="md:col-span-1 space-y-6">
+                    <div class="md:col-span-1 space-y-6">
                         <div class="stat-card p-6 rounded-lg">
                             <p class="text-sm font-medium text-gray-400">Total Revenue</p>
-                           <p id="stat-total-revenue" class="text-3xl font-bold mt-1">$0.00</p>
+                            <p id="stat-total-revenue" class="text-3xl font-bold mt-1">$0.00</p>
                         </div>
                         <div class="stat-card p-6 rounded-lg">
                             <p class="text-sm font-medium text-gray-400">Average Check</p>
-                           <p id="stat-avg-check" class="text-3xl font-bold mt-1">$0.00</p>
+                            <p id="stat-avg-check" class="text-3xl font-bold mt-1">$0.00</p>
                         </div>
                         <div class="stat-card p-6 rounded-lg">
                             <p class="text-sm font-medium text-gray-400">Conversion Rate</p>
@@ -76,16 +79,16 @@
                         <div class="stat-card p-6 rounded-lg">
                             <p class="text-lg font-bold text-white mb-4">Conversion Funnel</p>
                             <div class="space-y-4">
-                               <div id="funnel-start"></div>
-                               <div id="funnel-finish"></div>
-                               <div id="funnel-paid"></div>
-                           </div>
+                                <div id="funnel-start"></div>
+                                <div id="funnel-finish"></div>
+                                <div id="funnel-paid"></div>
+                            </div>
                         </div>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div class="stat-card p-6 rounded-lg">
                                 <p class="text-lg font-bold text-white mb-4">Top Traffic Sources</p>
                                 <ul id="stat-top-sources" class="space-y-2"></ul>
-                             </div>
+                            </div>
                             <div class="stat-card p-6 rounded-lg">
                                 <p class="text-lg font-bold text-white mb-4">Top Countries</p>
                                 <ul id="stat-top-countries" class="space-y-2"></ul>
@@ -93,21 +96,22 @@
                         </div>
                     </div>
                 </div>
-           </div>
+            </div>
 
             <div id="content-sessions" class="tab-content mt-6">
                 <div class="flex flex-col sm:flex-row gap-4 items-center">
-                    <input type="text" id="search-input" placeholder="Search by IP, Country or Email..." class="w-full sm:w-1/3 form-input rounded-md p-2 text-white">
+                    <input type="text" id="search-input" placeholder="Search by IP or Country..." class="w-full sm:w-1/3 form-input rounded-md p-2 text-white">
                     <select id="status-filter" class="w-full sm:w-auto form-input rounded-md p-2 text-white">
-                       <option value="">All Payment Statuses</option>
+                        <option value="">All Payment Statuses</option>
                         <option value="succeeded">Succeeded</option>
                         <option value="pending">Pending</option>
+                        <option value="failed">Failed</option>
                     </select>
-                 </div>
+                </div>
                 <div class="mt-4 overflow-x-auto rounded-lg border border-gray-700">
                     <table class="min-w-full divide-y divide-gray-700 table-custom">
                         <thead class="bg-gray-800">
-                           <tr>
+                            <tr>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Device/Source</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">IP/Country</th>
@@ -116,215 +120,240 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Progress</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Duration</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Payment</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Errors</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Link</th>
                             </tr>
                         </thead>
-                       <tbody id="sessions-table-body" class="bg-gray-900 divide-y divide-gray-700"></tbody>
+                        <tbody id="sessions-table-body" class="bg-gray-900 divide-y divide-gray-700"></tbody>
                     </table>
                 </div>
             </div>
             
             <div id="content-messages" class="tab-content mt-6">
-                <div id="messages-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    </div>
+                <div id="messages-container" class="space-y-4">
+                    <!-- Сообщения будут рендериться сюда -->
+                </div>
             </div>
         </div>
     </main>
 
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // DOM Elements
-        const loginForm = document.getElementById('login-form');
-        const passwordInput = document.getElementById('password-input');
-        const loginError = document.getElementById('login-error');
-        const loginModal = document.getElementById('login-modal');
-        const adminPanel = document.getElementById('admin-panel');
-        const refreshBtn = document.getElementById('refresh-data-btn');
-        const refreshIcon = document.getElementById('refresh-icon');
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            const passwordInput = document.getElementById('password-input');
+            const loginError = document.getElementById('login-error');
+            const loginModal = document.getElementById('login-modal');
+            const adminPanel = document.getElementById('admin-panel');
+            const refreshBtn = document.getElementById('refresh-data-btn');
+            const refreshIcon = document.getElementById('refresh-icon');
 
-        // State variables
-        let allSessionsData = [];
-        let statisticsData = {};
-        let allMessagesData = []; // Для сообщений
-        let adminPassword = null;
+            let allSessionsData = [];
+            let statisticsData = {};
+            let allMessagesData = [];
+            let adminPassword = null;
 
-        async function fetchAndRenderData(password) {
-            if (!password) {
-                loginError.textContent = 'Password is required to refresh.';
-                return;
-            }
-            loginError.textContent = '';
-            refreshBtn.disabled = true;
-            refreshIcon.classList.add('animate-spin');
-            try {
-                const response = await fetch('/.netlify/functions/getAdminData', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: password })
-                });
-                if (response.status === 401) throw new Error('Incorrect password.');
-                if (!response.ok) throw new Error('Could not fetch data from server.');
-                
-                const { sessions, statistics, messages } = await response.json();
-                
-                allSessionsData = sessions;
-                statisticsData = statistics;
-                allMessagesData = messages;
-                
-                if (!adminPassword) {
-                    adminPassword = password;
-                    loginModal.classList.add('hidden');
-                    adminPanel.classList.remove('hidden');
-                    setupFiltersAndTabs();
+            async function fetchAndRenderData(password) {
+                if (!password) {
+                    loginError.textContent = 'Password is required to refresh.';
+                    return;
                 }
-                renderAll();
-            } catch (error) {
-                console.error("Refresh Error:", error.message);
-                alert("Error refreshing data: " + error.message);
-            } finally {
-                refreshBtn.disabled = false;
-                refreshIcon.classList.remove('animate-spin');
+                loginError.textContent = '';
+                refreshBtn.disabled = true;
+                refreshIcon.classList.add('animate-spin');
+
+                try {
+                    const response = await fetch('/.netlify/functions/getAdminData', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password: password })
+                    });
+                    if (response.status === 401) throw new Error('Incorrect password.');
+                    if (!response.ok) throw new Error('Could not fetch data from server.');
+                    
+                    const { sessions, statistics, messages } = await response.json();
+                    
+                    allSessionsData = sessions;
+                    statisticsData = statistics;
+                    allMessagesData = messages;
+                    
+                    if (!adminPassword) {
+                        adminPassword = password;
+                        loginModal.classList.add('hidden');
+                        adminPanel.classList.remove('hidden');
+                        setupUI();
+                    }
+                    renderAll();
+                } catch (error) {
+                    console.error("Fetch Error:", error.message);
+                    alert("Error fetching data: " + error.message);
+                } finally {
+                    refreshBtn.disabled = false;
+                    refreshIcon.classList.remove('animate-spin');
+                }
             }
-        }
 
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await fetchAndRenderData(passwordInput.value);
-        });
-        
-        refreshBtn.addEventListener('click', () => {
-            fetchAndRenderData(adminPassword);
-        });
-
-        function setupFiltersAndTabs() {
-            const searchInput = document.getElementById('search-input');
-            const statusFilter = document.getElementById('status-filter');
-            const tabs = document.querySelectorAll('.tab-button');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    tabs.forEach(t => t.classList.remove('active', 'text-purple-400', 'border-purple-400'));
-                    tab.classList.add('active', 'text-purple-400', 'border-purple-400');
-                    tabContents.forEach(content => content.classList.remove('active'));
-                    document.getElementById(tab.id.replace('tab-', 'content-')).classList.add('active');
-                });
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await fetchAndRenderData(passwordInput.value);
+            });
+            
+            refreshBtn.addEventListener('click', () => {
+                fetchAndRenderData(adminPassword);
             });
 
-            const applyFilters = () => {
-                const searchTerm = searchInput.value.toLowerCase();
-                const statusValue = statusFilter.value;
-                let filteredData = allSessionsData.filter(session => {
-                    const searchMatch = session.ipAddress.toLowerCase().includes(searchTerm) ||
-                                      session.country.toLowerCase().includes(searchTerm) ||
-                                      session.email.toLowerCase().includes(searchTerm);
+            function setupUI() {
+                const searchInput = document.getElementById('search-input');
+                const statusFilter = document.getElementById('status-filter');
+                const tabs = document.querySelectorAll('.tab-button');
+                const tabContents = document.querySelectorAll('.tab-content');
+                const tableBody = document.getElementById('sessions-table-body');
+
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        tabs.forEach(t => t.classList.remove('active', 'text-purple-400', 'border-purple-400'));
+                        tab.classList.add('active', 'text-purple-400', 'border-purple-400');
+                        tabContents.forEach(content => content.classList.remove('active'));
+                        document.getElementById(tab.id.replace('tab-', 'content-')).classList.add('active');
+                    });
+                });
+                
+                const applyFilters = () => renderTable(allSessionsData);
+                searchInput.addEventListener('input', applyFilters);
+                statusFilter.addEventListener('change', applyFilters);
+
+                tableBody.addEventListener('click', (event) => {
+                    if (event.target.classList.contains('toggle-errors-btn')) {
+                        const button = event.target;
+                        const sessionId = button.dataset.sessionId;
+                        const errorRow = document.getElementById(`errors-${sessionId}`);
+                        if (errorRow) {
+                            const isHidden = errorRow.classList.toggle('hidden');
+                            button.textContent = isHidden ? `Show (${button.dataset.errorCount})` : 'Hide';
+                        }
+                    }
+                });
+            }
+
+            function renderAll() {
+                renderStats(statisticsData);
+                renderTable(allSessionsData);
+                renderMessages(allMessagesData);
+            }
+
+            function renderStats(stats) {
+                document.getElementById('stat-total-revenue').textContent = `$${stats.totalRevenue}`;
+                document.getElementById('stat-avg-check').textContent = `$${stats.avgCheck}`;
+                document.getElementById('stat-conversion').textContent = `${stats.conversionRate}%`;
+                const funnelStart = stats.totalSessions || 0;
+                const funnelFinish = Math.round(stats.totalSessions * (stats.quizCompletionRate / 100));
+                const funnelPaid = stats.successfulPayments || 0;
+                document.getElementById('funnel-start').innerHTML = createFunnelStep('Sessions Started', funnelStart, funnelStart, '#6366f1');
+                document.getElementById('funnel-finish').innerHTML = createFunnelStep('Quiz Finished', funnelFinish, funnelStart, '#7c3aed');
+                document.getElementById('funnel-paid').innerHTML = createFunnelStep('Payment Completed', funnelPaid, funnelStart, '#a855f7');
+                renderTopList('stat-top-sources', stats.topTrafficSources);
+                renderTopList('stat-top-countries', stats.topCountries);
+            }
+            
+            function createFunnelStep(label, value, total, color) {
+                const percent = total > 0 ? (value / total * 100).toFixed(1) : 0;
+                return `<div class="flex items-center justify-between text-sm"><p class="text-gray-300">${label}</p><p class="font-bold text-white">${value}</p></div><div class="w-full bg-gray-700 rounded-full h-2.5 mt-1"><div class="bar-chart-bar h-2.5 rounded-full" style="width: ${percent}%; background-color:${color};"></div></div>`;
+            }
+
+            function renderTopList(elementId, data) {
+                const ul = document.getElementById(elementId);
+                ul.innerHTML = '';
+                if (!data || data.length === 0) {
+                    ul.innerHTML = `<li class="text-sm text-gray-500">No data available</li>`;
+                    return;
+                }
+                data.forEach(([name, count]) => {
+                    const li = document.createElement('li');
+                    li.className = 'flex justify-between items-center text-sm';
+                    li.innerHTML = `<span class="text-gray-300">${name}</span><span class="font-semibold text-white">${count}</span>`;
+                    ul.appendChild(li);
+                });
+            }
+
+            function renderTable(data) {
+                const tableBody = document.getElementById('sessions-table-body');
+                const searchTerm = document.getElementById('search-input').value.toLowerCase();
+                const statusValue = document.getElementById('status-filter').value;
+
+                let filteredData = data.filter(session => {
+                    const searchMatch = session.ipAddress.toLowerCase().includes(searchTerm) || session.country.toLowerCase().includes(searchTerm);
                     const statusMatch = statusValue ? session.paymentStatus === statusValue : true;
                     return searchMatch && statusMatch;
                 });
-                renderTable(filteredData);
-            };
-            searchInput.addEventListener('input', applyFilters);
-            statusFilter.addEventListener('change', applyFilters);
-        }
 
-        function renderAll() {
-            renderStats(statisticsData);
-            renderTable(allSessionsData);
-            renderMessages(allMessagesData);
-        }
-
-        function renderStats(stats) {
-            document.getElementById('stat-total-revenue').textContent = `$${stats.totalRevenue}`;
-            document.getElementById('stat-avg-check').textContent = `$${stats.avgCheck}`;
-            document.getElementById('stat-conversion').textContent = `${stats.conversionRate}%`;
-            const funnelStart = stats.totalSessions || 0;
-            const funnelFinish = Math.round(stats.totalSessions * (stats.quizCompletionRate / 100));
-            const funnelPaid = stats.successfulPayments || 0;
-            document.getElementById('funnel-start').innerHTML = createFunnelStep('Sessions Started', funnelStart, funnelStart, '#6366f1');
-            document.getElementById('funnel-finish').innerHTML = createFunnelStep('Quiz Finished', funnelFinish, funnelStart, '#7c3aed');
-            document.getElementById('funnel-paid').innerHTML = createFunnelStep('Payment Completed', funnelPaid, funnelStart, '#a855f7');
-            renderTopList('stat-top-sources', stats.topTrafficSources);
-            renderTopList('stat-top-countries', stats.topCountries);
-        }
-        
-        function createFunnelStep(label, value, total, color) {
-            const percent = total > 0 ? (value / total * 100).toFixed(1) : 0;
-            return `<div class="flex items-center justify-between text-sm"><p class="text-gray-300">${label}</p><p class="font-bold text-white">${value}</p></div><div class="w-full bg-gray-700 rounded-full h-2.5 mt-1"><div class="bar-chart-bar h-2.5 rounded-full" style="width: ${percent}%; background-color:${color};"></div></div>`;
-        }
-
-        function renderTopList(elementId, data) {
-            const ul = document.getElementById(elementId);
-            ul.innerHTML = '';
-            if (!data || data.length === 0) {
-                ul.innerHTML = `<li class="text-sm text-gray-500">No data available</li>`;
-                return;
+                if (filteredData.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="10" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`;
+                    return;
+                }
+                
+                let tableHTML = '';
+                filteredData.forEach(session => {
+                    const paymentStatusClass = session.paymentStatus === 'succeeded' ? 'bg-green-500 text-green-100' : 'bg-yellow-500 text-yellow-100';
+                    tableHTML += `
+                        <tr class="main-row">
+                            <td class="px-4 py-3 whitespace-nowrap text-sm">${session.createdAt}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.deviceType}</div><div class="text-gray-400">${session.trafficSource}</div></td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.ipAddress}</div><div class="text-gray-400">${session.country}</div></td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-purple-400">${session.email}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.gender}</div><div class="text-gray-400">Age: ${session.age}</div></td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.progress}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.duration}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">${session.paymentStatus}</span><div class="text-gray-400">${session.paymentAmount}</div></td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                ${session.errors && session.errors.length > 0 
+                                    ? `<button data-session-id="${session.id}" data-error-count="${session.errors.length}" class="toggle-errors-btn bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600">Show (${session.errors.length})</button>`
+                                    : '<span class="text-gray-600">—</span>'
+                                }
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-center">${session.progressPercent === 100 ? `<a href="/${session.resultLink}" target="_blank" class="text-purple-400 hover:text-purple-300">View</a>` : '<span class="text-gray-500 text-lg">❌</span>'}</td>
+                        </tr>
+                    `;
+                    if (session.errors && session.errors.length > 0) {
+                        let errorsHTML = session.errors.map(err => `
+                            <div class="border-b border-gray-700 py-1 last:border-b-0">
+                                <p class="text-red-400 font-semibold">${err.message}</p>
+                                <p class="text-gray-400 text-xs font-mono">${err.details}</p>
+                                <p class="text-gray-500 text-xs">${new Date(err.timestamp).toLocaleString()}</p>
+                            </div>
+                        `).join('');
+                        tableHTML += `
+                            <tr id="errors-${session.id}" class="hidden">
+                                <td colspan="10" class="p-2 bg-gray-800">${errorsHTML}</td>
+                            </tr>
+                        `;
+                    }
+                });
+                tableBody.innerHTML = tableHTML;
             }
-            data.forEach(([name, count]) => {
-                const li = document.createElement('li');
-                li.className = 'flex justify-between items-center text-sm';
-                li.innerHTML = `<span class="text-gray-300">${name}</span><span class="font-semibold text-white">${count}</span>`;
-                ul.appendChild(li);
-            });
-        }
 
-        function renderTable(data) {
-            const tableBody = document.getElementById('sessions-table-body');
-            tableBody.innerHTML = '';
-            if (data.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="9" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`;
-                return;
-            }
-            data.forEach(session => {
-                const row = document.createElement('tr');
-                const paymentStatusClass = session.paymentStatus === 'succeeded' ? 'bg-green-500 text-green-100' : 'bg-yellow-500 text-yellow-100';
-                row.innerHTML = `
-                    <td class="px-4 py-3 whitespace-nowrap text-sm">${session.createdAt}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.deviceType}</div><div class="text-gray-400">${session.trafficSource}</div></td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.ipAddress}</div><div class="text-gray-400">${session.country}</div></td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-purple-400">${session.email}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.gender}</div><div class="text-gray-400">Age: ${session.age}</div></td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.progress}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.duration}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">${session.paymentStatus}</span><div class="text-gray-400">${session.paymentAmount}</div></td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-center">
-                        ${session.progressPercent === 100
-                            ? `<a href="/${session.resultLink}" target="_blank" class="text-purple-400 hover:text-purple-300">View</a>`
-                            : '<span class="text-gray-500 text-lg">❌</span>'
-                        }
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        function renderMessages(data) {
-            const container = document.getElementById('messages-container');
-            container.innerHTML = '';
-            if (!data || data.length === 0) {
-                container.innerHTML = `<p class="text-gray-400 col-span-full text-center py-10">No messages received yet.</p>`;
-                return;
-            }
-            data.forEach(msg => {
-                const card = document.createElement('div');
-                card.className = 'message-card p-6 rounded-lg border border-gray-700 flex flex-col gap-4';
-                const date = new Date(msg.createdAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-center">
-                            <h4 class="font-bold text-white truncate">${msg.name}</h4>
-                            <span class="text-xs text-gray-400 flex-shrink-0 ml-2">${date}</span>
+            function renderMessages(data) {
+                const container = document.getElementById('messages-container');
+                container.innerHTML = '';
+                if (!data || data.length === 0) {
+                    container.innerHTML = `<div class="text-center p-6 bg-gray-800 rounded-lg text-gray-400">No new messages.</div>`;
+                    return;
+                }
+                data.forEach(msg => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-gray-800 border border-gray-700 rounded-lg p-4';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center border-b border-gray-600 pb-2 mb-2">
+                            <div>
+                                <p class="font-semibold text-white">${msg.subject}</p>
+                                <p class="text-sm text-gray-400">From: <a href="mailto:${msg.email}" class="text-purple-400 hover:underline">${msg.name}</a></p>
+                            </div>
+                            <span class="text-xs text-gray-500">${msg.receivedAt}</span>
                         </div>
-                        <a href="mailto:${msg.email}" class="text-sm text-purple-400 hover:underline truncate block">${msg.email}</a>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-400 font-semibold">Subject: ${msg.subject}</p>
-                        <p class="mt-2 text-gray-200 text-base whitespace-pre-wrap">${msg.message}</p>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-    });
+                        <p class="text-gray-300 whitespace-pre-wrap">${msg.message}</p>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        });
     </script>
 </body>
 </html>
