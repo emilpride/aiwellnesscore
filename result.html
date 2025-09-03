@@ -90,6 +90,21 @@
             .grid > div, .space-y-3 > li {
                 page-break-inside: avoid;
             }
+
+            /* Fix for wellness age gradient background */
+            #wellness-age {
+                background-image: none !important;
+                -webkit-background-clip: unset !important;
+                background-clip: unset !important;
+                color: #8B5CF6 !important; /* Примерный цвет из градиента */
+            }
+
+            /* Ensure background colors are preserved for sections if needed, by default they will be white from body */
+            .bg-gradient-to-br {
+                background: none !important; /* Убираем градиент для печати */
+                background-color: #ffffff !important; /* Фоновый цвет при печати */
+                color: #4a007b !important; /* Цвет текста для читабельности */
+            }
         }
     </style>
     <script>
@@ -238,8 +253,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                     </div>
                 </section>
 
-                <section class="mt-16 text-center reveal no-print">
-                    <button class="download-pdf-btn bg-purple-600 text-white font-semibold px-8 py-4 rounded-full text-lg hover:bg-purple-700 transition-colors transform hover:scale-105">
+                <section class="mt-16 text-center reveal no-print"> <button class="download-pdf-btn bg-purple-600 text-white font-semibold px-8 py-4 rounded-full text-lg hover:bg-purple-700 transition-colors transform hover:scale-105">
                         Download Your Report as PDF
                     </button>
                 </section>
