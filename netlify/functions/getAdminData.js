@@ -10,11 +10,14 @@ if (!getApps().length) {
 }
 const db = getFirestore();
 
-const QUESTION_KEYS = [
-    'email', 'age', 'gender', 'height', 'weight', 'sleep', 'activity', 'nutrition', 
-    'processed_food', 'hydration', 'stress', 'mindfulness', 'mood', 
-    'alcohol', 'smoking', 'screen_time'
+const ALL_QUESTION_KEYS = [
+    'name', 'start_consent', 'age', 'gender', 'height', 'weight', 
+    'sleep', 'activity', 'nutrition', 'processed_food', 'hydration', 'stress', 
+    'mindfulness', 'mood', 'alcohol', 'smoking', 'screen_time',
+    'selfie', // Шаг с фотографией (в ответах сохраняется как 'selfie')
+    'email'   // Шаг с вводом email
 ];
+const TOTAL_QUESTIONS = ALL_QUESTION_KEYS.length;
 const TOTAL_QUESTIONS = QUESTION_KEYS.length;
 
 const countryCodeToName = {
@@ -75,7 +78,8 @@ exports.handler = async (event) => {
     const sessionsData = sessionsSnapshot.docs.map(doc => {
       const data = doc.data();
       const answers = data.answers || {};
-      const answeredKeys = Object.keys(answers).filter(key => QUESTION_KEYS.includes(key));
+      // Теперь мы проверяем ответы по полному списку ВСЕХ вопросов
+      const answeredKeys = Object.keys(answers).filter(key => ALL_QUESTION_KEYS.includes(key));
       const answeredCount = answeredKeys.length;
       const progressPercent = Math.round((answeredCount / TOTAL_QUESTIONS) * 100);
       const progress = `${answeredCount} of ${TOTAL_QUESTIONS} (${progressPercent}%)`;
@@ -116,6 +120,9 @@ exports.handler = async (event) => {
         age: answers.age || 'N/A',
         progress: progress,
         progressPercent: progressPercent,
+        dropOffPoint: (data.dropOffPoint || 'N/A').replace('question_', ''),
+        duration: duration,
+        paymentStatus: data.paymentStatus || 'pending',
         duration: duration,
         paymentStatus: data.paymentStatus || 'pending',
         paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A',
