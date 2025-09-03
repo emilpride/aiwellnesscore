@@ -138,7 +138,59 @@ exports.handler = async (event, context) => {
         })
     };
 }
+<script>
+    // --- НОВЫЙ БЛОК: ГЛОБАЛЬНЫЙ ПЕРЕХВАТ ОШИБОК ---
 
+    // Функция для отправки ошибок на сервер
+    async function logErrorToServer(errorDetails) {
+        // Убедимся, что у нас есть sessionId, чтобы было куда логировать
+        if (!sessionId) {
+            console.error("Cannot log error: no sessionId.", errorDetails);
+            return;
+        }
+
+        try {
+            await fetch('/.netlify/functions/quiz', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'logError',
+                    sessionId: sessionId,
+                    error: {
+                        source: 'frontend',
+                        message: errorDetails.message,
+                        details: errorDetails.details || 'N/A'
+                    }
+                })
+            });
+        } catch (e) {
+            console.error("Failed to even send the error log:", e);
+        }
+    }
+
+    // Перехватчик для стандартных ошибок JS
+    window.onerror = function(message, source, lineno, colno, error) {
+        logErrorToServer({
+            message: `Uncaught Error: ${message}`,
+            details: `at ${source}:${lineno}:${colno}`
+        });
+        return false; // Позволяем стандартному обработчику тоже сработать
+    };
+
+    // Перехватчик для ошибок в промисах (например, в fetch)
+    window.addEventListener('unhandledrejection', event => {
+        logErrorToServer({
+            message: 'Unhandled Promise Rejection',
+            details: event.reason?.message || 'No details available'
+        });
+    });
+
+    // --- КОНЕЦ НОВОГО БЛОКА ---
+
+    // --- DOM Elements & State ---
+    const mainContainer = document.getElementById('main-container');
+    // ... остальной код
+</script>
 return { statusCode: 400, body: 'Invalid action' };
 
   } catch (error) {
