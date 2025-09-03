@@ -145,8 +145,10 @@
                     <h2 class="text-xl font-bold text-white">Funnel Analysis</h2>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
                         <div class="md:col-span-2">
-                            <label for="funnel-sources" class="block text-sm font-medium text-gray-400">Traffic Sources (hold Ctrl/Cmd to select multiple)</label>
-                            <select id="funnel-sources" multiple class="form-input w-full mt-1 h-32"></select>
+                            <label class="block text-sm font-medium text-gray-400">Traffic Sources</label>
+                            <div id="funnel-sources-checkboxes" class="form-input w-full mt-1 h-32 overflow-y-auto p-2 space-y-1">
+                                <!-- Checkboxes will be populated by JavaScript -->
+                            </div>
                         </div>
                         <div>
                             <label for="funnel-start-date" class="block text-sm font-medium text-gray-400">Start Date</label>
@@ -267,7 +269,7 @@
                 document.getElementById('stat-avg-check').textContent = `$${stats.avgCheck}`;
                 document.getElementById('stat-conversion').textContent = `${stats.conversionRate}%`;
                 const funnelStart = stats.totalSessions || 0;
-                const funnelFinish = Math.round(stats.totalSessions * (stats.quizCompletionRate / 100));
+                const funnelFinish = Math.round((stats.totalSessions || 0) * (parseFloat(stats.quizCompletionRate) / 100));
                 const funnelPaid = stats.successfulPayments || 0;
                 document.getElementById('funnel-start').innerHTML = createFunnelStep('Sessions Started', funnelStart, funnelStart, '#6366f1');
                 document.getElementById('funnel-finish').innerHTML = createFunnelStep('Quiz Finished', funnelFinish, funnelStart, '#7c3aed');
@@ -308,13 +310,13 @@
                 });
 
                 if (filteredData.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="10" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="11" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`;
                     return;
                 }
                 
                 let tableHTML = '';
                 filteredData.forEach(session => {
-                    const paymentStatusClass = session.paymentStatus === 'succeeded' ? 'bg-green-500 text-green-100' : 'bg-yellow-500 text-yellow-100';
+                    const paymentStatusClass = session.paymentStatus === 'succeeded' ? 'bg-green-500 text-green-100' : (session.paymentStatus === 'pending' ? 'bg-yellow-500 text-yellow-100' : 'bg-red-500 text-red-100');
                     tableHTML += `
                         <tr class="main-row">
                             <td class="px-4 py-3 whitespace-nowrap text-sm">${new Date(session.createdAt).toLocaleString()}</td>
@@ -332,7 +334,7 @@
                                     : '<span class="text-gray-600">—</span>'
                                 }
                             </td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-center">${session.progressPercent === 100 ? `<a href="/${session.resultLink}" target="_blank" class="text-purple-400 hover:text-purple-300">View</a>` : '<span class="text-gray-500 text-lg">❌</span>'}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-center">${session.resultLink && session.paymentStatus === 'succeeded' ? `<a href="/${session.resultLink}" target="_blank" class="text-purple-400 hover:text-purple-300">View</a>` : '<span class="text-gray-500 text-lg">❌</span>'}</td>
                         </tr>
                     `;
                     if (session.errors && session.errors.length > 0) {
@@ -345,7 +347,7 @@
                         `).join('');
                         tableHTML += `
                             <tr id="errors-${session.id}" class="hidden">
-                                <td colspan="10" class="p-3 bg-gray-800">${errorsHTML}</td>
+                                <td colspan="11" class="p-3 bg-gray-800">${errorsHTML}</td>
                             </tr>
                         `;
                     }
@@ -379,19 +381,22 @@
 
             function populateFunnelFilters() {
                 const sources = [...new Set(allSessionsData.map(s => s.trafficSource))].sort();
-                const select = document.getElementById('funnel-sources');
-                select.innerHTML = '';
+                const container = document.getElementById('funnel-sources-checkboxes');
+                container.innerHTML = '';
                 sources.forEach(source => {
-                    const option = document.createElement('option');
-                    option.value = source;
-                    option.textContent = source;
-                    select.appendChild(option);
+                    const label = document.createElement('label');
+                    label.className = 'flex items-center space-x-2 text-sm text-gray-300 hover:bg-gray-700 p-1 rounded cursor-pointer';
+                    label.innerHTML = `
+                        <input type="checkbox" value="${source}" class="funnel-source-checkbox h-4 w-4 rounded bg-gray-600 border-gray-500 text-purple-600 focus:ring-purple-500">
+                        <span>${source}</span>
+                    `;
+                    container.appendChild(label);
                 });
             }
 
             function calculateAndRenderFunnel() {
-                const sourceSelect = document.getElementById('funnel-sources');
-                const selectedSources = [...sourceSelect.selectedOptions].map(opt => opt.value);
+                const checkedCheckboxes = document.querySelectorAll('.funnel-source-checkbox:checked');
+                const selectedSources = [...checkedCheckboxes].map(cb => cb.value);
                 const startDate = document.getElementById('funnel-start-date').value;
                 const endDate = document.getElementById('funnel-end-date').value;
 
@@ -403,20 +408,19 @@
                     return sourceMatch && startDateMatch && endDateMatch;
                 });
 
-                    const funnelSteps = [
-    { name: 'Quiz Started', condition: session => true },
-    { name: '1. Answered Name', condition: session => session.answers.hasOwnProperty('name') },
-    { name: '2. Answered Age', condition: session => session.answers.hasOwnProperty('age') },
-    { name: '3. Answered Gender', condition: session => session.answers.hasOwnProperty('gender') },
-    { name: '4. Answered Weight/Height', condition: session => session.answers.hasOwnProperty('weight') && session.answers.hasOwnProperty('height') },
-    { name: '5. Answered Lifestyle (_Sleep_)', condition: session => session.answers.hasOwnProperty('sleep') },
-    { name: '6. Answered Lifestyle (_Stress_)', condition: session => session.answers.hasOwnProperty('stress') },
-    { name: '7. Answered Lifestyle (Final)', condition: session => session.answers.hasOwnProperty('screen_time') },
-    { name: '8. Took Photo', condition: session => session.answers.hasOwnProperty('selfie') },
-    { name: '9. Answered Email', condition: session => session.answers.hasOwnProperty('email') },
-    { name: '10. Quiz Completed', condition: session => session.progressPercent === 100 },
-    { name: '11. Reached Payment', condition: session => session.paymentStatus !== 'pending' || (session.errors && session.errors.some(e => e.message.includes('Payment'))) },
-    { name: '12. Purchased', condition: session => session.paymentStatus === 'succeeded' }
+                const funnelSteps = [
+                    { name: 'Quiz Started', condition: session => true },
+                    { name: '1. Answered Name', condition: session => session.answers.hasOwnProperty('name') },
+                    { name: '2. Answered Age & Gender', condition: session => session.answers.hasOwnProperty('age') && session.answers.hasOwnProperty('gender') },
+                    { name: '3. Answered Body Stats', condition: session => session.answers.hasOwnProperty('weight') && session.answers.hasOwnProperty('height') },
+                    { name: '4. Answered Lifestyle (Start)', condition: session => session.answers.hasOwnProperty('sleep') },
+                    { name: '5. Answered Lifestyle (Middle)', condition: session => session.answers.hasOwnProperty('stress') },
+                    { name: '6. Answered Lifestyle (End)', condition: session => session.answers.hasOwnProperty('screen_time') },
+                    { name: '7. Took Photo', condition: session => session.answers.hasOwnProperty('selfie') },
+                    { name: '8. Answered Email', condition: session => session.answers.hasOwnProperty('email') },
+                    { name: '9. Quiz Completed (All questions)', condition: session => session.progressPercent === 100 },
+                    { name: '10. Reached Payment', condition: session => session.paymentStatus !== 'pending' || (session.errors && session.errors.some(e => e.message.includes('Payment'))) },
+                    { name: '11. Purchased', condition: session => session.paymentStatus === 'succeeded' }
                 ];
                 
                 let results = [];
@@ -486,3 +490,4 @@
     </script>
 </body>
 </html>
+
