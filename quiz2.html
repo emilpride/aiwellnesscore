@@ -1158,6 +1158,47 @@
     }
 
     // --- CAMERA FUNCTIONALITY ---
+    function resizeAndCompressImage(dataUrl, maxSizeMB = 2) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                // Max dimensions (Face++ usually works well with 1200px)
+                let maxWidth = 1200;
+                let maxHeight = 1200;
+                let width = img.width;
+                let height = img.height;
+                // Preserve aspect ratio
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height *= maxWidth / width;
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width *= maxHeight / height;
+                        height = maxHeight;
+                    }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                // Start with 0.9 quality and decrease until the desired size is reached
+                let quality = 0.9;
+                let output = canvas.toDataURL('image/jpeg', quality);
+                // Check size (data URL is about 37% larger than the actual file)
+                while (output.length > maxSizeMB * 1024 * 1024 * 1.37 && quality > 0.1) {
+                    quality -= 0.1;
+                    output = canvas.toDataURL('image/jpeg', quality);
+                }
+                console.log(`Image compressed: quality=${quality.toFixed(1)}, size=${(output.length/1024/1024).toFixed(2)}MB`);
+                resolve(output);
+            };
+            img.src = dataUrl;
+        });
+    }
+
     function showCameraStep() {
         optionsContainerWrapper.classList.add('hidden');
         inputArea.classList.remove('hidden');
@@ -1192,11 +1233,28 @@
         input.onchange = async (e) => {
             const file = e.target.files[0];
             if (file) {
+                // Check file size
+                if (file.size > 10 * 1024 * 1024) { // If larger than 10MB
+                    addBotMessage("The photo is too large. Please choose a smaller image (max 10MB).");
+                    return;
+                }
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    capturedPhotoDataUrl = e.target.result;
+                reader.onload = async (e) => {
+                    // Show loading indicator
+                    addBotMessage("Processing your photo...");
+                    // Compress to 2MB for Face++
+                    const compressedDataUrl = await resizeAndCompressImage(e.target.result, 2);
+                    capturedPhotoDataUrl = compressedDataUrl;
                     userAnswers['selfie'] = 'Photo uploaded';
                     updateProgressBar();
+                    // Remove processing message
+                    const messages = chatContainer.querySelectorAll('.chat-bubble');
+                    if (messages.length > 0) {
+                        const lastMessage = messages[messages.length - 1];
+                        if (lastMessage.textContent.includes('Processing')) {
+                            lastMessage.remove();
+                        }
+                    }
                     showPhotoForConfirmation();
                 };
                 reader.readAsDataURL(file);
@@ -1315,17 +1373,18 @@ displaySize);
         photoCanvas.width = video.videoWidth;
         photoCanvas.height = video.videoHeight;
         const photoContext = photoCanvas.getContext('2d');
-
         photoContext.translate(video.videoWidth, 0);
         photoContext.scale(-1, 1);
         photoContext.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-
-        capturedPhotoDataUrl = photoCanvas.toDataURL('image/jpeg', 0.9);
-        userAnswers['selfie'] = 'Photo taken';
-
-        stopCamera();
-        updateProgressBar();
-        showPhotoForConfirmation();
+        // Compress to 2MB
+        const tempDataUrl = photoCanvas.toDataURL('image/jpeg', 0.9);
+        resizeAndCompressImage(tempDataUrl, 2).then(compressedDataUrl => {
+            capturedPhotoDataUrl = compressedDataUrl;
+            userAnswers['selfie'] = 'Photo taken';
+            stopCamera();
+            updateProgressBar();
+            showPhotoForConfirmation();
+        });
     }
 
     function showPhotoForConfirmation() {
