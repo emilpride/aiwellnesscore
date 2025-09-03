@@ -84,17 +84,25 @@ exports.handler = async (event) => {
       const progressPercent = Math.round((answeredCount / TOTAL_QUESTIONS) * 100);
       const progress = `${answeredCount} of ${TOTAL_QUESTIONS} (${progressPercent}%)`;
 
+      // НА ЭТОТ БОЛЕЕ НАДЕЖНЫЙ БЛОК:
       let duration = 'N/A';
       if (data.createdAt && data.quizEndedAt) {
-        if(progressPercent === 100) {
+        if (progressPercent === 100) {
             completedQuizzes++;
         }
         const start = new Date(data.createdAt);
         const end = new Date(data.quizEndedAt);
-        const diffMs = end - start;
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffSecs = ((diffMs % 60000) / 1000).toFixed(0);
-        duration = `${diffMins}m ${diffSecs}s`;
+
+        // Проверяем, что даты валидны, прежде чем выполнять вычисления
+        if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+            const diffMs = end - start;
+            // Проверяем, что разница не отрицательная и является числом
+            if (diffMs >= 0) {
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffSecs = ((diffMs % 60000) / 1000).toFixed(0);
+                duration = `${diffMins}m ${diffSecs}s`;
+            }
+        }
       }
 
       if (data.paymentStatus === 'succeeded' && data.paymentAmountUSD) {
