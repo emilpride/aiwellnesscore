@@ -29,7 +29,6 @@
         }
         .reveal.active { opacity: 1; transform: translateY(0); }
 
-        /* --- НОВЫЕ СТИЛИ ДЛЯ ЭКРАНА ЗАГРУЗКИ --- */
         #loading-overlay {
             position: fixed;
             inset: 0;
@@ -57,16 +56,43 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* --- КОНЕЦ СТИЛЕЙ ЗАГРУЗКИ --- */
 
         @media print {
-            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .no-print { display: none; }
-            .report-container { box-shadow: none !important; border: none !important; }
+            body { 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+                background-color: #ffffff !important;
+            }
+            .no-print { display: none !important; }
+            .report-container, section { 
+                box-shadow: none !important; 
+                border: none !important; 
+                padding: 0 !important;
+            }
+            html, body {
+                width: 100%;
+                height: auto;
+                background: none;
+            }
+            main {
+                padding: 0 !important;
+            }
+            .fixed.z-[-1] {
+                display: none;
+            }
+            section {
+                page-break-before: always;
+                page-break-inside: avoid;
+            }
+            section.report-container {
+                page-break-before: auto;
+            }
+            .grid > div, .space-y-3 > li {
+                page-break-inside: avoid;
+            }
         }
     </style>
-    <!-- Meta Pixel Code -->
-<script>
+    <script>
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -81,7 +107,6 @@ fbq('track', 'PageView');
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 /></noscript>
-<!-- End Meta Pixel Code -->
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased">
     <div id="loading-overlay">
@@ -121,7 +146,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                         </div>
                         <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl text-center">
                              <p class="text-lg text-purple-800">Your wellness age is</p>
-                            <p class="text-6xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500" id="wellness-age"></p>
+                             <p class="text-6xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500" id="wellness-age"></p>
                         </div>
                     </div>
                      <div class="mt-8 bg-green-50 border border-green-200 text-green-800 p-5 rounded-xl text-center">
@@ -133,7 +158,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                     <h2 class="text-3xl font-bold text-center">Overall Wellness Score</h2>
                     <div class="relative w-full max-w-[280px] mx-auto mt-4">
                         <canvas id="wellnessGauge"></canvas>
-                         <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="absolute inset-0 flex items-center justify-center">
                              <div class="text-center">
                                 <span id="gauge-score" class="text-5xl font-extrabold">0</span>
                                 <p class="font-semibold text-gray-600">out of 100</p>
@@ -155,7 +180,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                     </div>
                      <div class="bg-white p-8 rounded-2xl border border-gray-200">
                           <div class="flex items-center gap-3">
-                            <svg class="h-8 w-8 text-green-500"  fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <svg class="h-8 w-8 text-green-500"  fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                             </svg>
                             <h3 class="text-2xl font-bold text-green-600">What's Decreasing Your Age?</h3>
@@ -181,7 +206,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                              </div>
                             <p id="stress-desc" class="mt-3 text-sm text-gray-600"></p>
                         </div>
-                         <div class="text-center p-6 bg-gray-50 rounded-2xl">
+                        <div class="text-center p-6 bg-gray-50 rounded-2xl">
                             <h4 class="text-lg font-bold">Skin Quality</h4>
                             <div class="relative h-36 w-36 mx-auto mt-2">
                                 <canvas id="skinChart"></canvas>
@@ -195,14 +220,14 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                 </section>
                 
                 <section class="mt-12 bg-white p-8 md:p-12 rounded-3xl border border-gray-200 reveal">
-                    <h2 class="text-3xl font-bold text-center">Skin Analysis</h2>
+                     <h2 class="text-3xl font-bold text-center">Skin Analysis</h2>
                     <div class="mt-8 max-w-4xl mx-auto">
                         <div id="skin-analysis-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         </div>
-                        <div class="mt-8 bg-purple-50 p-6 rounded-xl border border-purple-200">
+                         <div class="mt-8 bg-purple-50 p-6 rounded-xl border border-purple-200">
                             <h4 class="font-bold text-lg text-purple-800">Skin Condition Conclusion:</h4>
                             <p id="skin-conclusion" class="mt-2 text-gray-700"></p>
-                        </div>
+                         </div>
                     </div>
                 </section>
 
@@ -224,8 +249,6 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 
     <script>
         document.addEventListener("DOMContentLoaded", async function() {
-
-            // --- ПОЛНОСТЬЮ ПЕРЕПИСАННАЯ ЛОГИКА ЗАГРУЗКИ ДАННЫХ ---
 
             async function fetchWellnessData() {
                 const params = new URLSearchParams(window.location.search);
@@ -264,19 +287,14 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                                 clearInterval(intervalId);
                                 reject(new Error("Report generation timed out."));
                             }
-                            // Если статус 'pending', просто ждем следующей попытки
                         } catch (error) {
                             clearInterval(intervalId);
                             reject(error);
                         }
-                    }, 3000); // Опрашиваем каждые 3 секунды
+                    }, 3000);
                 });
             }
             
-            // --- КОНЕЦ НОВОЙ ЛОГИКИ ---
-
-            // --- RENDER FUNCTIONS (без изменений) ---
-
             function populateReport(data) {
                 document.getElementById('report-content').style.visibility = 'visible';
                 document.getElementById('user-name').textContent = data.userName;
@@ -333,7 +351,6 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                     pores: { icon: '🕳️', title: 'Visible Pores', desc: 'Result from excess oil or genetics.' },
                     mole: { icon: '⚫', title: 'Moles', desc: 'Typically harmless pigmented spots.' }
                 };
-
                 for (const key in skinData) {
                     if (skinData[key] === 1 && skinMap[key]) {
                         const item = skinMap[key];
@@ -365,7 +382,6 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                 });
             }
 
-            // --- CHART RENDERING (без изменений) ---
             let chartData = {};
             function getScoreColor(value) {
                 if (value >= 75) return '#22c55e';
@@ -444,64 +460,45 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                 if(skinCtx) new Chart(skinCtx, { ...donutChartOptions(chartData.metrics.skinQuality.value, getScoreColor(chartData.metrics.skinQuality.value)), plugins: [createTextPlugin(`${chartData.metrics.skinQuality.value}%`)] });
             }
 
-            // PDF Download
             const downloadButtons = document.querySelectorAll('.download-pdf-btn');
             downloadButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     const element = document.getElementById('report-content');
-                    const opt = { margin: 0.5, filename: 'AI-WELLNESSCORE-Report.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas:  { scale: 2, useCORS: true }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
+                    const opt = {
+                        margin: 0.5,
+                        filename: 'AI-WELLNESSCORE-Report.pdf',
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true },
+                        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+                        pagebreak: { 
+                            mode: ['css', 'avoid-all'],
+                            before: ['#gauge-section', '#charts-section', '.mt-12.bg-white', '.mt-12.bg-gradient-to-br']
+                        }
+                    };
                     html2pdf().set(opt).from(element).save();
                 });
             });
-            // В result.html после загрузки страницы
-async function checkPaymentStatus() {
-    const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get('session_id');
-    
-    if (!sessionId) return;
-    
-    try {
-        const response = await fetch('/.netlify/functions/quiz', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                action: 'checkPaymentStatus', 
-                sessionId: sessionId 
-            })
-        });
-        
-        const data = await response.json();
-        console.log('Payment status:', data.status);
-    } catch (error) {
-        console.error('Failed to check payment status:', error);
-    }
-}
 
-// Вызываем при загрузке
-setTimeout(checkPaymentStatus, 2000);
-            
-            // --- ИЗМЕНЕННАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ ---
             async function initializeReport() {
-    // Отправка события покупки в Meta Pixel
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('payment') === 'success') {
-        fbq('track', 'Purchase', {value: 9.99, currency: 'USD'});
-    }
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('payment') === 'success') {
+                    fbq('track', 'Purchase', {value: 9.99, currency: 'USD'});
+                }
 
-    const loadingOverlay = document.getElementById('loading-overlay');
-    const loadingText = document.getElementById('loading-text');
-
-    try {
-        const reportData = await fetchWellnessData();
-        chartData = reportData; 
-        populateReport(reportData);
-        loadingOverlay.style.opacity = 0;
-        setTimeout(() => { loadingOverlay.style.display = 'none'; }, 500);
-    } catch (error) {
-        console.error("Failed to get report:", error);
-        loadingText.textContent = `Error: ${error.message}`;
-    }
-}
+                const loadingOverlay = document.getElementById('loading-overlay');
+                const loadingText = document.getElementById('loading-text');
+                try {
+                    const reportData = await fetchWellnessData();
+                    chartData = reportData; 
+                    populateReport(reportData);
+                    loadingOverlay.style.opacity = 0;
+                    setTimeout(() => { loadingOverlay.style.display = 'none'; }, 500);
+                } catch (error) {
+                    console.error("Failed to get report:", error);
+                    loadingText.textContent = `Error: ${error.message}`;
+                    // Можно добавить кнопку для повторной попытки или связи с поддержкой
+                }
+            }
 
             initializeReport();
         });
