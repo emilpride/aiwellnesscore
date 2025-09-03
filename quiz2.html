@@ -146,7 +146,7 @@
     const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
     window.addEventListener('resize', setVh); setVh();
     lottie.loadAnimation({ container: document.getElementById('dave-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'assistent.json' });
-    lottie.loadAnimation({ container: document.getElementById('arrow-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'https://assets2.lottiefiles.com/packages/lf20_l5qvxiqp.json' });
+    lottie.loadAnimation({ container: document.getElementById('arrow-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'https://lottie.host/23331b4b-9a23-47e9-9033-559e223b2467/iJ4a362q7U.json' });
 
     const swiperWrapper = document.getElementById('swiper-wrapper'); const slides = document.querySelectorAll('.swiper-slide'); const dotsContainer = document.getElementById('dots-container'); const startQuizBtn = document.getElementById('start-quiz-btn'); let currentSlide = 0, autoSwipeTimer, touchStartX = 0, touchEndX = 0; function goToSlide(slideIndex, isAuto = false) { if (!isAuto) resetAutoSwipe(); currentSlide = slideIndex; swiperWrapper.style.transform = `translateX(-${currentSlide * 100}%)`; slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide)); document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide)); if (slideIndex === 2) { animateNumbers(); } }
     const nextSlide = () => goToSlide((currentSlide + 1) % slides.length, true); const resetAutoSwipe = () => { clearInterval(autoSwipeTimer); autoSwipeTimer = setInterval(nextSlide, 3500); }; slides.forEach((_, i) => { const dot = document.createElement('div'); dot.className = 'dot w-2 h-2 bg-gray-300 rounded-full cursor-pointer'; dot.onclick = () => goToSlide(i); dotsContainer.appendChild(dot); }); const handleSwipe = () => { if (touchEndX < touchStartX - 50) nextSlide(); if (touchEndX > touchStartX + 50) goToSlide((currentSlide - 1 + slides.length) % slides.length); }; swiperWrapper.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; clearInterval(autoSwipeTimer); }, { passive: true }); swiperWrapper.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); resetAutoSwipe(); });
@@ -188,8 +188,17 @@
                 currentQuestionIndex++;
                 setTimeout(askNextQuestion, postAnimationDelay || question.delayBefore || 1500);
             } else if (question.type === 'question') {
-                showOptions(question.options.map(opt => ({ text: opt, class: 'option-btn bg-white border border-purple-300 text-purple-600 px-4 py-2 rounded-full text-sm flex-shrink-0 hover:bg-purple-50' })), question.options.map(opt => () => handleAnswer(opt)));
-                if(!question.hideInput) { inputArea.classList.remove('hidden'); userInput.placeholder = question.placeholder; userInput.focus(); }
+                if (question.options && question.options.length > 0) {
+                    showOptions(question.options.map(opt => ({ text: opt, class: 'option-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm flex-shrink-0 hover:bg-gray-100' })), question.options.map(opt => () => handleAnswer(opt, opt)));
+                    if (question.hideInput) {
+                        inputArea.classList.add('hidden');
+                    }
+                } else {
+                    optionsContainerWrapper.classList.add('hidden');
+                    inputArea.classList.remove('hidden');
+                    userInput.placeholder = question.placeholder;
+                    userInput.focus();
+                }
             } else if (question.type === 'slider') {
                 showSlider(question);
             } else if (question.type === 'final_step') {
@@ -220,7 +229,7 @@
     function handleAnswer(answerToStore, answerToDisplay) { const q = quizQuestions[currentQuestionIndex]; addUserMessage(answerToDisplay || answerToStore); saveAnswerToServer(q.key, answerToStore); userInput.value = ''; inputArea.classList.add('hidden'); optionsContainerWrapper.classList.add('hidden'); currentQuestionIndex++; askNextQuestion(); }
     function addUserMessage(text) { const d = document.createElement('div'); d.className = 'flex justify-end mb-4 chat-bubble'; d.innerHTML = `<div class="bg-purple-600 text-white p-3 rounded-tl-2xl rounded-br-2xl rounded-bl-2xl max-w-[85%]">${text}</div>`; chatContainer.appendChild(d); chatContainer.scrollTop = chatContainer.scrollHeight; }
     function addBotMessage(html) { const d = document.createElement('div'); d.className = 'flex justify-start mb-4 chat-bubble'; d.innerHTML = `<div class="bg-gray-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-[85%]">${html}</div>`; chatContainer.appendChild(d); chatContainer.scrollTop = chatContainer.scrollHeight; }
-    function updateProgressBar() { progressBar.style.width = `${(currentQuestionIndex / quizQuestions.length) * 100}%`; }
+    function updateProgressBar() { progressBar.style.width = `${((currentQuestionIndex + 1) / quizQuestions.length) * 100}%`; }
     sendBtn.addEventListener('click', () => handleAnswer(userInput.value, userInput.value)); userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAnswer(userInput.value, userInput.value); });
 
     function parseHeightToInches(heightVal) { if (!heightVal) return 68; if (!isNaN(parseFloat(heightVal))) { return parseFloat(heightVal) / 2.54; } let inches = 0; const feetMatch = heightVal.match(/(\d+)\s*(ft|')/); const inchesMatch = heightVal.match(/(\d+)\s*(in|")/); if (feetMatch) inches += parseInt(feetMatch[1]) * 12; if (inchesMatch) inches += parseInt(inchesMatch[1]); return inches > 0 ? inches : 68; }
@@ -231,8 +240,8 @@
     
     // --- Camera, Payment and Completion logic ---
     function showCameraStep() { optionsContainerWrapper.classList.add('hidden'); inputArea.classList.remove('hidden'); inputArea.innerHTML = `<button id="open-camera-btn" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-full hover:bg-purple-700 transition-colors">Open Camera</button>`; document.getElementById('open-camera-btn').onclick = startCamera; }
-    async function startCamera() { /* ... Full camera logic ... */ }
-    function showCompletionAnimation() { addBotMessage("Amazing! That's everything I need. Give me a moment while I analyze your results..."); /* ... Full completion logic ... */ }
+    async function startCamera() { /* Full camera logic will go here */ }
+    function showCompletionAnimation() { addBotMessage("Amazing! That's everything I need. Give me a moment while I analyze your results..."); /* Full completion logic will go here */ }
 
 </script>
 
