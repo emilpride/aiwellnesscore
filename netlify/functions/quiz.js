@@ -1,7 +1,8 @@
 // /netlify/functions/quiz.js
 
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
-const { getFirestore } = require('firebase-admin/firestore');
+// Добавляем FieldValue в импорт для чистоты кода
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 
 if (!getApps().length) {
   try {
@@ -75,7 +76,6 @@ exports.handler = async (event, context) => {
         body: JSON.stringify({ message: 'Answer saved' }),
       };
 
-    // --- НОВЫЙ БЛОК ДЛЯ СОХРАНЕНИЯ РЕЗУЛЬТАТОВ АНАЛИЗА ---
     } else if (action === 'saveAnalysisData') {
       const { sessionId, analysisData } = data;
       if (!sessionId || !analysisData) {
@@ -90,7 +90,6 @@ exports.handler = async (event, context) => {
         statusCode: 200,
         body: JSON.stringify({ message: 'Analysis data saved successfully' })
       };
-    // --- КОНЕЦ НОВОГО БЛОКА ---
 
     } else if (action === 'endQuiz') {
       const { sessionId } = data;
@@ -106,71 +105,62 @@ exports.handler = async (event, context) => {
       };
 
     } else if (action === 'updatePayment') {
-    const { sessionId, status, amountUSD } = data;
-    if (!sessionId) return { statusCode: 400, body: 'Missing sessionId' };
-    const sessionRef = db.collection('sessions').doc(sessionId);
-    await sessionRef.update({
-        paymentStatus: status,
-        paymentAmountUSD: amountUSD
-    });
-    return {
-        statusCode: 200,
-        body: JSON.stringify({ message: 'Payment details updated' })
-    };
+        const { sessionId, status, amountUSD } = data;
+        if (!sessionId) return { statusCode: 400, body: 'Missing sessionId' };
+        const sessionRef = db.collection('sessions').doc(sessionId);
+        await sessionRef.update({
+            paymentStatus: status,
+            paymentAmountUSD: amountUSD
+        });
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: 'Payment details updated' })
+        };
 
-} else if (action === 'checkPaymentStatus') {
-    const { sessionId } = data;
-    if (!sessionId) return { statusCode: 400, body: 'Missing sessionId' };
-    
-    const sessionRef = db.collection('sessions').doc(sessionId);
-    const doc = await sessionRef.get();
-    
-    if (!doc.exists) {
-        return { statusCode: 404, body: JSON.stringify({ status: 'not_found' }) };
+    } else if (action === 'checkPaymentStatus') {
+        const { sessionId } = data;
+        if (!sessionId) return { statusCode: 400, body: 'Missing sessionId' };
+        
+        const sessionRef = db.collection('sessions').doc(sessionId);
+        const doc = await sessionRef.get();
+        
+        if (!doc.exists) {
+            return { statusCode: 404, body: JSON.stringify({ status: 'not_found' }) };
+        }
+        
+        const sessionData = doc.data();
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ 
+                status: sessionData.paymentStatus || 'pending',
+                amount: sessionData.paymentAmountUSD || null
+            })
+        };
+        
+    } else if (action === 'logError') {
+        const { sessionId, error } = data;
+        if (!sessionId || !error) {
+            return { statusCode: 400, body: 'Session ID and error object are required' };
+        }
+        
+        const sessionRef = db.collection('sessions').doc(sessionId);
+        const errorEntry = {
+            ...error,
+            timestamp: new Date().toISOString()
+        };
+
+        await sessionRef.update({
+            errors: FieldValue.arrayUnion(errorEntry)
+        });
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: 'Error logged' })
+        };
     }
-    
-    const sessionData = doc.data();
-    return {
-        statusCode: 200,
-        body: JSON.stringify({ 
-            status: sessionData.paymentStatus || 'pending',
-            amount: sessionData.paymentAmountUSD || null
-        })
-    };
-}
-// /netlify/functions/quiz.js
-// ... (после блока 'checkPaymentStatus')
 
-// --- НОВЫЙ БЛОК ДЛЯ ЛОГИРОВАНИЯ ОШИБОК ---
-} else if (action === 'logError') {
-    const { sessionId, error } = data;
-    if (!sessionId || !error) {
-        return { statusCode: 400, body: 'Session ID and error object are required' };
-    }
-    
-    // Используем FieldValue.arrayUnion для атомарного добавления ошибки в массив
-    const { FieldValue } = require('firebase-admin/firestore');
-    const sessionRef = db.collection('sessions').doc(sessionId);
-
-    const errorEntry = {
-        ...error,
-        timestamp: new Date().toISOString()
-    };
-
-    await sessionRef.update({
-        errors: FieldValue.arrayUnion(errorEntry)
-    });
-
-    return {
-        statusCode: 200,
-        body: JSON.stringify({ message: 'Error logged' })
-    };
-// --- КОНЕЦ НОВОГО БЛОКА ---
-
-}
-
-return { statusCode: 400, body: 'Invalid action' };
-return { statusCode: 400, body: 'Invalid action' };
+    // Эта строка выполнится, если ни один из if/else if не сработал
+    return { statusCode: 400, body: 'Invalid action' };
 
   } catch (error) {
     console.error('Error in quiz.js handler:', error);
