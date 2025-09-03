@@ -176,7 +176,66 @@
                         <p class="text-gray-600 mt-2">Your personal AI wellness assistant. Let's unlock your potential together.</p>
                     </div>
                 </div>
+                <div class="swiper-slide flex items-center justify-center p-8">
+                    <div class="text-left w-full max-w-sm slide-content">
+                        <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">What you'll get:</h2>
+                        <ul class="space-y-4">
+                            <li class="flex items-center" style="animation-delay: 0.5s;">
+                                <span class="text-2xl mr-3">🎯</span>
+                                <div><h3 class="font-semibold">Wellness Score</h3><p class="text-sm text-gray-500">Your comprehensive health rating</p></div>
+                            </li>
+                            <li class="flex items-center" style="animation-delay: 0.7s;">
+                                <span class="text-2xl mr-3">⏳</span>
+                                <div><h3 class="font-semibold">Biological Age</h3><p class="text-sm text-gray-500">How "young" you are for your years</p></div>
+                            </li>
+                            <li class="flex items-center" style="animation-delay: 0.9s;">
+                                <span class="text-2xl mr-3">🌿</span>
+                                <div><h3 class="font-semibold">Skin & Stress Analysis</h3><p class="text-sm text-gray-500">Learn about hidden factors</p></div>
+                            </li>
+                            <li class="flex items-center" style="animation-delay: 1.1s;">
+                                <span class="text-2xl mr-3">🗺️</span>
+                                <div><h3 class="font-semibold">Personalized Plan</h3><p class="text-sm text-gray-500">A 7-day plan for improvement</p></div>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
+                <div class="swiper-slide flex items-center justify-center p-8">
+                    <div class="text-center slide-content">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Lower Your Biological Age</h2>
+                        <div class="flex justify-center items-center space-x-4">
+                            <div class="text-center">
+                                <p class="text-gray-500">Chronological</p>
+                                <p id="chrono-age" class="text-5xl font-bold text-gray-400">35</p>
+                            </div>
+                            <div id="arrow-animation" class="w-20 h-20"></div>
+                            <div class="text-center">
+                                <p class="text-purple-600 font-semibold">Biological</p>
+                                <p id="bio-age" class="text-6xl font-extrabold text-purple-600">32</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mt-6 max-w-xs mx-auto">Our plan is designed to help you feel younger and more energetic.</p>
+                    </div>
+                </div>
+                <div class="swiper-slide flex items-center justify-center p-8">
+                    <div class="text-center max-w-sm slide-content">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-8">Your Privacy is Our Priority</h2>
+                        <div class="space-y-6">
+                            <div class="flex items-center text-left" style="animation-delay: 0.5s;">
+                                <span class="text-3xl mr-4">📸</span>
+                                <p class="text-gray-600">Your photo is never stored and is deleted immediately after analysis.</p>
+                            </div>
+                            <div class="flex items-center text-left" style="animation-delay: 0.7s;">
+                                <span class="text-3xl mr-4">🔒</span>
+                                <p class="text-gray-600">All your data is anonymized and protected by encryption.</p>
+                            </div>
+                            <div class="flex items-center text-left" style="animation-delay: 0.9s;">
+                                <span class="text-3xl mr-4">⚕️</span>
+                                <p class="text-gray-600">This is not medical advice. All recommendations are for informational purposes only.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="py-8 px-6">
             <div id="dots-container" class="flex justify-center items-center space-x-3 mb-6"></div>
@@ -357,6 +416,12 @@
         loop: true,
         autoplay: true,
         path: 'assistent.json'
+    });
+    animationManager.add('arrow-animation', {
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        path: 'arrow.json' 
     });
     const swiperWrapper = document.getElementById('swiper-wrapper');
     const slides = document.querySelectorAll('.swiper-slide');
