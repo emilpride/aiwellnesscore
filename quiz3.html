@@ -415,7 +415,7 @@
         renderer: 'svg',
         loop: true,
         autoplay: true,
-        path: 'https://assets2.lottiefiles.com/packages/lf20_g8tG0M.json' // Example Lottie path
+        path: 'assistent.json' // Example Lottie path
     });
     animationManager.add('arrow-animation', {
         renderer: 'svg',
@@ -473,7 +473,7 @@
                 renderer: 'svg',
                 loop: true,
                 autoplay: true,
-                path: 'https://assets2.lottiefiles.com/packages/lf20_g8tG0M.json' // Example Lottie path
+                path: 'avatar.json' // Example Lottie path
             });
             initQuiz();
         }, 600);
@@ -569,7 +569,7 @@
         { key: 'alcohol', type: 'question', text: "Time for some lifestyle questions. 🍻 How many alcoholic drinks do you have in a typical week?", options: ["0", "1-3", "4-7", "8+"], hideInput: true },
         { key: 'smoking', type: 'question', text: "This is a safe space. 🚭 Do you smoke or use tobacco products?", options: ["No, never", "Used to, but quit", "Occasionally", "Yes, daily"], hideInput: true },
         { key: 'screen_time', type: 'question', text: "Last question before the final step! 📱 How much time do you spend on screens outside of work?", options: ["Less than 2 hours", "2-4 hours", "4-6 hours", "More than 6 hours"], hideInput: true },
-        {   key: 'camera',   type: 'final_step',   text: `Excellent work! 🎉 You're almost done.<div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 my-3">  <img src="https://i.ibb.co/6y40YJ7/face.jpg" alt="AI Face Analysis" class="w-full max-w-[200px] mx-auto rounded-lg mb-3">   <p class="text-sm text-gray-700 text-center">   Our AI needs to see your face using advanced analysis tools to provide a comprehensive wellness assessment. To do this, we need permission to access your camera.  </p>   <div class="flex items-center justify-center gap-2 mt-3 text-xs text-gray-600">   <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>   </svg>   <span>Analysis happens instantly • Photo deleted in 3 seconds</span>  </div></div>`}
+        {   key: 'camera',   type: 'final_step',   text: `Excellent work! 🎉 You're almost done.<div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 my-3">  <img src="face.jpeg" alt="AI Face Analysis" class="w-full max-w-[200px] mx-auto rounded-lg mb-3">   <p class="text-sm text-gray-700 text-center">   Our AI needs to see your face using advanced analysis tools to provide a comprehensive wellness assessment. To do this, we need permission to access your camera.  </p>   <div class="flex items-center justify-center gap-2 mt-3 text-xs text-gray-600">   <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>   </svg>   <span>Analysis happens instantly • Photo deleted in 3 seconds</span>  </div></div>`}
     ];
 
     // --- SESSION START ---
@@ -1565,7 +1565,7 @@
     }
 
     function showCompletionAnimation() {
-        const analysisAnimationPath = 'https://assets1.lottiefiles.com/packages/lf20_rJGk7z.json'; // Example Lottie path
+        const analysisAnimationPath = 'loader-animation.json'; // Example Lottie path
         confetti({
             particleCount: 150,
             spread: 100,
@@ -1679,7 +1679,7 @@
         scrollToBottom();
 
         // The stripe publishable key is public and safe to expose on the frontend.
-        stripe = Stripe('pk_live_51PBaNeRxF5E8Gg7c5iS696WCEeS13eZ8sT7yG59sW0qWv9Zc9D04pD1g8f9X4m7yT8n7h5E6R7d8I9J00B7W5qZ4m');
+        stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb');
         try {
             const response = await fetch('/.netlify/functions/payment', {
                 method: 'POST',
