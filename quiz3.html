@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Wellness Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        #main-container { overflow: hidden; }
+        .chat-container { scroll-behavior: smooth; -ms-overflow-style: none; scrollbar-width: none; }
+        .chat-container::-webkit-scrollbar { display: none; }
+        .chat-bubble { animation: slide-up 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+        @keyframes slide-up { 0% { transform: translateY(20px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+        .options-container::-webkit-scrollbar { display: none; }
+        .options-container { -ms-overflow-style: none; scrollbar-width: none; }
+        .option-btn { transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out; }
+        .option-btn:hover { transform: translateY(-2px); }
+        .typing-indicator span { height: 8px; width: 8px; background-color: #9ca3af; border-radius: 50%; display: inline-block; animation: bounce 1.4s infinite ease-in-out both; }
+        .typing-indicator span:nth-of-type(2) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-of-type(3) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+        .bot-avatar-lottie { width: 40px; height: 40px; background-color: #5b21b6; border-radius: 50%; box-shadow: 0 0 0 0 rgba(99, 53, 169, 0.7); animation: pulse 2.5s infinite, avatar-float 3s ease-in-out infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); } }
+        @keyframes avatar-float { 0% { transform: translateY(0); } 50% { transform: translateY(-5px); } 100% { transform: translateY(0); } }
+        #camera-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        #camera-modal.active { opacity: 1; pointer-events: all; }
+        #camera-container { position: relative; width: 90%; max-width: 400px; aspect-ratio: 3/4; overflow: hidden; border-radius: 1.5rem; background: #111; border: 1px solid rgba(255,255,255,0.2); }
+        #camera-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        #camera-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #camera-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; text-align: center; }
+        #camera-status { background-color: rgba(0,0,0,0.5); padding: 0.5rem 1rem; border-radius: 9999px; display: inline-block; color: white; font-weight: 500; transition: background-color 0.3s; }
+        #progress-bar { animation: glow 2s ease-in-out infinite alternate; }
+        @keyframes glow { from { box-shadow: 0 0 2px #a855f7, 0 0 4px #a855f7; } to { box-shadow: 0 0 6px #6366f1, 0 0 8px #6366f1; } }
+        .slider-widget { padding: 1rem; background-color: #faf5ff; border-radius: 1rem; border: 1px solid #e9d5ff; }
+        .slider-value { font-size: 2.5rem; font-weight: 800; line-height: 1; transition: color 0.3s ease; }
+        .slider-label { font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: #6b21a8; }
+        .slider-input { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: #d8b4fe; border-radius: 5px; outline: none; opacity: 0.7; transition: opacity .2s; }
+        .slider-input-gradient { background: linear-gradient(to right, #22c55e, #facc15, #ef4444); }
+        .slider-input:hover { opacity: 1; }
+        .slider-input::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; background: white; cursor: pointer; border-radius: 50%; border: 4px solid #8b5cf6; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
+        .slider-input::-moz-range-thumb { width: 24px; height: 24px; background: white; cursor: pointer; border-radius: 50%; border: 4px solid #8b5cf6; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
+        .slider-markers { display: flex; justify-content: space-between; font-size: 0.75rem; color: #9ca3af; margin: 0.25rem 0.25rem 0; }
+        .confirm-btn { margin-top: 1rem; width: 100%; background-color: #7c3aed; color: white; font-weight: bold; padding: 0.75rem; border-radius: 0.75rem; transition: background-color 0.2s; }
+        .confirm-btn:hover { background-color: #6d28d9; }
+        .widget-wrapper { max-width: 250px; margin: auto; text-align: center; padding: 1rem; background-color: #faf5ff; border-radius: 1rem; }
+        .widget-label { font-weight: 600; color: #6b21a8; margin-bottom: 0.75rem; }
+        .sleep-battery { width: 100px; height: 40px; border: 3px solid #c4b5fd; border-radius: 8px; margin: 0 auto; position: relative; }
+        .sleep-battery::after { content:''; position: absolute; top: 50%; right: -10px; transform: translateY(-50%); width: 5px; height: 20px; background-color: #c4b5fd; border-radius: 0 4px 4px 0; }
+        .sleep-battery-level { position: absolute; top: 3px; left: 3px; height: 30px; border-radius: 4px; width: 0%; background-color: #ef4444; transition: width 1.5s ease-out, background-color 1s ease; }
+        #hydration-water-fill { transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
+        #hydration-percentage { transition: opacity 0.5s; opacity: 0; }
+        .stress-bar-track { height: 12px; background-color: #ede9fe; border-radius: 9999px; overflow: hidden; }
+        .stress-bar-fill { height: 100%; width: 0%; background-image: linear-gradient(to right, #4ade80, #facc15, #f87171); border-radius: 9999px; transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
+        .stress-value { font-size: 1.5rem; font-weight: 700; margin-top: 0.5rem; transition: color 1.5s ease; }
+        .activity-week { display:flex; justify-content:center; gap: 0.5rem; }
+        .activity-day { width: 30px; height: 30px; border-radius: 0.5rem; background-color: #ede9fe; color: #a78bfa; font-weight: 600; display:flex; align-items:center; justify-content:center; font-size:0.75rem; transition: all 0.4s ease-out; }
+        .activity-day.active { background-color: #8b5cf6; color: white; transform: scale(1.1); box-shadow: 0 4px 10px rgba(139, 92, 246, 0.4); }
+        @keyframes fade-in-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animated-list-item { opacity: 0; animation: fade-in-up 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .list-icon-wrapper { background-color: #a78bfa; color: white; padding: 0.5rem; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .bmi-widget { background-color: #faf5ff; border: 1px solid #e9d5ff; border-radius: 1rem; padding: 1rem; text-align: center; max-width: 250px; margin: auto; }
+        .bmi-value { font-size: 2.5rem; font-weight: 800; color: #5b21b6; line-height: 1; }
+        .bmi-label { font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; }
+        .bmi-scale { position: relative; height: 10px; background-image: linear-gradient(to right, #60a5fa, #34d399, #facc15, #f87171); border-radius: 9999px; margin: 0.5rem 0; }
+        .bmi-indicator { position: absolute; top: 50%; width: 16px; height: 16px; background-color: white; border: 3px solid #5b21b6; border-radius: 50%; transform: translate(-50%, -50%); transition: left 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
+        .bmi-category { font-size: 0.75rem; font-weight: 500; color: #7e22ce; }
+        .bio-age-container { background-color: #f3e8ff; border: 1px solid #d8b4fe; border-radius: 1rem; padding: 1rem; text-align: center; max-width: 250px; margin: auto; }
+        .bio-age-header { font-size: 0.875rem; font-weight: 600; color: #6b21a8; margin-bottom: 0.75rem; }
+        .bio-age-display { display: flex; justify-content: center; align-items: baseline; margin-bottom: 1rem; color: #5b21b6; }
+        #bio-age-value { font-size: 3.75rem; font-weight: 800; line-height: 1; transition: color 0.3s; }
+        .bio-age-unit { font-size: 1rem; font-weight: 600; margin-left: 0.5rem; }
+        .week-progress { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .week-day { width: 10px; height: 10px; background-color: #ddd6fe; border-radius: 50%; transition: all 0.5s; }
+        .week-day.active { background-color: #7c3aed; transform: scale(1.3); box-shadow: 0 0 8px #a78bfa; }
+        .analysis-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; text-align: center; }
+        .analysis-animation { width: 160px; height: 160px; margin-bottom: 1rem; }
+        #analysis-text { font-size: 1rem; font-weight: 500; color: #4b5563; transition: opacity 0.5s ease-in-out; min-height: 1.5rem; }
+    </style>
+    <script>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '785592354117222');
+        fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
+    /></noscript>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-indigo-100 md:flex md:items-center md:justify-center min-h-screen">
+    <div id="main-container" class="w-full md:h-[90vh] md:max-w-lg flex flex-col bg-white md:shadow-2xl md:rounded-2xl overflow-hidden">
+        <div class="w-full bg-gray-200"><div id="progress-bar" class="h-2 bg-gradient-to-r from-purple-500 to-indigo-500" style="width: 0%; transition: width 0.5s ease-in-out;"></div></div>
+        <div id="chat-container" class="flex-1 p-6 overflow-y-auto chat-container"></div>
+        <div id="options-container-wrapper" class="px-4 pt-1 pb-2"><div id="options-container" class="flex gap-2 overflow-x-auto py-2 options-container"></div></div>
+        <div id="input-area" class="p-4 border-t border-gray-200">
+            <div class="flex items-center gap-2">
+                <input type="text" id="user-input" placeholder="Type your answer..." class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <button id="send-btn" class="bg-purple-600 text-white rounded-full p-3 hover:bg-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg></button>
+            </div>
+        </div>
+        <div id="payment-form-container"></div>
+    </div>
+    <div id="camera-modal">
+        <div id="camera-container">
+            <video id="camera-video" autoplay muted playsinline></video><canvas id="camera-canvas"></canvas>
+            <div id="camera-loader" class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4"><svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75"
+                    fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p id="loader-text" class="text-lg font-semibold">Initializing AI models...</p></div>
+            <div id="camera-overlay"><p id="camera-status">Position your face in the frame</p></div>
+        </div>
+    </div>
+
+    <script>
+        // --- ГЛОБАЛЬНЫЙ ПЕРЕХВАТ ОШИБОК ---
+        async function logErrorToServer(errorDetails) {
+            if (!sessionId) {
+                console.error("Cannot log error: no sessionId.", errorDetails);
+                return;
+            }
+            try {
+                await fetch('/.netlify/functions/quiz', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'logError',
+                        sessionId: sessionId,
+                        error: {
+                            source: 'frontend',
+                            message: errorDetails.message,
+                            details: errorDetails.details || 'N/A'
+                        }
+                    })
+                });
+            } catch (e) {
+                console.error("Failed to even send the error log:", e);
+            }
+        }
+        function initializeGlobalErrorHandlers() {
+            window.onerror = function(message, source, lineno, colno, error) {
+                logErrorToServer({
+                    message: `Uncaught Error: ${message}`,
+                    details: `at ${source}:${lineno}:${colno}`
+                });
+                return false;
+            };
+            window.addEventListener('unhandledrejection', event => {
+                logErrorToServer({
+                    message: 'Unhandled Promise Rejection',
+                    details: event.reason?.message || 'No details available'
+                });
+            });
+            console.log("Global error handlers initialized.");
+        }
+
+        // --- DOM Elements & State ---
+        const mainContainer = document.getElementById('main-container'), chatContainer = document.getElementById('chat-container'), optionsContainer = document.getElementById('options-container'), optionsContainerWrapper =
+            document.getElementById('options-container-wrapper'), inputArea = document.getElementById('input-area'), progressBar = document.getElementById('progress-bar'), cameraModal = document.getElementById('camera-modal'), video = document.getElementById('camera-video'), canvas = document.getElementById('camera-canvas'), cameraLoader = document.getElementById('camera-loader'), loaderText = document.getElementById('loader-text'), cameraStatus = document.getElementById('camera-status'), paymentFormContainer = document.getElementById('payment-form-container');
+        let userInput = document.getElementById('user-input'), sendBtn = document.getElementById('send-btn');
+        const originalInputAreaHTML = inputArea.innerHTML;
+        let sessionId = null, userAnswers = {}, currentQuestionIndex = 0, detectionInterval, stream, capturedPhotoDataUrl = null, countdownInterval;
+        class EventManager {
+            constructor() { this.handlers = new Map(); }
+            add(element, event, handler, key = null) { const handlerKey = key || `${element.id || 'element'}_${event}`; this.remove(element, event, handlerKey); this.handlers.set(handlerKey, { element, event, handler }); element.addEventListener(event, handler); }
+            remove(element, event, key = null) { const handlerKey = key || `${element.id || 'element'}_${event}`; const data = this.handlers.get(handlerKey); if (data) { data.element.removeEventListener(data.event, data.handler); this.handlers.delete(handlerKey); } }
+            removeAll() { this.handlers.forEach((data) => { data.element.removeEventListener(data.event, data.handler); }); this.handlers.clear(); }
+        }
+        const eventManager = new EventManager();
+        class AnimationManager {
+            constructor() { this.animations = new Map(); }
+            add(containerId, options) { this.remove(containerId); const anim = lottie.loadAnimation({ container: document.getElementById(containerId), ...options }); this.animations.set(containerId, anim); return anim; }
+            remove(containerId) { const anim = this.animations.get(containerId); if (anim) { anim.destroy(); this.animations.delete(containerId); } }
+            clear() { this.animations.forEach(anim => anim.destroy()); this.animations.clear(); }
+        }
+        const animationManager = new AnimationManager();
+        function saveQuizState() { if (sessionId) { localStorage.setItem('quiz_session_id', sessionId); localStorage.setItem('quiz_answers', JSON.stringify(userAnswers)); localStorage.setItem('quiz_current_index', currentQuestionIndex); localStorage.setItem('quiz_timestamp', Date.now()); } }
+        function loadQuizState() { const savedSessionId = localStorage.getItem('quiz_session_id'); const savedAnswers = localStorage.getItem('quiz_answers'); const savedIndex = localStorage.getItem('quiz_current_index'); const savedTimestamp = localStorage.getItem('quiz_timestamp'); if (savedSessionId && savedTimestamp) { const age = Date.now() - parseInt(savedTimestamp); if (age < 24 * 60 * 60 * 1000) { return { sessionId: savedSessionId, answers: savedAnswers ? JSON.parse(savedAnswers) : {}, currentIndex: parseInt(savedIndex) || 0 }; } } return null; }
+        function clearQuizState() { localStorage.removeItem('quiz_session_id'); localStorage.removeItem('quiz_answers'); localStorage.removeItem('quiz_current_index'); localStorage.removeItem('quiz_timestamp'); }
+        function isInAppBrowser() { const ua = navigator.userAgent || navigator.vendor || window.opera; return ua.includes('FBAN') || ua.includes('FBAV') || ua.includes('Instagram') || ua.includes('Telegram'); }
+        const messageDelay = 1800;
+        const setAppHeight = () => { mainContainer.style.height = `${window.innerHeight}px`; };
+        const isMobile = () => window.innerWidth <= 768;
+        const scrollToBottom = () => { setTimeout(() => { chatContainer.scrollTop = chatContainer.scrollHeight; }, 0); };
+        function parseHeightToInches(heightVal) { if (!heightVal) return 68; if (!isNaN(parseFloat(heightVal))) { return parseFloat(heightVal) / 2.54; } let inches = 0; const feetMatch = heightVal.match(/(\d+)\s*(ft|')/); const inchesMatch = heightVal.match(/(\d+)\s*(in|")/); if (feetMatch) inches += parseInt(feetMatch[1]) * 12; if (inchesMatch) inches += parseInt(inchesMatch[1]); return inches > 0 ? inches : 68; }
+        function playBiologicalAgeAnimation() { const ageElement = document.getElementById('bio-age-value'); if (!ageElement) return; let currentAge = 42; const targetAge = 39; const duration = 2800; const steps = currentAge - targetAge; const stepDuration = duration / steps; const dayDuration = duration / 7; for (let i = 1; i <= 7; i++) { setTimeout(() => { const dayEl = document.getElementById(`day-${i}`); if (dayEl) dayEl.classList.add('active'); }, i * dayDuration); } setTimeout(() => { const countdownInterval = setInterval(() => { currentAge--; ageElement.textContent = currentAge; if (currentAge === targetAge) { clearInterval(countdownInterval); ageElement.style.color = '#16a34a'; } }, stepDuration); }, 500); }
+        function playBmiAnimation() { const heightIn = parseHeightToInches(userAnswers.height); const weightLbs = (parseInt(userAnswers.weight) || 70) * 2.20462; if (heightIn && weightLbs) { const bmi = ((weightLbs / (heightIn * heightIn)) * 703).toFixed(1); let category = "Normal"; let percent = 50; if (bmi < 18.5) { category = "Underweight"; percent = (bmi / 18.5) * 25; } else if (bmi < 25) { category = "Normal"; percent = 25 + ((bmi - 18.5) / 6.5) * 50; } else if (bmi < 30) { category = "Overweight"; percent = 75 + ((bmi - 25) / 5) * 25; } else { category = "Obese"; percent = 100; } percent = Math.max(5, Math.min(95, percent)); const html = `<div class="bmi-widget"><div id="bmi-value-anim" class="bmi-value">0.0</div><div class="bmi-label">Your Estimated BMI</div><div class="bmi-scale"><div id="bmi-indicator-anim" class="bmi-indicator" style="left: 0%;"></div></div><div id="bmi-category-anim" class="bmi-category">&nbsp;</div></div>`; addBotMessage(html); setTimeout(() => { const valEl = document.getElementById('bmi-value-anim'); const catEl = document.getElementById('bmi-category-anim'); const indEl = document.getElementById('bmi-indicator-anim'); if(indEl) indEl.style.left = `${percent}%`; if(catEl) catEl.textContent = category; let start = 0; const end = parseFloat(bmi); const animDuration = 1500; const frameDuration = 1000 / 60; const totalFrames = Math.round(animDuration / frameDuration); let frame = 0; const countUp = setInterval(() => { frame++; const progress = frame / totalFrames; const currentVal = (start + (end - start) * progress).toFixed(1); if(valEl) valEl.textContent = currentVal; if (frame === totalFrames) { clearInterval(countUp); if(valEl) valEl.textContent = bmi; } }, frameDuration); }, 100); } }
+        function playSleepAnimation() { const answer = userAnswers.sleep || ""; let level = 25; if (answer.includes("5-6")) level = 50; if (answer.includes("7-8")) level = 90; if (answer.includes("More than 8")) level = 100; const html = `<div class="widget-wrapper"><div class="widget-label">Sleep Recharge</div><svg class="w-16 h-16 mx-auto text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg><div class="sleep-battery mt-2"><div id="sleep-battery-level-anim" class="sleep-battery-level"></div></div></div>`; addBotMessage(html); setTimeout(() => { const levelEl = document.getElementById('sleep-battery-level-anim'); if (!levelEl) return; let color = '#ef4444'; if (level > 40) color = '#f59e0b'; if (level > 75) color = '#22c55e'; levelEl.style.backgroundColor = color; levelEl.style.width = `${level}%`; }, 100); }
+        function playActivityAnimation() { const answer = userAnswers.activity || ""; let days = 1; if (answer.includes("1-2")) days = 2; if (answer.includes("3-4")) days = 4; if (answer.includes("5+")) days = 6; const html = `<div class="widget-wrapper"><div class="widget-label">Your Active Week</div><div class="activity-week" id="activity-week-anim"><div class="activity-day">M</div><div class="activity-day">T</div><div class="activity-day">W</div><div class="activity-day">T</div><div class="activity-day">F</div><div class="activity-day">S</div><div class="activity-day">S</div></div></div>`; addBotMessage(html); setTimeout(() => { const weekEl = document.getElementById('activity-week-anim'); if (!weekEl) return; const dayElements = weekEl.children; const daysToActivate = [0, 2, 4, 1, 3, 5, 6]; for (let i = 0; i < days; i++) { setTimeout(() => { dayElements[daysToActivate[i]].classList.add('active'); }, i * 250); } }, 100); }
+        function playHydrationAnimation() { const answer = userAnswers.hydration || ""; let level = 25; if (answer.includes("4-6")) level = 50; if (answer.includes("7-9")) level = 75; if (answer.includes("10+")) level = 100; const html = `<div class="widget-wrapper"><div class="widget-label">Body Hydration</div><svg class="w-20 h-24 mx-auto" viewBox="0 0 120 160"><defs><clipPath id="humanoid-clip"><path d="M60,20 C40,20 20,40 20,60 C20,80 40,100 60,100 C80,100 100,80 100,60 C100,40 80,20 60,20 M60,105 C40,105 20,120 20,140 L100,140 C100,120 80,105 60,105 Z"></path></clipPath></defs><g clip-path="url(#humanoid-clip)"><rect x="0" y="0" width="120" height="160" fill="#ede9fe"/><rect id="hydration-water-fill" x="0" y="0" width="120" height="160" fill="#818cf8" style="transform: translateY(160px);"/></g><path d="M60,20 C40,20 20,40 20,60 C20,80 40,100 60,100 C80,100 100,80 100,60 C100,40 80,20 60,20 M60,105 C40,105 20,120 20,140 L100,140 C100,120 80,105 60,105 Z" fill="none" stroke="#a78bfa" stroke-width="6"/></svg><div id="hydration-percentage" class="font-bold text-xl text-indigo-600 mt-2">0%</div></div>`; addBotMessage(html); setTimeout(() => { const waterEl = document.getElementById('hydration-water-fill'); const textEl = document.getElementById('hydration-percentage'); if (!waterEl || !textEl) return; const yPos = 160 - (160 * (level / 100)); waterEl.style.transform = `translateY(${yPos}px)`; textEl.style.opacity = '1'; let currentLevel = 0; const levelUp = setInterval(() => { currentLevel++; textEl.textContent = `${currentLevel}%`; if (currentLevel >= level) clearInterval(levelUp); }, 1500 / level); }, 100); }
+        function playStressGaugeAnimation() { const stressAnswer = userAnswers.stress || "1"; const level = parseInt(stressAnswer.match(/\d+/)[0]); const percent = (level - 1) / 9 * 100; let color = '#4ade80'; if (level > 4) color = '#facc15'; if (level > 7) color = '#f87171'; const html = `<div class="widget-wrapper"><div class="widget-label">Reported Stress Level</div><div class="stress-bar-track"><div id="stress-bar-fill-anim" class="stress-bar-fill"></div></div><div id="stress-value-anim" class="stress-value">${level}/10</div></div>`; addBotMessage(html); setTimeout(() => { const fillEl = document.getElementById('stress-bar-fill-anim'); const textEl = document.getElementById('stress-value-anim'); if (!fillEl || !textEl) return; fillEl.style.width = `${percent}%`; textEl.style.color = color; }, 100); }
+        
+        const quizQuestions = [ 
+            { key: 'intro_dave', type: 'message', text: "Hey! I'm Dave, your personal AI wellness assistant today. 👋" }, 
+            { key: 'name', type: 'question', text: "What should I call you?", options: [], placeholder: "Type your name...", skipOption: "Предпочитаю остаться анонимным" }, 
+            { key: 'intro_purpose', type: 'message', text: (name) => `Great to meet you, ${name}! Here's a quick look at what we'll uncover together: <div class="mt-4 text-sm text-gray-800"><div class="animated-list-item" style="animation-delay: 0.2s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg></div><span>Calculate your Wellness Score</span></div><div class="animated-list-item" style="animation-delay: 0.6s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l3 3a1 1 0 001.414-1.414L11 9.586V6z" clip-rule="evenodd" /></svg></div><span>Reveal your Biological Age</span></div><div class="animated-list-item" style="animation-delay: 1.0s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h.01a1 1 0 100-2H10zm3 0a1 1 0 000 2h.01a1 1 0 100-2H13zm-3 4a1 1 0 000 2h.01a1 1 0 100-2H10z" clip-rule="evenodd" /></svg></div><span>Assess your energy & recovery</span></div><div class="animated-list-item" style="animation-delay: 1.4s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg></div><span>Measure stress & find solutions</span></div><div class="animated-list-item" style="animation-delay: 1.8s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></div><span>Analyze skin health with AI</span></div><div class="animated-list-item" style="animation-delay: 2.2s;"><div class="list-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L7 8.414V13a1 1 0 11-2 0V8.414L3.293 6.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h5a1 1 0 100-2h-5z" /></svg></div><span>Review nutrition, BMI & more</span></div></div>` }, 
+            { key: 'intro_how', type: 'message', text: "To help you on your wellness journey, I need to get to know you a bit better—your lifestyle, habits, and a quick, secure look at you.", delayBefore: 3000 }, 
+            { key: 'intro_convo', type: 'message', text: "What makes this unique is our relaxed, conversational approach. I'll ask some questions, and you can use the quick-reply buttons or type your own answers. Every detail helps, so I appreciate you taking the time!" }, 
+            { key: 'intro_testimonial', type: 'message', text: `<div class="bio-age-container"><div class="bio-age-header">See What A Week Can Do</div><div class="bio-age-display"><span id="bio-age-value">42</span><span class="bio-age-unit">Years</span></div><div class="week-progress"><div class="week-day" id="day-1"></div><div class="week-day" id="day-2"></div><div class="week-day" id="day-3"></div><div class="week-day" id="day-4"></div><div class="week-day" id="day-5"></div><div class="week-day" id="day-6"></div><div class="week-day" id="day-7"></div></div><div class="bio-age-footer">Biological Age Improvement</div></div>`}, 
+            { key: 'intro_privacy', type: 'message', text: "And just to be clear about your privacy 🛡️: your photo is deleted immediately after the AI analysis, and your answers are wiped as soon as you get your report.", delayBefore: 3000 }, 
+            { key: 'start_consent', type: 'question', text: "Ready to begin?", options: ["Yes, let's start!"], hideInput: true }, 
+            { key: 'age', type: 'slider', text: (name) => `Perfect, ${userAnswers.name || 'friend'}! To start, what's your age? 🎂`, label: "Select your age", min: 18, max: 90, step: 1, defaultValue: 30, unit: 'years' }, 
+            { key: 'gender', type: 'question', text: "Great start! Now, what's your biological sex? 🧬", options: ['Male', 'Female', 'Other'], hideInput: true }, 
+            { key: 'height', type: 'slider', text: "Perfect. Let's talk about your height. 📏", label: "Select your height", min: 140, max: 220, step: 1, defaultValue: 175, unit: 'cm' }, 
+            { key: 'weight', type: 'slider', text: "Thanks! And your current weight? ⚖️", label: "Select your weight", min: 40, max: 150, step: 1, defaultValue: 70, unit: 'kg' }, 
+            { key: 'bmi_calculation', type: 'message', text: "Calculating your BMI based on your stats...", postAnimationDelay: 2000}, 
+            { key: 'sleep', type: 'question', text: "Sleep is crucial. 😴 How many hours of <i>quality</i> sleep do you get on an average night?", options: ["Less than 5 hours", "5-6 hours", "7-8 hours", "More than 8 hours"], hideInput: true }, 
+            { key: 'sleep_visual', type: 'message', text: 'Quality sleep recharges your mind and body.'}, 
+            { key: 'activity', type: 'question', text: "Movement is key! 🏃‍♀️ How often do you engage in moderate physical activity (like a brisk walk) per week?", options: ["Rarely", "1-2 times", "3-4 times", "5+ times"], hideInput: true }, 
+            { key: 'activity_visual', type: 'message', text: 'Every bit of movement counts!'}, 
+            { key: 'nutrition', type: 'question', text: "Let's dive into nutrition. 🥦 How many servings of fruits or vegetables do you typically eat per day?", options: ["0-1", "2-3", "4-5", "More than 5"], hideInput: true }, 
+            { key: 'processed_food', type: 'question', text: "Honesty is the best policy here. 😉 How often do you eat processed or fast food in a typical week?", options: ["Rarely", "1-2 times", "3-4 times", "Daily"], hideInput: true }, 
+            { key: 'hydration', type: 'question', text: "Hydration check! 💧 How many glasses of water (approx. 8 oz) do you drink per day?", options: ["1-3 glasses", "4-6 glasses", "7-9 glasses", "10+ glasses"], hideInput: true }, 
+            { key: 'hydration_visual', type: 'message', text: "Let's see your hydration level:"}, 
+            { key: 'stress', type: 'slider', text: "Now for the mind. 🧠 How would you rate your typical stress level?", label: "Drag to indicate your stress level", min: 1, max: 10, step: 1, defaultValue: 5, unit: 'stress', isGradient: true }, 
+            { key: 'stress_gauge', type: 'message', text: "Thanks for sharing. Here's what that looks like:"}, 
+            { key: 'mindfulness', type: 'question', text: "Finding calm is a superpower. 🧘‍♂️ How often do you practice mindfulness, meditation, or deep breathing?", options: ["Never", "Occasionally", "Weekly", "Daily"], hideInput: true }, 
+            { key: 'mood', type: 'question', text: "Let's check in with your emotions. ❤️ How would you describe your overall mood on a typical day?", options: ["Happy & Energetic", "Generally Content", "It varies a lot", "Often Stressed or Sad"], hideInput: true }, 
+            { key: 'alcohol', type: 'question', text: "Time for some lifestyle questions.🍻 How many alcoholic drinks do you have in a typical week?", options: ["0", "1-3", "4-7", "8+"], hideInput: true }, 
+            { key: 'smoking', type: 'question', text: "This is a safe space. 🚭 Do you smoke or use tobacco products?", options: ["No, never", "Used to, but quit", "Occasionally", "Yes, daily"], hideInput: true }, 
+            { key: 'screen_time', type: 'question', text: "Last question before the final step! 📱 How much time do you spend on screens (phone, computer, TV) outside of work?", options: ["Less than 2 hours", "2-4 hours", "4-6 hours", "More than 6 hours"], hideInput: true }, 
+            { key: 'camera', type: 'final_step', text: "You did it! 🎉 That's all the questions. Now for the fun part: a quick selfie. This helps me analyze non-medical indicators of stress and fatigue. Your photo is processed on the fly and never stored. Please allow camera access and position your face within the frame." } 
+        ];
+
+        async function startQuizSession() {
+            const savedState = loadQuizState();
+            if (savedState) {
+                sessionId = savedState.sessionId;
+                userAnswers = savedState.answers;
+                currentQuestionIndex = savedState.currentIndex;
+                console.log('Restored session:', sessionId);
+                initializeGlobalErrorHandlers(); // Активируем логгер для восстановленной сессии
+                return true;
+            }
+            const getDeviceType = () => {
+                const userAgent = navigator.userAgent.toLowerCase();
+                const width = window.innerWidth;
+                let os = 'Unknown';
+                if (/iphone|ipad|ipod/.test(userAgent)) { os = 'iOS'; }
+                else if (/android/.test(userAgent)) { os = 'Android'; }
+                else if (/windows phone/.test(userAgent)) { os = 'Windows Phone'; }
+                else if (/mac os x/.test(userAgent)) { os = 'macOS'; }
+                else if (/windows/.test(userAgent)) { os = 'Windows'; }
+                else if (/linux/.test(userAgent)) { os = 'Linux'; }
+                let device = 'Desktop';
+                if (width < 768) { device = 'Mobile'; }
+                else if (width < 1024) { device = 'Tablet'; }
+                if (device === 'Mobile' || device === 'Tablet') { return `${device}/${os}`; }
+                return `${device}/${os}`;
+            };
+            const getTrafficSource = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const utm_source = urlParams.get('utm_source');
+                const utm_medium = urlParams.get('utm_medium');
+                const utm_campaign = urlParams.get('utm_campaign');
+                const ref = document.referrer.toLowerCase();
+                if (utm_source) {
+                    if (utm_campaign) { return `${utm_source}/${utm_campaign}`; }
+                    if (utm_medium) { return `${utm_source}/${utm_medium}`; }
+                    return utm_source;
+                }
+                if (ref === '') return 'Direct';
+                if (ref.includes('google.')) return 'Google Search';
+                if (ref.includes('bing.')) return 'Bing';
+                if (ref.includes('facebook.com')) return 'Facebook';
+                if (ref.includes('instagram.com')) return 'Instagram';
+                try {
+                    const refUrl = new URL(ref);
+                    return `Referral/${refUrl.hostname.replace('www.', '')}`;
+                } catch {
+                    return 'Referral';
+                }
+            };
+            try {
+                const response = await fetch('/.netlify/functions/quiz', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'startSession',
+                        source: getTrafficSource(),
+                        deviceType: getDeviceType()
+                    })
+                });
+                if (!response.ok) throw new Error('Could not start session');
+                const data = await response.json();
+                sessionId = data.sessionId;
+                saveQuizState();
+                initializeGlobalErrorHandlers();
+                return false;
+            } catch (error) {
+                console.error('Failed to start session:', error);
+                addBotMessage("Sorry, I'm having trouble connecting. Please try refreshing the page.");
+                inputArea.style.display = 'none';
+                return false;
+            }
+        }
+
+        async function saveAnswerToServer(questionKey, answer) { if (!sessionId) { console.error('No session ID available'); return false; } userAnswers[questionKey] = answer; saveQuizState(); try { const response = await fetch('/.netlify/functions/quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'saveAnswer', sessionId: sessionId, questionId: questionKey, answer: answer }) }); if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); } return true; } catch (error) { console.error('Failed to save answer:', error); return false; } }
+        function updateProgressBar() { const questionKeys = quizQuestions.filter(q => q.type === 'question' || q.type === 'slider').map(q => q.key); const totalSteps = questionKeys.length + 1; const completedAnswers = Object.keys(userAnswers).filter(key => questionKeys.includes(key)).length; const photoStepCompleted = userAnswers['selfie'] ? 1 : 0; const progress = ((completedAnswers + photoStepCompleted) / totalSteps) * 100; progressBar.style.width = `${progress}%`; }
+        function showTypingIndicator() { const typingDiv = document.createElement('div'); typingDiv.id = 'typing-indicator'; typingDiv.className = 'flex justify-start mb-4 chat-bubble'; const avatarId = `avatar-lottie-${Date.now()}`; typingDiv.innerHTML = `<div id="${avatarId}" class="bot-avatar-lottie mr-3 flex-shrink-0"></div><div class="bg-gray-200 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`; chatContainer.appendChild(typingDiv); animationManager.add(avatarId, { renderer: 'svg', loop: true, autoplay: true, path: 'avatar.json' }); scrollToBottom(); }
+        function hideTypingIndicator() { document.getElementById('typing-indicator')?.remove(); }
+        function addBotMessage(html, key = '') { const messageDiv = document.createElement('div'); if (key === 'intro_dave') { messageDiv.className = 'mb-4 chat-bubble'; messageDiv.innerHTML = ` <div id="greeting-animation" class="w-full max-w-[250px] mx-auto mb-[-40px] z-10 relative"></div> <div class="flex justify-start"> <div id="greeting-avatar" class="bot-avatar-lottie mr-3 flex-shrink-0 self-end mb-1"></div> <div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${html}</div> </div> `; chatContainer.appendChild(messageDiv); animationManager.add('greeting-animation', { renderer: 'svg', loop: false, autoplay: true, path: 'assistent.json' }); animationManager.add('greeting-avatar', { renderer: 'svg', loop: true, autoplay: true, path: 'avatar.json' }); } else { messageDiv.className = 'flex justify-start mb-4 chat-bubble'; const avatarId = `avatar-lottie-${Date.now()}`; messageDiv.innerHTML = `<div id="${avatarId}" class="bot-avatar-lottie mr-3 flex-shrink-0"></div><div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${html}</div>`; chatContainer.appendChild(messageDiv); animationManager.add(avatarId, { renderer: 'svg', loop: true, autoplay: true, path: 'avatar.json' }); } scrollToBottom(); }
+        function addUserMessage(text) { const d = document.createElement('div'); d.className = 'flex justify-end mb-4 chat-bubble'; d.innerHTML = `<div class="bg-purple-600 text-white p-3 rounded-tl-2xl rounded-br-2xl rounded-bl-2xl max-w-xs">${text}</div>`; chatContainer.appendChild(d); scrollToBottom(); }
+        function showOptions(options, handlers) { optionsContainer.innerHTML = ''; if (options?.length > 0) { optionsContainerWrapper.classList.remove('hidden'); options.forEach((option, index) => { const button = document.createElement('button'); button.textContent = option.text; button.className = option.class; button.onclick = handlers[index]; optionsContainer.appendChild(button); }); } else { optionsContainerWrapper.classList.add('hidden'); } }
+        function showSlider(question) { optionsContainer.innerHTML = ''; optionsContainerWrapper.classList.remove('hidden'); const sliderWrapper = document.createElement('div'); sliderWrapper.className = 'slider-widget w-full'; const formatDisplayValue = (value) => { if (question.unit === 'stress') { if (value <= 3) return `<span style="color: #22c55e;">Low</span>`; if (value <= 7) return `<span style="color: #f59e0b;">Medium</span>`; return `<span style="color: #ef4444;">High</span>`; } if (question.unit === 'cm') { const feet = Math.floor(value / 30.48); const inches = Math.round((value % 30.48) / 2.54); return `${feet}'${inches}" <span class="text-lg ml-2 text-purple-400">(${value} cm)</span>`; } if (question.unit === 'kg') { const lbs = (value * 2.20462).toFixed(0); return `${lbs} lbs <span class="text-lg ml-2 text-purple-400">(${value} kg)</span>`; } return `${value} ${question.unit}`; }; const sliderInputClass = question.isGradient ? 'slider-input slider-input-gradient' : 'slider-input'; const markersHTML = question.isGradient ? `<div class="slider-markers"><span>Low</span><span>Medium</span><span>High</span></div>` : ''; sliderWrapper.innerHTML = `<div class="text-center"><div id="slider-value-display" class="slider-value">${formatDisplayValue(question.defaultValue)}</div><div class="slider-label">${question.label}</div></div><input type="range" min="${question.min}" max="${question.max}" value="${question.defaultValue}" step="${question.step}" class="${sliderInputClass}" id="slider-input-range">${markersHTML}<button id="slider-confirm-btn" class="confirm-btn">Confirm</button>`; optionsContainer.appendChild(sliderWrapper); const sliderInput = document.getElementById('slider-input-range'), valueDisplay = document.getElementById('slider-value-display'), confirmBtn = document.getElementById('slider-confirm-btn'); sliderInput.addEventListener('input', (e) => { valueDisplay.innerHTML = formatDisplayValue(e.target.value); }); confirmBtn.onclick = () => { const finalValue = sliderInput.value; let displayAnswerText = ''; if (question.unit === 'stress') { if (finalValue <= 3) displayAnswerText = 'Low'; else if (finalValue <= 7) displayAnswerText = 'Medium'; else displayAnswerText = 'High'; } else if (question.unit === 'cm') { const feet = Math.floor(finalValue / 30.48); const inches = Math.round((finalValue % 30.48) / 2.54); displayAnswerText = `${feet}'${inches}"`; } else if (question.unit === 'kg') { const lbs = (finalValue * 2.20462).toFixed(0); displayAnswerText = `${lbs} lbs`; } else { displayAnswerText = `${finalValue} ${question.unit}`; } handleAnswer(finalValue, displayAnswerText); }; }
+        function handleAnswer(answerToStore, answerToDisplay) { const valueToStore = (answerToStore || '').toString(); if (!valueToStore.trim()) return; const currentQuestion = quizQuestions[currentQuestionIndex]; const valueToDisplay = answerToDisplay || valueToStore; addUserMessage(valueToDisplay); userAnswers[currentQuestion.key] = valueToStore.trim(); saveAnswerToServer(currentQuestion.key, valueToStore.trim()); userInput.value = ''; userInput.blur(); inputArea.classList.add('hidden'); optionsContainerWrapper.classList.add('hidden'); currentQuestionIndex++; updateProgressBar(); askNextQuestion(); }
+        
+        function askNextQuestion() {
+            if (currentQuestionIndex >= quizQuestions.length) return;
+            const question = quizQuestions[currentQuestionIndex];
+            showTypingIndicator();
+            const delay = question.delayBefore || messageDelay;
+            setTimeout(() => {
+                hideTypingIndicator();
+                let questionText = typeof question.text === 'function' ? question.text(userAnswers.name || 'friend') : question.text;
+                let postAnimationDelay = question.postAnimationDelay || 0;
+                if (question.type === 'message') {
+                    addBotMessage(questionText, question.key);
+                    if (question.key === 'intro_testimonial') { setTimeout(playBiologicalAgeAnimation, 500); } 
+                    else if (question.key === 'bmi_calculation') { setTimeout(playBmiAnimation, 100); } 
+                    else if (question.key === 'stress_gauge') { setTimeout(playStressGaugeAnimation, 100); } 
+                    else if (question.key === 'sleep_visual') { setTimeout(playSleepAnimation, 100); } 
+                    else if (question.key === 'activity_visual') { setTimeout(playActivityAnimation, 100); } 
+                    else if (question.key === 'hydration_visual') { setTimeout(playHydrationAnimation, 100); }
+                    currentQuestionIndex++;
+                    setTimeout(askNextQuestion, postAnimationDelay);
+                } else if (question.type === 'question') {
+                    addBotMessage(questionText, question.key);
+                    
+                    let optionButtons = question.options.map(opt => ({ text: opt, class: 'option-btn bg-white border border-purple-300 text-purple-600 px-4 py-2 rounded-full text-sm flex-shrink-0 hover:bg-purple-50' }));
+                    let handlers = question.options.map(opt => () => handleAnswer(opt));
+
+                    if (question.skipOption) {
+                        optionButtons.push({ text: question.skipOption, class: 'option-btn bg-white border border-gray-300 text-gray-600 px-4 py-2 rounded-full text-sm flex-shrink-0 hover:bg-gray-50' });
+                        handlers.push(() => handleAnswer('Anonymous', 'Анонимно'));
+                    }
+
+                    showOptions(optionButtons, handlers);
+                    if (question.hideInput) { inputArea.classList.add('hidden'); } 
+                    else { inputArea.classList.remove('hidden'); userInput.placeholder = question.placeholder || "Type..."; }
+                    if (!isMobile()) { userInput.focus(); }
+                } else if (question.type === 'slider') {
+                    addBotMessage(questionText, question.key);
+                    inputArea.classList.add('hidden');
+                    showSlider(question);
+                } else if (question.type === 'final_step') {
+                    inputArea.classList.add('hidden');
+                    addBotMessage(questionText, question.key);
+                    fetch('/.netlify/functions/quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'endQuiz', sessionId: sessionId }) });
+                    showCameraStep();
+                }
+            }, delay);
+        }
+
+        function showCameraStep() {
+            optionsContainerWrapper.classList.add('hidden');
+            inputArea.classList.remove('hidden');
+            inputArea.innerHTML = `
+                <div class="space-y-2">
+                    <button id="open-camera-btn" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-full hover:bg-purple-700 transition-colors pulse-btn">Открыть камеру</button>
+                    <button id="skip-photo-btn" class="w-full text-gray-600 font-medium py-2 px-4 rounded-full hover:bg-gray-100 transition-colors">Пропустить этот шаг</button>
+                </div>
+            `;
+            document.getElementById('open-camera-btn').onclick = startCamera;
+            document.getElementById('skip-photo-btn').onclick = skipPhotoStep;
+        }
+
+        async function skipPhotoStep() {
+            addUserMessage("Пропустить шаг с фото");
+            await saveAnswerToServer('selfie', 'Skipped');
+            updateProgressBar();
+            optionsContainerWrapper.classList.add('hidden');
+            inputArea.classList.add('hidden');
+            
+            addBotMessage("Хорошо, мы пропустим анализ по фото. Ваш отчет будет основан на ответах из анкеты.");
+            showPaymentForm(); 
+        }
+
+        async function startCamera() {
+            cameraModal.classList.add('active');
+            try {
+                const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
+                await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)]);
+                loaderText.textContent = "Requesting camera access...";
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                video.srcObject = stream;
+                video.onloadedmetadata = () => { cameraLoader.style.display = 'none'; startFaceDetection(); };
+            } catch (err) {
+                console.error("Camera/Model Error:", err);
+                logErrorToServer({
+                    message: 'Camera or Face-API Model Error',
+                    details: err.message
+                });
+                loaderText.textContent = "Camera access denied or models failed to load. Please refresh and try again.";
+                setTimeout(stopCamera, 3000);
+            }
+        }
+
+        function stopCamera() { clearInterval(detectionInterval); stream?.getTracks().forEach(track => track.stop()); cameraModal.classList.remove('active'); video.srcObject = null; }
+        function startFaceDetection() { let captureTimeout; const context = canvas.getContext('2d'); detectionInterval = setInterval(async () => { const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks(); const displaySize = { width: video.clientWidth, height: video.clientHeight }; faceapi.matchDimensions(canvas, displaySize); context.clearRect(0, 0, canvas.width, canvas.height); context.save(); context.translate(canvas.width, 0); context.scale(-1, 1); if (detections.length > 0) { const resizedDetections = faceapi.resizeResults(detections, displaySize); const box = resizedDetections[0].detection.box; context.strokeStyle = 'rgba(0, 255, 255, 0.4)'; context.lineWidth = 1; faceapi.draw.drawFaceLandmarks(canvas, resizedDetections[0].landmarks, { drawLines: true }); context.strokeStyle = '#00FFFF'; context.lineWidth = 3; context.shadowColor = '#00FFFF'; context.shadowBlur = 10; const cornerLength = box.width * 0.1; context.beginPath(); context.moveTo(box.x, box.y + cornerLength); context.lineTo(box.x, box.y); context.lineTo(box.x + cornerLength, box.y); context.moveTo(box.x + box.width - cornerLength, box.y); context.lineTo(box.x + box.width, box.y); context.lineTo(box.x + box.width, box.y + cornerLength); context.moveTo(box.x, box.y + box.height - cornerLength); context.lineTo(box.x, box.y + box.height); context.lineTo(box.x + cornerLength, box.y + box.height); context.moveTo(box.x + box.width - cornerLength, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height); context.lineTo(box.x + box.width, box.y + box.height - cornerLength); context.stroke(); context.shadowBlur = 0; const isGoodSize = box.width > canvas.width * 0.4; if (isGoodSize) { cameraStatus.textContent = "Hold still..."; if (!captureTimeout) { captureTimeout = setTimeout(() => takePhoto(), 1500); } } else { cameraStatus.textContent = "Move closer"; clearTimeout(captureTimeout); captureTimeout = null; } } else { cameraStatus.textContent = "Position your face"; clearTimeout(captureTimeout); captureTimeout = null; } context.restore(); }, 100); }
+        function takePhoto() { clearInterval(detectionInterval); cameraStatus.textContent = "Perfect!"; const photoCanvas = document.createElement('canvas'); photoCanvas.width = video.videoWidth; photoCanvas.height = video.videoHeight; const photoContext = photoCanvas.getContext('2d'); photoContext.translate(video.videoWidth, 0); photoContext.scale(-1, 1); photoContext.drawImage(video, 0, 0, video.videoWidth, video.videoHeight); capturedPhotoDataUrl = photoCanvas.toDataURL('image/jpeg', 0.9); userAnswers['selfie'] = 'Photo taken'; stopCamera(); updateProgressBar(); showPhotoForConfirmation(); }
+        
+        async function startAnalysisAndShowForm() {
+            addUserMessage("Looks Good!");
+            await saveAnswerToServer('selfie', 'Photo taken');
+            document.getElementById('photo-preview-wrapper')?.remove();
+            optionsContainerWrapper.classList.add('hidden');
+            inputArea.classList.add('hidden');
+
+            showPaymentForm(); // Показываем оплату немедленно
+
+            try {
+                // Запускаем анализ кожи и генерацию отчета в фоне, не дожидаясь их завершения
+                const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ photoDataUrl: capturedPhotoDataUrl })
+                });
+                if (!analyzeResponse.ok) throw new Error('Skin analysis failed');
+                const analysisData = await analyzeResponse.json();
+                await fetch('/.netlify/functions/quiz', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'saveAnalysisData', sessionId: sessionId, analysisData: analysisData })
+                });
+                fetch('/.netlify/functions/result-background', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: sessionId })
+                });
+            } catch (error) {
+                console.error('Error during background analysis process:', error);
+                logErrorToServer({
+                    message: 'Skin Analysis or Result Generation Error (background)',
+                    details: error.message
+                });
+                // Если анализ не удался, фоновая функция все равно будет вызвана
+                // и сгенерирует отчет без данных о коже
+                fetch('/.netlify/functions/result-background', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: sessionId })
+                });
+            }
+        }
+
+        function showPhotoForConfirmation() { const d = document.createElement('div'); d.id = 'photo-preview-wrapper'; d.className = 'flex justify-start mb-4 chat-bubble'; const i = `<div class="bg-purple-100 text-gray-800 p-3 rounded-tr-2xl rounded-br-2xl rounded-bl-2xl max-w-xs"><p class="mb-2">Here's the photo. Happy with it?</p><img src="${capturedPhotoDataUrl}" alt="Your selfie" class="rounded-lg"/></div>`; d.innerHTML = `<div class="w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 bot-avatar-lottie overflow-hidden" id="photo-confirm-avatar"></div>${i}`; chatContainer.appendChild(d); scrollToBottom(); animationManager.add('photo-confirm-avatar', { renderer: 'svg', loop: false, autoplay: true, path: 'avatar.json' }); const o = [ { text: 'Looks Good!', class: 'option-btn bg-green-500 border-green-600 text-white px-4 py-2 rounded-full text-sm flex-shrink-0 font-semibold' }, { text: 'Retake', class: 'option-btn bg-white border-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm flex-shrink-0' } ]; const h = [startAnalysisAndShowForm, retakePhoto]; showOptions(o, h); inputArea.classList.add('hidden'); }
+        function retakePhoto() { addUserMessage("Retake"); document.getElementById('photo-preview-wrapper')?.remove(); optionsContainerWrapper.classList.add('hidden'); inputArea.classList.add('hidden'); startCamera(); }
+        let stripe, elements, clientSecret;
+        
+        async function showPaymentForm() {
+            fbq('track', 'InitiateCheckout', {value: 9.99, currency: 'USD'});
+            let hasSentAddPaymentInfo = false;
+            const sendAddPaymentInfoEvent = () => { if (!hasSentAddPaymentInfo) { fbq('track', 'AddPaymentInfo'); hasSentAddPaymentInfo = true; } };
+            
+            optionsContainerWrapper.classList.add('hidden');
+            inputArea.classList.add('hidden');
+            
+            const formHtml = `
+            <div class="p-4 bg-gray-50 border-t">
+                <div id="payment-wrapper" class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6">
+                    <div class="text-center mb-5">
+                        <div class="flex justify-center items-center gap-2 text-gray-500 text-sm">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
+                           <span>Безопасный платеж</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 mt-1">Разблокировать полный отчет</h2>
+                    </div>
+                    
+                    <div class="bg-purple-100 text-purple-800 rounded-lg p-3 text-center mb-5">
+                        <p class="text-sm font-medium">Ограниченное предложение (-30%)</p>
+                        <p class="text-3xl font-bold text-gray-800 my-2">$9.99 <span class="text-lg text-gray-400 line-through ml-2">$14.99</span></p>
+                        <p id="countdown-timer" class="text-sm font-bold tracking-wider bg-white/50 rounded-full px-2 py-1 inline-block">Осталось: 10:00</p>
+                    </div>
+                    
+                    <form id="payment-form" class="space-y-4">
+                        <div id="card-element" class="p-3 border border-gray-300 rounded-md shadow-sm bg-gray-50"></div>
+                        <button id="submit-payment" type="submit" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-md hover:bg-purple-700 transition-colors text-lg shadow-md">
+                            <span id="button-text">Оплатить $9.99</span>
+                        </button>
+                        <div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div>
+                    </form>
+
+                    <div class="mt-4 text-center">
+                        <img src="https://i.ibb.co/2jWMV4b/cards.png" alt="Accepted Cards" class="h-6 mx-auto opacity-70">
+                        <p class="text-xs text-gray-400 mt-2">Платежи надежно обрабатываются Stripe.</p>
+                    </div>
+                </div>
+            </div>`;
+            
+            paymentFormContainer.innerHTML = formHtml;
+            paymentFormContainer.classList.remove('hidden');
+            scrollToBottom();
+            startCountdown();
+            stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb');
+
+            try {
+                const response = await fetch('/.netlify/functions/payment', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: sessionId })
+                });
+                const data = await response.json();
+                clientSecret = data.clientSecret;
+                if (!clientSecret) throw new Error("Client secret not received.");
+                
+                elements = stripe.elements({ clientSecret });
+                const cardElement = elements.create("card", { style: { base: { fontSize: '16px', '::placeholder': { color: '#aab7c4' } } } });
+                cardElement.mount("#card-element");
+                cardElement.on('focus', () => { sendAddPaymentInfoEvent(); });
+                
+                document.getElementById('payment-form').addEventListener('submit', handlePayment);
+            } catch (error) {
+                console.error("Failed to initialize payment form:", error);
+                logErrorToServer({
+                    message: 'Stripe Payment Form Initialization Failed',
+                    details: error.message
+                });
+                document.getElementById('payment-wrapper').innerHTML = `<p class="text-center text-red-500">Could not load payment form. Error: ${error.message}</p>`;
+            }
+        }
+
+        async function handlePayment(e) {
+            e.preventDefault();
+            const submitButton = document.getElementById('submit-payment');
+            const messageDiv = document.getElementById('payment-message');
+            submitButton.disabled = true;
+            try {
+                const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+                    payment_method: { card: elements.getElement('card'), }
+                });
+                if (error) {
+                    logErrorToServer({ message: 'Stripe Payment Confirmation Error', details: error.message });
+                    messageDiv.textContent = error.message;
+                    messageDiv.classList.remove('hidden');
+                    submitButton.disabled = false;
+                    await fetch('/.netlify/functions/quiz', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'updatePayment', sessionId: sessionId, status: 'failed', amountUSD: '0' })
+                    });
+                } else if (paymentIntent) {
+                    if (paymentIntent.status === 'succeeded') {
+                        await fetch('/.netlify/functions/quiz', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'updatePayment', sessionId: sessionId, status: 'succeeded', amountUSD: '9.99' })
+                        });
+                        handleSuccessfulPayment();
+                    } else if (paymentIntent.status === 'requires_action') {
+                        messageDiv.textContent = 'Additional authentication required';
+                        messageDiv.classList.remove('hidden');
+                    }
+                }
+            } catch (err) {
+                logErrorToServer({ message: 'Unexpected error in handlePayment function', details: err.message });
+                messageDiv.textContent = "An unexpected error occurred. Please try again.";
+                messageDiv.classList.remove('hidden');
+                submitButton.disabled = false;
+            }
+        }
+
+        function handleSuccessfulPayment() { clearQuizState(); paymentFormContainer.innerHTML = `<div class="p-8 text-center"><svg class="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><h3 class="text-2xl font-bold mt-4">Payment Successful!</h3><p class="text-gray-600 mt-2">Finalizing your report...</p></div>`; scrollToBottom(); setTimeout(() => { window.location.href = `result.html?session_id=${sessionId}&payment=success`; }, 2500); }
+        function startCountdown() { let duration = 600; const timerEl = document.getElementById('countdown-timer'); if (!timerEl) return; countdownInterval = setInterval(() => { const minutes = Math.floor(duration / 60).toString().padStart(2, '0'); const seconds = (duration % 60).toString().padStart(2, '0'); timerEl.textContent = `Осталось: ${minutes}:${seconds}`; duration--; if (duration < 0) { clearInterval(countdownInterval); timerEl.textContent = "00:00"; } }, 1000); }
+        
+        async function initQuiz() {
+            setAppHeight();
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlSessionId = urlParams.get('session');
+            if (urlSessionId) {
+                sessionId = urlSessionId;
+                initializeGlobalErrorHandlers();
+                try {
+                    const response = await fetch('/.netlify/functions/quiz', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'getSession', sessionId: sessionId })
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.answers) { userAnswers = data.answers; saveQuizState(); }
+                    }
+                } catch (error) { console.error('Failed to load session data:', error); logErrorToServer({ message: 'Failed to load session data from URL', details: error.message }); }
+                
+                setTimeout(() => {
+                    inputArea.classList.add('hidden'); showTypingIndicator();
+                    setTimeout(() => {
+                        hideTypingIndicator(); addBotMessage("Welcome back! Let's complete your payment to get your full report."); showPaymentForm();
+                    }, 1200);
+                }, 1000);
+                return;
+            }
+
+            const isRestored = await startQuizSession();
+            if (isRestored) {
+                addBotMessage("С возвращением! Давайте продолжим с того места, где вы остановились.");
+                updateProgressBar();
+                askNextQuestion();
+            } else {
+                if (sessionId) { askNextQuestion(); }
+            }
+        }
+
+        let globalHandlersActive = false;
+        function setupGlobalHandlers() { if (globalHandlersActive) return; const globalClickHandler = () => { if (!inputArea.classList.contains('hidden') && userInput.type !== 'email') { handleAnswer(userInput.value); } }; const globalKeyHandler = (e) => { if (e.key === 'Enter' && !inputArea.classList.contains('hidden') && userInput.type !== 'email') { e.preventDefault(); handleAnswer(userInput.value); } }; eventManager.add(sendBtn, 'click', globalClickHandler, 'global_click'); eventManager.add(userInput, 'keypress', globalKeyHandler, 'global_keypress'); globalHandlersActive = true; }
+        function cleanup() { eventManager.removeAll(); animationManager.clear(); if (detectionInterval) { clearInterval(detectionInterval); detectionInterval = null; } if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; } if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; } if (video && video.srcObject) { video.srcObject = null; } }
+        
+        window.addEventListener('beforeunload', cleanup);
+        window.addEventListener('resize', setAppHeight);
+        inputArea.classList.add('hidden');
+        setupGlobalHandlers();
+        initQuiz();
+    </script>
+    <script>
+        fbq('track', 'ViewContent');
+        if (isInAppBrowser()) {
+            console.log('In-app browser detected:', navigator.userAgent);
+        }
+    </script>
+</body>
+</html>
