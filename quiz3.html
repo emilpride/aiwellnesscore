@@ -1693,6 +1693,7 @@
             elements = stripe.elements({ clientSecret });
 
             const paymentRequest = stripe.paymentRequest({
+country: 'GB',
                 currency: 'usd',
                 total: { label: 'AI Wellness Report', amount: 999 },
                 requestPayerName: true,
