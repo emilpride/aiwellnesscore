@@ -1,7 +1,6 @@
 'use strict';
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
-
 if (!getApps().length) {
   try {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
@@ -9,9 +8,9 @@ if (!getApps().length) {
   } catch (e) { console.error("Firebase init error in getAdminData.js:", e); }
 }
 const db = getFirestore();
-
+// --- ИЗМЕНЕНИЕ: Убран 'start_consent' для корректного подсчета прогресса ---
 const ALL_QUESTION_KEYS = [
-    'name', 'start_consent', 'age', 'gender', 'height', 'weight',
+    'name', 'age', 'gender', 'height', 'weight',
     'sleep', 'activity', 'nutrition', 'processed_food', 'hydration', 'stress',
     'mindfulness', 'mood', 'alcohol', 'smoking', 'screen_time',
     'selfie',
@@ -24,7 +23,6 @@ const countryCodeToName = {
     AU: "Australia", JP: "Japan", CN: "China", IN: "India", BR: "Brazil", RU: "Russia",
     UA: "Ukraine", PL: "Poland", IT: "Italy", ES: "Spain", NL: "Netherlands", SE: "Sweden",
 };
-
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -146,7 +144,6 @@ exports.handler = async (event) => {
         topTrafficSources: Object.entries(trafficSourceCounts).sort((a, b) => b[1] - a[1]).slice(0, 5),
         topCountries: Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 5),
     };
-
     return {
       statusCode: 200,
       body: JSON.stringify({
@@ -160,4 +157,3 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: JSON.stringify({ error: 'Internal Server Error' }) };
   }
 };
-
