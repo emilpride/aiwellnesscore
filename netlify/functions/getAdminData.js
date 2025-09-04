@@ -1,6 +1,7 @@
 'use strict';
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
+
 if (!getApps().length) {
   try {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
@@ -8,9 +9,9 @@ if (!getApps().length) {
   } catch (e) { console.error("Firebase init error in getAdminData.js:", e); }
 }
 const db = getFirestore();
-// --- ИЗМЕНЕНИЕ: Убран 'start_consent' для корректного подсчета прогресса ---
+
 const ALL_QUESTION_KEYS = [
-    'name', 'age', 'gender', 'height', 'weight',
+    'userGoal', 'name', 'start_consent', 'age', 'gender', 'height', 'weight',
     'sleep', 'activity', 'nutrition', 'processed_food', 'hydration', 'stress',
     'mindfulness', 'mood', 'alcohol', 'smoking', 'screen_time',
     'selfie',
@@ -23,6 +24,7 @@ const countryCodeToName = {
     AU: "Australia", JP: "Japan", CN: "China", IN: "India", BR: "Brazil", RU: "Russia",
     UA: "Ukraine", PL: "Poland", IT: "Italy", ES: "Spain", NL: "Netherlands", SE: "Sweden",
 };
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -81,7 +83,6 @@ exports.handler = async (event) => {
       const progressPercent = Math.round((answeredCount / TOTAL_QUESTIONS) * 100);
       const progress = `${answeredCount} of ${TOTAL_QUESTIONS} (${progressPercent}%)`;
 
-      // ИСПРАВЛЕНИЕ: Считаем квиз завершенным, если пользователь ответил на последний вопрос о стиле жизни ('screen_time').
       if (answers.hasOwnProperty('screen_time')) {
         completedQuizzes++;
       }
@@ -121,6 +122,7 @@ exports.handler = async (event) => {
         email: answers.email || 'N/A',
         gender: answers.gender || 'N/A',
         age: answers.age || 'N/A',
+        userGoal: answers.userGoal || 'N/A', // <-- ДОБАВЛЕНО НОВОЕ ПОЛЕ
         progress: progress,
         progressPercent: progressPercent,
         dropOffPoint: String(data.dropOffPoint || 'N/A').replace('question_', ''),
@@ -144,6 +146,7 @@ exports.handler = async (event) => {
         topTrafficSources: Object.entries(trafficSourceCounts).sort((a, b) => b[1] - a[1]).slice(0, 5),
         topCountries: Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 5),
     };
+
     return {
       statusCode: 200,
       body: JSON.stringify({
