@@ -8,7 +8,8 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         :root {
-            --bg-dark: #111827; --bg-light: #1F2937; --border-color: #374151;
+            --bg-dark: #111827;
+            --bg-light: #1F2937; --border-color: #374151;
             --text-main: #F9FAFB; --text-secondary: #9CA3AF; --accent-purple: #8b5cf6;
         }
         body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif; }
@@ -123,6 +124,7 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">IP/Country</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User Goal</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Progress</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Duration</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Drop-off Point</th>
@@ -147,8 +149,7 @@
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-400">Traffic Sources</label>
                             <div id="funnel-sources-checkboxes" class="form-input w-full mt-1 h-32 overflow-y-auto p-2 space-y-1">
-                                <!-- Checkboxes will be populated by JavaScript -->
-                            </div>
+                                </div>
                         </div>
                         <div>
                             <label for="funnel-start-date" class="block text-sm font-medium text-gray-400">Start Date</label>
@@ -195,13 +196,12 @@
                     });
                     if (response.status === 401) throw new Error('Incorrect password.');
                     if (!response.ok) throw new Error('Could not fetch data from server.');
-                    
                     const { sessions, statistics, messages } = await response.json();
                     
                     allSessionsData = sessions;
                     statisticsData = statistics;
                     allMessagesData = messages;
-                    
+
                     if (!adminPassword) {
                         adminPassword = password;
                         loginModal.classList.add('hidden');
@@ -237,7 +237,7 @@
                         document.getElementById(tab.id.replace('tab-', 'content-')).classList.add('active');
                     });
                 });
-                
+
                 const applyFilters = () => renderTable(allSessionsData);
                 searchInput.addEventListener('input', applyFilters);
                 statusFilter.addEventListener('change', applyFilters);
@@ -253,7 +253,6 @@
                         }
                     }
                 });
-                
                 analyzeFunnelBtn.addEventListener('click', calculateAndRenderFunnel);
             }
 
@@ -310,7 +309,7 @@
                 });
 
                 if (filteredData.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="11" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="12" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`;
                     return;
                 }
                 
@@ -324,6 +323,7 @@
                             <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.ipAddress}</div><div class="text-gray-400">${session.country}</div></td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-purple-400">${session.email}</td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.gender}</div><div class="text-gray-400">Age: ${session.age}</div></td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.userGoal}</td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.progress}</td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.duration}</td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-yellow-400 font-mono">${session.dropOffPoint}</td>
@@ -345,9 +345,10 @@
                                 <p class="text-gray-500 text-xs mt-1">${new Date(err.timestamp).toLocaleString()}</p>
                             </div>
                         `).join('');
+
                         tableHTML += `
                             <tr id="errors-${session.id}" class="hidden">
-                                <td colspan="11" class="p-3 bg-gray-800">${errorsHTML}</td>
+                                <td colspan="12" class="p-3 bg-gray-800">${errorsHTML}</td>
                             </tr>
                         `;
                     }
@@ -410,19 +411,19 @@
 
                 const funnelSteps = [
                     { name: 'Quiz Started', condition: session => true },
-                    { name: '1. Answered Name', condition: session => session.answers.hasOwnProperty('name') },
+                    { name: '1. Answered Goal', condition: session => session.answers.hasOwnProperty('userGoal') }, // Обновлено
                     { name: '2. Answered Age & Gender', condition: session => session.answers.hasOwnProperty('age') && session.answers.hasOwnProperty('gender') },
                     { name: '3. Answered Body Stats', condition: session => session.answers.hasOwnProperty('weight') && session.answers.hasOwnProperty('height') },
                     { name: '4. Answered Lifestyle (Start)', condition: session => session.answers.hasOwnProperty('sleep') },
                     { name: '5. Answered Lifestyle (Middle)', condition: session => session.answers.hasOwnProperty('stress') },
                     { name: '6. Answered Lifestyle (End)', condition: session => session.answers.hasOwnProperty('screen_time') },
-                    { name: '7. Took Photo', condition: session => session.answers.hasOwnProperty('selfie') },
+                    { name: '7. Took Photo', condition: session => session.answers.hasOwnProperty('selfie') && session.answers.selfie !== 'skipped' }, // Уточнено
                     { name: '8. Answered Email', condition: session => session.answers.hasOwnProperty('email') },
                     { name: '9. Quiz Completed (All questions)', condition: session => session.progressPercent === 100 },
                     { name: '10. Reached Payment', condition: session => session.paymentStatus !== 'pending' || (session.errors && session.errors.some(e => e.message.includes('Payment'))) },
                     { name: '11. Purchased', condition: session => session.paymentStatus === 'succeeded' }
                 ];
-                
+
                 let results = [];
                 let previousStepCount = filteredSessions.length;
                 const initialCount = filteredSessions.length;
@@ -440,7 +441,6 @@
                     
                     previousStepCount = count;
                 });
-
                 renderFunnelResults(results);
             }
 
@@ -452,7 +452,6 @@
                 }
 
                 const maxCount = results[0].count;
-
                 const tableRows = results.map(step => `
                     <tr class="border-b border-gray-700">
                         <td class="py-3 px-4 text-sm text-white">${step.name}</td>
@@ -490,4 +489,3 @@
     </script>
 </body>
 </html>
-
