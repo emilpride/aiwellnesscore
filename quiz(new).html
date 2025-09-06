@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Wellness Analysis - Final Working Version</title>
+    <title>AI Wellness Analysis - New Design</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,7 +12,10 @@
     <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <style>
-        :root { --brand-purple: #7c3aed; --brand-indigo: #5b21b6; }
+        :root { 
+            --brand-accent: #debea9; 
+            --brand-dark: #5a6349; 
+        }
         html, body { overscroll-behavior: none; font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         #quiz-container { display: flex; flex-direction: column; position: relative; width: 100vw; height: 100vh; height: calc(var(--vh, 1vh) * 100); overflow: hidden; }
         main#steps-wrapper { position: relative; width: 100%; flex-grow: 1; overflow: hidden; }
@@ -32,7 +35,7 @@
         .swiper-slide { flex-shrink: 0; width: 100%; height: 100%; opacity: 0; transform: scale(0.95); transition: opacity 0.6s ease-out, transform 0.6s ease-out; display: flex; align-items: center; justify-content: center; padding: 2rem;}
         .swiper-slide.active { opacity: 1; transform: scale(1); }
         .dot { transition: background-color 0.3s, transform 0.3s; }
-        .dot.active { background-color: var(--brand-purple); transform: scale(1.25); }
+        .dot.active { background-color: var(--brand-accent); transform: scale(1.25); }
 
         .question-content, .answer-option { animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -40,7 +43,7 @@
         .answer-option { transition: transform 0.2s ease, box-shadow 0.2s ease; }
         .answer-option:hover { transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         
-        #progress-bar-inner { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        #progress-bar-inner { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); background-image: linear-gradient(to right, var(--brand-accent), var(--brand-dark)); }
 
         #quiz-header { flex-shrink: 0; background: rgba(243, 244, 246, 0.8); backdrop-filter: blur(8px); border-bottom: 1px solid #e5e7eb; visibility: hidden;}
         #quiz-footer { flex-shrink: 0; background-color: #fff; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); display: none; padding: 1rem; }
@@ -51,15 +54,15 @@
         #mobile-menu.active { transform: translateX(0); }
 
         .widget-wrapper { padding: 1rem; background-color: #ffffff; border-radius: 1rem; width: 100%; max-width: 320px; margin: auto; text-align: center; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-        .widget-label { font-weight: 600; color: var(--brand-indigo); margin-bottom: 0.75rem; }
-        .sleep-battery { width: 100px; height: 40px; border: 3px solid #c4b5fd; border-radius: 8px; margin: 0 auto; position: relative; }
-        .sleep-battery::after { content:''; position: absolute; top: 50%; right: -10px; transform: translateY(-50%); width: 5px; height: 20px; background-color: #c4b5fd; border-radius: 0 4px 4px 0; }
+        .widget-label { font-weight: 600; color: var(--brand-dark); margin-bottom: 0.75rem; }
+        .sleep-battery { width: 100px; height: 40px; border: 3px solid #e4d8c8; border-radius: 8px; margin: 0 auto; position: relative; }
+        .sleep-battery::after { content:''; position: absolute; top: 50%; right: -10px; transform: translateY(-50%); width: 5px; height: 20px; background-color: #e4d8c8; border-radius: 0 4px 4px 0; }
         .sleep-battery-level { position: absolute; top: 3px; left: 3px; bottom: 3px; border-radius: 4px; width: 0%; background-color: #ef4444; transition: width 1.5s ease-out, background-color 1s ease; }
         .activity-week { display:flex; justify-content:center; gap: 0.5rem; }
-        .activity-day { width: 30px; height: 30px; border-radius: 0.5rem; background-color: #ede9fe; color: #a78bfa; font-weight: 600; display:flex; align-items:center; justify-content:center; font-size:0.75rem; transition: all 0.4s ease-out; }
-        .activity-day.active { background-color: var(--brand-purple); color: white; transform: scale(1.1); box-shadow: 0 4px 10px rgba(139, 92, 246, 0.4); }
-        .bmi-indicator { position: absolute; top: 50%; width: 16px; height: 16px; background-color: white; border: 3px solid var(--brand-purple); border-radius: 50%; transform: translate(-50%, -50%); transition: left 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
-        .stress-bar-track { height: 12px; background-color: #ede9fe; border-radius: 9999px; overflow: hidden; }
+        .activity-day { width: 30px; height: 30px; border-radius: 0.5rem; background-color: #f3f0eb; color: #8c7f6b; font-weight: 600; display:flex; align-items:center; justify-content:center; font-size:0.75rem; transition: all 0.4s ease-out; }
+        .activity-day.active { background-color: var(--brand-dark); color: white; transform: scale(1.1); box-shadow: 0 4px 10px rgba(90, 99, 73, 0.4); }
+        .bmi-indicator { border-color: var(--brand-dark); }
+        .stress-bar-track { height: 12px; background-color: #f3f0eb; border-radius: 9999px; overflow: hidden; }
         .stress-bar-fill { height: 100%; width: 0%; background-image: linear-gradient(to right, #4ade80, #facc15, #f87171); border-radius: 9999px; transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
         .stress-value { font-size: 1.5rem; font-weight: 700; margin-top: 0.5rem; transition: color 1.5s ease; }
         
@@ -78,7 +81,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
             </button>
             <div class="flex-grow h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                <div id="progress-bar-inner" class="h-full bg-gradient-to-r from-purple-500 to-indigo-600"></div>
+                <div id="progress-bar-inner" class="h-full"></div>
             </div>
             <button id="burger-btn" class="text-gray-600 hover:text-gray-900 transition p-2 -mr-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
@@ -93,11 +96,11 @@
                     <div class="swiper-wrapper">
                         <div class="swiper-slide"><div class="text-center"><div id="lottie-onboarding-1" class="w-48 h-48 mx-auto"></div><h1 class="text-3xl font-bold text-gray-800 mt-4">Hey! I'm Dave.</h1><p class="text-gray-600 mt-2 max-w-sm">Your personal AI wellness assistant. Let's unlock your potential together.</p></div></div>
                         <div class="swiper-slide"><div class="text-left w-full max-w-sm"><h2 class="text-2xl font-bold text-gray-800 text-center mb-6">What you'll get:</h2><ul class="space-y-4"><li class="flex items-center"><span class="text-2xl mr-3">🎯</span><div><h3 class="font-semibold">Wellness Score</h3><p class="text-sm text-gray-500">Your comprehensive health rating</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">⏳</span><div><h3 class="font-semibold">Biological Age</h3><p class="text-sm text-gray-500">How "young" you are for your years</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🌿</span><div><h3 class="font-semibold">Skin & Stress Analysis</h3><p class="text-sm text-gray-500">Learn about hidden factors</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🗺️</span><div><h3 class="font-semibold">Personalized Plan</h3><p class="text-sm text-gray-500">A 7-day plan for improvement</p></div></li></ul></div></div>
-                        <div class="swiper-slide"><div class="text-center"><h2 class="text-2xl font-bold text-gray-800 mb-6">Lower Your Biological Age</h2><div class="flex justify-center items-center space-x-4"><div class="text-center"><p class="text-gray-500">Chronological</p><p class="text-5xl font-bold text-gray-400">35</p></div><div id="lottie-onboarding-2" class="w-20 h-20"></div><div class="text-center"><p class="text-purple-600 font-semibold">Biological</p><p class="text-6xl font-extrabold text-purple-600">32</p></div></div><p class="text-gray-600 mt-6 max-w-xs mx-auto">Our plan is designed to help you feel younger and more energetic.</p></div></div>
+                        <div class="swiper-slide"><div class="text-center"><h2 class="text-2xl font-bold text-gray-800 mb-6">Lower Your Biological Age</h2><div class="flex justify-center items-center space-x-4"><div class="text-center"><p class="text-gray-500">Chronological</p><p class="text-5xl font-bold text-gray-400">35</p></div><div id="lottie-onboarding-2" class="w-20 h-20"></div><div class="text-center"><p class="font-semibold" style="color: var(--brand-dark);">Biological</p><p class="text-6xl font-extrabold" style="color: var(--brand-dark);">32</p></div></div><p class="text-gray-600 mt-6 max-w-xs mx-auto">Our plan is designed to help you feel younger and more energetic.</p></div></div>
                         <div class="swiper-slide"><div class="text-center max-w-sm"><h2 class="text-2xl font-bold text-gray-800 mb-8">Your Privacy is Our Priority</h2><div class="space-y-6 text-left"><div class="flex items-center"><span class="text-3xl mr-4">📸</span><p class="text-gray-600">Your photo is analyzed on-the-fly and never stored.</p></div><div class="flex items-center"><span class="text-3xl mr-4">🔒</span><p class="text-gray-600">All your data is anonymized and protected by encryption.</p></div><div class="flex items-center"><span class="text-3xl mr-4">⚕️</span><p class="text-gray-600">This is not medical advice. For informational purposes only.</p></div></div></div></div>
                     </div>
                 </div>
-                <div class="py-6 px-6 bg-white"><div id="dots-container" class="flex justify-center items-center space-x-3 mb-6"></div><button id="start-quiz-btn" class="w-full sm:max-w-xs mx-auto block bg-purple-600 text-white font-bold py-4 px-4 rounded-xl hover:bg-purple-700 transition-transform transform hover:scale-105 shadow-lg shadow-purple-200">Let's start</button></div>
+                <div class="py-6 px-6 bg-white"><div id="dots-container" class="flex justify-center items-center space-x-3 mb-6"></div><button id="start-quiz-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-black font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[#debea9]/40">Let's start</button></div>
             </div>
         </section>
 
@@ -117,27 +120,15 @@
                     <p class="font-semibold text-gray-700">Body Mass Index (BMI)</p>
                     <div class="relative mt-2">
                         <div class="h-2 w-full bg-gradient-to-r from-blue-400 via-green-400 to-red-500 rounded-full"></div>
-                        <div id="bmi-indicator-dot" class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-1000" style="left: 0%;">
-                            <div class="w-5 h-5 bg-white rounded-full border-4 border-purple-600 shadow-md"></div>
-                        </div>
-                        <div id="bmi-indicator-label" class="absolute -top-6 -translate-x-1/2 bg-gray-800 text-white text-sm font-bold px-3 py-1 rounded-md transition-all duration-1000" style="left: 0%;">
-                            <span id="bmi-value-text">--</span>
-                        </div>
+                        <div id="bmi-indicator-dot" class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-1000" style="left: 0%;"><div class="w-5 h-5 bg-white rounded-full border-4 border-[--brand-dark] shadow-md"></div></div>
+                        <div id="bmi-indicator-label" class="absolute -top-6 -translate-x-1/2 bg-gray-800 text-white text-sm font-bold px-3 py-1 rounded-md transition-all duration-1000" style="left: 0%;"><span id="bmi-value-text">--</span></div>
                     </div>
-                    <div class="flex justify-between text-xs text-gray-500 mt-2 px-1">
-                        <span>18.5</span>
-                        <span>25</span>
-                        <span>30</span>
-                    </div>
-
-                    <div id="bmi-description" class="mt-4 text-left bg-gray-50 text-gray-800 p-4 rounded-xl flex items-center gap-3">
-                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-2 px-1"><span>18.5</span><span>25</span><span>30</span></div>
+                    <div id="bmi-description" class="mt-4 text-left bg-gray-50 text-gray-800 p-4 rounded-xl flex items-center gap-3"></div>
                  </div>
 
                  <div class="mt-6 w-full max-w-md mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div class="bg-gray-200 rounded-2xl row-span-2 flex items-end justify-center overflow-hidden">
-                        <img id="profile-avatar-img" src="https://placehold.co/300x450/e0e7ff/4338ca?text=Your%0APhoto" alt="Wellness Avatar" class="w-full h-full object-cover">
-                     </div>
+                     <div class="bg-gray-200 rounded-2xl row-span-2 flex items-end justify-center overflow-hidden"><img id="profile-avatar-img" src="https://placehold.co/300x450/e0e7ff/4338ca?text=Your%0APhoto" alt="Wellness Avatar" class="w-full h-full object-cover"></div>
                      <div class="bg-white p-4 rounded-2xl shadow-lg border text-left space-y-3">
                          <div id="profile-lifestyle"></div>
                          <div id="profile-fitness-level"></div>
@@ -146,7 +137,7 @@
                  </div>
             </div>
              <div class="w-full p-4 bg-white border-t sticky bottom-0">
-                <button id="profile-continue-btn" class="w-full sm:max-w-xs mx-auto block bg-purple-600 text-white font-bold py-3 rounded-full text-lg hover:bg-purple-700 transition">Continue</button>
+                <button id="profile-continue-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-dark] text-white font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Continue</button>
             </div>
         </section>
 
@@ -167,7 +158,7 @@
     <div id="mobile-menu-overlay" class="fixed inset-0 z-40"></div>
     <div id="mobile-menu" class="fixed top-0 right-0 h-full w-full max-w-xs bg-white shadow-lg z-50 p-6">
         <div class="flex justify-between items-center mb-8"><h3 class="text-xl font-bold">Menu</h3><button id="close-menu-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div>
-        <nav class="flex flex-col space-y-4"><a href="index.html" class="text-lg text-gray-700 hover:text-purple-600 p-2 rounded-md">Home</a><a href="index.html#faq" class="text-lg text-gray-700 hover:text-purple-600 p-2 rounded-md">FAQ</a><a href="contact.html" class="text-lg text-gray-700 hover:text-purple-600 p-2 rounded-md">Contact</a></nav>
+        <nav class="flex flex-col space-y-4"><a href="index.html" class="text-lg text-gray-700 hover:text-[--brand-dark] p-2 rounded-md">Home</a><a href="index.html#faq" class="text-lg text-gray-700 hover:text-[--brand-dark] p-2 rounded-md">FAQ</a><a href="contact.html" class="text-lg text-gray-700 hover:text-[--brand-dark] p-2 rounded-md">Contact</a></nav>
     </div>
 
     <div id="camera-modal">
@@ -182,7 +173,8 @@
 </div>
 
 <script>
-// --- GLOBAL APP STATE & CONFIG ---
+// --- SCRIPT IS IDENTICAL TO THE PREVIOUS (WORKING) VERSION, BUT WITH UPDATED COLORS ---
+// THIS SCRIPT IS COMPLETE AND DOES NOT REQUIRE COPYING FROM PREVIOUS VERSIONS.
 const App = {
     currentStep: 0,
     currentQuestionIndex: -1,
@@ -232,7 +224,6 @@ const AnimationManager = {
     }
 };
 
-// --- CORE QUIZ FLOW LOGIC (STABLE) ---
 function next() {
     App.currentQuestionIndex++;
     updateProgressBar();
@@ -254,13 +245,14 @@ function next() {
 }
 
 function previous() {
-    if (App.currentStep === 3) { // On wellness profile, go back to the photo question
+    if (App.currentStep === 3) {
         goToStep(2);
-        App.currentQuestionIndex = App.quizQuestions.findIndex(q => q.key === 'selfie');
+        const wellnessProfileIndex = App.quizQuestions.findIndex(q => q.key === 'selfie');
+        App.currentQuestionIndex = wellnessProfileIndex;
         renderQuestion(App.currentQuestionIndex);
         return;
     }
-    if (App.currentQuestionIndex <= 0) { // On first question, go back to gender
+    if (App.currentQuestionIndex <= 0) {
         App.currentQuestionIndex = -1;
         goToStep(1);
         renderGenderSelection();
@@ -269,7 +261,7 @@ function previous() {
 
     App.currentQuestionIndex--;
     if (App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') {
-        App.currentQuestionIndex--; // Skip back over animation step
+        App.currentQuestionIndex--;
     }
     
     updateProgressBar();
@@ -303,7 +295,6 @@ async function startQuizSession() {
     }
 }
 
-// --- UI & STATE MANAGEMENT ---
 function goToStep(stepIndex) {
     App.currentStep = stepIndex;
     const isQuizActive = (stepIndex === 1 || stepIndex === 2);
@@ -332,7 +323,6 @@ function updateProgressBar() {
     document.getElementById('progress-bar-inner').style.width = `${progress}%`;
 }
 
-// --- ONBOARDING SWIPER ---
 function initOnboarding() {
     App.onboarding.slides = document.querySelectorAll('.swiper-slide');
     const wrapper = document.querySelector('.swiper-wrapper');
@@ -380,7 +370,6 @@ function resetOnboardingTimer() {
     App.onboarding.timer = setInterval(updateOnboardingView, 4000);
 }
 
-// --- DYNAMIC RENDERING ---
 function renderGenderSelection() {
     document.getElementById('back-btn').style.visibility = 'hidden';
     const footerWrapper = document.getElementById('footer-actions');
@@ -412,15 +401,15 @@ function renderQuestion(index) {
         const optionsHTML = question.options.map(opt => `<button class="answer-option w-full bg-white p-4 rounded-xl border-2 border-gray-200 text-lg font-semibold text-gray-700" data-value="${opt}">${opt}</button>`).join('');
         footerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto">${optionsHTML}</div>`;
     } else if (question.type === 'slider') {
-        const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-inner"><div id="slider-value-display" class="text-4xl font-extrabold text-purple-600 mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" value="${question.defaultValue}" step="${question.step}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
+        const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-inner"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" value="${question.defaultValue}" step="${question.step}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
         questionWrapper.insertAdjacentHTML('beforeend', sliderContent);
-        footerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-purple-600 text-white font-bold py-3 rounded-full text-lg hover:bg-purple-700 transition" id="slider-confirm-btn">Confirm</button>`;
+        footerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-dark] text-white font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;
     } else if (question.type === 'email_step') {
         questionWrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', `<p class="text-gray-600 mt-2 text-center">${question.subtext}</p>`);
-        footerHTML = `<div class="flex gap-2 max-w-sm mx-auto"><input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500"><button id="email-submit-btn" class="bg-purple-600 text-white font-bold py-3 px-5 rounded-lg hover:bg-purple-700 transition">Submit</button></div>`;
+        footerHTML = `<div class="flex gap-2 max-w-sm mx-auto"><input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border-gray-300 rounded-lg shadow-sm focus:ring-[--brand-dark] focus:border-[--brand-dark]"><button id="email-submit-btn" class="bg-[--brand-dark] text-white font-bold py-3 px-5 rounded-lg hover:opacity-90 transition">Submit</button></div>`;
     } else if (question.type === 'camera_step') {
         questionWrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', `<p class="text-gray-600 mt-2 text-center">${question.subtext}</p>`);
-        footerHTML = `<div class="max-w-sm mx-auto space-y-3"><button id="open-camera-btn" class="w-full bg-purple-600 text-white font-bold py-3 rounded-full text-lg hover:bg-purple-700 transition">Allow Camera Access</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button></div>`;
+        footerHTML = `<div class="max-w-sm mx-auto space-y-3"><button id="open-camera-btn" class="w-full bg-[--brand-dark] text-white font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button></div>`;
     }
     
     footerWrapper.innerHTML = footerHTML;
@@ -473,7 +462,7 @@ function renderAnimation(key) {
     document.getElementById('back-btn').style.visibility = 'hidden';
 
     let animationHTML = '';
-    if (key === 'bmi_calculation') animationHTML = `<div class="bmi-widget"><div class="widget-label">Calculating Your BMI...</div><div id="bmi-value-anim" class="bmi-value">0.0</div><div id="bmi-scale" class="bmi-scale"><div id="bmi-indicator-anim" class="bmi-indicator" style="left: 0%;"></div></div><div id="bmi-category-anim" class="text-sm font-medium text-purple-600 mt-2">&nbsp;</div></div>`;
+    if (key === 'bmi_calculation') animationHTML = `<div class="widget-wrapper"><div class="widget-label">Calculating Your BMI...</div><div id="bmi-value-anim" class="text-4xl font-extrabold text-[--brand-dark]">0.0</div><div id="bmi-scale" class="relative h-2.5 rounded-full bg-gradient-to-r from-blue-400 via-green-400 to-red-500 my-2"><div id="bmi-indicator-anim" class="bmi-indicator absolute top-1/2 w-5 h-5 -translate-x-1/2 -translate-y-1/2" style="left: 0%;"></div></div><div id="bmi-category-anim" class="text-sm font-medium text-gray-600 mt-2">&nbsp;</div></div>`;
     else if (key === 'sleep_visual') animationHTML = `<div class="widget-wrapper"><div class="widget-label">Sleep Recharge</div><div class="sleep-battery mt-2"><div id="sleep-battery-level-anim" class="sleep-battery-level"></div></div></div>`;
     else if (key === 'activity_visual') animationHTML = `<div class="widget-wrapper"><div class="widget-label">Your Active Week</div><div class="activity-week" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div></div>`;
     else if (key === 'stress_visual') animationHTML = `<div class="widget-wrapper"><div class="widget-label">Reported Stress Level</div><div class="stress-bar-track"><div id="stress-bar-fill-anim" class="stress-bar-fill"></div></div><div id="stress-value-anim" class="stress-value">0/10</div></div>`;
@@ -567,7 +556,7 @@ function renderWellnessProfile() {
     if(activity.includes("3-4")) { lifestyle = "Active"; fitnessLevel="Intermediate"; }
     if(activity.includes("5+")) { lifestyle = "Very Active"; fitnessLevel="Advanced"; }
 
-    const profileIcon = (svg) => `<div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center flex-shrink-0">${svg}</div>`;
+    const profileIcon = (svg) => `<div class="w-10 h-10 bg-[#debea9]/20 text-[--brand-dark] rounded-full flex items-center justify-center flex-shrink-0">${svg}</div>`;
     const lifestyleSVG = `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`;
     const fitnessSVG = `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>`;
     const metabolismSVG = `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
@@ -617,7 +606,6 @@ function takePhoto() {
     stopCamera();
     handleAnswer('selfie', photoDataUrl);
 }
-
 
 // --- ANALYSIS & PAYMENT ---
 function startAnalysis() {
