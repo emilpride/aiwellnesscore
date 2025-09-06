@@ -52,6 +52,11 @@
         #mobile-menu { transform: translateX(100%); transition: transform 0.3s ease-in-out; }
         #mobile-menu.active { transform: translateX(0); }
 
+        /* Testimonial Slider */
+        #testimonial-slider { overflow: hidden; }
+        #testimonial-track { display: flex; transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+        .testimonial-item { flex-shrink: 0; width: 100%; padding: 0 1rem; }
+
         /* Widget Styles */
         .widget-wrapper, .bmi-widget { padding: 1rem; background-color: #ffffff; border-radius: 1rem; width: 100%; max-width: 320px; margin: auto; text-align: center; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
         .widget-label { font-weight: 600; color: var(--brand-indigo); margin-bottom: 0.75rem; }
@@ -78,7 +83,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
             </button>
             <div class="flex-grow h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                <div id="progress-bar-inner" class="h-full bg-gradient-to-r from-purple-500 to-indigo-600" style="width: 0%;"></div>
+                <div id="progress-bar-inner" class="h-full bg-gradient-to-r from-purple-500 to-indigo-600"></div>
             </div>
             <button id="burger-btn" class="text-gray-600 hover:text-gray-900 transition p-2 -mr-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
@@ -110,9 +115,28 @@
         </section>
 
         <section id="step-3" class="quiz-step prev">
-             <div id="loading-animation" class="w-48 h-48"></div>
+            <div id="loading-animation" class="w-48 h-48"></div>
             <h2 class="text-3xl font-bold text-gray-800 mt-4 text-center">Analyzing Your Unique Profile...</h2>
             <p class="text-gray-600 mt-2 text-center">Our AI is calibrating your personalized results.</p>
+            <div id="testimonial-slider" class="w-full max-w-md mt-12 text-center">
+                <div id="testimonial-track">
+                    <div class="testimonial-item">
+                        <div class="flex justify-center text-yellow-400 mb-2">★★★★★</div>
+                        <p class="italic text-gray-700">"This was a real eye-opener. The 7-day plan was simple, effective, and made me feel years younger!"</p>
+                        <p class="font-bold mt-2 text-purple-700">- Jessica M., New York</p>
+                    </div>
+                    <div class="testimonial-item">
+                        <div class="flex justify-center text-yellow-400 mb-2">★★★★★</div>
+                        <p class="italic text-gray-700">"Finally, a wellness plan that understands my busy life. The photo analysis was surprisingly accurate about my stress levels."</p>
+                        <p class="font-bold mt-2 text-purple-700">- David L., California</p>
+                    </div>
+                    <div class="testimonial-item">
+                        <div class="flex justify-center text-yellow-400 mb-2">★★★★★</div>
+                        <p class="italic text-gray-700">"I've tried everything. This is the first time I've seen actual results that stick. Highly recommend!"</p>
+                        <p class="font-bold mt-2 text-purple-700">- Sarah K., Texas</p>
+                    </div>
+                </div>
+            </div>
         </section>
         
         <section id="step-4" class="quiz-step prev overflow-y-auto justify-start pt-8 pb-8">
@@ -177,7 +201,7 @@ const AnimationManager = {
     }
 };
 
-// --- CORE QUIZ FLOW LOGIC (REFINED AND STABLE) ---
+// --- CORE QUIZ FLOW LOGIC (STABLE) ---
 function next() {
     App.currentQuestionIndex++;
     updateProgressBar();
@@ -190,13 +214,13 @@ function next() {
             renderQuestion(App.currentQuestionIndex);
         }
     } else {
-        goToStep(3); // Go to loading screen
+        goToStep(3);
         startAnalysis();
     }
 }
 
 function previous() {
-    if (App.currentQuestionIndex < 0) return; // Should not happen with button visibility
+    if (App.currentQuestionIndex < 0) return;
     
     if (App.currentQuestionIndex === 0) {
         App.currentQuestionIndex = -1;
@@ -237,13 +261,12 @@ async function startQuizSession() {
     }
 }
 
-
 // --- UI & STATE MANAGEMENT ---
 function goToStep(stepIndex) {
     App.currentStep = stepIndex;
-    const isQuizStep = (stepIndex === 1 || stepIndex === 2);
+    const isQuizActive = (stepIndex === 1 || stepIndex === 2);
     document.getElementById('quiz-header').style.visibility = stepIndex > 0 && stepIndex < 3 ? 'visible' : 'hidden';
-    document.getElementById('quiz-footer').style.display = isQuizStep ? 'block' : 'none';
+    document.getElementById('quiz-footer').style.display = isQuizActive ? 'block' : 'none';
     
     document.querySelectorAll('.quiz-step').forEach((step, index) => {
         step.classList.remove('active', 'prev', 'next');
@@ -259,15 +282,13 @@ function updateProgressBar() {
     const totalQuestions = App.quizQuestions.filter(q => q.type !== 'animation').length;
     const answeredQuestions = Object.keys(App.userAnswers).length - (App.userAnswers.gender ? 1 : 0);
     
-    if (App.currentStep >= 2) {
+    if (App.currentStep === 2) {
         progress = totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0;
-    }
-     if (App.currentStep > 2) {
+    } else if (App.currentStep > 2) {
         progress = 100;
     }
     document.getElementById('progress-bar-inner').style.width = `${progress}%`;
 }
-
 
 // --- ONBOARDING SWIPER ---
 function initOnboarding() {
@@ -308,9 +329,7 @@ function initOnboarding() {
 }
 
 function updateOnboardingView(manual = false) {
-    if (!manual) {
-        App.onboarding.slideIndex = (App.onboarding.slideIndex + 1) % App.onboarding.slides.length;
-    }
+    if (!manual) { App.onboarding.slideIndex = (App.onboarding.slideIndex + 1) % App.onboarding.slides.length; }
     document.querySelector('.swiper-wrapper').style.transform = `translateX(-${App.onboarding.slideIndex * 100}%)`;
     App.onboarding.slides.forEach((s, i) => s.classList.toggle('active', i === App.onboarding.slideIndex));
     App.onboarding.dots.forEach((d, i) => d.classList.toggle('active', i === App.onboarding.slideIndex));
@@ -322,7 +341,6 @@ function resetOnboardingTimer() {
     App.onboarding.timer = setInterval(updateOnboardingView, 4000);
 }
 
-
 // --- DYNAMIC RENDERING ---
 function renderGenderSelection() {
     const questionWrapper = document.querySelector('#step-1 .question-content');
@@ -332,8 +350,7 @@ function renderGenderSelection() {
     const optionsHTML = `
         <div class="answer-option cursor-pointer bg-white p-4 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-w-1 aspect-h-1" data-value="Female"><div class="text-5xl sm:text-6xl">👩</div><p class="mt-4 text-lg sm:text-xl font-bold">Female</p></div>
         <div class="answer-option cursor-pointer bg-white p-4 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-w-1 aspect-h-1" data-value="Male"><div class="text-5xl sm:text-6xl">👨</div><p class="mt-4 text-lg sm:text-xl font-bold">Male</p></div>
-        <div class="answer-option cursor-pointer bg-white p-4 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-w-1 aspect-h-1" data-value="Other"><div class="text-5xl sm:text-6xl">🧑</div><p class="mt-4 text-lg sm:text-xl font-bold">Other</p></div>
-    `;
+        <div class="answer-option cursor-pointer bg-white p-4 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-w-1 aspect-h-1" data-value="Other"><div class="text-5xl sm:text-6xl">🧑</div><p class="mt-4 text-lg sm:text-xl font-bold">Other</p></div>`;
     footerWrapper.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">${optionsHTML}</div>`;
     
     document.querySelectorAll('#footer-actions .answer-option').forEach(card => {
@@ -350,7 +367,6 @@ function renderQuestion(index) {
     const footerWrapper = document.getElementById('footer-actions');
     
     document.getElementById('back-btn').style.visibility = 'visible';
-
     questionWrapper.innerHTML = `<div class="question-content"><h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2></div>`;
     
     let footerHTML = '';
@@ -445,15 +461,17 @@ function playAnimation(key) {
         setTimeout(() => {
             const levelEl = document.getElementById('sleep-battery-level-anim');
             let color = '#ef4444'; if (level > 40) color = '#f59e0b'; if (level > 75) color = '#22c55e';
-            levelEl.style.backgroundColor = color; levelEl.style.width = `${level}%`;
+            if(levelEl) { levelEl.style.backgroundColor = color; levelEl.style.width = `${level}%`; }
         }, 100);
     } else if (key === 'activity_visual') {
         const answer = App.userAnswers.activity || "";
         let days = 1;
         if (answer.includes("1-2")) days = 2; if (answer.includes("3-4")) days = 4; if (answer.includes("5+")) days = 6;
-        const dayElements = document.getElementById('activity-week-anim').children;
-        const daysToActivate = [0, 2, 4, 1, 3, 5, 6]; 
-        for (let i = 0; i < days; i++) { setTimeout(() => { dayElements[daysToActivate[i]].classList.add('active'); }, i * 250); }
+        const dayElements = document.getElementById('activity-week-anim')?.children;
+        if(dayElements) {
+            const daysToActivate = [0, 2, 4, 1, 3, 5, 6]; 
+            for (let i = 0; i < days; i++) { setTimeout(() => { if(dayElements[daysToActivate[i]]) dayElements[daysToActivate[i]].classList.add('active'); }, i * 250); }
+        }
     } else if (key === 'stress_visual') {
         const level = parseInt(App.userAnswers.stress || "5");
         const percent = (level - 1) / 9 * 100;
@@ -467,11 +485,73 @@ function playAnimation(key) {
     }
 }
 
-
 // --- ANALYSIS & PAYMENT ---
-function startAnalysis() { /* ... same as previous ... */ }
-async function initPaymentForm() { /* ... same as previous ... */ }
-async function handlePayment(e) { /* ... same as previous ... */ }
+function startAnalysis() {
+    try {
+        AnimationManager.add('loading-animation', 'https://assets3.lottiefiles.com/packages/lf20_gqG0Yk.json');
+        const track = document.getElementById('testimonial-track');
+        let testimonialIndex = 0;
+        setInterval(() => {
+            if (document.getElementById('testimonial-track')) {
+                testimonialIndex = (testimonialIndex + 1) % 3;
+                track.style.transform = `translateX(-${testimonialIndex * 100}%)`;
+            }
+        }, 3500);
+    } catch(e) { console.error("Error starting loading animations:", e); }
+    
+    fetch('/.netlify/functions/result-background', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: App.sessionId }) });
+    setTimeout(() => {
+        goToStep(4);
+        initPaymentForm();
+    }, 9000);
+}
+
+async function initPaymentForm() {
+    const formHtml = `<div id="payment-form" class="space-y-4"><div id="card-element" class="p-4 border border-gray-300 rounded-lg bg-white shadow-sm"></div><button id="submit-payment" class="pulsate w-full bg-green-500 text-white font-bold py-4 px-4 rounded-lg hover:bg-green-600 transition-colors text-xl shadow-lg shadow-green-200">Unlock My Report - $9.99</button><div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div><p class="text-xs text-gray-400 text-center mt-2">🔒 Secure one-time payment processed by Stripe</p></div>`;
+    document.getElementById('payment-form-container').innerHTML = formHtml;
+    
+    try {
+        App.stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb');
+        const response = await fetch('/.netlify/functions/payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: App.sessionId }) });
+        const data = await response.json();
+        App.clientSecret = data.clientSecret;
+        App.elements = App.stripe.elements({ clientSecret: App.clientSecret });
+        const cardElement = App.elements.create("card", { style: { base: { fontSize: '16px', '::placeholder': { color: '#aab7c4' } } } });
+        cardElement.mount("#card-element");
+        document.getElementById('payment-form').addEventListener('submit', handlePayment);
+    } catch (error) {
+        document.getElementById('payment-form-container').innerHTML = `<p class="text-center text-red-500">Payment form failed to load. Please refresh.</p>`;
+    }
+    
+    let duration = 10 * 60;
+    const countdownEl = document.getElementById('countdown');
+    setInterval(() => {
+        if (duration <= 0 || !countdownEl) return;
+        duration--;
+        const minutes = Math.floor(duration / 60).toString().padStart(2, '0');
+        const seconds = (duration % 60).toString().padStart(2, '0');
+        countdownEl.textContent = `${minutes}:${seconds}`;
+    }, 1000);
+}
+
+async function handlePayment(e) {
+    e.preventDefault();
+    const submitButton = document.getElementById('submit-payment');
+    const messageDiv = document.getElementById('payment-message');
+    submitButton.disabled = true;
+    submitButton.textContent = 'Processing...';
+    
+    const { error } = await App.stripe.confirmCardPayment(App.clientSecret, { payment_method: { card: App.elements.getElement('card') } });
+    
+    if (error) {
+        messageDiv.textContent = error.message;
+        messageDiv.classList.remove('hidden');
+        submitButton.disabled = false;
+        submitButton.textContent = 'Unlock My Report - $9.99';
+    } else {
+        window.location.href = `result.html?session_id=${App.sessionId}&payment=success`;
+    }
+}
 
 
 // --- INITIALIZATION ---
