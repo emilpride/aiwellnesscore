@@ -255,7 +255,7 @@ function showLoadingWithTestimonials() {
     const analysisSteps = ["Cross-referencing lifestyle factors...", "Evaluating skin health markers...", "Calculating your Wellness Age...", "Compiling your personalized plan..."]; let step = 0;
     setInterval(() => { const textEl = document.getElementById('analysis-text'); if(textEl) { textEl.style.opacity = '0'; setTimeout(() => { textEl.textContent = analysisSteps[step % analysisSteps.length]; textEl.style.opacity = '1'; step++; }, 300); }}, 2500);
     const track = document.getElementById('testimonial-track'); let currentSlide = 0;
-    setInterval(() => { if(track) { currentSlide = (currentSlide + 1) % track.children.length; track.style.transform = \`translateX(-${currentSlide * 100}%)\`; }}, 3500);
+    setInterval(() => { if(track) { currentSlide = (currentSlide + 1) % track.children.length; track.style.transform = \`translateX(-${currentSlide * 100}%)`; }}, 3500);
     triggerBackgroundAnalysis();
     setTimeout(() => handleAnswer(null), 8000);
 }
@@ -325,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dotsContainer = document.getElementById('dots-container');
     const startQuizBtn = document.getElementById('start-quiz-btn');
     let currentSlide = 0;
-    function goToSlide(slideIndex) { currentSlide = slideIndex; document.getElementById('swiper-wrapper').style.transform = \`translateX(-${currentSlide * 100}%)\`; slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide)); document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide)); }
+    function goToSlide(slideIndex) { currentSlide = slideIndex; document.getElementById('swiper-wrapper').style.transform = \`translateX(-${currentSlide * 100}%)`; slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide)); document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide)); }
     slides.forEach((_, i) => { const dot = document.createElement('div'); dot.className = 'dot w-2 h-2 bg-gray-300 rounded-full cursor-pointer'; dot.onclick = () => goToSlide(i); dotsContainer.appendChild(dot); });
     startQuizBtn.addEventListener('click', async () => { swiperContainer.style.display = 'none'; quizContainer.classList.remove('hidden'); const isResumed = await startQuizSession(); if (isResumed) { updateProgressBar(); } renderCurrentQuestion(); });
     goToSlide(0);
