@@ -50,7 +50,7 @@
         #mobile-menu { transform: translateX(100%); transition: transform 0.3s ease-in-out; }
         #mobile-menu.active { transform: translateX(0); }
 
-        .widget-wrapper, .bmi-widget { padding: 1rem; background-color: #ffffff; border-radius: 1rem; width: 100%; max-width: 320px; margin: auto; text-align: center; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .widget-wrapper { padding: 1rem; background-color: #ffffff; border-radius: 1rem; width: 100%; max-width: 320px; margin: auto; text-align: center; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
         .widget-label { font-weight: 600; color: var(--brand-indigo); margin-bottom: 0.75rem; }
         .sleep-battery { width: 100px; height: 40px; border: 3px solid #c4b5fd; border-radius: 8px; margin: 0 auto; position: relative; }
         .sleep-battery::after { content:''; position: absolute; top: 50%; right: -10px; transform: translateY(-50%); width: 5px; height: 20px; background-color: #c4b5fd; border-radius: 0 4px 4px 0; }
@@ -58,9 +58,7 @@
         .activity-week { display:flex; justify-content:center; gap: 0.5rem; }
         .activity-day { width: 30px; height: 30px; border-radius: 0.5rem; background-color: #ede9fe; color: #a78bfa; font-weight: 600; display:flex; align-items:center; justify-content:center; font-size:0.75rem; transition: all 0.4s ease-out; }
         .activity-day.active { background-color: var(--brand-purple); color: white; transform: scale(1.1); box-shadow: 0 4px 10px rgba(139, 92, 246, 0.4); }
-        .bmi-value { font-size: 2.5rem; font-weight: 800; color: #5b21b6; line-height: 1; }
-        .bmi-scale { position: relative; height: 10px; background-image: linear-gradient(to right, #60a5fa, #34d399, #facc15, #f87171); border-radius: 9999px; margin: 0.5rem 0; }
-        .bmi-indicator { position: absolute; top: 50%; width: 16px; height: 16px; background-color: white; border: 3px solid #5b21b6; border-radius: 50%; transform: translate(-50%, -50%); transition: left 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
+        .bmi-indicator { position: absolute; top: 50%; width: 16px; height: 16px; background-color: white; border: 3px solid var(--brand-purple); border-radius: 50%; transform: translate(-50%, -50%); transition: left 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
         .stress-bar-track { height: 12px; background-color: #ede9fe; border-radius: 9999px; overflow: hidden; }
         .stress-bar-fill { height: 100%; width: 0%; background-image: linear-gradient(to right, #4ade80, #facc15, #f87171); border-radius: 9999px; transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
         .stress-value { font-size: 1.5rem; font-weight: 700; margin-top: 0.5rem; transition: color 1.5s ease; }
@@ -69,7 +67,6 @@
         #camera-modal.active { opacity: 1; pointer-events: all; }
         #camera-container { position: relative; width: 90%; max-width: 400px; aspect-ratio: 3/4; overflow: hidden; border-radius: 1.5rem; background: #111; border: 1px solid rgba(255,255,255,0.2); }
         #camera-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        #camera-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
     </style>
 </head>
 <body>
@@ -134,7 +131,7 @@
                     </div>
 
                     <div id="bmi-description" class="mt-4 text-left bg-gray-50 text-gray-800 p-4 rounded-xl flex items-center gap-3">
-                        </div>
+                    </div>
                  </div>
 
                  <div class="mt-6 w-full max-w-md mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -142,9 +139,9 @@
                         <img id="profile-avatar-img" src="https://placehold.co/300x450/e0e7ff/4338ca?text=Your%0APhoto" alt="Wellness Avatar" class="w-full h-full object-cover">
                      </div>
                      <div class="bg-white p-4 rounded-2xl shadow-lg border text-left space-y-3">
-                         <div id="profile-body-type"></div>
                          <div id="profile-lifestyle"></div>
                          <div id="profile-fitness-level"></div>
+                         <div id="profile-metabolism"></div>
                      </div>
                  </div>
             </div>
@@ -176,16 +173,16 @@
     <div id="camera-modal">
         <div id="camera-container">
             <video id="camera-video" autoplay muted playsinline></video>
-            <canvas id="camera-canvas"></canvas>
             <div id="camera-loader" class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4">
                 <div class="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-                <p id="loader-text" class="text-lg font-semibold mt-4">Initializing AI models...</p>
+                <p id="loader-text" class="text-lg font-semibold mt-4">Initializing...</p>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+// --- GLOBAL APP STATE & CONFIG ---
 const App = {
     currentStep: 0,
     currentQuestionIndex: -1,
@@ -235,6 +232,7 @@ const AnimationManager = {
     }
 };
 
+// --- CORE QUIZ FLOW LOGIC (STABLE) ---
 function next() {
     App.currentQuestionIndex++;
     updateProgressBar();
@@ -256,13 +254,13 @@ function next() {
 }
 
 function previous() {
-    if (App.currentStep === 3) {
+    if (App.currentStep === 3) { // On wellness profile, go back to the photo question
         goToStep(2);
-        App.currentQuestionIndex = App.quizQuestions.findIndex(q => q.type === 'selfie');
+        App.currentQuestionIndex = App.quizQuestions.findIndex(q => q.key === 'selfie');
         renderQuestion(App.currentQuestionIndex);
         return;
     }
-    if (App.currentQuestionIndex <= 0) {
+    if (App.currentQuestionIndex <= 0) { // On first question, go back to gender
         App.currentQuestionIndex = -1;
         goToStep(1);
         renderGenderSelection();
@@ -271,7 +269,7 @@ function previous() {
 
     App.currentQuestionIndex--;
     if (App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') {
-        App.currentQuestionIndex--;
+        App.currentQuestionIndex--; // Skip back over animation step
     }
     
     updateProgressBar();
@@ -305,6 +303,7 @@ async function startQuizSession() {
     }
 }
 
+// --- UI & STATE MANAGEMENT ---
 function goToStep(stepIndex) {
     App.currentStep = stepIndex;
     const isQuizActive = (stepIndex === 1 || stepIndex === 2);
@@ -333,7 +332,7 @@ function updateProgressBar() {
     document.getElementById('progress-bar-inner').style.width = `${progress}%`;
 }
 
-
+// --- ONBOARDING SWIPER ---
 function initOnboarding() {
     App.onboarding.slides = document.querySelectorAll('.swiper-slide');
     const wrapper = document.querySelector('.swiper-wrapper');
@@ -381,6 +380,7 @@ function resetOnboardingTimer() {
     App.onboarding.timer = setInterval(updateOnboardingView, 4000);
 }
 
+// --- DYNAMIC RENDERING ---
 function renderGenderSelection() {
     document.getElementById('back-btn').style.visibility = 'hidden';
     const footerWrapper = document.getElementById('footer-actions');
@@ -473,7 +473,7 @@ function renderAnimation(key) {
     document.getElementById('back-btn').style.visibility = 'hidden';
 
     let animationHTML = '';
-    if (key === 'bmi_calculation') animationHTML = `<div class="bmi-widget"><div class="widget-label">Calculating Your BMI...</div><div id="bmi-value-anim" class="bmi-value">0.0</div><div class="bmi-scale"><div id="bmi-indicator-anim" class="bmi-indicator" style="left: 0%;"></div></div><div id="bmi-category-anim" class="text-sm font-medium text-purple-600 mt-2">&nbsp;</div></div>`;
+    if (key === 'bmi_calculation') animationHTML = `<div class="bmi-widget"><div class="widget-label">Calculating Your BMI...</div><div id="bmi-value-anim" class="bmi-value">0.0</div><div id="bmi-scale" class="bmi-scale"><div id="bmi-indicator-anim" class="bmi-indicator" style="left: 0%;"></div></div><div id="bmi-category-anim" class="text-sm font-medium text-purple-600 mt-2">&nbsp;</div></div>`;
     else if (key === 'sleep_visual') animationHTML = `<div class="widget-wrapper"><div class="widget-label">Sleep Recharge</div><div class="sleep-battery mt-2"><div id="sleep-battery-level-anim" class="sleep-battery-level"></div></div></div>`;
     else if (key === 'activity_visual') animationHTML = `<div class="widget-wrapper"><div class="widget-label">Your Active Week</div><div class="activity-week" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div></div>`;
     else if (key === 'stress_visual') animationHTML = `<div class="widget-wrapper"><div class="widget-label">Reported Stress Level</div><div class="stress-bar-track"><div id="stress-bar-fill-anim" class="stress-bar-fill"></div></div><div id="stress-value-anim" class="stress-value">0/10</div></div>`;
@@ -546,7 +546,7 @@ function renderWellnessProfile() {
     const weightKg = parseInt(App.userAnswers.weight);
     const bmi = (weightKg / (heightM * heightM));
     let category = "Normal", percent = 50, descText = "Good starting BMI to tone up and get your dream body.", bgColor = "bg-green-50", textColor = "text-green-800";
-    if (bmi < 18.5) { category = "Underweight"; percent = (bmi / 18.5) * 25; descText = "Your BMI is in the underweight range. Let's build a plan to reach a healthier weight."; bgColor="bg-blue-50"; textColor="text-blue-800";}
+    if (bmi < 18.5) { category = "Underweight"; percent = (bmi / 18.5) * 25; descText = "Your BMI is in the underweight range. We'll build a plan to reach a healthier weight."; bgColor="bg-blue-50"; textColor="text-blue-800";}
     else if (bmi < 25) { category = "Normal"; percent = 25 + ((bmi - 18.5) / 6.5) * 50; }
     else if (bmi < 30) { category = "Overweight"; percent = 75 + ((bmi - 25) / 5) * 25; descText = "Your BMI is in the overweight range. We'll create a plan to help you reach your goals."; bgColor="bg-yellow-50"; textColor="text-yellow-800";}
     else { category = "Obese"; percent = 100; descText = "A plan focused on consistent, healthy habits can make a big difference."; bgColor="bg-red-50"; textColor="text-red-800";}
@@ -568,13 +568,13 @@ function renderWellnessProfile() {
     if(activity.includes("5+")) { lifestyle = "Very Active"; fitnessLevel="Advanced"; }
 
     const profileIcon = (svg) => `<div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center flex-shrink-0">${svg}</div>`;
-    const bodyTypeSVG = `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>`;
     const lifestyleSVG = `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`;
     const fitnessSVG = `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>`;
+    const metabolismSVG = `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
     
-    document.getElementById('profile-body-type').innerHTML = `<div class="flex items-center gap-3">${profileIcon(bodyTypeSVG)} <div><p class="text-sm text-gray-500">Body type</p><p class="font-bold text-gray-800">Mesomorph</p></div></div>`;
     document.getElementById('profile-lifestyle').innerHTML = `<div class="flex items-center gap-3">${profileIcon(lifestyleSVG)} <div><p class="text-sm text-gray-500">Lifestyle</p><p class="font-bold text-gray-800">${lifestyle}</p></div></div>`;
     document.getElementById('profile-fitness-level').innerHTML = `<div class="flex items-center gap-3">${profileIcon(fitnessSVG)} <div><p class="text-sm text-gray-500">Fitness level</p><p class="font-bold text-gray-800">${fitnessLevel}</p></div></div>`;
+    document.getElementById('profile-metabolism').innerHTML = `<div class="flex items-center gap-3">${profileIcon(metabolismSVG)} <div><p class="text-sm text-gray-500">Metabolism</p><p class="font-bold text-gray-800">Moderate</p></div></div>`;
 }
 
 // --- CAMERA LOGIC ---
@@ -622,12 +622,12 @@ function takePhoto() {
 // --- ANALYSIS & PAYMENT ---
 function startAnalysis() {
     try {
-        AnimationManager.add('loading-animation', 'https://assets3.lottiefiles.com/packages/lf20_gqg0yk.json');
+        AnimationManager.add('loading-animation', 'loader.json');
     } catch(e) { console.error("Error starting loading animations:", e); }
     
     setTimeout(() => {
         goToStep(5);
-        // initPaymentForm(); // In a real scenario, you would call your payment form logic here.
+        // initPaymentForm();
     }, 5000);
 }
 
@@ -638,7 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', setVh);
     
     AnimationManager.add('lottie-onboarding-1', 'assistent.json');
-    AnimationManager.add('lottie-onboarding-2', 'https://assets4.lottiefiles.com/packages/lf20_c64I86.json');
+    AnimationManager.add('lottie-onboarding-2', 'arrow.json');
     
     initOnboarding();
     startQuizSession();
