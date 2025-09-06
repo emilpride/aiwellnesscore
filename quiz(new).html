@@ -15,11 +15,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body, html {
-            overscroll-behavior-y: contain; font-family: 'Inter', sans-serif; height: 100%; margin: 0; overflow: hidden;
-        }
+        body, html { overscroll-behavior-y: contain; font-family: 'Inter', sans-serif; height: 100%; margin: 0; overflow: hidden; }
         .full-screen-container { height: 100vh; height: calc(var(--vh, 1vh) * 100); overflow: hidden; position: relative; }
-        .swiper-slide { opacity: 0; transform: scale(0.95); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .swiper-wrapper { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .swiper-slide { flex-shrink: 0; width: 100%; height: 100%; opacity: 0; transform: scale(0.95); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
         .swiper-slide.active { opacity: 1; transform: scale(1); }
         .dot { transition: background-color 0.3s, transform 0.3s; }
         .dot.active { background-color: #8b5cf6; transform: scale(1.25); }
@@ -29,11 +28,10 @@
         @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
         .option-btn { transition: all 0.2s ease-in-out; }
         .option-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 20px rgba(139, 92, 246, 0.15); }
-        .option-btn.selected { background-color: #8b5cf6; color: white; border-color: #8b5cf6; transform: translateY(-3px); }
-        .slider-input { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: #d1d5db; border-radius: 5px; outline: none; }
+        .slider-input { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: #e5e7eb; border-radius: 5px; outline: none; transition: opacity .2s; }
         .slider-input::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 26px; height: 26px; background: white; cursor: pointer; border-radius: 50%; border: 5px solid #8b5cf6; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
         .slider-input::-moz-range-thumb { width: 26px; height: 26px; background: white; cursor: pointer; border-radius: 50%; border: 5px solid #8b5cf6; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-        #camera-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        #camera-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(5px); }
         #camera-modal.active { opacity: 1; pointer-events: all; }
         #camera-container { position: relative; width: 90%; max-width: 400px; aspect-ratio: 3/4; overflow: hidden; border-radius: 1.5rem; background: #111; border: 1px solid rgba(255,255,255,0.2); }
         #camera-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
@@ -42,16 +40,10 @@
         @keyframes glow { from { box-shadow: 0 0 2px #a855f7, 0 0 4px #a855f7; } to { box-shadow: 0 0 6px #6366f1, 0 0 8px #6366f1; } }
     </style>
     <script>
-        !function(f,b,e,v,n,t,s)
-        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-        n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window, document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
+        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
         fbq('init', '785592354117222');
         fbq('track', 'PageView');
+        fbq('track', 'ViewContent');
     </script>
 </head>
 <body class="bg-gray-50">
@@ -60,79 +52,19 @@
     <div id="swiper-container" class="relative w-full h-full flex flex-col">
         <div class="flex-grow w-full h-full overflow-hidden">
             <div id="swiper-wrapper" class="swiper-wrapper flex h-full">
-                <div class="swiper-slide flex items-center justify-center p-8">
-                    <div class="text-center slide-content">
-                         <div id="dave-animation" class="w-48 h-48 mx-auto"></div>
-                        <h1 class="text-3xl font-bold text-gray-800 mt-4">Hey! I'm Dave.</h1>
-                        <p class="text-gray-600 mt-2">Your personal AI wellness assistant. Let's unlock your potential together.</p>
-                    </div>
-                </div>
-                <div class="swiper-slide flex items-center justify-center p-8">
-                    <div class="text-left w-full max-w-sm slide-content">
-                         <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">What you'll get:</h2>
-                        <ul class="space-y-4">
-                            <li class="flex items-center"><span class="text-2xl mr-3">🎯</span><div><h3 class="font-semibold">Wellness Score</h3><p class="text-sm text-gray-500">Your comprehensive health rating</p></div></li>
-                            <li class="flex items-center"><span class="text-2xl mr-3">⏳</span><div><h3 class="font-semibold">Wellness Age</h3><p class="text-sm text-gray-500">How "young" you are for your years</p></div></li>
-                            <li class="flex items-center"><span class="text-2xl mr-3">🌿</span><div><h3 class="font-semibold">Skin & Stress Analysis</h3><p class="text-sm text-gray-500">Learn about hidden factors</p></div></li>
-                            <li class="flex items-center"><span class="text-2xl mr-3">🗺️</span><div><h3 class="font-semibold">Personalized Plan</h3><p class="text-sm text-gray-500">A 7-day plan for improvement</p></div></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="swiper-slide flex items-center justify-center p-8">
-                    <div class="text-center slide-content">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Lower Your Wellness Age</h2>
-                        <div class="flex justify-center items-center space-x-4">
-                            <div class="text-center"><p class="text-gray-500">Chronological</p><p class="text-5xl font-bold text-gray-400">35</p></div>
-                            <div id="arrow-animation" class="w-20 h-20"></div>
-                            <div class="text-center"><p class="text-purple-600 font-semibold">Wellness</p><p class="text-6xl font-extrabold text-purple-600">32</p></div>
-                        </div>
-                        <p class="text-gray-600 mt-6 max-w-xs mx-auto">Our plan is designed to help you feel younger and more energetic.</p>
-                    </div>
-                </div>
-                <div class="swiper-slide flex items-center justify-center p-8">
-                    <div class="text-center max-w-sm slide-content">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-8">Your Privacy is Our Priority</h2>
-                        <div class="space-y-6">
-                            <div class="flex items-center text-left"><span class="text-3xl mr-4">📸</span><p class="text-gray-600">Your photo is never stored and is deleted immediately after analysis.</p></div>
-                            <div class="flex items-center text-left"><span class="text-3xl mr-4">🔒</span><p class="text-gray-600">All your data is anonymized and protected by encryption.</p></div>
-                            <div class="flex items-center text-left"><span class="text-3xl mr-4">⚕️</span><p class="text-gray-600">This is not medical advice. All recommendations are for informational purposes only.</p></div>
-                        </div>
-                    </div>
-                </div>
+                <div class="swiper-slide flex items-center justify-center p-8"><div class="text-center"><div id="dave-animation" class="w-48 h-48 mx-auto"></div><h1 class="text-3xl font-bold text-gray-800 mt-4">Hey! I'm Dave.</h1><p class="text-gray-600 mt-2">Your personal AI wellness assistant. Let's unlock your potential together.</p></div></div>
+                <div class="swiper-slide flex items-center justify-center p-8"><div class="text-left w-full max-w-sm"><h2 class="text-2xl font-bold text-gray-800 text-center mb-6">What you'll get:</h2><ul class="space-y-4"><li class="flex items-center"><span class="text-2xl mr-3">🎯</span><div><h3 class="font-semibold">Wellness Score</h3><p class="text-sm text-gray-500">Your comprehensive health rating</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">⏳</span><div><h3 class="font-semibold">Wellness Age</h3><p class="text-sm text-gray-500">How "young" you are for your years</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🌿</span><div><h3 class="font-semibold">Skin & Stress Analysis</h3><p class="text-sm text-gray-500">Learn about hidden factors</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🗺️</span><div><h3 class="font-semibold">Personalized Plan</h3><p class="text-sm text-gray-500">A 7-day plan for improvement</p></div></li></ul></div></div>
+                <div class="swiper-slide flex items-center justify-center p-8"><div class="text-center"><h2 class="text-2xl font-bold text-gray-800 mb-6">Lower Your Wellness Age</h2><div class="flex justify-center items-center space-x-4"><div class="text-center"><p class="text-gray-500">Chronological</p><p class="text-5xl font-bold text-gray-400">35</p></div><div id="arrow-animation" class="w-20 h-20"></div><div class="text-center"><p class="text-purple-600 font-semibold">Wellness</p><p class="text-6xl font-extrabold text-purple-600">32</p></div></div><p class="text-gray-600 mt-6 max-w-xs mx-auto">Our plan is designed to help you feel younger and more energetic.</p></div></div>
+                <div class="swiper-slide flex items-center justify-center p-8"><div class="text-center max-w-sm"><h2 class="text-2xl font-bold text-gray-800 mb-8">Your Privacy is Our Priority</h2><div class="space-y-6"><div class="flex items-center text-left"><span class="text-3xl mr-4">📸</span><p class="text-gray-600">Your photo is never stored and is deleted immediately after analysis.</p></div><div class="flex items-center text-left"><span class="text-3xl mr-4">🔒</span><p class="text-gray-600">All your data is anonymized and protected by encryption.</p></div><div class="flex items-center text-left"><span class="text-3xl mr-4">⚕️</span><p class="text-gray-600">This is not medical advice. All recommendations are for informational purposes only.</p></div></div></div></div>
             </div>
         </div>
-        <div class="py-8 px-6">
-            <div id="dots-container" class="flex justify-center items-center space-x-3 mb-6"></div>
-            <button id="start-quiz-btn" class="w-full bg-purple-600 text-white font-bold py-4 px-4 rounded-xl hover:bg-purple-700 transition-transform transform hover:scale-105 shadow-lg shadow-purple-200">Let's Start</button>
-        </div>
+        <div class="py-8 px-6"><div id="dots-container" class="flex justify-center items-center space-x-3 mb-6"></div><button id="start-quiz-btn" class="w-full bg-purple-600 text-white font-bold py-4 px-4 rounded-xl hover:bg-purple-700 transition-transform transform hover:scale-105 shadow-lg shadow-purple-200">Let's Start</button></div>
     </div>
-
-    <div id="quiz-container" class="hidden w-full h-full flex flex-col bg-gray-50">
-        <div class="w-full bg-gray-200 h-1.5">
-            <div id="progress-bar" class="h-full bg-gradient-to-r from-purple-500 to-indigo-500" style="width: 0%; transition: width 0.5s ease-in-out;"></div>
-        </div>
-        <div id="question-wrapper" class="flex-grow w-full flex items-center justify-center p-6 overflow-y-auto">
-            </div>
-    </div>
+    <div id="quiz-container" class="hidden w-full h-full flex flex-col bg-gray-50"><div class="w-full bg-gray-200 h-1.5"><div id="progress-bar" class="h-full bg-gradient-to-r from-purple-500 to-indigo-500" style="width: 0%; transition: width 0.5s ease-in-out;"></div></div><div id="question-wrapper" class="flex-grow w-full flex items-center justify-center p-6 overflow-y-auto"></div></div>
 </div>
-
 <div id="camera-modal">
-    <div id="camera-container">
-        <video id="camera-video" autoplay muted playsinline></video>
-        <canvas id="camera-canvas"></canvas>
-        <div id="camera-loader" class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4">
-            <svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <p id="loader-text" class="text-lg font-semibold">Initializing AI models...</p>
-        </div>
-        <div id="camera-overlay" class="absolute bottom-0 left-0 right-0 p-6 text-center">
-            <p id="camera-status" class="bg-black/50 text-white font-medium py-2 px-4 rounded-full inline-block">Position your face in the frame</p>
-        </div>
-    </div>
+    <div id="camera-container"><video id="camera-video" autoplay muted playsinline></video><canvas id="camera-canvas"></canvas><div id="camera-loader" class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4"><svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p id="loader-text" class="text-lg font-semibold">Initializing AI models...</p></div><div id="camera-overlay" class="absolute bottom-0 left-0 right-0 p-6 text-center"><p id="camera-status" class="bg-black/50 text-white font-medium py-2 px-4 rounded-full inline-block">Position your face in the frame</p></div></div>
 </div>
-
 <div id="payment-screen-container"></div>
 
 <script>
@@ -189,7 +121,7 @@ const quizQuestions = [
 
 async function handleAnswer(answer) {
     const currentQuestion = quizQuestions[currentQuestionIndex];
-    if (currentQuestion.key) {
+    if (currentQuestion && currentQuestion.key) {
         await saveAnswerToServer(currentQuestion.key, answer);
     }
     const currentQuestionEl = questionWrapper.firstChild;
@@ -198,7 +130,7 @@ async function handleAnswer(answer) {
     setTimeout(() => {
         const nextQuestion = quizQuestions[currentQuestionIndex + 1];
         if (nextQuestion && nextQuestion.type === 'animation') {
-             playAnimationForKey(nextQuestion.key);
+             playAnimationForKey(currentQuestion.key);
              setTimeout(() => {
                 currentQuestionIndex += 2; // Skip question and animation step
                 updateProgressBar();
@@ -215,7 +147,7 @@ async function handleAnswer(answer) {
 function renderCurrentQuestion() {
     questionWrapper.innerHTML = '';
     const question = quizQuestions[currentQuestionIndex];
-    if (!question) { console.error("Quiz finished or question not found."); return; }
+    if (!question) { console.error("Quiz finished."); return; }
 
     const container = document.createElement('div');
     container.className = 'w-full max-w-2xl mx-auto text-center fade-in';
@@ -235,12 +167,12 @@ function renderCurrentQuestion() {
         
         case 'slider':
             const formatDisplayValue = (val, unit) => {
+                val = parseInt(val);
                 if (unit === 'in') {
                     const feet = Math.floor(val / 12);
                     const inches = val % 12;
                     return `${feet}' ${inches}"`;
                 }
-                if (unit === 'stress' || unit === '') return val;
                 return `${val}${unit}`;
             };
             contentHTML += `
@@ -258,43 +190,19 @@ function renderCurrentQuestion() {
             break;
         
         case 'camera':
-            container.innerHTML = `
-                <div class="max-w-lg mx-auto bg-white p-8 rounded-2xl shadow-xl">
-                    <img src="face.jpeg" alt="AI Face Analysis" class="w-full max-w-[200px] mx-auto rounded-lg mb-4">
-                    <h2 class="text-2xl font-bold text-gray-800">Final Step: AI Face Scan</h2>
-                    <p class="text-gray-600 mt-3">Our AI analyzes your face for non-medical wellness indicators like stress and fatigue. Your photo is processed instantly and never stored.</p>
-                    <div class="mt-6 grid grid-cols-1 gap-3">
-                        <button id="open-camera-btn" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-full hover:bg-purple-700 transition">Allow Camera Access</button>
-                        <button id="upload-photo-btn" class="text-sm text-gray-600 underline hover:text-gray-800">Or upload a photo</button>
-                        <button id="skip-photo-btn" class="text-sm text-gray-500 hover:text-gray-700 mt-2">Skip this step</button>
-                    </div>
-                </div>`;
-            questionWrapper.innerHTML = '';
-            questionWrapper.appendChild(container);
+            container.innerHTML = `<div class="max-w-lg mx-auto bg-white p-8 rounded-2xl shadow-xl"><img src="face.jpeg" alt="AI Face Analysis" class="w-full max-w-[200px] mx-auto rounded-lg mb-4"><h2 class="text-2xl font-bold text-gray-800">Final Step: AI Face Scan</h2><p class="text-gray-600 mt-3">Our AI analyzes your face for non-medical wellness indicators like stress and fatigue. Your photo is processed instantly and never stored.</p><div class="mt-6 grid grid-cols-1 gap-3"><button id="open-camera-btn" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-full hover:bg-purple-700 transition">Allow Camera Access</button><button id="upload-photo-btn" class="text-sm text-gray-600 underline hover:text-gray-800">Or upload a photo</button><button id="skip-photo-btn" class="text-sm text-gray-500 hover:text-gray-700 mt-2">Skip this step</button></div></div>`;
+            questionWrapper.innerHTML = ''; questionWrapper.appendChild(container);
             document.getElementById('open-camera-btn').onclick = startCamera;
             document.getElementById('upload-photo-btn').onclick = handlePhotoUpload;
             document.getElementById('skip-photo-btn').onclick = async () => { await saveAnswerToServer('selfie', 'skipped'); handleAnswer('skipped'); };
             return; 
 
         case 'email':
-            container.innerHTML = `
-                <div class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-xl text-center">
-                    <h2 class="text-2xl font-bold text-gray-800">Get Your Report Summary</h2>
-                    <p class="text-gray-600 mt-2">Enter your email to receive your results. We respect your privacy.</p>
-                    <div class="mt-6 flex flex-col gap-3">
-                        <input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg">
-                        <button id="email-submit-btn" class="w-full bg-purple-600 text-white font-bold py-3 rounded-lg text-lg">Submit</button>
-                    </div>
-                </div>`;
-             questionWrapper.innerHTML = '';
-             questionWrapper.appendChild(container);
+            container.innerHTML = `<div class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-xl text-center"><h2 class="text-2xl font-bold text-gray-800">Get Your Report Summary</h2><p class="text-gray-600 mt-2">Enter your email to receive your results. We respect your privacy.</p><div class="mt-6 flex flex-col gap-3"><input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-purple-500 outline-none"><button id="email-submit-btn" class="w-full bg-purple-600 text-white font-bold py-3 rounded-lg text-lg">Submit</button></div></div>`;
+             questionWrapper.innerHTML = ''; questionWrapper.appendChild(container);
              document.getElementById('email-submit-btn').onclick = () => {
                 const email = document.getElementById('email-input').value;
-                if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                    handleAnswer(email);
-                } else {
-                    alert("Please enter a valid email address.");
-                }
+                if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { handleAnswer(email); } else { alert("Please enter a valid email address."); }
              };
              return;
         
@@ -305,33 +213,31 @@ function renderCurrentQuestion() {
     questionWrapper.appendChild(container);
 }
 
+function updateProgressBar() {
+    const questionKeys = quizQuestions.filter(q => q.key).map(q => q.key);
+    const totalSteps = questionKeys.length;
+    let completedAnswers = Object.keys(userAnswers).length;
+    // Don't count animation steps in progress
+    const animationSteps = quizQuestions.filter(q => q.type === 'animation').map(q => q.key);
+    animationSteps.forEach(key => {
+        if (userAnswers[key]) completedAnswers--;
+    });
+    const progress = (completedAnswers / totalSteps) * 100;
+    progressBar.style.width = `${Math.min(progress, 100)}%`;
+}
+
+// --- UI COMPONENTS ---
+
 function playAnimationForKey(key) {
     const animationHTML = `<div id="animation-widget" class="w-full max-w-sm mx-auto bg-white p-6 rounded-2xl shadow-lg fade-in"></div>`;
     questionWrapper.innerHTML = animationHTML;
     const widget = document.getElementById('animation-widget');
-
-    // Here you would have specific HTML and JS for each animation
-    // For simplicity, showing a placeholder
-    widget.innerHTML = `<div class="text-center"><div class="text-4xl">✨</div><p class="mt-2 font-semibold">Analyzing your ${key.split('_')[0]}...</p></div>`;
+    widget.innerHTML = `<div class="text-center"><div class="text-4xl">✨</div><p class="mt-2 font-semibold">Analyzing your ${key.replace('_visual', '').replace('_calculation','').replace('_gauge','')}...</p></div>`;
 }
 
-// --- NEW UI COMPONENTS ---
-
 function showWellnessProfilePreview() {
-    questionWrapper.innerHTML = `
-        <div class="w-full max-w-3xl mx-auto text-center fade-in">
-            <h2 class="text-3xl font-bold">Your Preliminary Wellness Profile is Ready!</h2>
-            <p class="text-gray-600 mt-2">Here's a sneak peek. Unlock your full report for an in-depth analysis and a 7-day action plan.</p>
-            <div class="mt-8 grid md:grid-cols-2 gap-6 text-left">
-                <div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-bold text-lg">Body Mass Index (BMI)</h3><p class="text-4xl font-extrabold text-purple-600" id="preview-bmi-value">--</p><p id="preview-bmi-category" class="font-semibold text-gray-500">Calculating...</p></div>
-                <div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-bold text-lg">Sleep Quality</h3><p class="text-4xl font-extrabold text-yellow-500">Average</p><p class="text-sm text-gray-600">Based on ${userAnswers.sleep || 'your answer'}.</p></div>
-            </div>
-            <div class="mt-6 bg-white p-6 rounded-xl shadow-lg"><h3 class="font-bold text-lg text-center">Key Lifestyle Areas</h3><canvas id="preview-chart" class="max-h-64"></canvas></div>
-            <button onclick="handleAnswer(null)" class="mt-8 bg-green-500 text-white font-bold py-4 px-8 rounded-full text-xl transition transform hover:scale-105">Get My Full Report</button>
-        </div>
-    `;
-    const heightIn = parseInt(userAnswers.height);
-    const weightLbs = parseInt(userAnswers.weight);
+    questionWrapper.innerHTML = `<div class="w-full max-w-3xl mx-auto text-center fade-in"><h2 class="text-3xl font-bold">Your Preliminary Wellness Profile is Ready!</h2><p class="text-gray-600 mt-2">Here's a sneak peek. Unlock your full report for an in-depth analysis and a 7-day action plan.</p><div class="mt-8 grid md:grid-cols-2 gap-6 text-left"><div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-bold text-lg">Body Mass Index (BMI)</h3><p class="text-4xl font-extrabold text-purple-600" id="preview-bmi-value">--</p><p id="preview-bmi-category" class="font-semibold text-gray-500">Calculating...</p></div><div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-bold text-lg">Sleep Quality</h3><p class="text-4xl font-extrabold text-yellow-500">Average</p><p class="text-sm text-gray-600">Based on ${userAnswers.sleep || 'your answer'}.</p></div></div><div class="mt-6 bg-white p-6 rounded-xl shadow-lg"><h3 class="font-bold text-lg text-center">Key Lifestyle Areas</h3><canvas id="preview-chart" class="max-h-64"></canvas></div><button onclick="handleAnswer(null)" class="mt-8 bg-green-500 text-white font-bold py-4 px-8 rounded-full text-xl transition transform hover:scale-105">Get My Full Report</button></div>`;
+    const heightIn = parseInt(userAnswers.height); const weightLbs = parseInt(userAnswers.weight);
     if(heightIn && weightLbs) {
         const bmi = ((weightLbs / (heightIn * heightIn)) * 703).toFixed(1);
         document.getElementById('preview-bmi-value').textContent = bmi;
@@ -340,33 +246,16 @@ function showWellnessProfilePreview() {
         document.getElementById('preview-bmi-category').textContent = category;
     }
     const ctx = document.getElementById('preview-chart').getContext('2d');
-    new Chart(ctx, {
-        type: 'radar', data: { labels: ['Nutrition', 'Activity', 'Stress Mgt.', 'Mindfulness', 'Hydration'], datasets: [{ label: 'Your Score', data: [65, 80, 40, 70, 90], backgroundColor: 'rgba(139, 92, 246, 0.2)', borderColor: 'rgb(139, 92, 246)' }] },
-        options: { scales: { r: { suggestedMin: 0, suggestedMax: 100, pointLabels: { font: { size: 14 } } } }, plugins: { legend: { display: false } } }
-    });
+    new Chart(ctx, { type: 'radar', data: { labels: ['Nutrition', 'Activity', 'Stress Mgt.', 'Mindfulness', 'Hydration'], datasets: [{ label: 'Your Score', data: [65, 80, 40, 70, 90], backgroundColor: 'rgba(139, 92, 246, 0.2)', borderColor: 'rgb(139, 92, 246)' }] }, options: { scales: { r: { suggestedMin: 0, suggestedMax: 100, pointLabels: { font: { size: 14 } } } }, plugins: { legend: { display: false } } } });
 }
 
 function showLoadingWithTestimonials() {
-    questionWrapper.innerHTML = `
-        <div class="text-center fade-in">
-            <div id="analysis-animation" class="w-32 h-32 mx-auto"></div>
-            <h2 id="analysis-text" class="text-2xl font-semibold mt-4 transition-opacity duration-300">Analyzing your data...</h2>
-            <div id="testimonial-swiper" class="mt-8 w-full max-w-md mx-auto overflow-hidden relative h-32">
-                <div id="testimonial-track" class="flex transition-transform duration-500 h-full">
-                    <div class="w-full flex-shrink-0 flex items-center justify-center p-4 h-full"><div><p class="italic text-gray-700">"I was shocked by my Wellness Age. It was the wake-up call I needed."</p><p class="font-bold text-gray-800 mt-2">- Jessica M.</p></div></div>
-                    <div class="w-full flex-shrink-0 flex items-center justify-center p-4 h-full"><div><p class="italic text-gray-700">"This service connected the dots for me in a way nothing else has."</p><p class="font-bold text-gray-800 mt-2">- Sarah K.</p></div></div>
-                </div>
-            </div>
-        </div>
-    `;
+    questionWrapper.innerHTML = `<div class="text-center fade-in"><div id="analysis-animation" class="w-32 h-32 mx-auto"></div><h2 id="analysis-text" class="text-2xl font-semibold mt-4 transition-opacity duration-300">Analyzing your data...</h2><div id="testimonial-swiper" class="mt-8 w-full max-w-md mx-auto overflow-hidden relative h-32"><div id="testimonial-track" class="flex transition-transform duration-500 h-full"><div class="w-full flex-shrink-0 flex items-center justify-center p-4 h-full"><div><p class="italic text-gray-700">"I was shocked by my Wellness Age. It was the wake-up call I needed."</p><p class="font-bold text-gray-800 mt-2">- Jessica M.</p></div></div><div class="w-full flex-shrink-0 flex items-center justify-center p-4 h-full"><div><p class="italic text-gray-700">"This service connected the dots for me in a way nothing else has."</p><p class="font-bold text-gray-800 mt-2">- Sarah K.</p></div></div></div></div></div>`;
     lottie.loadAnimation({ container: document.getElementById('analysis-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'loader-animation.json' });
-    const analysisSteps = ["Cross-referencing lifestyle factors...", "Evaluating skin health markers...", "Calculating your Wellness Age...", "Compiling your personalized plan..."];
-    let step = 0;
+    const analysisSteps = ["Cross-referencing lifestyle factors...", "Evaluating skin health markers...", "Calculating your Wellness Age...", "Compiling your personalized plan..."]; let step = 0;
     setInterval(() => { const textEl = document.getElementById('analysis-text'); if(textEl) { textEl.style.opacity = '0'; setTimeout(() => { textEl.textContent = analysisSteps[step % analysisSteps.length]; textEl.style.opacity = '1'; step++; }, 300); }}, 2500);
     const track = document.getElementById('testimonial-track'); let currentSlide = 0;
     setInterval(() => { if(track) { currentSlide = (currentSlide + 1) % track.children.length; track.style.transform = \`translateX(-${currentSlide * 100}%)\`; }}, 3500);
-    
-    // Trigger analysis and proceed to payment
     triggerBackgroundAnalysis();
     setTimeout(() => handleAnswer(null), 8000);
 }
@@ -375,57 +264,20 @@ async function showAttractivePaymentForm() {
     fbq('track', 'InitiateCheckout', {value: 9.99, currency: 'USD'});
     quizContainer.classList.add('hidden');
     const paymentContainer = document.getElementById('payment-screen-container');
-    paymentContainer.innerHTML = `
-    <div id="payment-screen" class="p-4 bg-gray-100 min-h-screen flex items-center justify-center fade-in">
-        <div class="max-w-md w-full mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
-            <div class="p-6 text-center bg-gradient-to-br from-purple-600 to-indigo-600 text-white"><h2 class="text-3xl font-bold">Your Personalized Report is Ready!</h2><p class="opacity-80 mt-1">Just one final step to unlock your results.</p></div>
-            <div class="p-6">
-                <div class="my-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-lg text-center">Your special price is reserved for: <span id="countdown-timer" class="font-bold text-lg">09:59</span></div>
-                <h3 class="font-bold text-lg mb-3">Here's What You'll Unlock:</h3>
-                <ul class="space-y-2 text-gray-700">
-                    <li class="flex items-center gap-3"><span class="text-green-500">✔️</span> Your accurate <b>Wellness Age</b></li>
-                    <li class="flex items-center gap-3"><span class="text-green-500">✔️</span> In-depth skin analysis for <b>12 key markers</b></li>
-                    <li class="flex items-center gap-3"><span class="text-green-500">✔️</span> A custom <b>7-Day Action Plan</b> for improvement</li>
-                    <li class="flex items-center gap-3"><span class="text-green-500">✔️</span> Analysis of stress, nutrition, and sleep risks</li>
-                </ul>
-                <form id="payment-form" class="space-y-4 mt-6">
-                    <div id="card-element" class="p-3 border border-gray-300 rounded-md shadow-sm"></div>
-                    <button id="submit-payment" class="w-full bg-green-500 text-white font-bold py-4 rounded-lg text-xl transition transform hover:scale-105 shadow-lg shadow-green-200/50">Pay $9.99 and Get My Report</button>
-                    <div id="payment-message" class="hidden text-center text-red-500 pt-1"></div>
-                </form>
-                <div class="mt-4 text-center text-xs text-gray-400"><p>🔒 Secure 256-bit SSL encrypted payment by Stripe.</p></div>
-            </div>
-        </div>
-    </div>`;
-
-    let timeLeft = 10 * 60;
-    const timerEl = document.getElementById('countdown-timer');
-    const timerInterval = setInterval(() => {
-        if (!timerEl) { clearInterval(timerInterval); return; }
-        timeLeft--; const minutes = Math.floor(timeLeft / 60); const seconds = timeLeft % 60;
-        timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        if(timeLeft <= 0) { clearInterval(timerInterval); timerEl.textContent = "Expired"; }
-    }, 1000);
-
+    paymentContainer.innerHTML = `<div id="payment-screen" class="p-4 bg-gray-100 min-h-screen flex items-center justify-center fade-in"><div class="max-w-md w-full mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden"><div class="p-6 text-center bg-gradient-to-br from-purple-600 to-indigo-600 text-white"><h2 class="text-3xl font-bold">Your Personalized Report is Ready!</h2><p class="opacity-80 mt-1">Just one final step to unlock your results.</p></div><div class="p-6"><div class="my-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-lg text-center">Your special price is reserved for: <span id="countdown-timer" class="font-bold text-lg">09:59</span></div><h3 class="font-bold text-lg mb-3">Here's What You'll Unlock:</h3><ul class="space-y-2 text-gray-700"><li class="flex items-center gap-3"><span class="text-green-500">✔️</span> Your accurate <b>Wellness Age</b></li><li class="flex items-center gap-3"><span class="text-green-500">✔️</span> In-depth skin analysis for <b>12 key markers</b></li><li class="flex items-center gap-3"><span class="text-green-500">✔️</span> A custom <b>7-Day Action Plan</b> for improvement</li><li class="flex items-center gap-3"><span class="text-green-500">✔️</span> Analysis of stress, nutrition, and sleep risks</li></ul><form id="payment-form" class="space-y-4 mt-6"><div id="card-element" class="p-3 border border-gray-300 rounded-md shadow-sm"></div><button id="submit-payment" class="w-full bg-green-500 text-white font-bold py-4 rounded-lg text-xl transition transform hover:scale-105 shadow-lg shadow-green-200/50">Pay $9.99 and Get My Report</button><div id="payment-message" class="hidden text-center text-red-500 pt-1"></div></form><div class="mt-4 text-center text-xs text-gray-400"><p>🔒 Secure 256-bit SSL encrypted payment by Stripe.</p></div></div></div></div>`;
+    let timeLeft = 10 * 60; const timerEl = document.getElementById('countdown-timer');
+    const timerInterval = setInterval(() => { if (!timerEl) { clearInterval(timerInterval); return; } timeLeft--; const minutes = Math.floor(timeLeft / 60); const seconds = timeLeft % 60; timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`; if(timeLeft <= 0) { clearInterval(timerInterval); timerEl.textContent = "Expired"; }}, 1000);
     stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb');
     const { clientSecret: secret } = await fetch('/.netlify/functions/payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId }) }).then(res => res.json());
-    clientSecret = secret;
-    elements = stripe.elements({ clientSecret });
-    const cardElement = elements.create("card", { style: { base: { fontSize: '16px' } } });
-    cardElement.mount("#card-element");
-    
-    let hasSentAddPaymentInfo = false;
-    cardElement.on('focus', () => { if (!hasSentAddPaymentInfo) { fbq('track', 'AddPaymentInfo'); hasSentAddPaymentInfo = true; }});
-
+    clientSecret = secret; elements = stripe.elements({ clientSecret }); const cardElement = elements.create("card", { style: { base: { fontSize: '16px' } } }); cardElement.mount("#card-element");
+    let hasSentAddPaymentInfo = false; cardElement.on('focus', () => { if (!hasSentAddPaymentInfo) { fbq('track', 'AddPaymentInfo'); hasSentAddPaymentInfo = true; }});
     document.getElementById('payment-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         document.getElementById('submit-payment').disabled = true;
-        const { error } = await stripe.confirmCardPayment(clientSecret, { payment_method: { card: cardElement } });
+        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, { payment_method: { card: cardElement } });
         if (error) {
-            document.getElementById('payment-message').textContent = error.message;
-            document.getElementById('payment-message').classList.remove('hidden');
-            document.getElementById('submit-payment').disabled = false;
-        } else {
+            document.getElementById('payment-message').textContent = error.message; document.getElementById('payment-message').classList.remove('hidden'); document.getElementById('submit-payment').disabled = false;
+        } else if (paymentIntent && paymentIntent.status === 'succeeded') {
             handleSuccessfulPayment();
         }
     });
@@ -434,79 +286,51 @@ async function showAttractivePaymentForm() {
 function handleSuccessfulPayment() {
     fbq('track', 'Purchase', {value: 9.99, currency: 'USD'});
     localStorage.removeItem('quiz_session_id');
-    document.getElementById('payment-screen-container').innerHTML = `
-        <div class="p-8 text-center flex flex-col items-center justify-center min-h-screen">
-            <svg class="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <h3 class="text-2xl font-bold mt-4">Payment Successful!</h3>
-            <p class="text-gray-600 mt-2">Finalizing your report... You will be redirected shortly.</p>
-        </div>`;
+    document.getElementById('payment-screen-container').innerHTML = `<div class="p-8 text-center flex flex-col items-center justify-center min-h-screen"><svg class="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><h3 class="text-2xl font-bold mt-4">Payment Successful!</h3><p class="text-gray-600 mt-2">Finalizing your report... You will be redirected shortly.</p></div>`;
     setTimeout(() => { window.location.href = `result.html?session_id=${sessionId}&payment=success`; }, 2500);
 }
 
+// --- HELPER FUNCTIONS (FROM ORIGINAL FILE) ---
 
-// --- ORIGINAL HELPER FUNCTIONS (UNCHANGED OR SLIGHTLY ADAPTED) ---
+async function logErrorToServer(errorDetails) { if (!sessionId) return; try { await fetch('/.netlify/functions/quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'logError', sessionId: sessionId, error: { source: 'frontend', message: errorDetails.message, details: errorDetails.details || 'N/A' } }) }); } catch (e) { console.error("Failed to send error log:", e); } }
+function saveQuizState() { if (sessionId) { localStorage.setItem('quiz_session_id', sessionId); localStorage.setItem('quiz_answers', JSON.stringify(userAnswers)); localStorage.setItem('quiz_current_index', currentQuestionIndex); localStorage.setItem('quiz_timestamp', Date.now()); } }
+function loadQuizState() { const savedSessionId = localStorage.getItem('quiz_session_id'); const savedTimestamp = localStorage.getItem('quiz_timestamp'); if (savedSessionId && savedTimestamp && (Date.now() - parseInt(savedTimestamp) < 24 * 60 * 60 * 1000)) { return { sessionId: savedSessionId, answers: JSON.parse(localStorage.getItem('quiz_answers') || '{}'), currentIndex: parseInt(localStorage.getItem('quiz_current_index')) || 0 }; } return null; }
 
-async function startQuizSession() { /* ... same as original ... */ return false; }
-async function saveAnswerToServer(key, answer) { /* ... same as original ... */ }
-async function logErrorToServer(details) { /* ... same as original ... */ }
-function saveQuizState() { /* ... same as original ... */ }
-function loadQuizState() { /* ... same as original ... */ return null; }
-function startCamera() { /* ... same as original ... */ }
-function stopCamera() { /* ... same as original ... */ }
-function startFaceDetection() { /* ... same as original ... */ }
-function takePhoto() { /* ... same as original ... */ }
-function handlePhotoUpload() { /* ... same as original ... */ }
-
-async function triggerBackgroundAnalysis() {
+async function startQuizSession() {
+    const savedState = loadQuizState();
+    if (savedState) { sessionId = savedState.sessionId; userAnswers = savedState.answers; currentQuestionIndex = savedState.currentIndex; return true; }
     try {
-        if (capturedPhotoDataUrl) {
-            const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photoDataUrl: capturedPhotoDataUrl }) });
-            if (!analyzeResponse.ok) throw new Error('Skin analysis API failed');
-            const analysisData = await analyzeResponse.json();
-            await fetch('/.netlify/functions/quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'saveAnalysisData', sessionId, analysisData }) });
-        }
-        fetch('/.netlify/functions/result-background', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId }) });
-    } catch (error) {
-        console.error('Error during background analysis trigger:', error);
-        logErrorToServer({ message: 'Background Analysis Trigger Failed', details: error.message });
-        // Still trigger report generation, just without photo data
-        fetch('/.netlify/functions/result-background', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId }) });
-    }
+        const getDeviceType = () => { const ua = navigator.userAgent; if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) return "Tablet"; if (/Mobile|iP(hone|od)|Android|BlackBerry|IEMobile|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) return "Mobile"; return "Desktop"; };
+        const getTrafficSource = () => { const params = new URLSearchParams(window.location.search); if (params.get('utm_source')) return params.get('utm_source'); if (document.referrer) { const ref = new URL(document.referrer); return ref.hostname.replace('www.','');} return 'Direct'; };
+        const response = await fetch('/.netlify/functions/quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'startSession', source: getTrafficSource(), deviceType: getDeviceType() }) });
+        if (!response.ok) throw new Error('Could not start session');
+        const data = await response.json();
+        sessionId = data.sessionId;
+        saveQuizState();
+        return false;
+    } catch (error) { console.error('Failed to start session:', error); questionWrapper.innerHTML = `<p class="text-red-500">Error: Could not start a new session. Please refresh the page.</p>`; return false; }
 }
 
+async function saveAnswerToServer(questionId, answer) { if (!sessionId) { console.error('No session ID'); return; } userAnswers[questionId] = answer; saveQuizState(); try { await fetch('/.netlify/functions/quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'saveAnswer', sessionId, questionId, answer }) }); } catch (error) { console.error('Failed to save answer to server:', error); logErrorToServer({ message: 'Save Answer Failed', details: `Question: ${questionId}, Error: ${error.message}` }); } }
+async function triggerBackgroundAnalysis() { try { if (capturedPhotoDataUrl) { const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photoDataUrl: capturedPhotoDataUrl }) }); if (!analyzeResponse.ok) throw new Error('Skin analysis API failed'); const analysisData = await analyzeResponse.json(); await fetch('/.netlify/functions/quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'saveAnalysisData', sessionId, analysisData }) }); } fetch('/.netlify/functions/result-background', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId }) }); } catch (error) { console.error('Error during background analysis trigger:', error); logErrorToServer({ message: 'Background Analysis Trigger Failed', details: error.message }); fetch('/.netlify/functions/result-background', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId }) }); } }
+async function startCamera() { cameraModal.classList.add('active'); try { const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights'; await Promise.all([ faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL) ]); loaderText.textContent = "Requesting camera access..."; stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } }); video.srcObject = stream; video.onloadedmetadata = () => { cameraLoader.style.display = 'none'; startFaceDetection(); }; } catch (err) { loaderText.textContent = "Camera access denied. Please allow camera access and refresh."; setTimeout(stopCamera, 3000); } }
+function stopCamera() { if(detectionInterval) clearInterval(detectionInterval); stream?.getTracks().forEach(track => track.stop()); cameraModal.classList.remove('active'); video.srcObject = null; }
+function startFaceDetection() { const context = canvas.getContext('2d'); detectionInterval = setInterval(async () => { const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()); if (detections.length > 0) { const isGoodSize = detections[0].box.width > video.videoWidth * 0.4; if (isGoodSize) { cameraStatus.textContent = "Hold still..."; setTimeout(takePhoto, 1500); clearInterval(detectionInterval); } else { cameraStatus.textContent = "Move closer"; } } else { cameraStatus.textContent = "Position your face in the frame"; } }, 300); }
+function takePhoto() { const photoCanvas = document.createElement('canvas'); photoCanvas.width = video.videoWidth; photoCanvas.height = video.videoHeight; const ctx = photoCanvas.getContext('2d'); ctx.translate(video.videoWidth, 0); ctx.scale(-1, 1); ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight); capturedPhotoDataUrl = photoCanvas.toDataURL('image/jpeg', 0.9); stopCamera(); handleAnswer('Photo Taken'); }
+function handlePhotoUpload() { const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = e => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = e => { capturedPhotoDataUrl = e.target.result; handleAnswer('Photo Uploaded'); }; reader.readAsDataURL(file); } }; input.click(); }
 
-// --- ONBOARDING SWIPER LOGIC (Kept from original) ---
+// --- ONBOARDING SWIPER LOGIC ---
 document.addEventListener('DOMContentLoaded', () => {
-    const slides = document.querySelectorAll('.swiper-slide');
+    const slides = [...document.querySelectorAll('.swiper-slide')];
     const dotsContainer = document.getElementById('dots-container');
     const startQuizBtn = document.getElementById('start-quiz-btn');
     let currentSlide = 0;
-
-    function goToSlide(slideIndex) {
-        currentSlide = slideIndex;
-        document.getElementById('swiper-wrapper').style.transform = \`translateX(-${currentSlide * 100}%)\`;
-        slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
-        document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
-    }
-
-    slides.forEach((_, i) => {
-        const dot = document.createElement('div');
-        dot.className = 'dot w-2 h-2 bg-gray-300 rounded-full cursor-pointer';
-        dot.onclick = () => goToSlide(i);
-        dotsContainer.appendChild(dot);
-    });
-
-    startQuizBtn.addEventListener('click', async () => {
-        swiperContainer.style.display = 'none';
-        quizContainer.classList.remove('hidden');
-        await startQuizSession();
-        renderCurrentQuestion();
-    });
-    
+    function goToSlide(slideIndex) { currentSlide = slideIndex; document.getElementById('swiper-wrapper').style.transform = \`translateX(-${currentSlide * 100}%)\`; slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide)); document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide)); }
+    slides.forEach((_, i) => { const dot = document.createElement('div'); dot.className = 'dot w-2 h-2 bg-gray-300 rounded-full cursor-pointer'; dot.onclick = () => goToSlide(i); dotsContainer.appendChild(dot); });
+    startQuizBtn.addEventListener('click', async () => { swiperContainer.style.display = 'none'; quizContainer.classList.remove('hidden'); const isResumed = await startQuizSession(); if (isResumed) { updateProgressBar(); } renderCurrentQuestion(); });
     goToSlide(0);
-
     lottie.loadAnimation({ container: document.getElementById('dave-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'assistent.json' });
-    lottie.loadAnimation({ container: document.getElementById('arrow-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'https://assets4.lottiefiles.com/packages/lf20_c64I86.json' });
+    lottie.loadAnimation({ container: document.getElementById('arrow-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'https://lottie.host/a35368a4-3685-4545-9833-281ce1c2b536/M4A0m5b6OJ.json' });
 });
 
 </script>
