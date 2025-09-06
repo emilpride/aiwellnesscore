@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Wellness Analysis - Final Version</title>
+    <title>AI Wellness Analysis - Final Working Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -121,10 +121,10 @@
                             <div class="w-5 h-5 bg-white rounded-full border-4 border-purple-600 shadow-md"></div>
                         </div>
                         <div id="bmi-indicator-label" class="absolute -top-6 -translate-x-1/2 bg-gray-800 text-white text-sm font-bold px-3 py-1 rounded-md transition-all duration-1000" style="left: 50%;">
-                            <span id="bmi-value-text">24.9</span>
+                            <span id="bmi-value-text">--</span>
                         </div>
                     </div>
-                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <div class="flex justify-between text-xs text-gray-500 mt-1 px-1">
                         <span>18.5</span>
                         <span>25</span>
                         <span>30</span>
@@ -141,7 +141,7 @@
 
                  <div class="mt-6 w-full max-w-md mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
                      <div id="profile-avatar" class="bg-gray-200 rounded-2xl row-span-2 flex items-end justify-center overflow-hidden">
-                        <img src="https://placehold.co/300x450/e0e7ff/4338ca?text=Your\nAvatar" alt="Wellness Avatar" class="w-full h-full object-cover">
+                        <img src="https://placehold.co/300x450/e0e7ff/4338ca?text=Your%0AAvatar" alt="Wellness Avatar" class="w-full h-full object-cover">
                      </div>
                      <div class="bg-white p-4 rounded-2xl shadow-lg border text-left space-y-3">
                          <div id="profile-body-type"></div>
@@ -160,13 +160,6 @@
             <div id="loading-animation" class="w-48 h-48"></div>
             <h2 class="text-3xl font-bold text-gray-800 mt-4 text-center">Analyzing Your Unique Profile...</h2>
             <p class="text-gray-600 mt-2 text-center">Our AI is calibrating your personalized results.</p>
-            <div id="testimonial-slider" class="w-full max-w-md mt-12 text-center">
-                <div id="testimonial-track">
-                    <div class="testimonial-item"><div class="flex justify-center text-yellow-400 mb-2">★★★★★</div><p class="italic text-gray-700">"This was a real eye-opener. The 7-day plan was simple, effective, and made me feel years younger!"</p><p class="font-bold mt-2 text-purple-700">- Jessica M., New York</p></div>
-                    <div class="testimonial-item"><div class="flex justify-center text-yellow-400 mb-2">★★★★★</div><p class="italic text-gray-700">"Finally, a wellness plan that understands my busy life. The photo analysis was surprisingly accurate about my stress levels."</p><p class="font-bold mt-2 text-purple-700">- David L., California</p></div>
-                    <div class="testimonial-item"><div class="flex justify-center text-yellow-400 mb-2">★★★★★</div><p class="italic text-gray-700">"I've tried everything. This is the first time I've seen actual results that stick. Highly recommend!"</p><p class="font-bold mt-2 text-purple-700">- Sarah K., Texas</p></div>
-                </div>
-            </div>
         </section>
         
         <section id="step-5" class="quiz-step prev overflow-y-auto justify-start pt-8 pb-8">
@@ -197,12 +190,13 @@
 </div>
 
 <script>
+// --- GLOBAL APP STATE & CONFIG ---
 const App = {
     currentStep: 0,
     currentQuestionIndex: -1,
     sessionId: null,
     userAnswers: {},
-    camera: { stream: null, detectionInterval: null },
+    camera: { stream: null },
     onboarding: { slideIndex: -1, slides: null, dots: null, timer: null, touchStartX: 0 },
     quizQuestions: [
         { key: 'userGoal', type: 'options', text: "What's your primary wellness goal?", options: ['Find out my biological age', 'Get a skin condition analysis', 'Get a 7-day improvement plan', 'All of the above!'] },
@@ -245,6 +239,7 @@ const AnimationManager = {
     }
 };
 
+// --- CORE QUIZ FLOW LOGIC (STABLE) ---
 function next() {
     App.currentQuestionIndex++;
     updateProgressBar();
@@ -266,23 +261,25 @@ function next() {
 }
 
 function previous() {
-    if (App.currentStep === 3) { // If on wellness profile
+    if (App.currentStep === 3) {
         goToStep(2);
-        App.currentQuestionIndex = App.quizQuestions.findIndex(q => q.type === 'wellness_profile_page') - 1;
+        const wellnessProfileIndex = App.quizQuestions.findIndex(q => q.type === 'wellness_profile_page');
+        App.currentQuestionIndex = wellnessProfileIndex - 1;
         renderQuestion(App.currentQuestionIndex);
         return;
     }
-    if (App.currentQuestionIndex < 0) return;
-    if (App.currentQuestionIndex === 0) {
+    if (App.currentQuestionIndex <= 0) {
         App.currentQuestionIndex = -1;
         goToStep(1);
         renderGenderSelection();
         return;
     }
+
     App.currentQuestionIndex--;
     if (App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') {
         App.currentQuestionIndex--;
     }
+    
     updateProgressBar();
     renderQuestion(App.currentQuestionIndex);
 }
@@ -310,10 +307,11 @@ async function startQuizSession() {
     }
 }
 
+// --- UI & STATE MANAGEMENT ---
 function goToStep(stepIndex) {
     App.currentStep = stepIndex;
     const isQuizActive = (stepIndex === 1 || stepIndex === 2);
-    document.getElementById('quiz-header').style.visibility = stepIndex > 0 && stepIndex < 4 ? 'visible' : 'hidden';
+    document.getElementById('quiz-header').style.visibility = (stepIndex > 0 && stepIndex < 4) ? 'visible' : 'hidden';
     document.getElementById('quiz-footer').style.display = isQuizActive ? 'block' : 'none';
     
     document.querySelectorAll('.quiz-step').forEach((step, index) => {
@@ -327,7 +325,7 @@ function goToStep(stepIndex) {
 
 function updateProgressBar() {
     let progress = 0;
-    const totalQuestions = App.quizQuestions.filter(q => q.type !== 'animation' && q.type !== 'wellness_profile_page').length;
+    const totalQuestions = App.quizQuestions.filter(q => q.type.endsWith('_step') || q.type === 'options' || q.type === 'slider').length;
     const answeredQuestions = Object.keys(App.userAnswers).length - (App.userAnswers.gender ? 1 : 0);
     
     if (App.currentStep === 2) {
@@ -338,8 +336,8 @@ function updateProgressBar() {
     document.getElementById('progress-bar-inner').style.width = `${progress}%`;
 }
 
-// All other functions are provided below, no omissions.
 
+// --- ONBOARDING SWIPER ---
 function initOnboarding() {
     App.onboarding.slides = document.querySelectorAll('.swiper-slide');
     const wrapper = document.querySelector('.swiper-wrapper');
@@ -390,6 +388,8 @@ function resetOnboardingTimer() {
     App.onboarding.timer = setInterval(updateOnboardingView, 4000);
 }
 
+
+// --- DYNAMIC RENDERING ---
 function renderGenderSelection() {
     document.getElementById('back-btn').style.visibility = 'hidden';
     const footerWrapper = document.getElementById('footer-actions');
@@ -437,6 +437,7 @@ function renderQuestion(index) {
 }
 
 function addQuestionEventListeners(question) {
+    if (!question) return;
     if (question.type === 'options') {
         document.querySelectorAll('.answer-option').forEach(btn => btn.addEventListener('click', () => handleAnswer(question.key, btn.dataset.value)));
     } else if (question.type === 'slider') {
@@ -488,7 +489,6 @@ function renderAnimation(key) {
     
     wrapper.innerHTML = `<div class="question-content">${animationHTML}</div>`;
     
-    // Ensure the animation logic runs after the DOM is updated
     requestAnimationFrame(() => {
         playAnimation(key);
     });
@@ -498,8 +498,9 @@ function renderAnimation(key) {
 
 function playAnimation(key) {
     if (key === 'bmi_calculation') {
-        const heightM = (parseInt(App.userAnswers.height) || 175) / 100;
-        const weightKg = parseInt(App.userAnswers.weight) || 70;
+        if (!App.userAnswers.height || !App.userAnswers.weight) return;
+        const heightM = (parseInt(App.userAnswers.height)) / 100;
+        const weightKg = parseInt(App.userAnswers.weight);
         const bmi = (weightKg / (heightM * heightM));
         let category = "Normal", percent = 50;
         if (bmi < 18.5) { category = "Underweight"; percent = (bmi / 18.5) * 25; }
@@ -541,8 +542,9 @@ function playAnimation(key) {
 
 function renderWellnessProfile() {
     document.getElementById('back-btn').style.visibility = 'visible';
-    const heightM = (parseInt(App.userAnswers.height) || 175) / 100;
-    const weightKg = parseInt(App.userAnswers.weight) || 70;
+    if (!App.userAnswers.height || !App.userAnswers.weight) return;
+    const heightM = (parseInt(App.userAnswers.height)) / 100;
+    const weightKg = parseInt(App.userAnswers.weight);
     const bmi = (weightKg / (heightM * heightM));
     let percent = 50;
     if (bmi < 18.5) { percent = (bmi / 18.5) * 25; }
@@ -551,11 +553,9 @@ function renderWellnessProfile() {
     else { percent = 100; }
     
     document.getElementById('bmi-value-text').textContent = bmi.toFixed(1);
-    const indicatorDot = document.getElementById('bmi-indicator-dot');
-    const indicatorLabel = document.getElementById('bmi-indicator-label');
     const finalPercent = `${Math.max(5, Math.min(95, percent))}%`;
-    indicatorDot.style.left = finalPercent;
-    indicatorLabel.style.left = finalPercent;
+    document.getElementById('bmi-indicator-dot').style.left = finalPercent;
+    document.getElementById('bmi-indicator-label').style.left = finalPercent;
 
     const activity = App.userAnswers.activity || "";
     let lifestyle = "Sedentary", fitnessLevel = "Beginner";
@@ -583,19 +583,15 @@ async function startCamera() {
     
     cameraModal.classList.add('active');
     try {
-        loaderText.textContent = "Initializing models...";
-        await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights');
         loaderText.textContent = "Requesting camera access...";
         App.camera.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
         video.srcObject = App.camera.stream;
         video.onloadedmetadata = () => {
             document.getElementById('camera-loader').style.display = 'none';
-            // Simplified flow: just take a photo after a short delay to simulate analysis.
             setTimeout(takePhoto, 2000);
         };
     } catch (err) {
-        console.error("Camera Error:", err);
-        loaderText.textContent = "Camera access denied. Please check browser permissions.";
+        loaderText.textContent = "Camera access denied.";
         setTimeout(stopCamera, 3000);
     }
 }
@@ -606,7 +602,7 @@ function stopCamera() {
     App.camera.stream?.getTracks().forEach(track => track.stop());
     cameraModal.classList.remove('active');
     video.srcObject = null;
-    document.getElementById('camera-loader').style.display = 'flex'; // Reset loader
+    document.getElementById('camera-loader').style.display = 'flex';
 }
 
 function takePhoto() {
@@ -615,8 +611,6 @@ function takePhoto() {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
-    // In a real app, you would use this dataURL
-    // const photoDataUrl = canvas.toDataURL('image/jpeg');
     stopCamera();
     handleAnswer('selfie', 'Photo taken');
 }
@@ -627,24 +621,21 @@ function startAnalysis() {
     try {
         AnimationManager.add('loading-animation', 'https://assets3.lottiefiles.com/packages/lf20_gqg0yk.json');
         const track = document.getElementById('testimonial-track');
-        let testimonialIndex = 0;
-        setInterval(() => {
-            if (track) {
+        if (track) {
+            let testimonialIndex = 0;
+            setInterval(() => {
                 testimonialIndex = (testimonialIndex + 1) % 3;
                 track.style.transform = `translateX(-${testimonialIndex * 100}%)`;
-            }
-        }, 3500);
+            }, 3500);
+        }
     } catch(e) { console.error("Error starting loading animations:", e); }
     
-    // fetch('/.netlify/functions/result-background', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: App.sessionId }) });
+    // setTimeout is guaranteed to run even if animations fail
     setTimeout(() => {
         goToStep(5);
-        // initPaymentForm(); // Uncomment in production to enable Stripe
+        // initPaymentForm(); // In a real scenario, you would call your payment form logic here.
     }, 9000);
 }
-
-// ... initPaymentForm and handlePayment are not included as per user request to provide a self-contained, working code.
-// In a real scenario, these functions would handle Stripe integration.
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
