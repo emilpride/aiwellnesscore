@@ -3,761 +3,409 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Wellness Quiz - New Concept</title>
+    <title>AI Wellness Analysis - Redefined</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
     <style>
-        body, html {
-            overscroll-behavior-y: contain;
-            font-family: 'Inter', sans-serif;
-            height: 100%;
-            margin: 0;
-            overflow: hidden;
-            background-color: #f9fafb;
+        :root {
+            --brand-purple: #7c3aed;
+            --brand-indigo: #5b21b6;
+            --brand-green: #10b981;
         }
-        .full-screen-container {
+        html, body {
+            overscroll-behavior: none;
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        #quiz-container {
+            position: relative;
+            width: 100vw;
             height: 100vh;
             height: calc(var(--vh, 1vh) * 100);
             overflow: hidden;
-            position: relative;
         }
-        
-        /* Screen Transitions */
-        .screen {
+        #steps-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .quiz-step {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.5s ease-in-out, visibility 0.5s;
             display: flex;
             flex-direction: column;
-            background-color: #f9fafb;
-        }
-        .screen.active {
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            background-color: #f3f4f6;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
             opacity: 1;
-            visibility: visible;
+        }
+        .quiz-step:not(.active) {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .quiz-step.prev {
+            transform: translateX(-100%);
+        }
+        .quiz-step.next {
+            transform: translateX(100%);
+        }
+        
+        .question-content, .answer-option {
+            animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .answer-option {
+            transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .answer-option:hover {
+            transform: translateY(-5px);
+            border-color: var(--brand-purple);
+            background-color: #faf5ff;
+        }
+        
+        #progress-bar-inner {
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Onboarding Swiper */
-        #swiper-container {
-            transition: opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Testimonial Slider on Loading Screen */
+        #testimonial-slider {
+            overflow: hidden;
         }
-        .swiper-wrapper {
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        #testimonial-track {
+            display: flex;
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
-        .swiper-slide {
+        .testimonial-item {
             flex-shrink: 0;
             width: 100%;
-            height: 100%;
-            opacity: 0;
-            transform: scale(0.95);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
-        .swiper-slide.active {
-            opacity: 1;
-            transform: scale(1);
-        }
-        .dot {
-            transition: background-color 0.3s, transform 0.3s;
-        }
-        .dot.active {
-            background-color: #8b5cf6;
-            transform: scale(1.25);
-        }
-        .slide-content > * {
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.8s 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
-        }
-        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
-
-        /* General Quiz Styles */
-        .quiz-option, .gender-card {
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-        }
-        .quiz-option:hover, .gender-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08);
-        }
-        
-        /* Camera Modal */
-        #camera-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.8); z-index: 100;
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-        }
-        #camera-modal.active { opacity: 1; pointer-events: all; }
-        #camera-container {
-            position: relative; width: 90%; max-width: 400px; aspect-ratio: 3/4;
-            overflow: hidden; border-radius: 1.5rem; background: #111;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        #camera-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        #camera-canvas, #camera-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-
-        /* Testimonial Slider */
-        .testimonial-slider { overflow: hidden; }
-        .testimonial-track { display: flex; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-        .testimonial-item { flex-shrink: 0; width: 100%; }
-
-        /* Payment Screen Timer */
-        .timer-box {
-            background: linear-gradient(145deg, #ef4444, #f87171);
-            animation: pulse-red 2s infinite;
-        }
-        @keyframes pulse-red {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            50% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+            padding: 0 1rem;
         }
 
-        /* Widgets (reused from original) */
-        .slider-widget { padding: 1rem; background-color: #f3f4f6; border-radius: 1rem; width: 100%; max-width: 300px; margin: auto; }
-        .slider-value { font-size: 2.5rem; font-weight: 800; line-height: 1; transition: color 0.3s ease; }
-        .slider-label { font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; color: #6b21a8; }
-        .slider-input { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: #d1d5db; border-radius: 5px; outline: none; transition: opacity .2s; }
-        .slider-input-gradient { background: linear-gradient(to right, #22c55e, #facc15, #ef4444); }
-        .slider-input::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; background: white; cursor: pointer; border-radius: 50%; border: 4px solid #8b5cf6; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-        .confirm-btn { margin-top: 1rem; width: 100%; background-color: #7c3aed; color: white; font-weight: bold; padding: 0.75rem; border-radius: 0.75rem; transition: background-color 0.2s; }
-        .widget-wrapper, .bmi-widget, .analysis-container { padding: 1rem; background-color: #f3f4f6; border-radius: 1rem; max-width: 250px; margin: auto; text-align: center; }
-        .widget-label { font-weight: 600; color: #6b21a8; margin-bottom: 0.75rem; }
-        .sleep-battery { width: 100px; height: 40px; border: 3px solid #c4b5fd; border-radius: 8px; margin: 0 auto; position: relative; }
-        .sleep-battery::after { content:''; position: absolute; top: 50%; right: -10px; transform: translateY(-50%); width: 5px; height: 20px; background-color: #c4b5fd; border-radius: 0 4px 4px 0; }
-        .sleep-battery-level { position: absolute; top: 3px; left: 3px; height: 30px; border-radius: 4px; width: 0%; background-color: #ef4444; transition: width 1.5s ease-out, background-color 1s ease; }
-        .activity-week { display:flex; justify-content:center; gap: 0.5rem; }
-        .activity-day { width: 30px; height: 30px; border-radius: 0.5rem; background-color: #ede9fe; color: #a78bfa; font-weight: 600; display:flex; align-items:center; justify-content:center; font-size:0.75rem; transition: all 0.4s ease-out; }
-        .activity-day.active { background-color: #8b5cf6; color: white; transform: scale(1.1); box-shadow: 0 4px 10px rgba(139, 92, 246, 0.4); }
+        /* Payment Screen Pulsing Button */
+        #submit-payment.pulsate {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 15px rgba(124, 58, 237, 0);
+            }
+        }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
 
-<div id="app-container" class="full-screen-container">
+<div id="quiz-container">
+    <div id="progress-bar" class="absolute top-0 left-0 w-full h-1.5 bg-gray-300 z-20">
+        <div id="progress-bar-inner" class="h-full bg-gradient-to-r from-purple-500 to-indigo-600" style="width: 0%;"></div>
+    </div>
 
-    <div id="onboarding-screen" class="screen active">
-        <div id="swiper-container" class="relative w-full h-full flex flex-col bg-white">
-            <div class="flex-grow w-full h-full overflow-hidden">
-                <div id="swiper-wrapper" class="swiper-wrapper flex h-full">
-                    <div class="swiper-slide flex items-center justify-center p-8">
-                        <div class="text-center slide-content">
-                            <div id="dave-animation" class="w-48 h-48 mx-auto"></div>
-                            <h1 class="text-3xl font-bold text-gray-800 mt-4">Hey! I'm Dave.</h1>
-                            <p class="text-gray-600 mt-2">Your personal AI wellness assistant. Let's unlock your potential together.</p>
-                        </div>
+    <div id="steps-wrapper">
+        <section id="step-0" class="quiz-step active">
+            <div id="welcome-animation" class="w-64 h-64"></div>
+            <h1 class="text-4xl font-extrabold text-gray-900 text-center tracking-tight">Unlock Your True Wellness Age</h1>
+            <p class="text-lg text-gray-600 mt-4 text-center max-w-lg">Take our 2-minute AI-powered analysis to get a personalized wellness plan that actually works.</p>
+            <button data-action="next" class="mt-8 w-full max-w-sm bg-purple-600 text-white font-bold py-4 px-6 rounded-full text-lg shadow-lg shadow-purple-200 hover:bg-purple-700 transition transform hover:scale-105">
+                Start Analysis
+            </button>
+        </section>
+
+        <section id="step-1" class="quiz-step next">
+            <div class="question-content w-full max-w-2xl text-center">
+                <h2 class="text-3xl font-bold text-gray-900">To personalize your plan, which do you identify with?</h2>
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="answer-option cursor-pointer bg-white p-6 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-square" data-value="Female">
+                        <div class="text-6xl">👩</div>
+                        <p class="mt-4 text-xl font-bold">Female</p>
                     </div>
-                    <div class="swiper-slide flex items-center justify-center p-8">
-                        <div class="text-left w-full max-w-sm slide-content">
-                            <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">What you'll get:</h2>
-                            <ul class="space-y-4">
-                                <li class="flex items-center"><span class="text-2xl mr-3">🎯</span><div><h3 class="font-semibold">Wellness Score</h3><p class="text-sm text-gray-500">Your comprehensive health rating</p></div></li>
-                                <li class="flex items-center"><span class="text-2xl mr-3">⏳</span><div><h3 class="font-semibold">Biological Age</h3><p class="text-sm text-gray-500">How "young" you are for your years</p></div></li>
-                                <li class="flex items-center"><span class="text-2xl mr-3">🌿</span><div><h3 class="font-semibold">Skin & Stress Analysis</h3><p class="text-sm text-gray-500">Learn about hidden factors</p></div></li>
-                                <li class="flex items-center"><span class="text-2xl mr-3">🗺️</span><div><h3 class="font-semibold">Personalized Plan</h3><p class="text-sm text-gray-500">A 7-day plan for improvement</p></div></li>
-                            </ul>
-                        </div>
+                    <div class="answer-option cursor-pointer bg-white p-6 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-square" data-value="Male">
+                        <div class="text-6xl">👨</div>
+                        <p class="mt-4 text-xl font-bold">Male</p>
                     </div>
-                    <div class="swiper-slide flex items-center justify-center p-8">
-                        <div class="text-center slide-content">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-6">Lower Your Biological Age</h2>
-                            <div class="flex justify-center items-center space-x-4">
-                                <div class="text-center"><p class="text-gray-500">Chronological</p><p class="text-5xl font-bold text-gray-400">35</p></div>
-                                <div id="arrow-animation" class="w-20 h-20"></div>
-                                <div class="text-center"><p class="text-purple-600 font-semibold">Biological</p><p class="text-6xl font-extrabold text-purple-600">32</p></div>
-                            </div>
-                            <p class="text-gray-600 mt-6 max-w-xs mx-auto">Our plan is designed to help you feel younger and more energetic.</p>
-                        </div>
-                    </div>
-                     <div class="swiper-slide flex items-center justify-center p-8">
-                        <div class="text-center max-w-sm slide-content">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-8">Your Privacy is Our Priority</h2>
-                            <div class="space-y-6">
-                                <div class="flex items-center text-left"><span class="text-3xl mr-4">📸</span><p class="text-gray-600">Your photo is never stored and is deleted immediately after analysis.</p></div>
-                                <div class="flex items-center text-left"><span class="text-3xl mr-4">🔒</span><p class="text-gray-600">All your data is anonymized and protected by encryption.</p></div>
-                                <div class="flex items-center text-left"><span class="text-3xl mr-4">⚕️</span><p class="text-gray-600">This is not medical advice. All recommendations are for informational purposes only.</p></div>
-                            </div>
-                        </div>
+                    <div class="answer-option cursor-pointer bg-white p-6 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-square" data-value="Other">
+                        <div class="text-6xl">🧑</div>
+                        <p class="mt-4 text-xl font-bold">Other</p>
                     </div>
                 </div>
             </div>
-            <div class="py-8 px-6 bg-white">
-                <div id="dots-container" class="flex justify-center items-center space-x-3 mb-6"></div>
-                <button id="start-quiz-btn" class="w-full bg-purple-600 text-white font-bold py-4 px-4 rounded-xl hover:bg-purple-700 transition-transform transform hover:scale-105 shadow-lg shadow-purple-200">Let's start</button>
-            </div>
-        </div>
-    </div>
+        </section>
 
-    <div id="gender-screen" class="screen justify-center p-6">
-        <div class="text-center max-w-lg mx-auto">
-            <h1 class="text-3xl font-bold text-gray-900">To get started, which gender do you identify with?</h1>
-            <p class="text-gray-600 mt-2">This helps us personalize your wellness analysis.</p>
-            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="gender-card cursor-pointer bg-white p-6 rounded-2xl border-2 border-gray-200 hover:border-purple-500" data-gender="Female">
-                    <div class="text-6xl">👩</div>
-                    <p class="mt-4 text-xl font-bold">Female</p>
+        <section id="step-2" class="quiz-step next">
+            <div id="question-wrapper" class="w-full max-w-2xl">
                 </div>
-                <div class="gender-card cursor-pointer bg-white p-6 rounded-2xl border-2 border-gray-200 hover:border-purple-500" data-gender="Male">
-                    <div class="text-6xl">👨</div>
-                    <p class="mt-4 text-xl font-bold">Male</p>
-                </div>
-                <div class="gender-card cursor-pointer bg-white p-6 rounded-2xl border-2 border-gray-200 hover:border-purple-500" data-gender="Other">
-                    <div class="text-6xl">🧑</div>
-                    <p class="mt-4 text-xl font-bold">Other</p>
-                </div>
-            </div>
-        </div>
-    </div>
+        </section>
 
-    <div id="quiz-screen" class="screen">
-        <div class="w-full bg-gray-200"><div id="progress-bar" class="h-1 bg-gradient-to-r from-purple-500 to-indigo-500" style="width: 0%; transition: width 0.5s ease-in-out;"></div></div>
-        <div id="question-container" class="flex-grow flex items-center justify-center p-6 overflow-y-auto">
-            </div>
-    </div>
-
-    <div id="profile-screen" class="screen">
-         <div class="p-6 text-center bg-white border-b">
-            <h1 class="text-2xl font-bold">Your Preliminary Wellness Profile</h1>
-            <p class="text-gray-600">Here's a snapshot based on your answers. Unlock the full report for a deep dive.</p>
-        </div>
-        <div class="flex-grow p-6 overflow-y-auto space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-md text-center">
-                <h3 class="font-bold text-purple-700">Overall Wellness Score</h3>
-                <p class="text-6xl font-extrabold text-purple-600" id="profile-wellness-score">--</p>
-                <p class="text-gray-500">A high score indicates a great balance in life.</p>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white p-4 rounded-2xl shadow-md text-center">
-                    <h4 class="font-semibold text-gray-700">Stress Level</h4>
-                    <p class="text-4xl font-bold" id="profile-stress-level">--</p>
-                </div>
-                <div class="bg-white p-4 rounded-2xl shadow-md text-center">
-                    <h4 class="font-semibold text-gray-700">Sleep Quality</h4>
-                    <p class="text-4xl font-bold" id="profile-sleep-quality">--</p>
+        <section id="step-3" class="quiz-step next">
+            <div id="loading-animation" class="w-48 h-48"></div>
+            <h2 class="text-3xl font-bold text-gray-800 mt-4 text-center">Analyzing Your Unique Profile...</h2>
+            <p class="text-gray-600 mt-2 text-center">Our AI is calibrating your personalized results.</p>
+            <div id="testimonial-slider" class="w-full max-w-md mt-12 text-center">
+                <div id="testimonial-track">
+                    <div class="testimonial-item">
+                        <p class="italic text-gray-700">"This was a real eye-opener. The 7-day plan was simple, effective, and made me feel years younger!"</p>
+                        <p class="font-bold mt-2 text-purple-700">- Jessica M., New York</p>
+                    </div>
+                    <div class="testimonial-item">
+                        <p class="italic text-gray-700">"Finally, a wellness plan that understands my busy life. The photo analysis was surprisingly accurate about my stress levels."</p>
+                        <p class="font-bold mt-2 text-purple-700">- David L., California</p>
+                    </div>
+                    <div class="testimonial-item">
+                        <p class="italic text-gray-700">"I've tried everything. This is the first time I've seen actual results that stick. Highly recommend!"</p>
+                        <p class="font-bold mt-2 text-purple-700">- Sarah K., Texas</p>
+                    </div>
                 </div>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-md">
-                <h3 class="font-bold text-lg mb-2">Key Areas:</h3>
-                <ul class="space-y-2">
-                    <li id="profile-area-1" class="flex items-center gap-2"><span class="text-xl"></span><span class="text-gray-700"></span></li>
-                    <li id="profile-area-2" class="flex items-center gap-2"><span class="text-xl"></span><span class="text-gray-700"></span></li>
-                </ul>
-            </div>
-        </div>
-        <div class="p-6 bg-white border-t">
-            <button id="see-full-report-btn" class="w-full bg-purple-600 text-white font-bold py-4 rounded-xl hover:bg-purple-700 transition transform hover:scale-105 shadow-lg">See My Full Report & Plan</button>
-        </div>
-    </div>
-
-    <div id="loading-screen" class="screen justify-center items-center text-center p-6">
-        <div id="analysis-animation" class="w-40 h-40"></div>
-        <h2 id="analysis-text" class="text-2xl font-bold text-gray-800 mt-4">Analyzing your results...</h2>
-        <p class="text-gray-600">This will just take a moment.</p>
+        </section>
         
-        <div class="testimonial-slider w-full max-w-md mt-8">
-            <div id="testimonial-track" class="testimonial-track">
-                <div class="testimonial-item px-4">
-                    <p class="italic text-gray-700">"I was shocked by my Wellness Age. It was the wake-up call I needed. The plan was so simple to follow!"</p>
-                    <p class="font-bold mt-2">- Jessica M.</p>
-                </div>
-                <div class="testimonial-item px-4">
-                    <p class="italic text-gray-700">"Finally, a wellness tool that isn't about guilt. The 'Creative Owl' archetype resonated so much with me."</p>
-                    <p class="font-bold mt-2">- David L.</p>
-                </div>
-                <div class="testimonial-item px-4">
-                    <p class="italic text-gray-700">"The photo analysis was fascinating. I had no idea my screen time was showing up as visible eye strain."</p>
-                    <p class="font-bold mt-2">- Sarah K.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="payment-screen" class="screen">
-        <div class="flex-grow p-6 overflow-y-auto">
-            <div class="max-w-md mx-auto">
+        <section id="step-4" class="quiz-step next overflow-y-auto justify-start pt-24">
+            <div class="w-full max-w-lg mx-auto">
                 <div class="text-center">
-                    <div class="text-5xl">✨</div>
-                    <h1 class="text-3xl font-extrabold text-gray-900 mt-2">You're one step away!</h1>
-                    <p class="text-lg text-gray-600 mt-2">Unlock your complete, personalized wellness report to start your transformation.</p>
+                    <div class="text-6xl">✨</div>
+                    <h1 class="text-4xl font-extrabold text-gray-900 mt-2">Your Report Is Ready!</h1>
+                    <p class="text-xl text-gray-600 mt-2">Just one final step to unlock your complete, personalized wellness blueprint.</p>
                 </div>
 
-                <div class="mt-6 bg-white rounded-2xl shadow-lg p-6">
-                    <h3 class="font-bold text-lg">What You'll Unlock:</h3>
-                    <ul class="mt-4 space-y-3 text-gray-700">
-                        <li class="flex items-start"><span class="mr-2 text-green-500">✓</span><span><b>Detailed Biological Age</b> analysis and what it means for you.</span></li>
-                        <li class="flex items-start"><span class="mr-2 text-green-500">✓</span><span><b>Comprehensive Skin Analysis</b> identifying key areas for improvement.</span></li>
-                        <li class="flex items-start"><span class="mr-2 text-green-500">✓</span><span>A <b>7-Day Action Plan</b> with simple, daily tasks to improve your score.</span></li>
-                        <li class="flex items-start"><span class="mr-2 text-green-500">✓</span><span>In-depth breakdown of all <b>8 Wellness Metrics</b> (Stress, Sleep, Nutrition, etc.).</span></li>
+                <div class="mt-8 bg-white rounded-3xl shadow-2xl p-8">
+                    <h3 class="font-bold text-2xl text-center">What You'll Unlock:</h3>
+                    <ul class="mt-6 space-y-4 text-gray-700">
+                        <li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Your True Wellness Age:</b> See how your lifestyle impacts your biological age.</span></li>
+                        <li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>In-Depth Skin Analysis:</b> Identify hidden signs of stress and fatigue.</span></li>
+                        <li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Custom 7-Day Action Plan:</b> Simple, daily tasks to improve your score.</span></li>
+                        <li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Full Metrics Breakdown:</b> Understand your scores for Energy, Stress, Nutrition, and more.</span></li>
                     </ul>
                 </div>
                 
-                <div class="mt-6">
+                <div class="mt-8">
+                    <div class="flex items-center justify-center gap-4 mb-4">
+                        <div id="timer-box" class="bg-red-500 text-white font-bold p-3 rounded-lg text-center shadow-lg">
+                            <span id="countdown" class="text-2xl">10:00</span>
+                        </div>
+                        <p class="text-red-600 font-semibold">Your special offer is reserved!</p>
+                    </div>
                     <div id="payment-form-container">
                         </div>
                 </div>
-
-                <div class="mt-6 flex items-center justify-center gap-4">
-                    <div id="timer" class="timer-box text-white font-bold p-3 rounded-lg text-center">
-                        <span id="countdown">10:00</span>
-                        <div class="text-xs opacity-80">Offer Ends</div>
-                    </div>
-                    <p class="text-gray-600">Your personalized report is reserved for the next 10 minutes!</p>
-                </div>
-
             </div>
-        </div>
-    </div>
-</div>
-
-<div id="camera-modal">
-    <div id="camera-container">
-        <video id="camera-video" autoplay muted playsinline></video>
-        <canvas id="camera-canvas"></canvas>
-        <div id="camera-loader" class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4">
-            <svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <p id="loader-text" class="text-lg font-semibold">Initializing AI models...</p>
-        </div>
-        <div id="camera-overlay" class="p-6 text-center text-white font-semibold" style="background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);">
-            <p id="camera-status">Position your face in the frame</p>
-        </div>
+        </section>
     </div>
 </div>
 
 <script>
-// --- CORE APP LOGIC ---
-
-// --- VIEWPORT & INITIALIZATION ---
-const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
-window.addEventListener('resize', setVh);
-setVh();
-
-// --- GLOBAL STATE ---
-let sessionId = null, userAnswers = {}, currentQuestionIndex = 0;
-let detectionInterval, stream, capturedPhotoDataUrl = null, countdownInterval;
-let stripe, elements, clientSecret;
-const questionContainer = document.getElementById('question-container');
-
-// --- ERROR LOGGING (same as original) ---
-async function logErrorToServer(errorDetails) {
-    if (!sessionId) return;
-    try {
-        await fetch('/.netlify/functions/quiz', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'logError', sessionId: sessionId, error: { source: 'frontend-v2', message: errorDetails.message, details: errorDetails.details || 'N/A' } })
-        });
-    } catch (e) { console.error("Failed to send error log:", e); }
-}
-
-// --- SCREEN MANAGEMENT ---
-function showScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(screen => {
-        screen.classList.toggle('active', screen.id === screenId);
-    });
-}
-
-// --- ONBOARDING SWIPER LOGIC (adapted from original) ---
-const swiperWrapper = document.getElementById('swiper-wrapper');
-const slides = document.querySelectorAll('.swiper-slide');
-const dotsContainer = document.getElementById('dots-container');
-const startQuizBtn = document.getElementById('start-quiz-btn');
-let currentSlide = 0, autoSwipeTimer, touchStartX = 0, touchEndX = 0;
-
-function goToSlide(slideIndex, isAuto = false) {
-    if (!isAuto) resetAutoSwipe();
-    currentSlide = slideIndex;
-    swiperWrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
-    slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
-    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
-}
-const nextSlide = () => goToSlide((currentSlide + 1) % slides.length, true);
-const resetAutoSwipe = () => { clearInterval(autoSwipeTimer); autoSwipeTimer = setInterval(nextSlide, 3500); };
-
-slides.forEach((_, i) => {
-    const dot = document.createElement('div');
-    dot.className = 'dot w-2 h-2 bg-gray-300 rounded-full cursor-pointer';
-    dot.onclick = () => goToSlide(i);
-    dotsContainer.appendChild(dot);
-});
-
-swiperWrapper.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; clearInterval(autoSwipeTimer); }, { passive: true });
-swiperWrapper.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; if(touchEndX < touchStartX - 50) nextSlide(); if(touchEndX > touchStartX + 50) goToSlide((currentSlide - 1 + slides.length) % slides.length); resetAutoSwipe(); });
-
-goToSlide(0);
-resetAutoSwipe();
-
-// --- ANIMATION MANAGEMENT (adapted from original) ---
-const animationManager = {
-    animations: new Map(),
-    add(containerId, options) {
-        this.remove(containerId);
-        const container = document.getElementById(containerId);
-        if (!container) return null;
-        const anim = lottie.loadAnimation({ container, ...options });
-        this.animations.set(containerId, anim);
-        return anim;
-    },
-    remove(containerId) {
-        const anim = this.animations.get(containerId);
-        if (anim) { anim.destroy(); this.animations.delete(containerId); }
-    }
+// --- GLOBAL APP STATE & CONFIG ---
+const App = {
+    currentStep: 0,
+    sessionId: null,
+    userAnswers: {},
+    stripe: null,
+    elements: null,
+    clientSecret: null,
+    quizQuestions: [
+        { key: 'userGoal', type: 'options', text: "What's your primary wellness goal?", options: ['Find out my biological age', 'Get a skin condition analysis', 'Get a 7-day improvement plan', 'All of the above!'] },
+        { key: 'age', type: 'slider', text: "What's your current age?", label: "Select your age", min: 18, max: 90, step: 1, defaultValue: 30, unit: 'years' },
+        { key: 'height', type: 'slider', text: "What is your height?", label: "Select your height", min: 140, max: 220, step: 1, defaultValue: 175, unit: 'cm' },
+        { key: 'weight', type: 'slider', text: "And your current weight?", label: "Select your weight", min: 40, max: 150, step: 1, defaultValue: 70, unit: 'kg' },
+        { key: 'sleep', type: 'options', text: "😴 How many hours of quality sleep do you get on average?", options: ["Less than 5 hours", "5-6 hours", "7-8 hours", "More than 8 hours"] },
+        { key: 'activity', type: 'options', text: "🏃‍♀️ How often do you engage in moderate physical activity per week?", options: ["Rarely", "1-2 times", "3-4 times", "5+ times"] },
+        { key: 'stress', type: 'slider', text: "🧠 On a scale of 1-10, how would you rate your typical stress level?", label: "Drag to indicate your stress level", min: 1, max: 10, step: 1, defaultValue: 5, unit: 'stress', isGradient: true },
+        { key: 'screen_time', type: 'options', text: "📱 Outside of work, how much time do you spend on screens daily?", options: ["Less than 2 hours", "2-4 hours", "4-6 hours", "More than 6 hours"] },
+        { key: 'email', type: 'email_step', text: "Where should we send your report summary?", subtext: "We respect your privacy. No spam, ever." }
+    ],
+    totalSteps: 5 // Welcome, Gender, Quiz, Loading, Payment
 };
 
-animationManager.add('dave-animation', { renderer: 'svg', loop: true, autoplay: true, path: 'assistent.json' });
-animationManager.add('arrow-animation', { renderer: 'svg', loop: true, autoplay: true, path: 'https://assets4.lottiefiles.com/packages/lf20_c64I86.json' });
+// --- CORE FUNCTIONS ---
+const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
 
+function goToStep(stepIndex) {
+    App.currentStep = stepIndex;
+    document.querySelectorAll('.quiz-step').forEach((step, index) => {
+        step.classList.remove('active', 'prev', 'next');
+        if (index === stepIndex) {
+            step.classList.add('active');
+        } else if (index < stepIndex) {
+            step.classList.add('prev');
+        } else {
+            step.classList.add('next');
+        }
+    });
+    updateProgressBar();
+}
 
-// --- QUIZ QUESTIONS & DATA ---
-const quizQuestions = [
-    { key: 'userGoal', type: 'options', text: "What's your primary wellness goal?", options: ['Find out my biological age', 'Get a skin condition analysis', 'Get a 7-day improvement plan', 'All of the above!'] },
-    { key: 'age', type: 'slider', text: "To start, what's your age? 🎂", label: "Select your age", min: 18, max: 90, step: 1, defaultValue: 30, unit: 'years' },
-    { key: 'height', type: 'slider', text: "Perfect. And your height? 📏", label: "Select your height", min: 140, max: 220, step: 1, defaultValue: 175, unit: 'cm' },
-    { key: 'weight', type: 'slider', text: "Thanks! And your current weight? ⚖️", label: "Select your weight", min: 40, max: 150, step: 1, defaultValue: 70, unit: 'kg' },
-    { key: 'bmi_calculation', type: 'animation' },
-    { key: 'sleep', type: 'options', text: "😴 How many hours of <i>quality</i> sleep do you get on an average night?", options: ["Less than 5 hours", "5-6 hours", "7-8 hours", "More than 8 hours"] },
-    { key: 'sleep_visual', type: 'animation' },
-    { key: 'activity', type: 'options', text: "🏃‍♀️ How often do you engage in moderate physical activity per week?", options: ["Rarely", "1-2 times", "3-4 times", "5+ times"] },
-    { key: 'activity_visual', type: 'animation' },
-    { key: 'stress', type: 'slider', text: "🧠 How would you rate your typical stress level?", label: "Drag to indicate your stress level", min: 1, max: 10, step: 1, defaultValue: 5, unit: 'stress', isGradient: true },
-    { key: 'screen_time', type: 'options', text: "📱 How much time do you spend on screens outside of work?", options: ["Less than 2 hours", "2-4 hours", "4-6 hours", "More than 6 hours"] },
-    { key: 'camera', type: 'camera_step', text: "Excellent! The final step is a quick photo analysis.", subtext: "Our AI analyzes your face for non-medical indicators of stress and fatigue to provide a comprehensive wellness assessment. Your photo is deleted instantly after analysis." },
-    { key: 'email', type: 'email_step', text: "Just one more thing...", subtext: "Enter your email to get your personalized report summary. We respect your privacy." }
-];
+function updateProgressBar() {
+    const progress = (App.currentStep / (App.totalSteps - 1)) * 100;
+    document.getElementById('progress-bar-inner').style.width = `${progress}%`;
+}
 
-// --- QUIZ FLOW & LOGIC ---
 async function startQuizSession() {
-    const getDeviceType = () => { /* ... (same as original) ... */ return 'Desktop/Unknown'; };
-    const getTrafficSource = () => { /* ... (same as original) ... */ return 'Direct'; };
     try {
         const response = await fetch('/.netlify/functions/quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'startSession', source: getTrafficSource(), deviceType: getDeviceType() })
+            body: JSON.stringify({ action: 'startSession' })
         });
         if (!response.ok) throw new Error('Could not start session');
         const data = await response.json();
-        sessionId = data.sessionId;
+        App.sessionId = data.sessionId;
     } catch (error) {
-        console.error('Failed to start session:', error);
-        questionContainer.innerHTML = `<div class="text-center text-red-500">Sorry, could not start the quiz. Please refresh the page.</div>`;
+        console.error('Session start failed:', error);
+        alert('Could not start the quiz. Please refresh and try again.');
     }
 }
 
-async function saveAnswer(questionKey, answer) {
-    if (!sessionId) return;
-    userAnswers[questionKey] = answer.toString().trim();
-    try {
-        await fetch('/.netlify/functions/quiz', {
+async function handleAnswer(questionKey, answer) {
+    App.userAnswers[questionKey] = answer.toString().trim();
+    if (App.sessionId) {
+        fetch('/.netlify/functions/quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'saveAnswer', sessionId, questionId: questionKey, answer })
-        });
-    } catch (error) { console.error('Failed to save answer:', error); }
+            body: JSON.stringify({ action: 'saveAnswer', sessionId: App.sessionId, questionId: questionKey, answer })
+        }).catch(err => console.error("Failed to save answer:", err));
+    }
     
-    updateProgressBar();
-    
-    // Check for associated animation
+    const currentQuestionIndex = App.quizQuestions.findIndex(q => q.key === questionKey);
     const nextQuestionIndex = currentQuestionIndex + 1;
-    if (nextQuestionIndex < quizQuestions.length && quizQuestions[nextQuestionIndex].type === 'animation') {
-        currentQuestionIndex++; // Skip to the animation step
-        renderQuestion(currentQuestionIndex);
+
+    if (nextQuestionIndex < App.quizQuestions.length) {
+        renderQuestion(nextQuestionIndex);
     } else {
-        proceedToNextQuestion();
+        // All questions answered, move to loading screen
+        goToStep(3); // Go to loading screen
+        startAnalysis();
     }
 }
 
-function updateProgressBar() {
-    const totalSteps = quizQuestions.length;
-    const progress = ((currentQuestionIndex + 1) / totalSteps) * 100;
-    document.getElementById('progress-bar').style.width = `${progress}%`;
-}
-
-function proceedToNextQuestion() {
-    currentQuestionIndex++;
-    if (currentQuestionIndex < quizQuestions.length) {
-        renderQuestion(currentQuestionIndex);
-    } else {
-        // Quiz is finished
-        showScreen('profile-screen');
-        populateWellnessProfile();
-    }
-}
-
+// --- UI RENDERING & EVENT LISTENERS ---
 function renderQuestion(index) {
-    const question = quizQuestions[index];
+    const question = App.quizQuestions[index];
+    const wrapper = document.getElementById('question-wrapper');
     let contentHTML = '';
 
-    const questionHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>`;
+    const questionTitle = `<h2 class="text-3xl font-bold text-gray-900 text-center mb-8">${question.text}</h2>`;
 
-    switch (question.type) {
-        case 'options':
-            const optionsHTML = question.options.map(opt => 
-                `<button class="quiz-option w-full bg-white p-4 rounded-xl border-2 border-gray-200 text-lg font-semibold text-gray-700 hover:border-purple-500" data-answer="${opt}">${opt}</button>`
-            ).join('');
-            contentHTML = `<div class="w-full max-w-lg mx-auto">${questionHTML}<div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">${optionsHTML}</div></div>`;
-            break;
-
-        case 'slider':
-             const formatDisplayValue = (value) => {
-                if (question.unit === 'stress') {
-                    if (value <= 3) return `<span style="color: #22c55e;">Low</span>`;
-                    if (value <= 7) return `<span style="color: #f59e0b;">Medium</span>`;
-                    return `<span style="color: #ef4444;">High</span>`;
-                }
-                if (question.unit === 'cm') {
-                    const feet = Math.floor(value / 30.48);
-                    const inches = Math.round((value % 30.48) / 2.54);
-                    return `${feet}'${inches}" <span class="text-lg ml-2 text-purple-400">(${value} cm)</span>`;
-                }
-                if (question.unit === 'kg') {
-                    const lbs = (value * 2.20462).toFixed(0);
-                    return `${lbs} lbs <span class="text-lg ml-2 text-purple-400">(${value} kg)</span>`;
-                }
-                return `${value} ${question.unit}`;
-            };
-            const sliderInputClass = question.isGradient ? 'slider-input slider-input-gradient' : 'slider-input';
-            const markersHTML = question.isGradient ? `<div class="flex justify-between text-xs text-gray-500"><span>Low</span><span>Medium</span><span>High</span></div>` : '';
-            
-            contentHTML = `<div class="w-full max-w-lg mx-auto text-center">
-                ${questionHTML}
-                <div class="slider-widget mt-8">
-                    <div id="slider-value-display" class="slider-value">${formatDisplayValue(question.defaultValue)}</div>
-                    <div class="slider-label">${question.label}</div>
-                    <input type="range" min="${question.min}" max="${question.max}" value="${question.defaultValue}" step="${question.step}" class="${sliderInputClass}" id="slider-input-range">
-                    ${markersHTML}
-                    <button id="slider-confirm-btn" class="confirm-btn">Confirm</button>
-                </div>
-            </div>`;
-            break;
-        
-        case 'animation':
-            let animationHTML = '';
-            if (question.key === 'bmi_calculation') {
-                 animationHTML = `<div class="bmi-widget"><div id="bmi-value-anim" class="text-4xl font-extrabold">0.0</div><div class="text-sm font-semibold text-gray-600 mb-2">Your Estimated BMI</div></div>`;
-            } else if (question.key === 'sleep_visual') {
-                 animationHTML = `<div class="widget-wrapper"><div class="widget-label">Sleep Recharge</div><div class="sleep-battery mt-2"><div id="sleep-battery-level-anim" class="sleep-battery-level"></div></div></div>`;
-            } else if (question.key === 'activity_visual') {
-                animationHTML = `<div class="widget-wrapper"><div class="widget-label">Your Active Week</div><div class="activity-week" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div></div>`;
-            }
-            contentHTML = `<div class="text-center">${animationHTML}</div>`;
-            break;
-            
-        case 'camera_step':
-             contentHTML = `<div class="text-center max-w-lg mx-auto">
-                <div class="text-6xl mb-4">📸</div>
-                ${questionHTML}
-                <p class="text-gray-600 mt-2">${question.subtext}</p>
-                <div class="mt-8 space-y-3">
-                    <button id="open-camera-btn" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-full hover:bg-purple-700 transition">Allow Camera Access</button>
-                    <button id="skip-photo-btn" class="text-sm text-gray-500 hover:text-gray-800">Skip for now</button>
-                </div>
-             </div>`;
-             break;
-        
-        case 'email_step':
-            contentHTML = `<div class="text-center max-w-lg mx-auto">
-                <div class="text-6xl mb-4">✉️</div>
-                ${questionHTML}
-                <p class="text-gray-600 mt-2">${question.subtext}</p>
-                <div class="mt-8 flex gap-2">
-                    <input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500">
-                    <button id="email-submit-btn" class="bg-purple-600 text-white font-bold py-3 px-5 rounded-lg hover:bg-purple-700 transition">Submit</button>
-                </div>
-            </div>`;
-            break;
+    if (question.type === 'options') {
+        const optionsHTML = question.options.map(opt => 
+            `<button class="answer-option w-full bg-white p-4 rounded-xl border-2 border-gray-200 text-lg font-semibold text-gray-700" data-value="${opt}">${opt}</button>`
+        ).join('');
+        contentHTML = `<div class="question-content"><div class="text-center">${questionTitle}</div><div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">${optionsHTML}</div></div>`;
+    } else if (question.type === 'slider') {
+        // ... slider rendering logic (can be adapted from quiz2.html)
+        contentHTML = `<div class="question-content w-full max-w-sm mx-auto text-center">${questionTitle}
+            <div class="bg-white p-6 rounded-2xl mt-8 shadow-md">
+                <div id="slider-value-display" class="text-4xl font-extrabold text-purple-600 mb-2">${question.defaultValue} ${question.unit}</div>
+                <input type="range" min="${question.min}" max="${question.max}" value="${question.defaultValue}" step="${question.step}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
+                <button class="mt-6 w-full bg-purple-600 text-white font-bold py-3 rounded-full text-lg hover:bg-purple-700 transition" id="slider-confirm-btn">Confirm</button>
+            </div>
+        </div>`;
+    } else if (question.type === 'email_step') {
+        contentHTML = `<div class="question-content text-center">
+            ${questionTitle}
+            <p class="text-gray-600 mt-2">${question.subtext}</p>
+            <div class="mt-8 flex gap-2 max-w-sm mx-auto">
+                <input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500">
+                <button id="email-submit-btn" class="bg-purple-600 text-white font-bold py-3 px-5 rounded-lg hover:bg-purple-700 transition">Submit</button>
+            </div>
+        </div>`;
     }
-
-    questionContainer.style.opacity = 0;
-    setTimeout(() => {
-        questionContainer.innerHTML = contentHTML;
-        questionContainer.style.opacity = 1;
-        addQuestionEventListeners(question);
-        
-        if (question.type === 'animation') {
-            playAnimation(question.key);
-            setTimeout(proceedToNextQuestion, 2000); // Auto-proceed after animation
-        }
-
-    }, 300); // Fade transition time
+    
+    wrapper.innerHTML = contentHTML;
+    addQuestionEventListeners(question);
 }
 
 function addQuestionEventListeners(question) {
     if (question.type === 'options') {
-        document.querySelectorAll('.quiz-option').forEach(btn => {
-            btn.addEventListener('click', () => saveAnswer(question.key, btn.dataset.answer));
+        document.querySelectorAll('.answer-option').forEach(btn => {
+            btn.addEventListener('click', () => handleAnswer(question.key, btn.dataset.value));
         });
     } else if (question.type === 'slider') {
-        const sliderInput = document.getElementById('slider-input-range');
+        const sliderInput = document.getElementById('slider-input');
         const valueDisplay = document.getElementById('slider-value-display');
-        const confirmBtn = document.getElementById('slider-confirm-btn');
-        sliderInput.addEventListener('input', (e) => {
-            // This reuses the same formatting logic from renderQuestion
-            const formatDisplayValue = (value) => { /* ... (copy format logic from render) ... */ return `${value} ${question.unit}`; };
-            valueDisplay.innerHTML = formatDisplayValue(e.target.value);
-        });
-        confirmBtn.onclick = () => saveAnswer(question.key, sliderInput.value);
-    } else if (question.type === 'camera_step') {
-        document.getElementById('open-camera-btn').onclick = startCamera;
-        document.getElementById('skip-photo-btn').onclick = () => saveAnswer('selfie', 'skipped');
+        sliderInput.addEventListener('input', () => { valueDisplay.textContent = `${sliderInput.value} ${question.unit}`; });
+        document.getElementById('slider-confirm-btn').addEventListener('click', () => handleAnswer(question.key, sliderInput.value));
     } else if (question.type === 'email_step') {
-        const emailInput = document.getElementById('email-input');
-        document.getElementById('email-submit-btn').onclick = () => {
-             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-             if (emailRegex.test(emailInput.value)) {
-                 saveAnswer(question.key, emailInput.value);
-             } else {
-                 alert('Please enter a valid email address.');
-             }
-        };
+        document.getElementById('email-submit-btn').addEventListener('click', () => {
+            const emailInput = document.getElementById('email-input');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailRegex.test(emailInput.value)) {
+                handleAnswer(question.key, emailInput.value);
+            } else {
+                alert('Please enter a valid email address.');
+            }
+        });
     }
 }
 
-function playAnimation(key) {
-    if (key === 'bmi_calculation') {
-        const heightM = (parseInt(userAnswers.height) || 175) / 100;
-        const weightKg = parseInt(userAnswers.weight) || 70;
-        const bmi = (weightKg / (heightM * heightM)).toFixed(1);
-        document.getElementById('bmi-value-anim').textContent = bmi;
-    } else if (key === 'sleep_visual') {
-        const answer = userAnswers.sleep || "";
-        let level = 25;
-        if (answer.includes("5-6")) level = 50; if (answer.includes("7-8")) level = 90; if (answer.includes("More than 8")) level = 100;
-        const levelEl = document.getElementById('sleep-battery-level-anim');
-        setTimeout(() => {
-            let color = '#ef4444'; if (level > 40) color = '#f59e0b'; if (level > 75) color = '#22c55e';
-            levelEl.style.backgroundColor = color; levelEl.style.width = `${level}%`;
-        }, 100);
-    } else if (key === 'activity_visual') {
-        const answer = userAnswers.activity || "";
-        let days = 1;
-        if (answer.includes("1-2")) days = 2; if (answer.includes("3-4")) days = 4; if (answer.includes("5+")) days = 6;
-        const dayElements = document.getElementById('activity-week-anim').children;
-        const daysToActivate = [0, 2, 4, 1, 3, 5, 6]; 
-        for (let i = 0; i < days; i++) { setTimeout(() => { dayElements[daysToActivate[i]].classList.add('active'); }, i * 250); }
-    }
-}
-
-// --- WELLNESS PROFILE ---
-function populateWellnessProfile() {
-    // Simplified logic for profile preview
-    const stress = parseInt(userAnswers.stress) || 5;
-    const sleep = userAnswers.sleep || "5-6 hours";
-    
-    let wellnessScore = 50 + (stress > 5 ? -10 : 10);
-    if (sleep.includes('7-8')) wellnessScore += 15; else if (sleep.includes('less than 5')) wellnessScore -=10;
-    
-    document.getElementById('profile-wellness-score').textContent = Math.min(99, Math.max(20, wellnessScore));
-    document.getElementById('profile-stress-level').textContent = stress > 7 ? 'High' : stress > 4 ? 'Medium' : 'Low';
-    document.getElementById('profile-sleep-quality').textContent = sleep.includes('7-8') ? 'Good' : 'Needs Improvement';
-
-    document.querySelector('#profile-area-1 span:first-child').textContent = '💡';
-    document.querySelector('#profile-area-1 span:last-child').textContent = 'Your nutrition habits are a key factor.';
-    document.querySelector('#profile-area-2 span:first-child').textContent = '🏃‍♀️';
-    document.querySelector('#profile-area-2 span:last-child').textContent = 'Physical activity is showing positive impact.';
-}
-
-// --- CAMERA LOGIC (adapted from original) ---
-const cameraModal = document.getElementById('camera-modal'), video = document.getElementById('camera-video'), canvas = document.getElementById('camera-canvas'), cameraLoader = document.getElementById('camera-loader'), loaderText = document.getElementById('loader-text'), cameraStatus = document.getElementById('camera-status');
-async function startCamera() {
-    cameraModal.classList.add('active');
-    try {
-        const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
-        await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)]);
-        loaderText.textContent = "Requesting camera access...";
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-        video.srcObject = stream;
-        video.onloadedmetadata = () => { cameraLoader.style.display = 'none'; startFaceDetection(); };
-    } catch (err) { loaderText.textContent = "Camera access denied."; setTimeout(stopCamera, 3000); }
-}
-function stopCamera() { clearInterval(detectionInterval); stream?.getTracks().forEach(track => track.stop()); cameraModal.classList.remove('active'); video.srcObject = null; }
-function startFaceDetection() { /* ... (same as original, calls takePhoto) ... */ detectionInterval = setInterval(async () => { if(Math.random() > 0.95) takePhoto() }, 3000) } // Mock detection
-async function takePhoto() {
-    clearInterval(detectionInterval);
-    cameraStatus.textContent = "Perfect!";
-    // Mock photo capture
-    await new Promise(res => setTimeout(res, 1000));
-    stopCamera();
-    saveAnswer('selfie', 'Photo taken');
-}
-
-
-// --- PAYMENT & FINALIZATION LOGIC ---
-document.getElementById('see-full-report-btn').addEventListener('click', () => {
-    showScreen('loading-screen');
-    startAnalysis();
-});
-
+// --- ANALYSIS & PAYMENT FLOW ---
 function startAnalysis() {
-    animationManager.add('analysis-animation', { renderer: 'svg', loop: true, autoplay: true, path: 'loader-animation.json'});
+    lottie.loadAnimation({ container: document.getElementById('loading-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'loader-animation.json' });
 
-    // Testimonial slider
     const track = document.getElementById('testimonial-track');
     let testimonialIndex = 0;
     setInterval(() => {
         testimonialIndex = (testimonialIndex + 1) % 3;
         track.style.transform = `translateX(-${testimonialIndex * 100}%)`;
-    }, 3000);
+    }, 3500);
 
-    // End quiz on server
-    fetch('/.netlify/functions/quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'endQuiz', sessionId }) });
-    
-    // Trigger background report generation
-    fetch('/.netlify/functions/result-background', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId }) });
+    fetch('/.netlify/functions/result-background', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: App.sessionId }) });
 
-    // Transition to payment screen after delay
     setTimeout(() => {
-        showScreen('payment-screen');
-        showPaymentForm();
-    }, 8000); // Simulate analysis time
+        goToStep(4); // Go to payment screen
+        initPaymentForm();
+    }, 9000); // Simulate analysis time
 }
 
-async function showPaymentForm() {
+async function initPaymentForm() {
     fbq('track', 'InitiateCheckout', {value: 9.99, currency: 'USD'});
     const formHtml = `
-        <div id="payment-wrapper" class="bg-white rounded-2xl">
-            <div id="payment-form" class="space-y-4">
-                <div id="card-element" class="p-4 border border-gray-300 rounded-lg shadow-sm"></div>
-                <button id="submit-payment" type="submit" class="w-full bg-green-500 text-white font-bold py-4 px-4 rounded-lg hover:bg-green-600 transition-colors text-lg shadow-md">Pay Securely - $9.99</button>
-                <div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div>
-            </div>
-            <p class="text-xs text-gray-400 text-center mt-4">🔒 Securely processed by Stripe</p>
+        <div id="payment-form" class="space-y-4">
+            <div id="card-element" class="p-4 border border-gray-300 rounded-lg bg-white shadow-sm"></div>
+            <button id="submit-payment" class="pulsate w-full bg-green-500 text-white font-bold py-4 px-4 rounded-lg hover:bg-green-600 transition-colors text-xl shadow-lg shadow-green-200">Unlock My Report - $9.99</button>
+            <div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div>
+            <p class="text-xs text-gray-400 text-center mt-2">🔒 Secure one-time payment processed by Stripe</p>
         </div>`;
     document.getElementById('payment-form-container').innerHTML = formHtml;
 
-    stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb');
+    App.stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb');
     try {
-        const response = await fetch('/.netlify/functions/payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId }) });
+        const response = await fetch('/.netlify/functions/payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: App.sessionId }) });
         const data = await response.json();
-        clientSecret = data.clientSecret;
-        if (!clientSecret) throw new Error("Client secret not received.");
+        App.clientSecret = data.clientSecret;
         
-        elements = stripe.elements({ clientSecret });
-        const cardElement = elements.create("card", { style: { base: { fontSize: '16px' } } });
+        App.elements = App.stripe.elements({ clientSecret: App.clientSecret });
+        const cardElement = App.elements.create("card", { style: { base: { fontSize: '16px', '::placeholder': { color: '#aab7c4' } } } });
         cardElement.mount("#card-element");
         cardElement.on('focus', () => fbq('track', 'AddPaymentInfo'));
 
         document.getElementById('payment-form').addEventListener('submit', handlePayment);
     } catch (error) {
-         document.getElementById('payment-wrapper').innerHTML = `<p class="text-center text-red-500">Could not load payment form. Error: ${error.message}</p>`;
+        document.getElementById('payment-form-container').innerHTML = `<p class="text-center text-red-500">Payment form failed to load. Please refresh.</p>`;
     }
-
-    // Timer logic
+    
     let duration = 10 * 60;
     const countdownEl = document.getElementById('countdown');
-    countdownInterval = setInterval(() => {
+    setInterval(() => {
+        if (duration <= 0) return;
+        duration--;
         const minutes = Math.floor(duration / 60).toString().padStart(2, '0');
         const seconds = (duration % 60).toString().padStart(2, '0');
         countdownEl.textContent = `${minutes}:${seconds}`;
-        if (--duration < 0) clearInterval(countdownInterval);
     }, 1000);
 }
 
@@ -768,48 +416,43 @@ async function handlePayment(e) {
     submitButton.disabled = true;
     submitButton.textContent = 'Processing...';
 
-    const { error } = await stripe.confirmCardPayment(clientSecret, { payment_method: { card: elements.getElement('card') } });
+    const { error } = await App.stripe.confirmCardPayment(App.clientSecret, { payment_method: { card: App.elements.getElement('card') } });
 
     if (error) {
         messageDiv.textContent = error.message;
         messageDiv.classList.remove('hidden');
         submitButton.disabled = false;
-        submitButton.textContent = 'Pay Securely - $9.99';
+        submitButton.textContent = 'Unlock My Report - $9.99';
     } else {
-        // This flow assumes success is handled by webhook. Redirect to result page.
         fbq('track', 'Purchase', {value: 9.99, currency: 'USD'});
-        messageDiv.textContent = 'Payment successful! Redirecting...';
-        messageDiv.classList.remove('hidden');
-        messageDiv.classList.replace('text-red-500', 'text-green-500');
-        window.location.href = `result.html?session_id=${sessionId}&payment=success`;
+        window.location.href = `result.html?session_id=${App.sessionId}&payment=success`;
     }
 }
 
 
-// --- APP INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', async () => {
-    // Button to start the actual quiz logic after onboarding
-    startQuizBtn.addEventListener('click', () => {
-        clearInterval(autoSwipeTimer);
-        document.getElementById('onboarding-screen').classList.remove('active'); // Hide onboarding
-        
-        // Start quiz session with server
-        startQuizSession();
-        
-        // Show the first real screen (gender selection)
-        showScreen('gender-screen');
-    });
+// --- INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', () => {
+    setVh();
+    window.addEventListener('resize', setVh);
 
-    // Gender selection handlers
-    document.querySelectorAll('.gender-card').forEach(card => {
+    lottie.loadAnimation({ container: document.getElementById('welcome-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'assistent.json' });
+    
+    startQuizSession();
+
+    document.querySelector('[data-action="next"]').addEventListener('click', () => goToStep(1));
+    
+    document.querySelectorAll('#step-1 .answer-option').forEach(card => {
         card.addEventListener('click', () => {
-            saveAnswer('gender', card.dataset.gender); // Save the answer
-            showScreen('quiz-screen'); // Move to the quiz screen
-            renderQuestion(currentQuestionIndex); // Render the first question
+            handleAnswer('gender', card.dataset.value);
+            goToStep(2); // Go to quiz questions
+            renderQuestion(0);
         });
     });
+    
+    updateProgressBar();
+    fbq('track', 'ViewContent');
 });
-</script>
 
+</script>
 </body>
 </html>
