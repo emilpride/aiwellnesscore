@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Wellness Analysis - Redefined</title>
+    <title>AI Wellness Analysis - Final Concept</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,17 +47,14 @@
             background-color: #f3f4f6;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s;
             opacity: 1;
+            overflow-y: auto;
         }
         .quiz-step:not(.active) {
             opacity: 0;
             pointer-events: none;
         }
-        .quiz-step.prev {
-            transform: translateX(-100%);
-        }
-        .quiz-step.next {
-            transform: translateX(100%);
-        }
+        .quiz-step.prev { transform: translateX(-100%); }
+        .quiz-step.next { transform: translateX(100%); }
         
         .question-content, .answer-option {
             animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
@@ -81,41 +78,35 @@
             transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Testimonial Slider on Loading Screen */
-        #testimonial-slider {
-            overflow: hidden;
-        }
-        #testimonial-track {
-            display: flex;
-            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        }
-        .testimonial-item {
-            flex-shrink: 0;
-            width: 100%;
-            padding: 0 1rem;
+        #testimonial-slider { overflow: hidden; }
+        #testimonial-track { display: flex; transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+        .testimonial-item { flex-shrink: 0; width: 100%; padding: 0 1rem; }
+
+        #submit-payment.pulsate { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(124, 58, 237, 0); }
         }
 
-        /* Payment Screen Pulsing Button */
-        #submit-payment.pulsate {
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7);
-            }
-            50% {
-                transform: scale(1.05);
-                box-shadow: 0 0 0 15px rgba(124, 58, 237, 0);
-            }
-        }
+        /* Re-added Animation Widget Styles from v2 */
+        .widget-wrapper, .bmi-widget { padding: 1rem; background-color: #ffffff; border-radius: 1rem; width: 100%; max-width: 300px; margin: auto; text-align: center; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .widget-label { font-weight: 600; color: var(--brand-indigo); margin-bottom: 0.75rem; }
+        .sleep-battery { width: 100px; height: 40px; border: 3px solid #c4b5fd; border-radius: 8px; margin: 0 auto; position: relative; }
+        .sleep-battery::after { content:''; position: absolute; top: 50%; right: -10px; transform: translateY(-50%); width: 5px; height: 20px; background-color: #c4b5fd; border-radius: 0 4px 4px 0; }
+        .sleep-battery-level { position: absolute; top: 3px; left: 3px; bottom: 3px; border-radius: 4px; width: 0%; background-color: #ef4444; transition: width 1.5s ease-out, background-color 1s ease; }
+        .activity-week { display:flex; justify-content:center; gap: 0.5rem; }
+        .activity-day { width: 30px; height: 30px; border-radius: 0.5rem; background-color: #ede9fe; color: #a78bfa; font-weight: 600; display:flex; align-items:center; justify-content:center; font-size:0.75rem; transition: all 0.4s ease-out; }
+        .activity-day.active { background-color: var(--brand-purple); color: white; transform: scale(1.1); box-shadow: 0 4px 10px rgba(139, 92, 246, 0.4); }
+        .bmi-value { font-size: 2.5rem; font-weight: 800; color: #5b21b6; line-height: 1; }
+        .bmi-scale { position: relative; height: 10px; background-image: linear-gradient(to right, #60a5fa, #34d399, #facc15, #f87171); border-radius: 9999px; margin: 0.5rem 0; }
+        .bmi-indicator { position: absolute; top: 50%; width: 16px; height: 16px; background-color: white; border: 3px solid #5b21b6; border-radius: 50%; transform: translate(-50%, -50%); transition: left 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
     </style>
 </head>
 <body>
 
 <div id="quiz-container">
     <div id="progress-bar" class="absolute top-0 left-0 w-full h-1.5 bg-gray-300 z-20">
-        <div id="progress-bar-inner" class="h-full bg-gradient-to-r from-purple-500 to-indigo-600" style="width: 0%;"></div>
+        <div id="progress-bar-inner" class="h-full bg-gradient-to-r from-purple-500 to-indigo-600"></div>
     </div>
 
     <div id="steps-wrapper">
@@ -131,18 +122,18 @@
         <section id="step-1" class="quiz-step next">
             <div class="question-content w-full max-w-2xl text-center">
                 <h2 class="text-3xl font-bold text-gray-900">To personalize your plan, which do you identify with?</h2>
-                <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="answer-option cursor-pointer bg-white p-6 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-square" data-value="Female">
-                        <div class="text-6xl">👩</div>
-                        <p class="mt-4 text-xl font-bold">Female</p>
+                <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="answer-option cursor-pointer bg-white p-4 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-w-1 aspect-h-1" data-value="Female">
+                        <div class="text-5xl sm:text-6xl">👩</div>
+                        <p class="mt-4 text-lg sm:text-xl font-bold">Female</p>
                     </div>
-                    <div class="answer-option cursor-pointer bg-white p-6 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-square" data-value="Male">
-                        <div class="text-6xl">👨</div>
-                        <p class="mt-4 text-xl font-bold">Male</p>
+                    <div class="answer-option cursor-pointer bg-white p-4 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-w-1 aspect-h-1" data-value="Male">
+                        <div class="text-5xl sm:text-6xl">👨</div>
+                        <p class="mt-4 text-lg sm:text-xl font-bold">Male</p>
                     </div>
-                    <div class="answer-option cursor-pointer bg-white p-6 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-square" data-value="Other">
-                        <div class="text-6xl">🧑</div>
-                        <p class="mt-4 text-xl font-bold">Other</p>
+                    <div class="answer-option cursor-pointer bg-white p-4 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-w-1 aspect-h-1" data-value="Other">
+                        <div class="text-5xl sm:text-6xl">🧑</div>
+                        <p class="mt-4 text-lg sm:text-xl font-bold">Other</p>
                     </div>
                 </div>
             </div>
@@ -154,55 +145,23 @@
         </section>
 
         <section id="step-3" class="quiz-step next">
-            <div id="loading-animation" class="w-48 h-48"></div>
+             <div id="loading-animation" class="w-48 h-48"></div>
             <h2 class="text-3xl font-bold text-gray-800 mt-4 text-center">Analyzing Your Unique Profile...</h2>
             <p class="text-gray-600 mt-2 text-center">Our AI is calibrating your personalized results.</p>
             <div id="testimonial-slider" class="w-full max-w-md mt-12 text-center">
                 <div id="testimonial-track">
-                    <div class="testimonial-item">
-                        <p class="italic text-gray-700">"This was a real eye-opener. The 7-day plan was simple, effective, and made me feel years younger!"</p>
-                        <p class="font-bold mt-2 text-purple-700">- Jessica M., New York</p>
-                    </div>
-                    <div class="testimonial-item">
-                        <p class="italic text-gray-700">"Finally, a wellness plan that understands my busy life. The photo analysis was surprisingly accurate about my stress levels."</p>
-                        <p class="font-bold mt-2 text-purple-700">- David L., California</p>
-                    </div>
-                    <div class="testimonial-item">
-                        <p class="italic text-gray-700">"I've tried everything. This is the first time I've seen actual results that stick. Highly recommend!"</p>
-                        <p class="font-bold mt-2 text-purple-700">- Sarah K., Texas</p>
-                    </div>
+                    <div class="testimonial-item"><p class="italic text-gray-700">"This was a real eye-opener. The 7-day plan was simple, effective, and made me feel years younger!"</p><p class="font-bold mt-2 text-purple-700">- Jessica M., New York</p></div>
+                    <div class="testimonial-item"><p class="italic text-gray-700">"Finally, a wellness plan that understands my busy life. The photo analysis was surprisingly accurate about my stress levels."</p><p class="font-bold mt-2 text-purple-700">- David L., California</p></div>
+                    <div class="testimonial-item"><p class="italic text-gray-700">"I've tried everything. This is the first time I've seen actual results that stick. Highly recommend!"</p><p class="font-bold mt-2 text-purple-700">- Sarah K., Texas</p></div>
                 </div>
             </div>
         </section>
         
-        <section id="step-4" class="quiz-step next overflow-y-auto justify-start pt-24">
+        <section id="step-4" class="quiz-step next overflow-y-auto justify-start pt-24 pb-8">
             <div class="w-full max-w-lg mx-auto">
-                <div class="text-center">
-                    <div class="text-6xl">✨</div>
-                    <h1 class="text-4xl font-extrabold text-gray-900 mt-2">Your Report Is Ready!</h1>
-                    <p class="text-xl text-gray-600 mt-2">Just one final step to unlock your complete, personalized wellness blueprint.</p>
-                </div>
-
-                <div class="mt-8 bg-white rounded-3xl shadow-2xl p-8">
-                    <h3 class="font-bold text-2xl text-center">What You'll Unlock:</h3>
-                    <ul class="mt-6 space-y-4 text-gray-700">
-                        <li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Your True Wellness Age:</b> See how your lifestyle impacts your biological age.</span></li>
-                        <li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>In-Depth Skin Analysis:</b> Identify hidden signs of stress and fatigue.</span></li>
-                        <li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Custom 7-Day Action Plan:</b> Simple, daily tasks to improve your score.</span></li>
-                        <li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Full Metrics Breakdown:</b> Understand your scores for Energy, Stress, Nutrition, and more.</span></li>
-                    </ul>
-                </div>
-                
-                <div class="mt-8">
-                    <div class="flex items-center justify-center gap-4 mb-4">
-                        <div id="timer-box" class="bg-red-500 text-white font-bold p-3 rounded-lg text-center shadow-lg">
-                            <span id="countdown" class="text-2xl">10:00</span>
-                        </div>
-                        <p class="text-red-600 font-semibold">Your special offer is reserved!</p>
-                    </div>
-                    <div id="payment-form-container">
-                        </div>
-                </div>
+                <div class="text-center"><div class="text-6xl">✨</div><h1 class="text-4xl font-extrabold text-gray-900 mt-2">Your Report Is Ready!</h1><p class="text-xl text-gray-600 mt-2">Just one final step to unlock your complete, personalized wellness blueprint.</p></div>
+                <div class="mt-8 bg-white rounded-3xl shadow-2xl p-8"><h3 class="font-bold text-2xl text-center">What You'll Unlock:</h3><ul class="mt-6 space-y-4 text-gray-700"><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Your True Wellness Age:</b> See how your lifestyle impacts your biological age.</span></li><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>In-Depth Skin Analysis:</b> Identify hidden signs of stress and fatigue.</span></li><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Custom 7-Day Action Plan:</b> Simple, daily tasks to improve your score.</span></li><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Full Metrics Breakdown:</b> Understand your scores for Energy, Stress, Nutrition, and more.</span></li></ul></div>
+                <div class="mt-8"><div class="flex items-center justify-center gap-4 mb-4"><div id="timer-box" class="bg-red-500 text-white font-bold p-3 rounded-lg text-center shadow-lg"><span id="countdown" class="text-2xl">10:00</span></div><p class="text-red-600 font-semibold">Your special offer is reserved!</p></div><div id="payment-form-container"></div></div>
             </div>
         </section>
     </div>
@@ -212,19 +171,22 @@
 // --- GLOBAL APP STATE & CONFIG ---
 const App = {
     currentStep: 0,
+    currentQuestionIndex: -1,
     sessionId: null,
     userAnswers: {},
-    stripe: null,
-    elements: null,
-    clientSecret: null,
+    stripe: null, elements: null, clientSecret: null,
     quizQuestions: [
         { key: 'userGoal', type: 'options', text: "What's your primary wellness goal?", options: ['Find out my biological age', 'Get a skin condition analysis', 'Get a 7-day improvement plan', 'All of the above!'] },
-        { key: 'age', type: 'slider', text: "What's your current age?", label: "Select your age", min: 18, max: 90, step: 1, defaultValue: 30, unit: 'years' },
-        { key: 'height', type: 'slider', text: "What is your height?", label: "Select your height", min: 140, max: 220, step: 1, defaultValue: 175, unit: 'cm' },
-        { key: 'weight', type: 'slider', text: "And your current weight?", label: "Select your weight", min: 40, max: 150, step: 1, defaultValue: 70, unit: 'kg' },
+        { key: 'age', type: 'slider', text: "What's your current age?", min: 18, max: 90, defaultValue: 30, unit: 'years' },
+        { key: 'height', type: 'slider', text: "What is your height?", min: 140, max: 220, defaultValue: 175, unit: 'cm' },
+        { key: 'weight', type: 'slider', text: "And your current weight?", min: 40, max: 150, defaultValue: 70, unit: 'kg' },
+        { key: 'bmi_calculation', type: 'animation' },
         { key: 'sleep', type: 'options', text: "😴 How many hours of quality sleep do you get on average?", options: ["Less than 5 hours", "5-6 hours", "7-8 hours", "More than 8 hours"] },
+        { key: 'sleep_visual', type: 'animation' },
         { key: 'activity', type: 'options', text: "🏃‍♀️ How often do you engage in moderate physical activity per week?", options: ["Rarely", "1-2 times", "3-4 times", "5+ times"] },
-        { key: 'stress', type: 'slider', text: "🧠 On a scale of 1-10, how would you rate your typical stress level?", label: "Drag to indicate your stress level", min: 1, max: 10, step: 1, defaultValue: 5, unit: 'stress', isGradient: true },
+        { key: 'activity_visual', type: 'animation' },
+        { key: 'stress', type: 'slider', text: "🧠 On a scale of 1-10, how would you rate your typical stress level?", min: 1, max: 10, defaultValue: 5, unit: 'stress' },
+        { key: 'stress_visual', type: 'animation' },
         { key: 'screen_time', type: 'options', text: "📱 Outside of work, how much time do you spend on screens daily?", options: ["Less than 2 hours", "2-4 hours", "4-6 hours", "More than 6 hours"] },
         { key: 'email', type: 'email_step', text: "Where should we send your report summary?", subtext: "We respect your privacy. No spam, ever." }
     ],
@@ -238,29 +200,25 @@ function goToStep(stepIndex) {
     App.currentStep = stepIndex;
     document.querySelectorAll('.quiz-step').forEach((step, index) => {
         step.classList.remove('active', 'prev', 'next');
-        if (index === stepIndex) {
-            step.classList.add('active');
-        } else if (index < stepIndex) {
-            step.classList.add('prev');
-        } else {
-            step.classList.add('next');
-        }
+        if (index === stepIndex) step.classList.add('active');
+        else if (index < stepIndex) step.classList.add('prev');
+        else step.classList.add('next');
     });
     updateProgressBar();
 }
 
 function updateProgressBar() {
-    const progress = (App.currentStep / (App.totalSteps - 1)) * 100;
-    document.getElementById('progress-bar-inner').style.width = `${progress}%`;
+    // Progress is now based on question progress within the single quiz step
+    const progress = App.currentQuestionIndex >= 0 ? ((App.currentQuestionIndex + 1) / App.quizQuestions.length) * 100 : 0;
+    // We tie the bar to step 2 (the quiz itself)
+    const overallProgress = (App.currentStep - 2) > 0 ? 100 : progress;
+    document.getElementById('progress-bar-inner').style.width = `${overallProgress}%`;
 }
+
 
 async function startQuizSession() {
     try {
-        const response = await fetch('/.netlify/functions/quiz', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'startSession' })
-        });
+        const response = await fetch('/.netlify/functions/quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'startSession' }) });
         if (!response.ok) throw new Error('Could not start session');
         const data = await response.json();
         App.sessionId = data.sessionId;
@@ -273,27 +231,27 @@ async function startQuizSession() {
 async function handleAnswer(questionKey, answer) {
     App.userAnswers[questionKey] = answer.toString().trim();
     if (App.sessionId) {
-        fetch('/.netlify/functions/quiz', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'saveAnswer', sessionId: App.sessionId, questionId: questionKey, answer })
-        }).catch(err => console.error("Failed to save answer:", err));
+        fetch('/.netlify/functions/quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'saveAnswer', sessionId: App.sessionId, questionId: questionKey, answer }) });
     }
     
-    const currentQuestionIndex = App.quizQuestions.findIndex(q => q.key === questionKey);
-    const nextQuestionIndex = currentQuestionIndex + 1;
+    App.currentQuestionIndex++;
+    updateProgressBar();
 
-    if (nextQuestionIndex < App.quizQuestions.length) {
-        renderQuestion(nextQuestionIndex);
+    const nextQuestion = App.quizQuestions[App.currentQuestionIndex];
+    if (nextQuestion && nextQuestion.type === 'animation') {
+        renderAnimation(nextQuestion.key);
+    } else if (nextQuestion) {
+        renderQuestion(App.currentQuestionIndex);
     } else {
-        // All questions answered, move to loading screen
-        goToStep(3); // Go to loading screen
+        // All questions answered
+        goToStep(3);
         startAnalysis();
     }
 }
 
 // --- UI RENDERING & EVENT LISTENERS ---
 function renderQuestion(index) {
+    App.currentQuestionIndex = index;
     const question = App.quizQuestions[index];
     const wrapper = document.getElementById('question-wrapper');
     let contentHTML = '';
@@ -301,32 +259,38 @@ function renderQuestion(index) {
     const questionTitle = `<h2 class="text-3xl font-bold text-gray-900 text-center mb-8">${question.text}</h2>`;
 
     if (question.type === 'options') {
-        const optionsHTML = question.options.map(opt => 
-            `<button class="answer-option w-full bg-white p-4 rounded-xl border-2 border-gray-200 text-lg font-semibold text-gray-700" data-value="${opt}">${opt}</button>`
-        ).join('');
-        contentHTML = `<div class="question-content"><div class="text-center">${questionTitle}</div><div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">${optionsHTML}</div></div>`;
+        const optionsHTML = question.options.map(opt => `<button class="answer-option w-full bg-white p-4 rounded-xl border-2 border-gray-200 text-lg font-semibold text-gray-700" data-value="${opt}">${opt}</button>`).join('');
+        contentHTML = `<div class="question-content">${questionTitle}<div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">${optionsHTML}</div></div>`;
     } else if (question.type === 'slider') {
-        // ... slider rendering logic (can be adapted from quiz2.html)
         contentHTML = `<div class="question-content w-full max-w-sm mx-auto text-center">${questionTitle}
             <div class="bg-white p-6 rounded-2xl mt-8 shadow-md">
-                <div id="slider-value-display" class="text-4xl font-extrabold text-purple-600 mb-2">${question.defaultValue} ${question.unit}</div>
+                <div id="slider-value-display" class="text-4xl font-extrabold text-purple-600 mb-2"></div>
                 <input type="range" min="${question.min}" max="${question.max}" value="${question.defaultValue}" step="${question.step}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
                 <button class="mt-6 w-full bg-purple-600 text-white font-bold py-3 rounded-full text-lg hover:bg-purple-700 transition" id="slider-confirm-btn">Confirm</button>
             </div>
         </div>`;
     } else if (question.type === 'email_step') {
-        contentHTML = `<div class="question-content text-center">
-            ${questionTitle}
-            <p class="text-gray-600 mt-2">${question.subtext}</p>
-            <div class="mt-8 flex gap-2 max-w-sm mx-auto">
-                <input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500">
-                <button id="email-submit-btn" class="bg-purple-600 text-white font-bold py-3 px-5 rounded-lg hover:bg-purple-700 transition">Submit</button>
-            </div>
-        </div>`;
+        contentHTML = `<div class="question-content text-center">${questionTitle}<p class="text-gray-600 mt-2">${question.subtext}</p><div class="mt-8 flex gap-2 max-w-sm mx-auto"><input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500"><button id="email-submit-btn" class="bg-purple-600 text-white font-bold py-3 px-5 rounded-lg hover:bg-purple-700 transition">Submit</button></div></div>`;
     }
     
     wrapper.innerHTML = contentHTML;
     addQuestionEventListeners(question);
+}
+
+function updateSliderDisplay(question, value) {
+    const valueDisplay = document.getElementById('slider-value-display');
+    let displayHTML = '';
+    if (question.unit === 'cm') {
+        const feet = Math.floor(value / 30.48);
+        const inches = Math.round((value % 30.48) / 2.54);
+        displayHTML = `${feet}'${inches}" <span class="text-lg text-gray-400 font-medium">(${value} cm)</span>`;
+    } else if (question.unit === 'kg') {
+        const lbs = (value * 2.20462).toFixed(0);
+        displayHTML = `${lbs} lbs <span class="text-lg text-gray-400 font-medium">(${value} kg)</span>`;
+    } else {
+        displayHTML = `${value} ${question.unit}`;
+    }
+    valueDisplay.innerHTML = displayHTML;
 }
 
 function addQuestionEventListeners(question) {
@@ -336,68 +300,110 @@ function addQuestionEventListeners(question) {
         });
     } else if (question.type === 'slider') {
         const sliderInput = document.getElementById('slider-input');
-        const valueDisplay = document.getElementById('slider-value-display');
-        sliderInput.addEventListener('input', () => { valueDisplay.textContent = `${sliderInput.value} ${question.unit}`; });
+        updateSliderDisplay(question, sliderInput.value); // Initial display
+        sliderInput.addEventListener('input', () => updateSliderDisplay(question, sliderInput.value));
         document.getElementById('slider-confirm-btn').addEventListener('click', () => handleAnswer(question.key, sliderInput.value));
     } else if (question.type === 'email_step') {
         document.getElementById('email-submit-btn').addEventListener('click', () => {
-            const emailInput = document.getElementById('email-input');
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (emailRegex.test(emailInput.value)) {
-                handleAnswer(question.key, emailInput.value);
-            } else {
-                alert('Please enter a valid email address.');
-            }
+            const email = document.getElementById('email-input').value;
+            if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) handleAnswer(question.key, email);
+            else alert('Please enter a valid email address.');
         });
     }
 }
 
-// --- ANALYSIS & PAYMENT FLOW ---
-function startAnalysis() {
-    lottie.loadAnimation({ container: document.getElementById('loading-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'loader-animation.json' });
+function renderAnimation(key) {
+    const wrapper = document.getElementById('question-wrapper');
+    let animationHTML = '';
 
-    const track = document.getElementById('testimonial-track');
-    let testimonialIndex = 0;
-    setInterval(() => {
-        testimonialIndex = (testimonialIndex + 1) % 3;
-        track.style.transform = `translateX(-${testimonialIndex * 100}%)`;
-    }, 3500);
-
-    fetch('/.netlify/functions/result-background', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: App.sessionId }) });
+    if (key === 'bmi_calculation') {
+        animationHTML = `<div class="bmi-widget"><div class="widget-label">Calculating Your BMI...</div><div id="bmi-value-anim" class="bmi-value">0.0</div><div class="bmi-scale"><div id="bmi-indicator-anim" class="bmi-indicator" style="left: 0%;"></div></div><div id="bmi-category-anim" class="text-sm font-medium text-purple-600 mt-2">&nbsp;</div></div>`;
+    } else if (key === 'sleep_visual') {
+        animationHTML = `<div class="widget-wrapper"><div class="widget-label">Sleep Recharge</div><div class="sleep-battery mt-2"><div id="sleep-battery-level-anim" class="sleep-battery-level"></div></div></div>`;
+    } else if (key === 'activity_visual') {
+        animationHTML = `<div class="widget-wrapper"><div class="widget-label">Your Active Week</div><div class="activity-week" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div></div>`;
+    } else if (key === 'stress_visual') {
+        animationHTML = `<div class="widget-wrapper"><div class="widget-label">Stress Level Visualized</div><div id="stress-lottie" class="w-32 h-32 mx-auto"></div></div>`;
+    }
+    
+    wrapper.innerHTML = `<div class="question-content">${animationHTML}</div>`;
+    playAnimation(key);
 
     setTimeout(() => {
-        goToStep(4); // Go to payment screen
-        initPaymentForm();
-    }, 9000); // Simulate analysis time
+        if (App.currentQuestionIndex < App.quizQuestions.length) {
+            renderQuestion(App.currentQuestionIndex);
+        } else {
+            goToStep(3); // Loading screen
+            startAnalysis();
+        }
+    }, 2800); // Wait for animation to play
 }
 
-async function initPaymentForm() {
-    fbq('track', 'InitiateCheckout', {value: 9.99, currency: 'USD'});
-    const formHtml = `
-        <div id="payment-form" class="space-y-4">
-            <div id="card-element" class="p-4 border border-gray-300 rounded-lg bg-white shadow-sm"></div>
-            <button id="submit-payment" class="pulsate w-full bg-green-500 text-white font-bold py-4 px-4 rounded-lg hover:bg-green-600 transition-colors text-xl shadow-lg shadow-green-200">Unlock My Report - $9.99</button>
-            <div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div>
-            <p class="text-xs text-gray-400 text-center mt-2">🔒 Secure one-time payment processed by Stripe</p>
-        </div>`;
-    document.getElementById('payment-form-container').innerHTML = formHtml;
+function playAnimation(key) {
+    if (key === 'bmi_calculation') {
+        const heightM = (parseInt(App.userAnswers.height) || 175) / 100;
+        const weightKg = parseInt(App.userAnswers.weight) || 70;
+        const bmi = (weightKg / (heightM * heightM));
+        let category = "Normal", percent = 50;
+        if (bmi < 18.5) { category = "Underweight"; percent = (bmi / 18.5) * 25; }
+        else if (bmi < 25) { category = "Normal"; percent = 25 + ((bmi - 18.5) / 6.5) * 50; }
+        else if (bmi < 30) { category = "Overweight"; percent = 75 + ((bmi - 25) / 5) * 25; }
+        else { category = "Obese"; percent = 100; }
+        
+        setTimeout(() => {
+            document.getElementById('bmi-value-anim').textContent = bmi.toFixed(1);
+            document.getElementById('bmi-indicator-anim').style.left = `${Math.max(5, Math.min(95, percent))}%`;
+            document.getElementById('bmi-category-anim').textContent = category;
+        }, 100);
+    } else if (key === 'sleep_visual') {
+        const answer = App.userAnswers.sleep || "";
+        let level = 25;
+        if (answer.includes("5-6")) level = 50; if (answer.includes("7-8")) level = 90; if (answer.includes("More than 8")) level = 100;
+        const levelEl = document.getElementById('sleep-battery-level-anim');
+        setTimeout(() => {
+            let color = '#ef4444'; if (level > 40) color = '#f59e0b'; if (level > 75) color = '#22c55e';
+            levelEl.style.backgroundColor = color; levelEl.style.width = `${level}%`;
+        }, 100);
+    } else if (key === 'activity_visual') {
+        const answer = App.userAnswers.activity || "";
+        let days = 1;
+        if (answer.includes("1-2")) days = 2; if (answer.includes("3-4")) days = 4; if (answer.includes("5+")) days = 6;
+        const dayElements = document.getElementById('activity-week-anim').children;
+        const daysToActivate = [0, 2, 4, 1, 3, 5, 6]; 
+        for (let i = 0; i < days; i++) { setTimeout(() => { dayElements[daysToActivate[i]].classList.add('active'); }, i * 250); }
+    } else if (key === 'stress_visual') {
+         lottie.loadAnimation({ container: document.getElementById('stress-lottie'), renderer: 'svg', loop: true, autoplay: true, path: 'https://assets2.lottiefiles.com/packages/lf20_q77jp3s3.json' });
+    }
+}
 
+
+// --- ANALYSIS & PAYMENT FLOW (Identical to quiz3.html) ---
+function startAnalysis() {
+    lottie.loadAnimation({ container: document.getElementById('loading-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'loader-animation.json' });
+    const track = document.getElementById('testimonial-track');
+    let testimonialIndex = 0;
+    setInterval(() => { testimonialIndex = (testimonialIndex + 1) % 3; track.style.transform = `translateX(-${testimonialIndex * 100}%)`; }, 3500);
+    fetch('/.netlify/functions/result-background', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: App.sessionId }) });
+    setTimeout(() => { goToStep(4); initPaymentForm(); }, 9000);
+}
+async function initPaymentForm() {
+    // ... (This function is identical to the one in quiz3.html) ...
+    fbq('track', 'InitiateCheckout', {value: 9.99, currency: 'USD'});
+    const formHtml = `<div id="payment-form" class="space-y-4"><div id="card-element" class="p-4 border border-gray-300 rounded-lg bg-white shadow-sm"></div><button id="submit-payment" class="pulsate w-full bg-green-500 text-white font-bold py-4 px-4 rounded-lg hover:bg-green-600 transition-colors text-xl shadow-lg shadow-green-200">Unlock My Report - $9.99</button><div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div><p class="text-xs text-gray-400 text-center mt-2">🔒 Secure one-time payment processed by Stripe</p></div>`;
+    document.getElementById('payment-form-container').innerHTML = formHtml;
     App.stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb');
     try {
         const response = await fetch('/.netlify/functions/payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: App.sessionId }) });
         const data = await response.json();
         App.clientSecret = data.clientSecret;
-        
         App.elements = App.stripe.elements({ clientSecret: App.clientSecret });
         const cardElement = App.elements.create("card", { style: { base: { fontSize: '16px', '::placeholder': { color: '#aab7c4' } } } });
         cardElement.mount("#card-element");
         cardElement.on('focus', () => fbq('track', 'AddPaymentInfo'));
-
         document.getElementById('payment-form').addEventListener('submit', handlePayment);
     } catch (error) {
         document.getElementById('payment-form-container').innerHTML = `<p class="text-center text-red-500">Payment form failed to load. Please refresh.</p>`;
     }
-    
     let duration = 10 * 60;
     const countdownEl = document.getElementById('countdown');
     setInterval(() => {
@@ -408,16 +414,14 @@ async function initPaymentForm() {
         countdownEl.textContent = `${minutes}:${seconds}`;
     }, 1000);
 }
-
 async function handlePayment(e) {
+    // ... (This function is identical to the one in quiz3.html) ...
     e.preventDefault();
     const submitButton = document.getElementById('submit-payment');
     const messageDiv = document.getElementById('payment-message');
     submitButton.disabled = true;
     submitButton.textContent = 'Processing...';
-
     const { error } = await App.stripe.confirmCardPayment(App.clientSecret, { payment_method: { card: App.elements.getElement('card') } });
-
     if (error) {
         messageDiv.textContent = error.message;
         messageDiv.classList.remove('hidden');
@@ -429,30 +433,22 @@ async function handlePayment(e) {
     }
 }
 
-
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     setVh();
     window.addEventListener('resize', setVh);
-
     lottie.loadAnimation({ container: document.getElementById('welcome-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'assistent.json' });
-    
     startQuizSession();
-
     document.querySelector('[data-action="next"]').addEventListener('click', () => goToStep(1));
-    
     document.querySelectorAll('#step-1 .answer-option').forEach(card => {
         card.addEventListener('click', () => {
             handleAnswer('gender', card.dataset.value);
-            goToStep(2); // Go to quiz questions
-            renderQuestion(0);
+            goToStep(2);
         });
     });
-    
     updateProgressBar();
     fbq('track', 'ViewContent');
 });
-
 </script>
 </body>
 </html>
