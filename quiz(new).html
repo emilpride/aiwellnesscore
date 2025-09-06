@@ -159,11 +159,7 @@
         </section>
         
         <section id="step-5" class="quiz-step prev overflow-y-auto justify-start pt-8 pb-8">
-             <div class="w-full max-w-lg mx-auto">
-                <div class="text-center"><div class="text-6xl">✨</div><h1 class="text-4xl font-extrabold text-gray-900 mt-2">Your Report Is Ready!</h1><p class="text-xl text-gray-600 mt-2">Just one final step to unlock your complete, personalized wellness blueprint.</p></div>
-                <div class="mt-8 bg-white rounded-3xl shadow-2xl p-8"><h3 class="font-bold text-2xl text-center">What You'll Unlock:</h3><ul class="mt-6 space-y-4 text-gray-700"><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Your True Wellness Age:</b> See how your lifestyle impacts your biological age.</span></li><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>In-Depth Skin Analysis:</b> Identify hidden signs of stress and fatigue.</span></li><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Custom 7-Day Action Plan:</b> Simple, daily tasks to improve your score.</span></li><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Full Metrics Breakdown:</b> Understand your scores for Energy, Stress, Nutrition, and more.</span></li></ul></div>
-                <div class="mt-8"><div class="flex items-center justify-center gap-4 mb-4"><div id="timer-box" class="bg-red-500 text-white font-bold p-3 rounded-lg text-center shadow-lg"><span id="countdown" class="text-2xl">10:00</span></div><p class="text-red-600 font-semibold">Your special offer is reserved!</p></div><div id="payment-form-container"></div></div>
-            </div>
+             <div class="w-full max-w-lg mx-auto"><div class="text-center"><div class="text-6xl">✨</div><h1 class="text-4xl font-extrabold text-gray-900 mt-2">Your Report Is Ready!</h1><p class="text-xl text-gray-600 mt-2">Just one final step to unlock your complete, personalized wellness blueprint.</p></div><div class="mt-8 bg-white rounded-3xl shadow-2xl p-8"><h3 class="font-bold text-2xl text-center">What You'll Unlock:</h3><ul class="mt-6 space-y-4 text-gray-700"><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Your True Wellness Age:</b> See how your lifestyle impacts your biological age.</span></li><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>In-Depth Skin Analysis:</b> Identify hidden signs of stress and fatigue.</span></li><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Custom 7-Day Action Plan:</b> Simple, daily tasks to improve your score.</span></li><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Full Metrics Breakdown:</b> Understand your scores for Energy, Stress, Nutrition, and more.</span></li></ul></div><div class="mt-8"><div class="flex items-center justify-center gap-4 mb-4"><div id="timer-box" class="bg-red-500 text-white font-bold p-3 rounded-lg text-center shadow-lg"><span id="countdown" class="text-2xl">10:00</span></div><p class="text-red-600 font-semibold">Your special offer is reserved!</p></div><div id="payment-form-container"></div></div></div>
         </section>
     </main>
     
@@ -190,7 +186,6 @@
 </div>
 
 <script>
-// --- GLOBAL APP STATE & CONFIG ---
 const App = {
     currentStep: 0,
     currentQuestionIndex: -1,
@@ -240,7 +235,6 @@ const AnimationManager = {
     }
 };
 
-// --- CORE QUIZ FLOW LOGIC (STABLE) ---
 function next() {
     App.currentQuestionIndex++;
     updateProgressBar();
@@ -264,7 +258,7 @@ function next() {
 function previous() {
     if (App.currentStep === 3) {
         goToStep(2);
-        App.currentQuestionIndex = App.quizQuestions.findIndex(q => q.type === 'selfie') - 1;
+        App.currentQuestionIndex = App.quizQuestions.findIndex(q => q.type === 'selfie');
         renderQuestion(App.currentQuestionIndex);
         return;
     }
@@ -285,12 +279,11 @@ function previous() {
 }
 
 async function handleAnswer(questionKey, answer) {
-    App.userAnswers[questionKey] = answer.toString().trim();
+    App.userAnswers[questionKey] = answer;
     if (questionKey === 'selfie' && answer !== 'skipped') {
-        App.userPhotoUrl = answer; // Save photo URL
+        App.userPhotoUrl = answer;
     }
     if (App.sessionId) {
-        // We don't send the full photo data URL to the server for privacy
         const answerToSend = (questionKey === 'selfie' && answer !== 'skipped') ? 'Photo taken' : answer;
         fetch('/.netlify/functions/quiz', {
             method: 'POST',
@@ -312,7 +305,6 @@ async function startQuizSession() {
     }
 }
 
-// --- UI & STATE MANAGEMENT ---
 function goToStep(stepIndex) {
     App.currentStep = stepIndex;
     const isQuizActive = (stepIndex === 1 || stepIndex === 2);
@@ -342,7 +334,6 @@ function updateProgressBar() {
 }
 
 
-// --- ONBOARDING SWIPER ---
 function initOnboarding() {
     App.onboarding.slides = document.querySelectorAll('.swiper-slide');
     const wrapper = document.querySelector('.swiper-wrapper');
@@ -390,8 +381,6 @@ function resetOnboardingTimer() {
     App.onboarding.timer = setInterval(updateOnboardingView, 4000);
 }
 
-
-// --- DYNAMIC RENDERING ---
 function renderGenderSelection() {
     document.getElementById('back-btn').style.visibility = 'hidden';
     const footerWrapper = document.getElementById('footer-actions');
@@ -545,7 +534,6 @@ function playAnimation(key) {
 function renderWellnessProfile() {
     document.getElementById('back-btn').style.visibility = 'visible';
     
-    // Update Photo
     const avatarImg = document.getElementById('profile-avatar-img');
     if (App.userPhotoUrl) {
         avatarImg.src = App.userPhotoUrl;
@@ -553,7 +541,6 @@ function renderWellnessProfile() {
         avatarImg.src = "https://placehold.co/300x450/e0e7ff/4338ca?text=Photo%0ASkipped";
     }
 
-    // Update BMI
     if (!App.userAnswers.height || !App.userAnswers.weight) return;
     const heightM = (parseInt(App.userAnswers.height)) / 100;
     const weightKg = parseInt(App.userAnswers.weight);
@@ -631,17 +618,17 @@ function takePhoto() {
     handleAnswer('selfie', photoDataUrl);
 }
 
+
 // --- ANALYSIS & PAYMENT ---
 function startAnalysis() {
     try {
         AnimationManager.add('loading-animation', 'https://assets3.lottiefiles.com/packages/lf20_gqg0yk.json');
     } catch(e) { console.error("Error starting loading animations:", e); }
     
-    // setTimeout is guaranteed to run even if animations fail
     setTimeout(() => {
         goToStep(5);
-        // initPaymentForm();
-    }, 5000); // Shorter delay for better UX
+        // initPaymentForm(); // In a real scenario, you would call your payment form logic here.
+    }, 5000);
 }
 
 // --- INITIALIZATION ---
