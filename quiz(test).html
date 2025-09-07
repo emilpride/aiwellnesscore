@@ -29,20 +29,20 @@
         .quiz-step {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 1rem; background-color: transparent; /* Changed */
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease-out; /* Opacity added */
+            padding: 1rem; background-color: transparent;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease-out;
             opacity: 1; overflow-y: auto;
         }
         .quiz-step:not(.active) {
             opacity: 0;
             pointer-events: none;
-            transform: translateX(30px) scale(0.98); /* Changed */
+            transform: translateX(30px) scale(0.98);
         }
         .quiz-step.active {
-            transform: translateX(0) scale(1); /* Changed */
+            transform: translateX(0) scale(1);
         }
         .quiz-step.prev {
-            transform: translateX(-30px) scale(0.98); /* Changed */
+            transform: translateX(-30px) scale(0.98);
         }
         
         #onboarding-swiper { background-color: #fff; }
@@ -74,6 +74,11 @@
             to {
                 background-position: 200% center;
             }
+        }
+
+        /* === NEW: Unified gradient style for health bars === */
+        .unified-gradient-bar {
+            background-image: linear-gradient(to right, #fbbf24, #4ade80 35%, #fbbf24 75%, #f87171 100%);
         }
 
         #quiz-header { flex-shrink: 0; background: rgba(243, 244, 246, 0.8); backdrop-filter: blur(8px); border-bottom: 1px solid #e5e7eb; visibility: hidden;}
@@ -137,7 +142,8 @@
                                 <div class="flex-grow"></div>
                                 <h1 class="text-4xl font-extrabold tracking-tight">Unlock Your Inner Potential.</h1>
                                 <p class="mt-3 max-w-md text-lg text-gray-200">Discover your biological age and get a personalized wellness plan based on AI analysis.</p>
-                                <div class="h-[15vh]"></div> </div>
+                                <div class="h-[15vh]"></div>
+                            </div>
                         </div>
                         <div class="swiper-slide"><div class="text-left w-full max-w-sm"><h2 class="text-2xl font-bold text-gray-800 text-center mb-6">What you'll get:</h2><ul class="space-y-4"><li class="flex items-center"><span class="text-2xl mr-3">🎯</span><div><h3 class="font-semibold">Wellness Score</h3><p class="text-sm text-gray-500">Your comprehensive health rating</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">⏳</span><div><h3 class="font-semibold">Biological Age</h3><p class="text-sm text-gray-500">How "young" you are for your years</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🌿</span><div><h3 class="font-semibold">Skin & Stress Analysis</h3><p class="text-sm text-gray-500">Learn about hidden factors</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🗺️</span><div><h3 class="font-semibold">Personalized Plan</h3><p class="text-sm text-gray-500">A 7-day plan for improvement</p></div></li></ul></div></div>
                         <div class="swiper-slide"><div class="text-center"><h2 class="text-2xl font-bold text-gray-800 mb-6">Lower Your Biological Age</h2><div class="flex justify-center items-center space-x-4"><div class="text-center"><p class="text-gray-500">Chronological</p><p class="text-5xl font-bold text-gray-400">35</p></div><div id="lottie-onboarding-2" class="w-20 h-20"></div><div class="text-center"><p class="font-semibold" style="color: var(--brand-dark-text);">Biological</p><p class="text-6xl font-extrabold" style="color: var(--brand-dark-text);">32</p></div></div><p class="text-gray-600 mt-6 max-w-xs mx-auto">Our plan is designed to help you feel younger and more energetic.</p></div></div>
@@ -163,7 +169,7 @@
                  <div class="mt-6 w-full max-w-md mx-auto bg-white p-6 rounded-2xl shadow-lg border">
                     <p class="font-semibold text-gray-700">Body Mass Index (BMI)</p>
                     <div class="relative mt-2">
-                        <div class="h-2 w-full bg-gradient-to-r from-blue-400 via-green-400 to-red-500 rounded-full"></div>
+                        <div class="h-2 w-full unified-gradient-bar rounded-full"></div>
                         <div id="bmi-indicator-dot" class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-1000" style="left: 0%;"><div class="w-5 h-5 bg-white rounded-full border-4 border-[--brand-accent] shadow-md"></div></div>
                         <div id="bmi-indicator-label" class="absolute -top-6 -translate-x-1/2 bg-gray-800 text-white text-sm font-bold px-3 py-1 rounded-md transition-all duration-1000" style="left: 0%;"><span id="bmi-value-text">--</span></div>
                     </div>
@@ -171,9 +177,11 @@
                     <div id="bmi-description" class="mt-4 text-left bg-gray-50 text-gray-800 p-4 rounded-xl flex items-center gap-3"></div>
                  </div>
 
-                 <div class="mt-6 w-full max-w-md mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div class="bg-gray-200 rounded-2xl row-span-2 flex items-end justify-center overflow-hidden"><img id="profile-avatar-img" src="https://placehold.co/300x450/e0e7ff/4338ca?text=Your%0APhoto" alt="Wellness Avatar" class="w-full h-full object-cover"></div>
-                      <div class="bg-white p-4 rounded-2xl shadow-lg border text-left space-y-3">
+                 <div id="profile-grid" class="mt-6 w-full max-w-md mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div id="profile-avatar-container" class="bg-gray-200 rounded-2xl row-span-2 flex items-end justify-center overflow-hidden">
+                          <img id="profile-avatar-img" src="" alt="Wellness Avatar" class="w-full h-full object-cover">
+                      </div>
+                      <div id="profile-details-container" class="bg-white p-4 rounded-2xl shadow-lg border text-left space-y-3">
                           <div id="profile-lifestyle"></div>
                           <div id="profile-fitness-level"></div>
                           <div id="profile-metabolism"></div>
@@ -437,10 +445,24 @@ function initOnboarding() {
     App.onboarding.dots = document.querySelectorAll('.dot');
     
     wrapper.addEventListener('touchstart', e => { App.onboarding.touchStartX = e.changedTouches[0].screenX; clearInterval(App.onboarding.timer); }, { passive: true });
+    
+    // === UPDATED: Added swipe-to-start functionality ===
     wrapper.addEventListener('touchend', e => {
         const touchEndX = e.changedTouches[0].screenX;
+        const isLastSlide = App.onboarding.slideIndex === App.onboarding.slides.length - 1;
+
+        // Swipe Left
         if (touchEndX < App.onboarding.touchStartX - 50) {
-            updateOnboardingView(true);
+            if (isLastSlide) {
+                // If it's the last slide, start the quiz
+                clearInterval(App.onboarding.timer);
+                goToStep(1);
+                renderGenderSelection();
+                return;
+            } else {
+                updateOnboardingView(true);
+            }
+        // Swipe Right
         } else if (touchEndX > App.onboarding.touchStartX + 50) {
             if (App.onboarding.slideIndex > 0) { App.onboarding.slideIndex -= 2; updateOnboardingView(true); }
         }
@@ -519,7 +541,6 @@ function renderQuestion(index) {
 function addQuestionEventListeners(question) {
     if (!question) return;
     if (question.type === 'options') {
-        // === UPDATED EVENT LISTENER FOR VISUAL FEEDBACK ===
         document.querySelectorAll('.answer-option').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.answer-option.selected').forEach(b => b.classList.remove('selected'));
@@ -571,7 +592,8 @@ function renderAnimation(key) {
     document.getElementById('back-btn').style.visibility = 'hidden';
 
     let animationHTML = '';
-    if (key === 'bmi_calculation') animationHTML = `<div class="widget-wrapper"><div class="widget-label">Calculating Your BMI...</div><div id="bmi-value-anim" class="text-4xl font-extrabold text-[--brand-dark-text]">0.0</div><div id="bmi-scale" class="relative h-2.5 rounded-full bg-gradient-to-r from-blue-400 via-green-400 to-red-500 my-2"><div id="bmi-indicator-anim" class="bmi-indicator absolute top-1/2 w-5 h-5 -translate-x-1/2 -translate-y-1/2" style="left: 0%;"></div></div><div id="bmi-category-anim" class="text-sm font-medium text-gray-600 mt-2">&nbsp;</div></div>`;
+    // === UPDATED: Animation HTML now uses the unified gradient class for consistency ===
+    if (key === 'bmi_calculation') animationHTML = `<div class="widget-wrapper"><div class="widget-label">Calculating Your BMI...</div><div id="bmi-value-anim" class="text-4xl font-extrabold text-[--brand-dark-text]">0.0</div><div id="bmi-scale" class="relative h-2.5 rounded-full unified-gradient-bar my-2"><div id="bmi-indicator-anim" class="bmi-indicator absolute top-1/2 w-5 h-5 -translate-x-1/2 -translate-y-1/2" style="left: 0%;"></div></div><div id="bmi-category-anim" class="text-sm font-medium text-gray-600 mt-2">&nbsp;</div></div>`;
     else if (key === 'sleep_visual') animationHTML = `<div class="widget-wrapper"><div class="widget-label">Sleep Recharge</div><div class="sleep-battery mt-2"><div id="sleep-battery-level-anim" class="sleep-battery-level"></div></div></div>`;
     else if (key === 'activity_visual') animationHTML = `<div class="widget-wrapper"><div class="widget-label">Your Active Week</div><div class="activity-week" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div></div>`;
     else if (key === 'stress_visual') animationHTML = `<div class="widget-wrapper"><div class="widget-label">Reported Stress Level</div><div class="stress-bar-track"><div id="stress-bar-fill-anim" class="stress-bar-fill"></div></div><div id="stress-value-anim" class="stress-value">0/10</div></div>`;
@@ -632,11 +654,16 @@ function playAnimation(key) {
 function renderWellnessProfile() {
     document.getElementById('back-btn').style.visibility = 'visible';
     
-    const avatarImg = document.getElementById('profile-avatar-img');
+    // === UPDATED: Logic to hide photo block if skipped ===
+    const avatarContainer = document.getElementById('profile-avatar-container');
+    const detailsContainer = document.getElementById('profile-details-container');
     if (App.userPhotoUrl) {
-        avatarImg.src = App.userPhotoUrl;
+        avatarContainer.style.display = 'flex';
+        document.getElementById('profile-avatar-img').src = App.userPhotoUrl;
+        detailsContainer.classList.remove('md:col-span-2');
     } else {
-        avatarImg.src = "https://placehold.co/300x450/e0e7ff/4338ca?text=Photo%0ASkipped";
+        avatarContainer.style.display = 'none';
+        detailsContainer.classList.add('md:col-span-2');
     }
 
     if (!App.userAnswers.height || !App.userAnswers.weight) return;
@@ -644,7 +671,7 @@ function renderWellnessProfile() {
     const weightKg = parseInt(App.userAnswers.weight);
     const bmi = (weightKg / (heightM * heightM));
     let category = "Normal", percent = 50, descText = "Good starting BMI to tone up and get your dream body.", bgColor = "bg-green-50", textColor = "text-green-800";
-    if (bmi < 18.5) { category = "Underweight"; percent = (bmi / 18.5) * 25; descText = "Your BMI is in the underweight range. We'll build a plan to reach a healthier weight."; bgColor="bg-blue-50"; textColor="text-blue-800";}
+    if (bmi < 18.5) { category = "Underweight"; percent = (bmi / 18.5) * 25; descText = "Your BMI is in the underweight range. We'll build a plan to reach a healthier weight."; bgColor="bg-yellow-50"; textColor="text-yellow-800";}
     else if (bmi < 25) { category = "Normal"; percent = 25 + ((bmi - 18.5) / 6.5) * 50; }
     else if (bmi < 30) { category = "Overweight"; percent = 75 + ((bmi - 25) / 5) * 25; descText = "Your BMI is in the overweight range. We'll create a plan to help you reach your goals."; bgColor="bg-yellow-50"; textColor="text-yellow-800";}
     else { category = "Obese"; percent = 100; descText = "A plan focused on consistent, healthy habits can make a big difference."; bgColor="bg-red-50"; textColor="text-red-800";}
@@ -781,7 +808,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setVh();
     window.addEventListener('resize', setVh);
     
-    // === REMOVED LOTTIE CALL FOR FIRST ONBOARDING SLIDE ===
     AnimationManager.add('lottie-onboarding-2', 'arrow.json');
     
     initOnboarding();
