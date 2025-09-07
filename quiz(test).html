@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { key: 'bmi_calculation', type: 'animation' },
             { key: 'sleep', type: 'options', text: "😴 How many hours of quality sleep do you get on average?", options: ["Less than 5 hours", "5-6 hours", "7-8 hours", "More than 8 hours"], values: [4, 6, 8, 9] },
             { key: 'sleep_visual', type: 'animation' },
-            { key: 'activity', type: 'options', text: "🏃‍♀️ How often do you engage in moderate physical activity per week?", options: ["Rarely", "1-2 times", "3-4 times", "5+ times"], values: [1, 3, 5, 7] }, // Adjusted values for better impact
+            { key: 'activity', type: 'options', text: "🏃‍♀️ How often do you engage in moderate physical activity per week?", options: ["Rarely", "1-2 times", "3-4 times", "5+ times"], values: [1, 3, 5, 7] },
             { key: 'activity_visual', type: 'animation' },
             {
                 key: 'stress',
@@ -297,12 +297,24 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- UTILITY FUNCTIONS ---
-    const AnimationManager = { /* ... (no changes) ... */ };
+    const AnimationManager = {
+        animations: new Map(),
+        add(id, path) {
+            if (this.animations.has(id) || !document.getElementById(id)) return;
+            const container = document.getElementById(id);
+            try {
+                const anim = lottie.loadAnimation({ container, renderer: 'svg', loop: true, autoplay: true, path });
+                this.animations.set(id, anim);
+            } catch(e) { console.error(`Lottie error on container #${id}:`, e); }
+        }
+    };
+
     const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
 
     function animateCountUp(element, finalValue, duration = 1500, isInt = true) {
+        if (!element) return;
         let startTimestamp = null;
-        const startValue = parseInt(element.textContent) || 0;
+        const startValue = parseInt(element.textContent.replace(/[^0-9.]/g, '')) || 0;
         const step = (timestamp) => {
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
@@ -387,7 +399,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- RENDERING FUNCTIONS ---
     function renderQuestion() {
-        // ... (this function is mostly the same, but simplified for brevity here) ...
         const question = App.quizQuestions[App.currentQuestionIndex];
         if(!question) return;
         const questionWrapper = document.getElementById('question-wrapper');
@@ -415,6 +426,22 @@ document.addEventListener('DOMContentLoaded', () => {
         footerWrapper.innerHTML = footerHTML;
         addQuestionEventListeners(question);
     }
+    
+    function updateSliderDisplay(question, value) {
+        const valueDisplay = document.getElementById('slider-value-display');
+        if (!valueDisplay) return;
+        let displayHTML = `${value} ${question.unit || ''}`;
+        if (question.unit === 'cm') {
+            const totalInches = value / 2.54;
+            const feet = Math.floor(totalInches / 12);
+            const inches = Math.round(totalInches % 12);
+            displayHTML = `${feet}'${inches}" <span class="text-lg text-gray-400 font-medium">(${value} cm)</span>`;
+        } else if (question.unit === 'kg') {
+            const lbs = (value * 2.20462).toFixed(0);
+            displayHTML = `${lbs} lbs <span class="text-lg text-gray-400 font-medium">(${value} kg)</span>`;
+        }
+        valueDisplay.innerHTML = displayHTML;
+    }
 
     function renderGenderSelection() {
         const footerWrapper = document.getElementById('footer-actions');
@@ -433,13 +460,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="mt-4 text-xl font-bold">Other</p>
                 </div>
             </div>`;
-        document.querySelectorAll('#footer-actions .answer-option').forEach(card => {
-            card.addEventListener('click', (e) => {
-                e.currentTarget.classList.add('selected');
-                setTimeout(() => handleAnswer('gender', card.dataset.value), 400);
-            });
-        });
+        addQuestionEventListeners({type: 'gender_selection'});
     }
+    
+    function addQuestionEventListeners(question) {
+        const footer = document.getElementById('footer-actions');
+        if (!question || !footer) return;
+
+        if (question.type === 'options' || question.type === 'gender_selection') {
+            footer.querySelectorAll('.answer-option').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.currentTarget.classList.add('selected');
+                    setTimeout(() => handleAnswer(question.key, btn.dataset.value), 400);
+                });
+            });
+        } else if (question.type === 'slider') {
+            const sliderInput = document.getElementById('slider-input');
+            sliderInput.addEventListener('input', () => updateSliderDisplay(question, sliderInput.value));
+            document.getElementById('slider-confirm-btn').addEventListener('click', () => handleAnswer(question.key, sliderInput.value));
+        } else if (question.type === 'camera_step') {
+            document.getElementById('open-camera-btn').addEventListener('click', openCamera);
+            document.getElementById('skip-photo-btn').addEventListener('click', () => handleAnswer('selfie', 'skipped'));
+        }
+    }
+
 
     function renderAnimation(key) {
         const wrapper = document.getElementById('question-wrapper');
@@ -460,13 +504,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div id="bmi-category-anim" class="text-sm font-medium text-gray-600 mt-1">&nbsp;</div>
                 </div>`;
         } else {
-             // Logic for other animations remains similar
+             let label = '';
+             let content = '';
+             switch(key) {
+                case 'sleep_visual':
+                    label = 'Sleep Recharge';
+                    content = `<div class="sleep-battery mt-2 mx-auto"><div id="sleep-battery-level-anim" class="sleep-battery-level"></div></div>`;
+                    break;
+                case 'activity_visual':
+                    label = 'Your Active Week';
+                    content = `<div class="activity-week" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div>`;
+                    break;
+                case 'stress_visual':
+                    label = 'Reported Stress Level';
+                    content = `<div class="stress-bar-track"><div id="stress-bar-fill-anim" class="stress-bar-fill"></div></div>`;
+                    break;
+             }
+             animationHTML = `<div class="widget-wrapper"><div class="widget-label">${label}</div>${content}</div>`;
         }
         wrapper.innerHTML = `<div class="question-content w-full">${animationHTML}</div>`;
         requestAnimationFrame(() => playAnimation(key));
         setTimeout(next, 3200);
     }
-    
+
     function playAnimation(key) {
         if (key === 'bmi_calculation') {
             const heightM = App.userAnswers.height / 100;
@@ -478,14 +538,30 @@ document.addEventListener('DOMContentLoaded', () => {
             if (bmi < 18.5) { category = "Underweight"; activeFigureClass = ".bmi-figure-under"; }
             else if (bmi >= 25 && bmi < 30) { category = "Overweight"; activeFigureClass = ".bmi-figure-over"; }
             else if (bmi >= 30) { category = "Obese"; activeFigureClass = ".bmi-figure-obese"; }
-            
+
             document.querySelectorAll('.bmi-figure').forEach(el => el.style.opacity = '0');
             document.querySelector(activeFigureClass).style.opacity = '1';
 
             document.getElementById('bmi-category-anim').textContent = category;
             animateCountUp(document.getElementById('bmi-value-anim'), bmi, 2000, false);
+        } else if (key === 'sleep_visual') {
+            const hours = parseInt(App.userAnswers.sleep || 4);
+            const level = Math.min(100, (hours / 8) * 100);
+            const levelEl = document.getElementById('sleep-battery-level-anim');
+            let color = '#ef4444'; if (level > 60) color = '#f59e0b'; if (level > 85) color = '#22c55e';
+            if(levelEl) { levelEl.style.backgroundColor = color; levelEl.style.width = `${level}%`; }
+        } else if (key === 'activity_visual') {
+            const days = parseInt(App.userAnswers.activity || 0);
+            const dayElements = document.querySelectorAll('#activity-week-anim .activity-day');
+            if(dayElements.length) {
+                for (let i = 0; i < Math.min(days, 7); i++) { setTimeout(() => dayElements[i]?.classList.add('active'), i * 250); }
+            }
+        } else if (key === 'stress_visual') {
+            const level = parseInt(App.userAnswers.stress || 5);
+            const percent = (level / 10) * 100;
+            const fillEl = document.getElementById('stress-bar-fill-anim');
+            if(fillEl) fillEl.style.width = `${percent}%`;
         }
-        // ... other animation logic ...
     }
 
     function renderWellnessProfile() {
@@ -502,7 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
             pageContent.classList.remove('md:grid-cols-2');
             pageContent.classList.add('md:grid-cols-1', 'max-w-sm');
         }
-        
+
         // BMI Widget
         const heightM = height / 100;
         const bmi = (weight / (heightM * heightM)).toFixed(1);
@@ -526,26 +602,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const metricsContainer = document.getElementById('profile-metrics-container');
         metricsContainer.innerHTML = `
             <div class="metric-widget">
-                <div class="metric-widget-value" id="age-widget-val">${age}</div>
+                <div class="metric-widget-value" id="age-widget-val">0</div>
                 <div class="metric-widget-label">Years Old</div>
             </div>
             <div class="metric-widget">
                 <div class="relative w-20 h-20 mx-auto">
                     <svg class="w-full h-full" viewBox="0 0 36 36"><circle class="progress-ring-bg" cx="18" cy="18" r="15.915" fill="none" stroke-width="3"></circle><circle id="sleep-ring" class="progress-ring-fg" cx="18" cy="18" r="15.915" fill="none" stroke-width="3" stroke-dasharray="100, 100" stroke-dashoffset="100"></circle></svg>
-                    <div class="absolute inset-0 flex items-center justify-center font-bold text-lg">${sleep}h</div>
+                    <div id="sleep-widget-val" class="absolute inset-0 flex items-center justify-center font-bold text-lg">0h</div>
                 </div>
                 <div class="metric-widget-label mt-1">Sleep</div>
             </div>
             <div class="metric-widget">
                  <div class="flex justify-center items-end h-20 gap-1.5">
-                    ${[...Array(7)].map((_, i) => `<div class="activity-bar w-3 rounded-full bg-gray-200" style="height: ${i < activity ? (20 + i*10) : 10}%; transition: height 1s ease ${i*0.1}s"></div>`).join('')}
+                    ${[...Array(7)].map((_, i) => `<div class="activity-bar w-3 rounded-full bg-gray-200" style="height: 10%"></div>`).join('')}
                 </div>
                 <div class="metric-widget-label mt-1">Activity Days</div>
             </div>
             <div class="metric-widget">
                  <div class="relative w-24 h-16 mx-auto overflow-hidden">
                     <div class="w-48 h-24 border-8 border-gray-200 rounded-t-full absolute bottom-0 left-1/2 -translate-x-1/2"></div>
-                    <div class="w-48 h-24 border-8 border-transparent rounded-t-full absolute bottom-0 left-1/2 -translate-x-1/2 stress-gauge-mask"></div>
+                    <div class="w-48 h-24 border-8 border-transparent rounded-t-full absolute bottom-0 left-1/2 -translate-x-1/2" style="background-image: linear-gradient(to right, #4ade80, #facc15, #f87171); clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);"></div>
                     <div id="stress-needle" class="w-1 h-12 bg-gray-800 absolute bottom-0 left-1/2 rounded-t-full transition-transform duration-1000 origin-bottom" style="transform: translateX(-50%) rotate(-90deg);"></div>
                 </div>
                 <div class="metric-widget-label mt-1">Stress Level</div>
@@ -553,17 +629,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Trigger animations
         setTimeout(() => {
-            // Sleep Ring
+            animateCountUp(document.getElementById('age-widget-val'), age);
+            animateCountUp(document.getElementById('sleep-widget-val'), sleep, 1500, true);
+            document.getElementById('sleep-widget-val').innerHTML += 'h';
+
             const sleepRing = document.getElementById('sleep-ring');
             const sleepPercent = Math.min(100, (sleep / 9) * 100);
             sleepRing.style.strokeDashoffset = 100 - sleepPercent;
-            // Activity Bars
-            document.querySelectorAll('.activity-bar').forEach(bar => {
-                const h = bar.style.height;
-                bar.style.height = '10%';
-                requestAnimationFrame(() => bar.style.height = h);
+
+            document.querySelectorAll('.activity-bar').forEach((bar, i) => {
+                if(i < activity) {
+                    bar.style.height = `${20 + i*10}%`;
+                }
             });
-            // Stress Needle
+
             const stressNeedle = document.getElementById('stress-needle');
             const stressAngle = -90 + ((stress / 10) * 180);
             stressNeedle.style.transform = `translateX(-50%) rotate(${stressAngle}deg)`;
@@ -574,32 +653,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const { age, bmi, sleep, activity, stress } = App.userAnswers;
         const chronoAge = parseInt(age);
         let bioAge = chronoAge;
-
-        // BMI factor: ideal BMI is 22. Penalty for deviation.
-        const bmiFactor = Math.abs(parseFloat(bmi) - 22) * 0.2;
-        bioAge += bmiFactor;
-
-        // Sleep factor: ideal is 8 hours.
-        const sleepFactor = (8 - parseInt(sleep)) * 0.5;
-        bioAge += sleepFactor;
-
-        // Activity factor: more is better.
-        const activityFactor = (5 - parseInt(activity)) * 0.3;
-        bioAge += activityFactor;
-
-        // Stress factor: less is better.
-        const stressFactor = (parseInt(stress) / 10) * 2;
-        bioAge += stressFactor;
-
+        bioAge += Math.abs(parseFloat(bmi) - 22) * 0.2; // BMI
+        bioAge += (8 - parseInt(sleep)) * 0.5; // Sleep
+        bioAge += (5 - parseInt(activity)) * 0.3; // Activity
+        bioAge += (parseInt(stress) / 10) * 2; // Stress
         App.biologicalAge = Math.round(bioAge);
         return App.biologicalAge;
     }
     
     function startAnalysis() {
-        // ...
         App.userAnswers.bmi = (App.userAnswers.weight / ((App.userAnswers.height/100)**2)).toFixed(1);
         calculateBiologicalAge();
-
+        AnimationManager.add('loading-animation', 'loader.json');
+        const stepsContainer = document.getElementById('analysis-steps');
+        stepsContainer.innerHTML = '';
+        const steps = ["Calculating biological age...", "Assessing metabolic rate...", "Analyzing stress indicators...", "Compiling wellness report..."];
+        steps.forEach((text, i) => {
+            setTimeout(() => {
+                stepsContainer.innerHTML += `<div class="flex items-center opacity-0 animate-fade-in"><svg class="w-5 h-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg><span>${text}</span></div>`;
+            }, i * 1100);
+        });
         setTimeout(() => {
             goToStep(5);
             preparePaymentPage();
@@ -626,45 +699,112 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const wrapper = document.querySelector('.testimonial-wrapper');
         const dotsContainer = document.querySelector('.testimonial-dots-container');
+        if (!wrapper || !dotsContainer) return;
         
         wrapper.innerHTML = testimonials.map(t => `
             <div class="testimonial-slide">
-                <div class="bg-white p-6 rounded-xl border">
+                <div class="bg-white p-6 rounded-xl border h-full flex flex-col">
                     <div class="star-rating flex">${[...Array(5)].map((_, i) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 ${i < t.rating ? '' : 'text-gray-300'}"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.007z" clip-rule="evenodd" /></svg>`).join('')}</div>
-                    <p class="text-sm text-gray-600 mt-2">"${t.text}"</p>
-                    <p class="font-semibold mt-3">- ${t.name}</p>
+                    <p class="text-sm text-gray-600 mt-2 flex-grow">"${t.text}"</p>
+                    <p class="font-semibold mt-3 text-right">- ${t.name}</p>
                 </div>
             </div>
         `).join('');
 
-        // Basic slider logic
-        // ... a more robust slider implementation would be needed for production ...
+        dotsContainer.innerHTML = testimonials.map((_, i) => `<div class="dot w-2 h-2 bg-gray-300 rounded-full cursor-pointer ${i === 0 ? 'active' : ''}" data-index="${i}"></div>`).join('');
+        const dots = dotsContainer.querySelectorAll('.dot');
+        
+        const setActive = (index) => {
+            wrapper.style.transform = `translateX(-${index * 100}%)`;
+            dots.forEach(d => d.classList.toggle('active', parseInt(d.dataset.index) === index));
+        };
+
+        dots.forEach(dot => dot.addEventListener('click', () => setActive(parseInt(dot.dataset.index))));
     }
 
     // --- ONBOARDING & INITIALIZATION ---
-    // All other functions like initOnboarding, updateSliderDisplay, addQuestionEventListeners, etc.
-    // remain largely the same. All event listeners are set up at the end.
+    function initOnboarding() {
+        App.onboarding.slides = document.querySelectorAll('#onboarding-swiper .swiper-slide');
+        const wrapper = document.querySelector('#onboarding-swiper .swiper-wrapper');
+        const dotsContainer = document.getElementById('dots-container');
+
+        App.onboarding.slides.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'dot w-2 h-2 bg-gray-300 rounded-full cursor-pointer';
+            dot.onclick = () => { App.onboarding.slideIndex = i; updateOnboardingView(true); };
+            dotsContainer.appendChild(dot);
+        });
+        App.onboarding.dots = document.querySelectorAll('#dots-container .dot');
+
+        wrapper.addEventListener('touchstart', e => { App.onboarding.touchStartX = e.changedTouches[0].screenX; clearInterval(App.onboarding.timer); }, { passive: true });
+        wrapper.addEventListener('touchend', e => {
+            const touchEndX = e.changedTouches[0].screenX;
+            if (touchEndX < App.onboarding.touchStartX - 50) {
+                if (App.onboarding.slideIndex < App.onboarding.slides.length - 1) {
+                    App.onboarding.slideIndex++;
+                    updateOnboardingView(true);
+                } else { startQuiz(); }
+            } else if (touchEndX > App.onboarding.touchStartX + 50) {
+                if (App.onboarding.slideIndex > 0) {
+                    App.onboarding.slideIndex--;
+                    updateOnboardingView(true);
+                }
+            }
+        });
+
+        document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
+        updateOnboardingView(true);
+    }
+    
+    function updateOnboardingView(manual = false) {
+        document.querySelector('#onboarding-swiper .swiper-wrapper').style.transform = `translateX(-${App.onboarding.slideIndex * 100}%)`;
+        App.onboarding.slides.forEach((s, i) => s.classList.toggle('active', i === App.onboarding.slideIndex));
+        App.onboarding.dots.forEach((d, i) => d.classList.toggle('active', i === App.onboarding.slideIndex));
+        if (manual) resetOnboardingTimer();
+    }
+    
+    function resetOnboardingTimer() {
+        clearInterval(App.onboarding.timer);
+        App.onboarding.timer = setInterval(() => {
+            if (App.onboarding.slideIndex < App.onboarding.slides.length - 1) {
+                App.onboarding.slideIndex++;
+                updateOnboardingView();
+            } else {
+                clearInterval(App.onboarding.timer);
+            }
+        }, 4000);
+    }
+    
+    function startQuiz() {
+        clearInterval(App.onboarding.timer);
+        next();
+    }
+    
+    // Camera Logic
+    async function openCamera() { /* ... unchanged ... */ }
+    function closeCamera() { /* ... unchanged ... */ }
+    function capturePhoto() { /* ... unchanged ... */ }
     
     // Burger Menu Logic
     const burgerBtn = document.getElementById('burger-menu-btn');
     const sideMenu = document.getElementById('side-menu');
     const menuOverlay = document.getElementById('menu-overlay');
-
     function toggleMenu() {
         sideMenu.classList.toggle('active');
         menuOverlay.classList.toggle('active');
     }
-
     burgerBtn.addEventListener('click', toggleMenu);
     menuOverlay.addEventListener('click', toggleMenu);
-
+    
+    // Event Listeners
     setVh();
     window.addEventListener('resize', setVh);
     AnimationManager.add('lottie-onboarding-2', 'arrow.json');
     initOnboarding();
     document.getElementById('back-btn').addEventListener('click', previous);
     document.getElementById('profile-continue-btn').addEventListener('click', next);
-    // ... all other initial event listeners ...
+    document.getElementById('capture-btn').addEventListener('click', capturePhoto);
+    document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
 });
 </script>
 </body>
