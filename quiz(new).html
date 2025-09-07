@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Wellness Analysis - Final Version</title>
+    <title>AI Wellness Analysis - Final Working Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -310,8 +310,7 @@ function next() {
 function previous() {
     if (App.currentStep === 3) {
         goToStep(2);
-        const wellnessProfileIndex = App.quizQuestions.findIndex(q => q.key === 'selfie');
-        App.currentQuestionIndex = wellnessProfileIndex;
+        App.currentQuestionIndex = App.quizQuestions.findIndex(q => q.key === 'selfie');
         renderQuestion(App.currentQuestionIndex);
         return;
     }
@@ -629,7 +628,7 @@ function renderWellnessProfile() {
     document.getElementById('profile-metabolism').innerHTML = `<div class="flex items-center gap-3">${profileIcon(metabolismSVG)} <div><p class="text-sm text-gray-500">Metabolism</p><p class="font-bold text-gray-800">Moderate</p></div></div>`;
 }
 
-function startCamera() {
+async function startCamera() {
     const cameraModal = document.getElementById('camera-modal');
     const video = document.getElementById('camera-video');
     const loaderText = document.getElementById('loader-text');
@@ -676,8 +675,58 @@ function startAnalysis() {
     
     setTimeout(() => {
         goToStep(5);
-        // initPaymentForm();
+        initPaymentForm();
     }, 5000);
+}
+
+async function initPaymentForm() {
+    document.getElementById('payment-now-value').textContent = `${(App.userAnswers.weight * 2.20462).toFixed(0)} lbs`;
+    document.getElementById('payment-goal-value').textContent = `${((App.userAnswers.weight * 2.20462) - 15).toFixed(0)} lbs`;
+
+    const formHtml = `<div id="payment-form" class="space-y-4"><div id="card-element" class="p-4 border border-gray-300 rounded-lg bg-white shadow-sm"></div><button id="submit-payment" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-4 px-4 rounded-lg hover:opacity-90 transition-opacity text-xl shadow-lg shadow-[--brand-accent]/40">Get My Plan - $9.99</button><div id="payment-message" class="hidden text-center text-red-500 text-sm pt-1"></div><p class="text-xs text-gray-400 text-center mt-2">🔒 Secure one-time payment processed by Stripe</p></div>`;
+    document.getElementById('payment-form-container').innerHTML = formHtml;
+    
+    try {
+        App.stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb');
+        const response = await fetch('/.netlify/functions/payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: App.sessionId }) });
+        const data = await response.json();
+        App.clientSecret = data.clientSecret;
+        App.elements = App.stripe.elements({ clientSecret: App.clientSecret });
+        const cardElement = App.elements.create("card", { style: { base: { fontSize: '16px', '::placeholder': { color: '#aab7c4' } } } });
+        cardElement.mount("#card-element");
+        document.getElementById('payment-form').addEventListener('submit', handlePayment);
+    } catch (error) {
+        document.getElementById('payment-form-container').innerHTML = `<p class="text-center text-red-500">Payment form failed to load. Please refresh.</p>`;
+    }
+    
+    let duration = 10 * 60;
+    const countdownEl = document.getElementById('countdown');
+    setInterval(() => {
+        if (duration <= 0 || !countdownEl) return;
+        duration--;
+        const minutes = Math.floor(duration / 60).toString().padStart(2, '0');
+        const seconds = (duration % 60).toString().padStart(2, '0');
+        countdownEl.textContent = `${minutes}:${seconds}`;
+    }, 1000);
+}
+
+async function handlePayment(e) {
+    e.preventDefault();
+    const submitButton = document.getElementById('submit-payment');
+    const messageDiv = document.getElementById('payment-message');
+    submitButton.disabled = true;
+    submitButton.textContent = 'Processing...';
+    
+    const { error } = await App.stripe.confirmCardPayment(App.clientSecret, { payment_method: { card: App.elements.getElement('card') } });
+    
+    if (error) {
+        messageDiv.textContent = error.message;
+        messageDiv.classList.remove('hidden');
+        submitButton.disabled = false;
+        submitButton.textContent = `Get My Plan - $9.99`;
+    } else {
+        window.location.href = `result.html?session_id=${App.sessionId}&payment=success`;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
