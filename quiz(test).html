@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { key: 'stress_visual', type: 'animation' },
             { key: 'selfie', type: 'camera_step', text: 'Final Step: AI Photo Analysis', subtext: 'Our AI analyzes your face for non-medical indicators of stress and fatigue. Your photo is deleted instantly after analysis.'},
             { key: 'wellness_profile', type: 'wellness_profile_page'},
-            { key: 'email', type: 'email_step', text: "Where should we send your report summary?", subtext: "We respect your privacy. No spam, ever." }
+            { key: 'email', type: 'email_step', text: "Where should we send your plan?", subtext: "We respect your privacy. No spam, ever." }
         ]
     };
 
@@ -294,8 +294,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleAnswer(questionKey, answer) {
-        if (questionKey === 'selfie' && answer !== 'skipped') {
-            App.userPhotoUrl = answer;
+        if (questionKey === 'selfie') {
+             App.userPhotoUrl = answer;
         } else {
             App.userAnswers[questionKey] = answer;
         }
@@ -304,7 +304,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function next() {
         App.currentQuestionIndex++;
-        
         const stepConfig = App.quizQuestions[App.currentQuestionIndex];
 
         if (!stepConfig) {
@@ -326,31 +325,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function previous() {
         if (App.currentStep === 3) {
-             App.currentQuestionIndex = App.quizQuestions.findIndex(q => q.type === 'wellness_profile_page') - 1;
-        } else {
-            App.currentQuestionIndex--;
-             if (App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') {
-                App.currentQuestionIndex--;
-            }
+            App.currentQuestionIndex = App.quizQuestions.findIndex(q => q.type === 'wellness_profile_page');
         }
-        
+        App.currentQuestionIndex--;
+
+        if (App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') {
+            App.currentQuestionIndex--;
+        }
         if (App.currentQuestionIndex < 0) App.currentQuestionIndex = 0;
 
         const stepConfig = App.quizQuestions[App.currentQuestionIndex];
         
-        if(stepConfig.type === 'gender_selection') {
-             goToStep(1);
-             renderGenderSelection();
+        if (stepConfig.type === 'gender_selection') {
+            goToStep(1);
+            renderGenderSelection();
         } else {
-             goToStep(2);
-             renderQuestion();
+            goToStep(2);
+            renderQuestion();
         }
         updateProgressBar();
     }
 
     function updateProgressBar() {
         const totalQuestions = App.quizQuestions.length;
-        const progress = totalQuestions > 0 ? ((App.currentQuestionIndex + 1) / totalQuestions) * 100 : 0;
+        const progress = totalQuestions > 0 ? (App.currentQuestionIndex / totalQuestions) * 100 : 0;
         document.getElementById('progress-bar-inner').style.width = `${progress}%`;
     }
 
@@ -454,16 +452,31 @@ document.addEventListener('DOMContentLoaded', () => {
         valueDisplay.innerHTML = displayHTML;
     }
 
+    function animateCountUp(element, finalValue, duration = 1500) {
+        let start = 0;
+        const stepTime = 16;
+        const totalSteps = duration / stepTime;
+        const increment = finalValue / totalSteps;
+        const timer = setInterval(() => {
+            start += increment;
+            if (start >= finalValue) {
+                element.textContent = finalValue.toFixed(1);
+                clearInterval(timer);
+            } else {
+                element.textContent = start.toFixed(1);
+            }
+        }, stepTime);
+    }
+    
     function renderAnimation(key) {
         const wrapper = document.getElementById('question-wrapper');
         document.getElementById('footer-actions').innerHTML = '';
-        
-        let animationHTML = '';
         const widget = (content) => `<div class="widget-wrapper">${content}</div>`;
+        let animationHTML = '';
 
         switch(key) {
             case 'bmi_calculation':
-                animationHTML = widget(`<div class="widget-label">Calculating Your BMI...</div><div id="bmi-value-anim" class="text-4xl font-extrabold text-[--brand-dark-text]">0.0</div><div class="relative h-2.5 rounded-full unified-gradient-bar my-2"><div id="bmi-indicator-anim" class="absolute top-1/2 w-5 h-5 -translate-x-1/2 -translate-y-1/2 transition-all duration-1000" style="left: 0%;"></div></div><div id="bmi-category-anim" class="text-sm font-medium text-gray-600 mt-2">&nbsp;</div>`);
+                animationHTML = widget(`<div class="widget-label">Calculating Your BMI...</div><div id="bmi-value-anim" class="text-4xl font-extrabold text-[--brand-dark-text]">0.0</div><div class="relative h-2.5 rounded-full unified-gradient-bar my-2"><div id="bmi-indicator-anim" class="transition-all duration-1000 absolute top-1/2 w-5 h-5 -translate-x-1/2 -translate-y-1/2" style="left: 0%;"></div></div><div id="bmi-category-anim" class="text-sm font-medium text-gray-600 mt-2">&nbsp;</div>`);
                 break;
             case 'sleep_visual':
                 animationHTML = widget(`<div class="widget-label">Sleep Recharge</div><div class="sleep-battery mt-2 mx-auto"><div id="sleep-battery-level-anim" class="sleep-battery-level"></div></div>`);
@@ -475,7 +488,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 animationHTML = widget(`<div class="widget-label">Reported Stress Level</div><div class="stress-bar-track"><div id="stress-bar-fill-anim" class="stress-bar-fill"></div></div>`);
                 break;
         }
-        
         wrapper.innerHTML = `<div class="question-content w-full">${animationHTML}</div>`;
         requestAnimationFrame(() => playAnimation(key));
         setTimeout(next, 2800);
@@ -493,13 +505,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (bmi < 30) { category = "Overweight"; percent = 75 + ((bmi - 25) / 5) * 25; }
                 else { category = "Obese"; percent = 100; }
                 
-                const indicator = document.getElementById('bmi-indicator-anim');
-                if(indicator) indicator.style.left = `${Math.max(5, Math.min(95, percent))}%`;
-                const categoryEl = document.getElementById('bmi-category-anim');
-                if(categoryEl) categoryEl.textContent = category;
-                
-                const bmiValueEl = document.getElementById('bmi-value-anim');
-                if(bmiValueEl) animateCountUp(bmiValueEl, bmi, 1500);
+                document.getElementById('bmi-indicator-anim').style.left = `${Math.max(5, Math.min(95, percent))}%`;
+                document.getElementById('bmi-category-anim').textContent = category;
+                animateCountUp(document.getElementById('bmi-value-anim'), bmi);
                 break;
             }
             case 'sleep_visual': {
@@ -531,27 +539,83 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function animateCountUp(element, finalValue, duration) {
-        let start = 0;
-        const stepTime = 16; // ~60fps
-        const totalSteps = duration / stepTime;
-        const increment = finalValue / totalSteps;
-        const timer = setInterval(() => {
-            start += increment;
-            if (start >= finalValue) {
-                element.textContent = finalValue.toFixed(1);
-                clearInterval(timer);
-            } else {
-                element.textContent = start.toFixed(1);
+    function renderWellnessProfile() {
+        // Profile rendering logic here
+    }
+
+    function startAnalysis() {
+        AnimationManager.add('loading-animation', 'loader.json');
+        const stepsContainer = document.getElementById('analysis-steps');
+        stepsContainer.innerHTML = '';
+        const steps = ["Calculating biological age...", "Assessing metabolic rate...", "Analyzing stress indicators...", "Compiling wellness report..."];
+        steps.forEach((text, i) => {
+            setTimeout(() => {
+                stepsContainer.innerHTML += `<div class="flex items-center opacity-0 animate-fade-in"><svg class="w-5 h-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg><span>${text}</span></div>`;
+            }, i * 1100);
+        });
+        setTimeout(() => goToStep(5), 5000);
+    }
+
+    function initOnboarding() {
+        App.onboarding.slides = document.querySelectorAll('.swiper-slide');
+        const wrapper = document.querySelector('.swiper-wrapper');
+        const dotsContainer = document.getElementById('dots-container');
+        
+        App.onboarding.slides.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'dot w-2 h-2 bg-gray-300 rounded-full cursor-pointer';
+            dot.onclick = () => { App.onboarding.slideIndex = i; updateOnboardingView(true); };
+            dotsContainer.appendChild(dot);
+        });
+        App.onboarding.dots = document.querySelectorAll('.dot');
+        
+        wrapper.addEventListener('touchstart', e => { App.onboarding.touchStartX = e.changedTouches[0].screenX; clearInterval(App.onboarding.timer); }, { passive: true });
+        
+        wrapper.addEventListener('touchend', e => {
+            const touchEndX = e.changedTouches[0].screenX;
+            if (touchEndX < App.onboarding.touchStartX - 50) { // Swipe Left
+                if (App.onboarding.slideIndex < App.onboarding.slides.length - 1) {
+                    App.onboarding.slideIndex++;
+                    updateOnboardingView(true);
+                } else {
+                    startQuiz();
+                }
+            } else if (touchEndX > App.onboarding.touchStartX + 50) { // Swipe Right
+                if (App.onboarding.slideIndex > 0) {
+                    App.onboarding.slideIndex--;
+                    updateOnboardingView(true);
+                }
             }
-        }, stepTime);
+        });
+
+        document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
+        updateOnboardingView(true); // Initial render
+    }
+
+    function updateOnboardingView(manual = false) {
+        document.querySelector('.swiper-wrapper').style.transform = `translateX(-${App.onboarding.slideIndex * 100}%)`;
+        App.onboarding.slides.forEach((s, i) => s.classList.toggle('active', i === App.onboarding.slideIndex));
+        App.onboarding.dots.forEach((d, i) => d.classList.toggle('active', i === App.onboarding.slideIndex));
+        if (manual) resetOnboardingTimer();
+    }
+
+    function resetOnboardingTimer() {
+        clearInterval(App.onboarding.timer);
+        App.onboarding.timer = setInterval(() => {
+            if (App.onboarding.slideIndex < App.onboarding.slides.length - 1) {
+                App.onboarding.slideIndex++;
+                updateOnboardingView();
+            } else {
+                clearInterval(App.onboarding.timer);
+            }
+        }, 4000);
     }
     
-    function renderWellnessProfile() { /* Omitted for brevity, full code below */ }
-    function startAnalysis() { /* Omitted for brevity, full code below */ }
-    function initOnboarding() { /* Omitted for brevity, full code below */ }
-    
-    // Initial Setup
+    function startQuiz() {
+        clearInterval(App.onboarding.timer);
+        next();
+    }
+
     const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
     setVh();
     window.addEventListener('resize', setVh);
