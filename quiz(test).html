@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Wellness Analysis - Итоговая версия</title>
+    <title>AI Wellness Analysis - Final Working Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -87,6 +87,7 @@
         #camera-modal.active { opacity: 1; pointer-events: all; }
         #camera-container { position: relative; width: 90%; max-width: 400px; aspect-ratio: 3/4; overflow: hidden; border-radius: 1.5rem; background: #111; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
         #camera-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        #camera-feedback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; text-align: center; padding: 1rem; background-color: rgba(0,0,0,0.5); border-radius: 0.5rem;}
         .camera-controls { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; display: flex; justify-content: center; align-items: center; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); }
         #capture-btn { width: 70px; height: 70px; border-radius: 50%; background-color: white; border: 5px solid white; box-shadow: 0 0 0 5px rgba(255,255,255,0.3); cursor: pointer; transition: transform 0.2s; }
         #capture-btn:active { transform: scale(0.9); }
@@ -119,26 +120,26 @@
                      <div class="swiper-wrapper">
                          <div class="swiper-slide !p-0">
                              <video class="absolute top-0 left-0 w-full h-full object-cover -z-10" autoplay loop muted playsinline>
-                                 <source src="https://assets.mixkit.co/videos/preview/mixkit-woman-doing-yoga-on-a-rooftop-4923-large.mp4" type="video/mp4">
-                             </video>
+                                 <source src="fon.webm" type="video/webm">
+                                 </video>
                              <div class="w-full h-full flex flex-col justify-end items-center text-center p-8 bg-black/30 text-white">
                                  <div class="flex-grow"></div>
-                                 <h1 class="text-4xl font-extrabold tracking-tight">Раскройте свой внутренний потенциал.</h1>
-                                 <p class="mt-3 max-w-md text-lg text-gray-200">Узнайте свой биологический возраст и получите персональный план оздоровления на основе AI-анализа.</p>
+                                 <h1 class="text-4xl font-extrabold tracking-tight">Unlock Your Inner Potential.</h1>
+                                 <p class="mt-3 max-w-md text-lg text-gray-200">Discover your biological age and get a personalized wellness plan based on AI analysis.</p>
                                  <div class="h-[15vh]"></div>
                              </div>
                          </div>
-                         <div class="swiper-slide"><div class="text-left w-full max-w-sm"><h2 class="text-2xl font-bold text-gray-800 text-center mb-6">Что вы получите:</h2><ul class="space-y-4"><li class="flex items-center"><span class="text-2xl mr-3">🎯</span><div><h3 class="font-semibold">Оценка здоровья</h3><p class="text-sm text-gray-500">Ваш комплексный рейтинг здоровья</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">⏳</span><div><h3 class="font-semibold">Биологический возраст</h3><p class="text-sm text-gray-500">Насколько вы «молоды» для своих лет</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🌿</span><div><h3 class="font-semibold">Анализ кожи и стресса</h3><p class="text-sm text-gray-500">Узнайте о скрытых факторах</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🗺️</span><div><h3 class="font-semibold">Персональный план</h3><p class="text-sm text-gray-500">7-дневный план для улучшений</p></div></li></ul></div></div>
-                         <div class="swiper-slide"><div class="text-center"><h2 class="text-2xl font-bold text-gray-800 mb-6">Снизьте свой биологический возраст</h2><div class="flex justify-center items-center space-x-4"><div class="text-center"><p class="text-gray-500">Хронологический</p><p class="text-5xl font-bold text-gray-400">35</p></div><div id="lottie-onboarding-2" class="w-20 h-20"></div><div class="text-center"><p class="font-semibold" style="color: var(--brand-dark-text);">Биологический</p><p class="text-6xl font-extrabold" style="color: var(--brand-dark-text);">32</p></div></div><p class="text-gray-600 mt-6 max-w-xs mx-auto">Наш план разработан, чтобы помочь вам чувствовать себя моложе и энергичнее.</p></div></div>
-                         <div class="swiper-slide"><div class="text-center max-w-sm"><h2 class="text-2xl font-bold text-gray-800 mb-8">Ваша конфиденциальность — наш приоритет</h2><div class="space-y-6 text-left"><div class="flex items-center"><span class="text-3xl mr-4">📸</span><p class="text-gray-600">Ваше фото анализируется «на лету» и никогда не сохраняется.</p></div><div class="flex items-center"><span class="text-3xl mr-4">🔒</span><p class="text-gray-600">Все ваши данные анонимизированы и защищены шифрованием.</p></div><div class="flex items-center"><span class="text-3xl mr-4">⚕️</span><p class="text-gray-600">Это не медицинская консультация. Только в информационных целях.</p></div></div></div></div>
+                         <div class="swiper-slide"><div class="text-left w-full max-w-sm"><h2 class="text-2xl font-bold text-gray-800 text-center mb-6">What you'll get:</h2><ul class="space-y-4"><li class="flex items-center"><span class="text-2xl mr-3">🎯</span><div><h3 class="font-semibold">Wellness Score</h3><p class="text-sm text-gray-500">Your comprehensive health rating</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">⏳</span><div><h3 class="font-semibold">Biological Age</h3><p class="text-sm text-gray-500">How "young" you are for your years</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🌿</span><div><h3 class="font-semibold">Skin & Stress Analysis</h3><p class="text-sm text-gray-500">Learn about hidden factors</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🗺️</span><div><h3 class="font-semibold">Personalized Plan</h3><p class="text-sm text-gray-500">A 7-day plan for improvement</p></div></li></ul></div></div>
+                         <div class="swiper-slide"><div class="text-center"><h2 class="text-2xl font-bold text-gray-800 mb-6">Lower Your Biological Age</h2><div class="flex justify-center items-center space-x-4"><div class="text-center"><p class="text-gray-500">Chronological</p><p class="text-5xl font-bold text-gray-400">35</p></div><div id="lottie-onboarding-2" class="w-20 h-20"></div><div class="text-center"><p class="font-semibold" style="color: var(--brand-dark-text);">Biological</p><p class="text-6xl font-extrabold" style="color: var(--brand-dark-text);">32</p></div></div><p class="text-gray-600 mt-6 max-w-xs mx-auto">Our plan is designed to help you feel younger and more energetic.</p></div></div>
+                         <div class="swiper-slide"><div class="text-center max-w-sm"><h2 class="text-2xl font-bold text-gray-800 mb-8">Your Privacy is Our Priority</h2><div class="space-y-6 text-left"><div class="flex items-center"><span class="text-3xl mr-4">📸</span><p class="text-gray-600">Your photo is analyzed on-the-fly and never stored.</p></div><div class="flex items-center"><span class="text-3xl mr-4">🔒</span><p class="text-gray-600">All your data is anonymized and protected by encryption.</p></div><div class="flex items-center"><span class="text-3xl mr-4">⚕️</span><p class="text-gray-600">This is not medical advice. For informational purposes only.</p></div></div></div></div>
                      </div>
                  </div>
-                 <div class="py-6 px-6 bg-white"><div id="dots-container" class="flex justify-center items-center space-x-3 mb-6"></div><button id="start-quiz-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[--brand-accent]/40">Начать</button></div>
+                 <div class="py-6 px-6 bg-white"><div id="dots-container" class="flex justify-center items-center space-x-3 mb-6"></div><button id="start-quiz-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[--brand-accent]/40">Let's start</button></div>
              </div>
         </section>
 
         <section id="step-1" class="quiz-step prev">
-            <div class="question-content w-full max-w-2xl text-center"><h2 class="text-3xl font-bold text-gray-900">Для персонализации вашего плана, укажите ваш пол:</h2></div>
+            <div class="question-content w-full max-w-2xl text-center"><h2 class="text-3xl font-bold text-gray-900">To personalize your plan, which do you identify with?</h2></div>
         </section>
 
         <section id="step-2" class="quiz-step prev">
@@ -147,9 +148,9 @@
 
         <section id="step-3" class="quiz-step prev p-0 justify-start">
             <div class="w-full h-full overflow-y-auto p-4 sm:p-6 md:p-8 text-center bg-white">
-                 <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900">Вот ваш профиль здоровья</h2>
+                 <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900">Here's your wellness profile</h2>
                  <div class="mt-6 w-full max-w-md mx-auto bg-white p-4 sm:p-6 rounded-2xl shadow-lg border">
-                     <p class="font-semibold text-gray-700">Индекс Массы Тела (ИМТ)</p>
+                     <p class="font-semibold text-gray-700">Body Mass Index (BMI)</p>
                      <div class="relative mt-2">
                          <div class="h-2 w-full unified-gradient-bar rounded-full"></div>
                          <div id="bmi-indicator-dot" class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-1000" style="left: 0%;"><div class="w-5 h-5 bg-white rounded-full border-4 border-[--brand-accent] shadow-md"></div></div>
@@ -166,13 +167,13 @@
                  </div>
             </div>
              <div class="w-full p-4 bg-white border-t sticky bottom-0">
-                 <button id="profile-continue-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-dark-text] text-white font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Продолжить</button>
+                 <button id="profile-continue-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-dark-text] text-white font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Continue</button>
              </div>
         </section>
 
         <section id="step-4" class="quiz-step prev">
             <div id="loading-animation" class="w-48 h-48"></div>
-            <h2 class="text-3xl font-bold text-gray-800 mt-4 text-center">Анализируем ваш уникальный профиль...</h2>
+            <h2 class="text-3xl font-bold text-gray-800 mt-4 text-center">Analyzing Your Unique Profile...</h2>
             <div id="analysis-steps" class="mt-6 text-gray-600 space-y-2 w-64 text-left"></div>
         </section>
 
@@ -180,67 +181,67 @@
             <div class="w-full h-full overflow-y-auto">
                 <div class="p-6">
                     <div class="text-center">
-                        <h1 class="text-3xl font-extrabold text-gray-900">Получите ваш персональный план сейчас!</h1>
+                        <h1 class="text-3xl font-extrabold text-gray-900">Get your Personalized Plan now!</h1>
                         <div class="mt-4 w-full max-w-md mx-auto bg-gray-50 p-4 rounded-2xl border">
                              <div class="flex justify-between items-center text-center">
-                                 <div><p class="text-sm text-gray-500">Сейчас</p><p id="payment-now-value" class="font-bold text-lg">-- кг</p></div>
+                                 <div><p class="text-sm text-gray-500">Now</p><p id="payment-now-value" class="font-bold text-lg">-- lbs</p></div>
                                  <div class="text-gray-300 text-2xl">&rarr;</div>
-                                 <div><p class="text-sm text-gray-500">Ваша цель</p><p id="payment-goal-value" class="font-bold text-lg text-green-600">-- кг</p></div>
+                                 <div><p class="text-sm text-gray-500">Your Goal</p><p id="payment-goal-value" class="font-bold text-lg text-green-600">-- lbs</p></div>
                              </div>
                         </div>
                     </div>
                     <div class="mt-6 max-w-md mx-auto">
                         <div id="payment-form-container" class="space-y-4">
                             <div>
-                                <label class="text-sm font-medium text-gray-700">Номер карты</label>
+                                <label for="card-number" class="text-sm font-medium text-gray-700">Card Number</label>
                                 <div id="card-number" class="stripe-field mt-1"></div>
                             </div>
                             <div class="flex gap-4">
                                 <div class="flex-1">
-                                    <label class="text-sm font-medium text-gray-700">Срок</label>
+                                    <label for="card-expiry" class="text-sm font-medium text-gray-700">Expiration</label>
                                     <div id="card-expiry" class="stripe-field mt-1"></div>
                                 </div>
                                 <div class="flex-1">
-                                    <label class="text-sm font-medium text-gray-700">CVC</label>
+                                    <label for="card-cvc" class="text-sm font-medium text-gray-700">CVC</label>
                                     <div id="card-cvc" class="stripe-field mt-1"></div>
                                 </div>
                             </div>
-                             <button id="payment-submit-btn" class="w-full block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[--brand-accent]/40 mt-6 !text-lg">Оплатить и получить план</button>
+                             <button id="payment-submit-btn" class="w-full block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[--brand-accent]/40 mt-6 !text-lg">Pay & Get My Plan</button>
                         </div>
-                        <p class="text-xs text-gray-500 mt-3 text-center">Без отмены подписки, до окончания выбранного вводного плана со скидкой, я соглашаюсь, что вы будете автоматически списывать $9.99 (без НДС) каждые 4 недели, пока я не отменю подписку.</p>
+                        <p class="text-xs text-gray-500 mt-3 text-center">Without cancellation, before the selected discounted intro plan ends, I accept that you will automatically charge $9.99 (excl. VAT) every 4 weeks until I cancel.</p>
                     </div>
                 </div>
                 <div class="bg-gray-50/70 p-6 mt-8">
                     <div class="max-w-md mx-auto">
-                        <h3 class="font-bold text-xl text-center">Что вы получаете</h3>
+                        <h3 class="font-bold text-xl text-center">What you get</h3>
                         <ul class="mt-4 space-y-4">
-                            <li class="flex items-start gap-3"><span class="text-2xl">🤸</span><div><h4 class="font-semibold">Стройное и подтянутое тело</h4><p class="text-sm text-gray-600">10-20 минутные тренировки для начинающих для целевых зон.</p></div></li>
-                            <li class="flex items-start gap-3"><span class="text-2xl">🧘</span><div><h4 class="font-semibold">Улучшенная осанка</h4><p class="text-sm text-gray-600">Снижение напряжения в спине, шее и плечах.</p></div></li>
-                             <li class="flex items-start gap-3"><span class="text-2xl">🥗</span><div><h4 class="font-semibold">Персональный план питания</h4><p class="text-sm text-gray-600">Достигните желаемого веса быстрее с нашими рекомендациями.</p></div></li>
+                            <li class="flex items-start gap-3"><span class="text-2xl">🤸</span><div><h4 class="font-semibold">Slim toned body</h4><p class="text-sm text-gray-600">10-20 min beginner-friendly workouts for target areas.</p></div></li>
+                            <li class="flex items-start gap-3"><span class="text-2xl">🧘</span><div><h4 class="font-semibold">Improved posture</h4><p class="text-sm text-gray-600">Reduced tension in back, neck, and shoulders.</p></div></li>
+                             <li class="flex items-start gap-3"><span class="text-2xl">🥗</span><div><h4 class="font-semibold">Personalized nutrition plan</h4><p class="text-sm text-gray-600">Reach your goal weight faster with our guidance.</p></div></li>
                         </ul>
                     </div>
                 </div>
                 <div class="p-6">
                     <div class="max-w-md mx-auto">
-                        <h3 class="font-bold text-xl text-center">Пользователи любят наши планы</h3>
+                        <h3 class="font-bold text-xl text-center">Users love our plans</h3>
                         <div class="mt-4 space-y-4">
-                            <div class="bg-white p-4 rounded-xl border"><p class="font-semibold">Анна В.</p><p class="text-sm text-gray-600 mt-1">"Вау, это лучшее приложение для тренировок, которое я когда-либо использовала, в нем легко ориентироваться... оно действительно помогло мне сбросить вес и укрепить пресс..."</p></div>
-                            <div class="bg-white p-4 rounded-xl border"><p class="font-semibold">Максим Н.</p><p class="text-sm text-gray-600 mt-1">"Это приложение имеет большое значение. Я верю, что это будет очень хорошее приложение для контроля своей формы с помощью простых упражнений."</p></div>
+                            <div class="bg-white p-4 rounded-xl border"><p class="font-semibold">Okunade A.</p><p class="text-sm text-gray-600 mt-1">"Wow this is the best workout app I have ever used it's easy to navigate... it's really help me to loss weight and I pill Up some abs..."</p></div>
+                            <div class="bg-white p-4 rounded-xl border"><p class="font-semibold">Rashmi N.</p><p class="text-sm text-gray-600 mt-1">"This application makes a big difference. I believe that it will be a very good application to control her shape as much as I want with simple exercises."</p></div>
                         </div>
                     </div>
                 </div>
                  <div class="bg-gray-50/70 p-6 mt-2">
                     <div class="max-w-md mx-auto">
-                        <h3 class="font-bold text-xl text-center">Часто задаваемые вопросы</h3>
+                        <h3 class="font-bold text-xl text-center">People often ask</h3>
                         <div id="payment-faq" class="mt-4 space-y-2">
-                            <details class="bg-white p-4 rounded-xl border cursor-pointer"><summary class="font-semibold flex justify-between items-center">Как этот план поможет мне похудеть?<span class="accordion-arrow transition-transform text-gray-400">&darr;</span></summary><p class="text-sm text-gray-600 mt-2">Ваш план включает все необходимое для успешного похудения. Разнообразные упражнения, пошаговый план питания и советы экспертов: 3 элемента, которые жизненно важны для вашего успеха.</p></details>
-                            <details class="bg-white p-4 rounded-xl border cursor-pointer"><summary class="font-semibold flex justify-between items-center">Нормально ли, что у меня плохая гибкость?<span class="accordion-arrow transition-transform text-gray-400">&darr;</span></summary><p class="text-sm text-gray-600 mt-2">Наши планы подходят для разных уровней подготовки. Вы найдете что-то для себя, независимо от того, можете ли вы сесть на шпагат или не можете дотянуться до пальцев ног!</p></details>
+                            <details class="bg-white p-4 rounded-xl border cursor-pointer"><summary class="font-semibold flex justify-between items-center">How can this plan help me lose weight?<span class="accordion-arrow transition-transform text-gray-400">&darr;</span></summary><p class="text-sm text-gray-600 mt-2">Your plan includes everything you need for successful weight loss. A variety of exercises, a step-by-step nutrition plan, and expert tips: 3 elements that are vital for your success.</p></details>
+                            <details class="bg-white p-4 rounded-xl border cursor-pointer"><summary class="font-semibold flex justify-between items-center">Is it okay that I'm not flexible?<span class="accordion-arrow transition-transform text-gray-400">&darr;</span></summary><p class="text-sm text-gray-600 mt-2">Our plans are suitable for different skill levels. You’ll find something for yourself whether you can do a full split or if you can’t touch your toes!</p></details>
                         </div>
                     </div>
                  </div>
                  <div class="p-6 text-center">
-                     <h3 class="font-bold text-xl">30-дневная гарантия возврата денег</h3>
-                     <p class="text-sm text-gray-600 mt-2 max-w-md mx-auto">Мы верим, что наш план сработает для вас. Мы готовы вернуть ваши деньги, если вы не увидите видимых результатов и сможете продемонстрировать, что следовали нашему плану.</p>
+                     <h3 class="font-bold text-xl">30-Day Money-Back Guarantee</h3>
+                     <p class="text-sm text-gray-600 mt-2 max-w-md mx-auto">We believe that our plan may work for you. We are ready to return your money back if you don’t see visible results and can demonstrate that you followed our plan.</p>
                  </div>
             </div>
         </section>
@@ -254,11 +255,11 @@
 <div id="camera-modal">
     <div id="camera-container">
         <video id="camera-video" autoplay playsinline></video>
-        <div id="camera-feedback" class="text-white text-center p-4"></div>
+        <div id="camera-feedback"></div>
         <div class="camera-controls">
-            <button id="capture-btn" title="Сделать снимок"></button>
+            <button id="capture-btn" title="Take Photo"></button>
         </div>
-        <button id="close-camera-btn" title="Закрыть камеру">
+        <button id="close-camera-btn" title="Close Camera">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
     </div>
@@ -277,29 +278,27 @@ document.addEventListener('DOMContentLoaded', () => {
         cameraStream: null,
         quizQuestions: [
             { key: 'gender', type: 'gender_selection' },
-            { key: 'userGoal', type: 'options', text: "Какова ваша основная цель в области здоровья?", options: ['Узнать мой биологический возраст', 'Получить анализ состояния кожи', 'Получить 7-дневный план улучшений', 'Все вышеперечисленное!'] },
-            { key: 'age', type: 'slider', text: "Ваш текущий возраст?", min: 18, max: 90, defaultValue: 30, unit: 'лет' },
-            { key: 'height', type: 'slider', text: "Ваш рост?", min: 140, max: 220, defaultValue: 175, unit: 'см' },
-            { key: 'weight', type: 'slider', text: "И ваш текущий вес?", min: 40, max: 150, defaultValue: 70, unit: 'кг' },
+            { key: 'userGoal', type: 'options', text: "What's your primary wellness goal?", options: ['Find out my biological age', 'Get a skin condition analysis', 'Get a 7-day improvement plan', 'All of the above!'] },
+            { key: 'age', type: 'slider', text: "What's your current age?", min: 18, max: 90, defaultValue: 30, unit: 'years' },
+            { key: 'height', type: 'slider', text: "What is your height?", min: 140, max: 220, defaultValue: 175, unit: 'cm' },
+            { key: 'weight', type: 'slider', text: "And your current weight?", min: 40, max: 150, defaultValue: 70, unit: 'kg' },
             { key: 'bmi_calculation', type: 'animation' },
-            { key: 'sleep', type: 'options', text: "😴 Сколько часов качественного сна вы получаете в среднем?", options: ["Менее 5 часов", "5-6 часов", "7-8 часов", "Более 8 часов"], values: [4, 6, 8, 8] },
+            { key: 'sleep', type: 'options', text: "😴 How many hours of quality sleep do you get on average?", options: ["Less than 5 hours", "5-6 hours", "7-8 hours", "More than 8 hours"], values: [4, 6, 8, 9] },
             { key: 'sleep_visual', type: 'animation' },
-            { key: 'activity', type: 'options', text: "🏃‍♀️ Как часто вы занимаетесь умеренной физической активностью в неделю?", options: ["Редко", "1-2 раза", "3-4 раза", "5+ раз"], values: [1, 2, 4, 6] },
+            { key: 'activity', type: 'options', text: "🏃‍♀️ How often do you engage in moderate physical activity per week?", options: ["Rarely", "1-2 times", "3-4 times", "5+ times"], values: [1, 2, 4, 6] },
             { key: 'activity_visual', type: 'animation' },
             {
                 key: 'stress',
                 type: 'options',
-                text: "🧠 Как вы себя чувствовали в последнее время?",
+                text: "🧠 How have you been feeling lately?",
                 options: [
-                    { text: "🧘‍♀️ Спокойно и расслабленно", value: 2 }, { text: "🙂 В основном хорошо", value: 4 },
-                    { text: "😅 Немного занят(а)", value: 6 }, { text: "🥵 Перегружен(а)", value: 8 }
+                    { text: "🧘‍♀️ Calm & Relaxed", value: 2 }, { text: "🙂 Mostly Okay", value: 4 },
+                    { text: " A bit busy", value: 6 }, { text: "🥵 Overwhelmed", value: 8 }
                 ]
             },
             { key: 'stress_visual', type: 'animation' },
-            { key: 'selfie', type: 'camera_step', text: 'Последний шаг: AI-анализ фото', subtext: 'Наш ИИ анализирует ваше лицо на немедицинские признаки стресса и усталости. Ваше фото удаляется сразу после анализа.'},
+            { key: 'selfie', type: 'camera_step', text: 'Final Step: AI Photo Analysis', subtext: 'Our AI analyzes your face for non-medical indicators of stress and fatigue. Your photo is deleted instantly after analysis.'},
             { key: 'wellness_profile', type: 'wellness_profile_page'},
-            // Удалено, так как страница оплаты стала финальным шагом
-            // { key: 'email', type: 'email_step', text: "Куда нам отправить ваш план?", subtext: "Мы уважаем вашу конфиденциальность. Никакого спама, никогда." }
         ]
     };
 
@@ -312,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     const anim = lottie.loadAnimation({ container, renderer: 'svg', loop: true, autoplay: true, path });
                     this.animations.set(id, anim);
-                } catch(e) { console.error(`Ошибка Lottie в контейнере #${id}:`, e); }
+                } catch(e) { console.error(`Lottie error on container #${id}:`, e); }
             }
         }
     };
@@ -411,12 +410,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-inner"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" value="${question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
             questionWrapper.insertAdjacentHTML('beforeend', sliderContent);
             updateSliderDisplay(question, question.defaultValue);
-            footerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Подтвердить</button>`;
-        } else if (question.type === 'camera_step' || question.type === 'email_step') {
+            footerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;
+        } else if (question.type === 'camera_step') {
               questionWrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', `<p class="text-gray-600 mt-2 text-center">${question.subtext}</p>`);
-              if (question.type === 'camera_step') {
-                  footerHTML = `<div class="max-w-sm mx-auto space-y-3"><button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Разрешить доступ к камере</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Пропустить</button></div>`;
-              }
+              footerHTML = `<div class="max-w-sm mx-auto space-y-3"><button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button></div>`;
         }
 
         footerWrapper.innerHTML = footerHTML;
@@ -446,16 +443,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const footerWrapper = document.getElementById('footer-actions');
         const optionsHTML = `
             <div class="group answer-option cursor-pointer bg-white p-4 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-square" data-value="Female">
-                <svg class="w-16 h-16 text-gray-500 group-hover:text-[--brand-dark-text] transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
-                <p class="mt-4 text-lg sm:text-xl font-bold">Женщина</p>
+                 <svg class="w-16 h-16 text-gray-500 group-hover:text-[--brand-dark-text] transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                <p class="mt-4 text-lg sm:text-xl font-bold">Female</p>
             </div>
             <div class="group answer-option cursor-pointer bg-white p-4 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-square" data-value="Male">
                  <svg class="w-16 h-16 text-gray-500 group-hover:text-[--brand-dark-text] transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
-                <p class="mt-4 text-lg sm:text-xl font-bold">Мужчина</p>
+                <p class="mt-4 text-lg sm:text-xl font-bold">Male</p>
             </div>
             <div class="group answer-option cursor-pointer bg-white p-4 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center aspect-square" data-value="Other">
-                <svg class="w-16 h-16 text-gray-500 group-hover:text-[--brand-dark-text] transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.438.995a6.427 6.427 0 0 1 0 .255c0 .382.145.755.438.995l1.003.827c.446.368.59 1.033.26 1.431l-1.296 2.247a1.125 1.125 0 0 1-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.075.124a6.57 6.57 0 0 1-.22.127c-.332.183-.582.495-.645.87l-.213 1.281c-.09.543-.56.94-1.11.94h-2.593c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 0 1-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 0 1-1.37-.49l-1.296-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.437-.995a6.427 6.427 0 0 1 0-.255c0-.382-.145-.755-.437-.995l-1.004-.827a1.125 1.125 0 0 1-.26-1.431l1.296-2.247a1.125 1.125 0 0 1 1.37-.49l1.217.456c.355.133.75.072 1.075-.124a6.57 6.57 0 0 1 .22-.127c.332-.183.582-.495-.645-.87l.213-1.281Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
-                <p class="mt-4 text-lg sm:text-xl font-bold">Другое</p>
+                 <svg class="w-16 h-16 text-gray-500 group-hover:text-[--brand-dark-text] transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.438.995a6.427 6.427 0 0 1 0 .255c0 .382.145.755.438.995l1.003.827c.446.368.59 1.033.26 1.431l-1.296 2.247a1.125 1.125 0 0 1-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.075.124a6.57 6.57 0 0 1-.22.127c-.332.183-.582.495-.645.87l-.213 1.281c-.09.543-.56.94-1.11.94h-2.593c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 0 1-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 0 1-1.37-.49l-1.296-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.437-.995a6.427 6.427 0 0 1 0-.255c0-.382-.145-.755-.437-.995l-1.004-.827a1.125 1.125 0 0 1-.26-1.431l1.296-2.247a1.125 1.125 0 0 1 1.37-.49l1.217.456c.355.133.75.072 1.075-.124a6.57 6.57 0 0 1 .22-.127c.332-.183.582-.495-.645-.87l.213-1.281Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+                <p class="mt-4 text-lg sm:text-xl font-bold">Other</p>
             </div>`;
         footerWrapper.innerHTML = `<div class="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-lg mx-auto">${optionsHTML}</div>`;
         document.querySelectorAll('#footer-actions .answer-option').forEach(card => {
@@ -470,10 +467,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const valueDisplay = document.getElementById('slider-value-display');
         if (!valueDisplay) return;
         let displayHTML = `${value} ${question.unit || ''}`;
-        if (question.unit === 'см') {
-            displayHTML = `${value} <span class="text-lg text-gray-400 font-medium">см</span>`;
-        } else if (question.unit === 'кг') {
-            displayHTML = `${value} <span class="text-lg text-gray-400 font-medium">кг</span>`;
+        if (question.unit === 'cm') {
+            const totalInches = value / 2.54;
+            const feet = Math.floor(totalInches / 12);
+            const inches = Math.round(totalInches % 12);
+            displayHTML = `${feet}'${inches}" <span class="text-lg text-gray-400 font-medium">(${value} cm)</span>`;
+        } else if (question.unit === 'kg') {
+            const lbs = (value * 2.20462).toFixed(0);
+            displayHTML = `${lbs} lbs <span class="text-lg text-gray-400 font-medium">(${value} kg)</span>`;
         }
         valueDisplay.innerHTML = displayHTML;
     }
@@ -502,16 +503,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         switch(key) {
             case 'bmi_calculation':
-                animationHTML = widget(`<div class="widget-label">Рассчитываем ваш ИМТ...</div><div id="bmi-value-anim" class="text-4xl font-extrabold text-[--brand-dark-text]">0.0</div><div class="relative h-2.5 rounded-full unified-gradient-bar my-2"><div id="bmi-indicator-anim" class="transition-all duration-1000 absolute top-1/2 w-5 h-5 -translate-x-1/2 -translate-y-1/2" style="left: 0%;"></div></div><div id="bmi-category-anim" class="text-sm font-medium text-gray-600 mt-2">&nbsp;</div>`);
+                animationHTML = widget(`<div class="widget-label">Calculating Your BMI...</div><div id="bmi-value-anim" class="text-4xl font-extrabold text-[--brand-dark-text]">0.0</div><div class="relative h-2.5 rounded-full unified-gradient-bar my-2"><div id="bmi-indicator-anim" class="transition-all duration-1000 absolute top-1/2 w-5 h-5 -translate-x-1/2 -translate-y-1/2" style="left: 0%;"></div></div><div id="bmi-category-anim" class="text-sm font-medium text-gray-600 mt-2">&nbsp;</div>`);
                 break;
             case 'sleep_visual':
-                animationHTML = widget(`<div class="widget-label">Заряд бодрости</div><div class="sleep-battery mt-2 mx-auto"><div id="sleep-battery-level-anim" class="sleep-battery-level"></div></div>`);
+                animationHTML = widget(`<div class="widget-label">Sleep Recharge</div><div class="sleep-battery mt-2 mx-auto"><div id="sleep-battery-level-anim" class="sleep-battery-level"></div></div>`);
                 break;
             case 'activity_visual':
-                animationHTML = widget(`<div class="widget-label">Ваша активная неделя</div><div class="activity-week" id="activity-week-anim">${['П', 'В', 'С', 'Ч', 'П', 'С', 'В'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div>`);
+                animationHTML = widget(`<div class="widget-label">Your Active Week</div><div class="activity-week" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div>`);
                 break;
             case 'stress_visual':
-                animationHTML = widget(`<div class="widget-label">Уровень стресса</div><div class="stress-bar-track"><div id="stress-bar-fill-anim" class="stress-bar-fill"></div></div>`);
+                animationHTML = widget(`<div class="widget-label">Reported Stress Level</div><div class="stress-bar-track"><div id="stress-bar-fill-anim" class="stress-bar-fill"></div></div>`);
                 break;
         }
         wrapper.innerHTML = `<div class="question-content w-full">${animationHTML}</div>`;
@@ -525,11 +526,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const heightM = App.userAnswers.height / 100;
                 const weightKg = App.userAnswers.weight;
                 const bmi = weightKg / (heightM * heightM);
-                let category = "Норма", percent = 50;
-                if (bmi < 18.5) { category = "Недостаточный вес"; percent = (bmi / 18.5) * 30; }
-                else if (bmi < 25) { category = "Норма"; percent = 35 + ((bmi - 18.5) / 6.5) * 40; }
-                else if (bmi < 30) { category = "Избыточный вес"; percent = 75 + ((bmi - 25) / 5) * 20; }
-                else { category = "Ожирение"; percent = 95; }
+                let category = "Normal", percent = 50;
+                if (bmi < 18.5) { category = "Underweight"; percent = (bmi / 18.5) * 30; }
+                else if (bmi < 25) { category = "Normal"; percent = 35 + ((bmi - 18.5) / 6.5) * 40; }
+                else if (bmi < 30) { category = "Overweight"; percent = 75 + ((bmi - 25) / 5) * 20; }
+                else { category = "Obese"; percent = 95; }
 
                 document.getElementById('bmi-indicator-anim').style.left = `${Math.max(5, Math.min(95, percent))}%`;
                 document.getElementById('bmi-category-anim').textContent = category;
@@ -537,9 +538,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             }
             case 'sleep_visual': {
-                const level = parseInt(App.userAnswers.sleep || 4) * 12.5; // 8 часов = 100%
+                const hours = parseInt(App.userAnswers.sleep || 4);
+                const level = Math.min(100, (hours / 8) * 100); // 8 hours is optimal (100%)
                 const levelEl = document.getElementById('sleep-battery-level-anim');
-                let color = '#ef4444'; if (level > 40) color = '#f59e0b'; if (level > 75) color = '#22c55e';
+                let color = '#ef4444'; if (level > 60) color = '#f59e0b'; if (level > 85) color = '#22c55e';
                 if(levelEl) { levelEl.style.backgroundColor = color; levelEl.style.width = `${level}%`; }
                 break;
             }
@@ -553,7 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             case 'stress_visual': {
                 const level = parseInt(App.userAnswers.stress || 5);
-                const percent = (level / 10) * 100; // 10 - максимальное значение
+                const percent = (level / 10) * 100;
                 const fillEl = document.getElementById('stress-bar-fill-anim');
                 if(fillEl) fillEl.style.width = `${percent}%`;
                 break;
@@ -567,48 +569,47 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. BMI Calculation and Display
         const heightM = height / 100;
         const bmi = (weight / (heightM * heightM)).toFixed(1);
-        let bmiCategory = "Норма", percent = 50, bmiIcon = '✅';
-        if (bmi < 18.5) { bmiCategory = "Недостаточный вес"; percent = (bmi / 18.5) * 30; bmiIcon = '⚠️'; }
-        else if (bmi < 25) { bmiCategory = "Норма"; percent = 35 + ((bmi - 18.5) / 6.5) * 40; }
-        else if (bmi < 30) { bmiCategory = "Избыточный вес"; percent = 75 + ((bmi - 25) / 5) * 20; bmiIcon = '⚠️'; }
-        else { bmiCategory = "Ожирение"; percent = 95; bmiIcon = '❗'; }
+        let bmiCategory = "Normal", percent = 50, bmiIcon = '✅';
+        if (bmi < 18.5) { bmiCategory = "Underweight"; percent = (bmi / 18.5) * 30; bmiIcon = '⚠️'; }
+        else if (bmi < 25) { bmiCategory = "Normal"; percent = 35 + ((bmi - 18.5) / 6.5) * 40; }
+        else if (bmi < 30) { bmiCategory = "Overweight"; percent = 75 + ((bmi - 25) / 5) * 20; bmiIcon = '⚠️'; }
+        else { bmiCategory = "Obese"; percent = 95; bmiIcon = '❗'; }
 
         document.getElementById('bmi-value-text').textContent = bmi;
         document.getElementById('bmi-indicator-dot').style.left = `${Math.max(5, Math.min(95, percent))}%`;
         document.getElementById('bmi-indicator-label').style.left = `${Math.max(5, Math.min(95, percent))}%`;
         document.getElementById('bmi-indicator-label').classList.add('opacity-100');
-        document.getElementById('bmi-description').innerHTML = `<span class="text-2xl">${bmiIcon}</span><div><p class="font-semibold">${bmiCategory}</p><p class="text-sm">Ваш ИМТ указывает на ${bmiCategory.toLowerCase()}.</p></div>`;
+        document.getElementById('bmi-description').innerHTML = `<span class="text-2xl">${bmiIcon}</span><div><p class="font-semibold">${bmiCategory}</p><p class="text-sm">Your BMI is considered ${bmiCategory.toLowerCase()}.</p></div>`;
         document.getElementById('bmi-description').classList.add('opacity-100');
 
         // 2. Set Avatar
-        let avatarUrl = "https://placehold.co/600x800/DEBEA9/3C3B31?text=Вы";
-        if(gender === 'Male') avatarUrl = 'https://images.pexels.com/photos/3778680/pexels-photo-3778680.jpeg?auto=compress&cs=tinysrgb&w=800';
-        if(gender === 'Female') avatarUrl = 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=800';
+        let avatarUrl = "https://placehold.co/600x800/DEBEA9/3C3B31?text=You";
+        if(gender === 'Male') avatarUrl = 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=800';
+        if(gender === 'Female') avatarUrl = 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=800';
         const avatarImg = document.getElementById('profile-avatar-img');
         avatarImg.src = avatarUrl;
         avatarImg.onload = () => avatarImg.classList.add('opacity-100');
 
-
         // 3. Populate Details
         const detailsContainer = document.getElementById('profile-details-container');
-        const getSleepText = (val) => val < 5 ? 'Мало' : val < 7 ? 'Нормально' : 'Отлично';
-        const getActivityText = (val) => val < 2 ? 'Низкая' : val < 4 ? 'Средняя' : 'Высокая';
-        const getStressText = (val) => val < 4 ? 'Низкий' : val < 7 ? 'Средний' : 'Высокий';
+        const getSleepText = (val) => val < 5 ? 'Low' : val < 7 ? 'Decent' : 'Great';
+        const getActivityText = (val) => val < 2 ? 'Low' : val < 4 ? 'Moderate' : 'High';
+        const getStressText = (val) => val < 4 ? 'Low' : val < 7 ? 'Moderate' : 'High';
 
         detailsContainer.innerHTML = `
-            <div><p class="text-sm text-gray-500">Возраст</p><p class="font-bold text-lg">${age} лет</p></div>
-            <div><p class="text-sm text-gray-500">Сон</p><p class="font-bold text-lg">${getSleepText(sleep)}</p></div>
-            <div><p class="text-sm text-gray-500">Активность</p><p class="font-bold text-lg">${getActivityText(activity)}</p></div>
-            <div><p class="text-sm text-gray-500">Стресс</p><p class="font-bold text-lg">${getStressText(stress)}</p></div>
+            <div><p class="text-sm text-gray-500">Age</p><p class="font-bold text-lg">${age} years</p></div>
+            <div><p class="text-sm text-gray-500">Sleep</p><p class="font-bold text-lg">${getSleepText(sleep)}</p></div>
+            <div><p class="text-sm text-gray-500">Activity</p><p class="font-bold text-lg">${getActivityText(activity)}</p></div>
+            <div><p class="text-sm text-gray-500">Stress</p><p class="font-bold text-lg">${getStressText(stress)}</p></div>
         `;
         detailsContainer.classList.add('opacity-100');
     }
 
     function startAnalysis() {
-        AnimationManager.add('loading-animation', 'https://assets-v2.lottiefiles.com/a/53b95114-1167-11ee-b691-1f925a1e783a/hr6222FNC0.json');
+        AnimationManager.add('loading-animation', 'loader.json');
         const stepsContainer = document.getElementById('analysis-steps');
         stepsContainer.innerHTML = '';
-        const steps = ["Расчет биологического возраста...", "Оценка скорости метаболизма...", "Анализ индикаторов стресса...", "Составление отчета о здоровье..."];
+        const steps = ["Calculating biological age...", "Assessing metabolic rate...", "Analyzing stress indicators...", "Compiling wellness report..."];
         steps.forEach((text, i) => {
             setTimeout(() => {
                 stepsContainer.innerHTML += `<div class="flex items-center opacity-0 animate-fade-in"><svg class="w-5 h-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg><span>${text}</span></div>`;
@@ -621,14 +622,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function preparePaymentPage() {
-        // Заполнение данных о весе
-        const currentWeight = parseFloat(App.userAnswers.weight);
-        const goalWeight = (currentWeight * 0.93).toFixed(0); // Цель - минус 7%
-        document.getElementById('payment-now-value').textContent = `${currentWeight} кг`;
-        document.getElementById('payment-goal-value').textContent = `${goalWeight} кг`;
+        const currentWeightKg = parseFloat(App.userAnswers.weight);
+        const currentWeightLbs = (currentWeightKg * 2.20462).toFixed(0);
+        const goalWeightLbs = (currentWeightLbs * 0.93).toFixed(0); // Goal is ~7% less weight
+        document.getElementById('payment-now-value').textContent = `${currentWeightLbs} lbs`;
+        document.getElementById('payment-goal-value').textContent = `${goalWeightLbs} lbs`;
 
-        // Имитация загрузки Stripe Elements. Для реального проекта потребуется ключ API.
-        // const stripe = Stripe('YOUR_PUBLIC_KEY');
+        // This is a mock of Stripe Elements setup.
+        // For a real project, use your actual Stripe public key.
+        // const stripe = Stripe('pk_test_YOUR_KEY');
         // const elements = stripe.elements();
         // const style = { base: { fontSize: '16px', color: '#32325d' } };
         // elements.create('cardNumber', {style}).mount('#card-number');
@@ -702,18 +704,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const videoEl = document.getElementById('camera-video');
         const feedbackEl = document.getElementById('camera-feedback');
         modal.classList.add('active');
-        feedbackEl.textContent = 'Запрос доступа к камере...';
+        feedbackEl.textContent = 'Requesting camera access...';
 
         try {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                throw new Error('Ваш браузер не поддерживает доступ к камере.');
+                throw new Error('Camera access is not supported by your browser.');
             }
             App.cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
             videoEl.srcObject = App.cameraStream;
             feedbackEl.textContent = '';
         } catch (err) {
-            console.error("Ошибка камеры:", err);
-            feedbackEl.textContent = `Ошибка: ${err.message}. Проверьте разрешения в браузере.`;
+            console.error("Camera Error:", err);
+            feedbackEl.textContent = `Error: ${err.message}. Please check browser permissions.`;
             setTimeout(closeCamera, 3000);
         }
     }
@@ -732,7 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        context.translate(canvas.width, 0); // Отражаем холст
+        context.translate(canvas.width, 0); // Flip canvas horizontally
         context.scale(-1, 1);
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
@@ -749,7 +751,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setVh();
     window.addEventListener('resize', setVh);
 
-    AnimationManager.add('lottie-onboarding-2', 'https://assets-v2.lottiefiles.com/a/a2921966-1075-11ee-b9a8-3756ab134823/5kb1bdPIU3.json');
+    AnimationManager.add('lottie-onboarding-2', 'arrow.json');
 
     initOnboarding();
 
