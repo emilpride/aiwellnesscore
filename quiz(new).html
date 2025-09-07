@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Wellness Analysis - Revised Design</title>
+    <title>AI Wellness Analysis - Final Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,10 +13,10 @@
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <style>
         :root { 
-            --brand-accent: #debea9; /* Основной акцентный цвет */
-            --brand-dark-text: #3c3b31; /* Темный текст для контраста */
-            --brand-gradient-start: #f2e7d7; /* Начало нового градиента */
-            --brand-gradient-end: #b69882; /* Конец нового градиента */
+            --brand-accent: #debea9; 
+            --brand-dark-text: #3c3b31; 
+            --brand-gradient-start: #f2e7d7;
+            --brand-gradient-end: #b69882;
         }
         html, body { overscroll-behavior: none; font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         #quiz-container { display: flex; flex-direction: column; position: relative; width: 100vw; height: 100vh; height: calc(var(--vh, 1vh) * 100); overflow: hidden; }
@@ -58,7 +58,7 @@
         .widget-wrapper { padding: 1rem; background-color: #ffffff; border-radius: 1rem; width: 100%; max-width: 320px; margin: auto; text-align: center; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
         .widget-label { font-weight: 600; color: var(--brand-dark-text); margin-bottom: 0.75rem; }
         .sleep-battery { width: 100px; height: 40px; border: 3px solid #e4d8c8; border-radius: 8px; margin: 0 auto; position: relative; }
-        .sleep-battery::after { content:''; position: absolute; top: 50%; right: -10px; transform: translateY(-50%); width: 5px; height: 20px; background-color: #e4d8c8; border-radius: 0 44px 4px 0; }
+        .sleep-battery::after { content:''; position: absolute; top: 50%; right: -10px; transform: translateY(-50%); width: 5px; height: 20px; background-color: #e4d8c8; border-radius: 0 4px 4px 0; }
         .sleep-battery-level { position: absolute; top: 3px; left: 3px; bottom: 3px; border-radius: 4px; width: 0%; background-color: #ef4444; transition: width 1.5s ease-out, background-color 1s ease; }
         .activity-week { display:flex; justify-content:center; gap: 0.5rem; }
         .activity-day { width: 30px; height: 30px; border-radius: 0.5rem; background-color: #f3f0eb; color: #8c7f6b; font-weight: 600; display:flex; align-items:center; justify-content:center; font-size:0.75rem; transition: all 0.4s ease-out; }
@@ -72,6 +72,10 @@
         #camera-modal.active { opacity: 1; pointer-events: all; }
         #camera-container { position: relative; width: 90%; max-width: 400px; aspect-ratio: 3/4; overflow: hidden; border-radius: 1.5rem; background: #111; border: 1px solid rgba(255,255,255,0.2); }
         #camera-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        
+        #payment-faq details > summary { list-style: none; }
+        #payment-faq details > summary::-webkit-details-marker { display: none; }
+        #payment-faq details[open] summary .accordion-arrow { transform: rotate(180deg); }
     </style>
 </head>
 <body>
@@ -148,8 +152,67 @@
             <h2 class="text-3xl font-bold text-gray-800 mt-4 text-center">Analyzing Your Unique Profile...</h2>
         </section>
         
-        <section id="step-5" class="quiz-step prev overflow-y-auto justify-start pt-8 pb-8">
-             <div class="w-full max-w-lg mx-auto"><div class="text-center"><div class="text-6xl">✨</div><h1 class="text-4xl font-extrabold text-gray-900 mt-2">Your Report Is Ready!</h1><p class="text-xl text-gray-600 mt-2">Just one final step to unlock your complete, personalized wellness blueprint.</p></div><div class="mt-8 bg-white rounded-3xl shadow-2xl p-8"><h3 class="font-bold text-2xl text-center">What You'll Unlock:</h3><ul class="mt-6 space-y-4 text-gray-700"><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Your True Wellness Age:</b> See how your lifestyle impacts your biological age.</span></li><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>In-Depth Skin Analysis:</b> Identify hidden signs of stress and fatigue.</span></li><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Custom 7-Day Action Plan:</b> Simple, daily tasks to improve your score.</span></li><li class="flex items-start gap-3"><span class="text-2xl text-green-500">✓</span><span><b>Full Metrics Breakdown:</b> Understand your scores for Energy, Stress, Nutrition, and more.</span></li></ul></div><div class="mt-8"><div class="flex items-center justify-center gap-4 mb-4"><div id="timer-box" class="bg-red-500 text-white font-bold p-3 rounded-lg text-center shadow-lg"><span id="countdown" class="text-2xl">10:00</span></div><p class="text-red-600 font-semibold">Your special offer is reserved!</p></div><div id="payment-form-container"></div></div></div>
+        <section id="step-5" class="quiz-step prev p-0 bg-white justify-start">
+            <div class="w-full h-full overflow-y-auto">
+                <div class="p-6">
+                    <div class="text-center">
+                        <h1 class="text-3xl font-extrabold text-gray-900">Get your Personalized Plan now!</h1>
+                        <div class="mt-4 w-full max-w-md mx-auto bg-gray-50 p-4 rounded-2xl border">
+                             <div class="flex justify-between items-center text-center">
+                                <div><p class="text-sm text-gray-500">Now</p><p id="payment-now-value" class="font-bold text-lg">154 lbs</p></div>
+                                <div class="text-gray-300">&rarr;</div>
+                                <div><p class="text-sm text-gray-500">Your Goal</p><p id="payment-goal-value" class="font-bold text-lg text-green-600">140 lbs</p></div>
+                             </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 max-w-md mx-auto">
+                         <div id="payment-form-container"></div>
+                         <p class="text-xs text-gray-500 mt-3 text-center">Without cancellation, before the selected discounted intro plan ends, I accept that you will automatically charge $9.99 (excl. VAT) every 4 weeks until I cancel.</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50/70 p-6 mt-8">
+                    <div class="max-w-md mx-auto">
+                        <h3 class="font-bold text-xl text-center">What you get</h3>
+                        <ul class="mt-4 space-y-4">
+                            <li class="flex items-start gap-3"><span class="text-2xl">🤸</span><div><h4 class="font-semibold">Slim toned body</h4><p class="text-sm text-gray-600">10-20 min beginner-friendly workouts for target areas.</p></div></li>
+                            <li class="flex items-start gap-3"><span class="text-2xl">🧘</span><div><h4 class="font-semibold">Improved posture</h4><p class="text-sm text-gray-600">Reduced tension in back, neck, and shoulders.</p></div></li>
+                             <li class="flex items-start gap-3"><span class="text-2xl">🥗</span><div><h4 class="font-semibold">Personalized nutrition plan</h4><p class="text-sm text-gray-600">Reach your goal weight faster with our guidance.</p></div></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="p-6">
+                    <div class="max-w-md mx-auto">
+                        <h3 class="font-bold text-xl text-center">Users love our plans</h3>
+                        <div class="mt-4 space-y-4">
+                            <div class="bg-white p-4 rounded-xl border">
+                                <p class="font-semibold">Okunade A.</p>
+                                <p class="text-sm text-gray-600 mt-1">"Wow this is the best workout app I have ever used it's easy to navigate... it's really help me to loss weight and I pill Up some abs..."</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-xl border">
+                                <p class="font-semibold">Rashmi N.</p>
+                                <p class="text-sm text-gray-600 mt-1">"This application makes a big difference. I believe that it will be a very good application to control her shape as much as I want with simple exercises."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 <div class="bg-gray-50/70 p-6 mt-2">
+                    <div class="max-w-md mx-auto">
+                        <h3 class="font-bold text-xl text-center">People often ask</h3>
+                        <div id="payment-faq" class="mt-4 space-y-2">
+                            <details class="bg-white p-4 rounded-xl border cursor-pointer"><summary class="font-semibold flex justify-between items-center">How can this plan help me lose weight?<span class="accordion-arrow transition-transform text-gray-400">&darr;</span></summary><p class="text-sm text-gray-600 mt-2">Your plan includes everything you need for successful weight loss. A variety of exercises, a step-by-step nutrition plan, and expert tips: 3 elements that are vital for your success.</p></details>
+                            <details class="bg-white p-4 rounded-xl border cursor-pointer"><summary class="font-semibold flex justify-between items-center">Is it okay that I'm not flexible?<span class="accordion-arrow transition-transform text-gray-400">&darr;</span></summary><p class="text-sm text-gray-600 mt-2">Our plans are suitable for different skill levels. You’ll find something for yourself whether you can do a full split or if you can’t touch your toes!</p></details>
+                        </div>
+                    </div>
+                 </div>
+
+                 <div class="p-6 text-center">
+                    <h3 class="font-bold text-xl">30-Day Money-Back Guarantee</h3>
+                    <p class="text-sm text-gray-600 mt-2 max-w-md mx-auto">We believe that our plan may work for you. We are ready to return your money back if you don’t see visible results and can demonstrate that you followed our plan.</p>
+                 </div>
+            </div>
         </section>
     </main>
     
@@ -175,8 +238,6 @@
 </div>
 
 <script>
-// --- SCRIPT IS IDENTICAL TO THE PREVIOUS (WORKING) VERSION, BUT WITH UPDATED COLORS ---
-// THIS SCRIPT IS COMPLETE AND DOES NOT REQUIRE COPYING FROM PREVIOUS VERSIONS.
 const App = {
     currentStep: 0,
     currentQuestionIndex: -1,
@@ -568,8 +629,7 @@ function renderWellnessProfile() {
     document.getElementById('profile-metabolism').innerHTML = `<div class="flex items-center gap-3">${profileIcon(metabolismSVG)} <div><p class="text-sm text-gray-500">Metabolism</p><p class="font-bold text-gray-800">Moderate</p></div></div>`;
 }
 
-// --- CAMERA LOGIC ---
-async function startCamera() {
+function startCamera() {
     const cameraModal = document.getElementById('camera-modal');
     const video = document.getElementById('camera-video');
     const loaderText = document.getElementById('loader-text');
@@ -609,7 +669,6 @@ function takePhoto() {
     handleAnswer('selfie', photoDataUrl);
 }
 
-// --- ANALYSIS & PAYMENT ---
 function startAnalysis() {
     try {
         AnimationManager.add('loading-animation', 'loader.json');
@@ -621,7 +680,6 @@ function startAnalysis() {
     }, 5000);
 }
 
-// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
     setVh();
