@@ -167,9 +167,9 @@
                  <div class="max-w-4xl mx-auto">
                     <h2 class="text-3xl font-extrabold text-gray-900">Your Wellness Profile is Ready!</h2>
                     <p class="text-gray-600 mt-1">Here is a snapshot of your current wellbeing.</p>
-                    <div id="profile-page-content" class="mt-8 grid grid-cols-1 md:grid-cols-5 gap-6">
-                        <div id="profile-avatar-area" class="md:col-span-2"></div>
-                        <div id="profile-metrics-area" class="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+                    <div id="profile-page-content" class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div id="profile-avatar-area" class="md:col-span-1"></div>
+                        <div id="profile-metrics-area" class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
                     </div>
                     <div id="profile-analysis-area" class="mt-6 text-left"></div>
                 </div>
@@ -422,7 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         questionWrapper.innerHTML = `<div class="question-content w-full">${contentHTML}</div>`;
-        footerWrapper.innerHTML = ''; // Clear previous buttons
+        footerWrapper.innerHTML = '';
 
         if (question.type === 'options') {
             const optionsHTML = question.options.map((opt, index) => {
@@ -492,17 +492,17 @@ document.addEventListener('DOMContentLoaded', () => {
         questionContent.innerHTML = `
             <h2 class="text-3xl font-bold text-gray-900">To personalize your plan...</h2>
             <p class="mt-2 text-lg text-gray-600">Which do you identify with?</p>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-4xl mx-auto mt-6">
+            <div class="grid grid-cols-3 gap-4 max-w-4xl mx-auto mt-6">
                 <div class="gender-option answer-option cursor-pointer bg-white p-2 sm:p-4 rounded-2xl flex flex-col items-center justify-end aspect-[3/4] border-2 border-transparent" data-value="Female">
-                    <img src="https://i.ibb.co/L661Fj5/female-render.png" alt="Female" class="h-full object-contain gender-image">
+                    <img src="female.png" alt="Female" class="h-full object-contain gender-image">
                     <p class="mt-2 sm:mt-4 text-lg sm:text-xl font-bold text-gray-800">Female</p>
                 </div>
                 <div class="gender-option answer-option cursor-pointer bg-white p-2 sm:p-4 rounded-2xl flex flex-col items-center justify-end aspect-[3/4] border-2 border-transparent" data-value="Male">
-                    <img src="https://i.ibb.co/n6R0K9B/male-render.png" alt="Male" class="h-full object-contain gender-image">
+                    <img src="male.png" alt="Male" class="h-full object-contain gender-image">
                     <p class="mt-2 sm:mt-4 text-lg sm:text-xl font-bold text-gray-800">Male</p>
                 </div>
-                <div class="gender-option answer-option cursor-pointer bg-white p-2 sm:p-4 rounded-2xl flex flex-col items-center justify-end aspect-[3/4] border-2 border-transparent col-span-2 sm:col-span-1" data-value="Other">
-                     <img src="https://i.ibb.co/P9b2N7T/other-render.png" alt="Other" class="h-full object-contain gender-image">
+                <div class="gender-option answer-option cursor-pointer bg-white p-2 sm:p-4 rounded-2xl flex flex-col items-center justify-end aspect-[3/4] border-2 border-transparent" data-value="Other">
+                     <img src="other.png" alt="Other" class="h-full object-contain gender-image">
                     <p class="mt-2 sm:mt-4 text-lg sm:text-xl font-bold text-gray-800">Other</p>
                 </div>
             </div>`;
@@ -644,16 +644,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (App.userPhotoUrl && App.userPhotoUrl !== 'skipped') {
             avatarArea.innerHTML = `
-                <div class="aspect-[4/5] bg-gray-200 rounded-2xl overflow-hidden shadow-lg animate-fade-in">
+                <div class="aspect-square bg-gray-200 rounded-2xl overflow-hidden shadow-lg animate-fade-in">
                     <img src="${App.userPhotoUrl}" alt="User Photo" class="w-full h-full object-cover">
                 </div>
                 <div class="text-center mt-4 text-gray-700 font-semibold">${age} y.o. ${gender}</div>`;
         } else {
             avatarArea.innerHTML = `
-                <div class="aspect-[4/5] bg-white rounded-2xl flex flex-col items-center justify-center text-center p-6 shadow-lg border animate-fade-in">
+                <div class="aspect-square bg-white rounded-2xl flex flex-col items-center justify-center text-center p-6 shadow-lg border animate-fade-in">
                     <svg class="w-16 h-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     <h3 class="mt-4 font-bold text-gray-800">Photo Analysis Skipped</h3>
-                    <p class="mt-1 text-sm text-gray-500">Profile is based on your answers.</p>
                 </div>
                 <div class="text-center mt-4 text-gray-700 font-semibold">${age} y.o. ${gender}</div>`;
         }
@@ -693,7 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const analysis = generateProfileAnalysis();
         analysisArea.innerHTML = `
-            <div class="bg-white p-5 rounded-2xl border animate-fade-in" style="animation-delay: 400ms;">
+            <div class="bg-white p-5 rounded-2xl border animate-fade-in md:col-span-3" style="animation-delay: 400ms;">
                 <h3 class="font-bold text-lg text-gray-800 mb-4">AI Recommendations</h3>
                 <ul class="space-y-3">
                     <li class="flex items-start gap-3"><span class="text-xl pt-1">${analysis.bmi.icon}</span> <p class="text-gray-600">${analysis.bmi.text}</p></li>
@@ -856,7 +855,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
-        updateOnboardingView();
+        updateOnboardingView(true, 0); // <-- FIX: Start on slide 0
         resetOnboardingTimer();
     }
     
@@ -865,7 +864,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const { slides, dots } = App.onboarding;
         if (!slides || slides.length === 0) return;
 
-        let newIndex = nextIndex !== undefined ? nextIndex : (App.onboarding.slideIndex + 1) % slides.length;
+        let newIndex;
+        if (nextIndex !== undefined) {
+            newIndex = nextIndex;
+        } else {
+            newIndex = (App.onboarding.slideIndex + 1) % slides.length;
+        }
+        
         App.onboarding.slideIndex = newIndex;
         
         document.querySelector('.swiper-wrapper').style.transform = `translateX(-${newIndex * 100}%)`;
