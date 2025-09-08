@@ -97,7 +97,7 @@
 <div id="quiz-container">
     <header id="quiz-header" class="w-full p-4">
         <div class="flex items-center gap-4 max-w-3xl mx-auto">
-            <button id="back-btn" class="text-gray-600 hover:text-gray-900 transition invisible p-2 -ml-2">
+            <button id="back-btn" class="text-gray-600 hover:text-gray-900 transition hidden p-2 -ml-2">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
             </button>
             <div id="progress-bar-container" class="flex-grow h-1.5 bg-gray-200 rounded-full overflow-hidden">
@@ -117,6 +117,8 @@
                          <div class="swiper-slide !p-0">
                              <video class="absolute top-0 left-0 w-full h-full object-cover -z-10" autoplay loop muted playsinline>
                                  <source src="fon.webm" type="video/webm">
+                                 <source src="fon.mp4" type="video/mp4">
+                                 Your browser does not support the video tag.
                              </video>
                              <div class="w-full h-full flex flex-col justify-end items-center text-center p-8 bg-black/30 text-white">
                                  <div class="flex-grow"></div>
@@ -265,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentStep: 0,
         currentQuestionIndex: -1,
         userAnswers: {},
-        userPhotoUrl: null,
+        userPhotoUrl: null, // This will store the photo Data URL
         biologicalAge: null,
         wellnessScore: null,
         onboarding: { slideIndex: 0, slides: null, dots: null, timer: null, touchStartX: 0 },
@@ -275,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { key: 'userGoal', type: 'options', text: "What's your primary wellness goal?", options: ['Find out my biological age', 'Get a skin condition analysis', 'Get a 7-day improvement plan', 'All of the above!'] },
             { key: 'age', type: 'slider', text: "What's your current age?", min: 18, max: 90, defaultValue: 30, unit: 'years' },
             { key: 'height', type: 'slider', text: "What is your height?", min: 140, max: 220, defaultValue: 175, unit: 'cm' },
-            { key: 'weight', type: 'slider', text: "And your current weight?", min: 40, max: 150, defaultValue: 70, unit: 'kg' },
+            { key: 'weight', type: 'slider', text: "And your current weight?", min: 40, max: 150, defaultValue: 77, unit: 'kg' }, // Changed default to ~170lbs
             { key: 'bmi_calculation', type: 'animation' },
             { key: 'sleep', type: 'options', text: "😴 How many hours of quality sleep do you get on average?", options: ["Less than 5 hours", "5-6 hours", "7-8 hours", "More than 8 hours"], values: [4, 6, 8, 9] },
             { key: 'sleep_visual', type: 'animation' },
@@ -341,18 +343,14 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const isQuizActive = (stepIndex === 1 || stepIndex === 2);
         
-        // --- BURGER MENU FIX ---
         const header = document.getElementById('quiz-header');
         const progressBarContainer = document.getElementById('progress-bar-container');
         const burgerBtn = document.getElementById('burger-menu-btn');
         
-        const showHeader = stepIndex > 0 && stepIndex !== 3; // Show header on all steps except 0 (onboarding) and 3 (loader)
+        const showHeader = stepIndex > 0 && stepIndex !== 3;
         header.style.visibility = showHeader ? 'visible' : 'hidden';
         
-        // Show progress bar only during quiz, hide on profile/payment
         progressBarContainer.style.visibility = isQuizActive ? 'visible' : 'hidden';
-
-        // Show burger only on profile/payment
         burgerBtn.style.visibility = (stepIndex >= 4) ? 'visible' : 'hidden';
         
         document.getElementById('quiz-footer').style.display = isQuizActive ? 'block' : 'none';
@@ -366,6 +364,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleAnswer(questionKey, answer) {
         App.userAnswers[questionKey] = answer;
+        
+        // --- FIX: Store the photo URL in the App state ---
+        if (questionKey === 'selfie') {
+            App.userPhotoUrl = answer;
+        }
+
         next();
     }
 
@@ -378,7 +382,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const backBtn = document.getElementById('back-btn');
-        backBtn.style.visibility = (App.currentQuestionIndex > 0) ? 'visible' : 'hidden';
+        if (App.currentQuestionIndex > 0) {
+             backBtn.classList.remove('hidden');
+        } else {
+             backBtn.classList.add('hidden');
+        }
         
         switch (stepConfig.type) {
             case 'animation': goToStep(2); renderAnimation(stepConfig.key); break;
@@ -396,7 +404,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const stepConfig = App.quizQuestions[App.currentQuestionIndex];
         if (!stepConfig) return; 
 
-        document.getElementById('back-btn').style.visibility = (App.currentQuestionIndex > 0) ? 'visible' : 'hidden';
+        const backBtn = document.getElementById('back-btn');
+         if (App.currentQuestionIndex > 0) {
+             backBtn.classList.remove('hidden');
+        } else {
+             backBtn.classList.add('hidden');
+        }
 
         if (stepConfig.type === 'gender_selection') {
             goToStep(1);
@@ -468,15 +481,22 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (question.type === 'email_input') {
             footerWrapper.innerHTML = `<div class="max-w-sm mx-auto space-y-3 mt-4">
                 <input id="email-input" type="email" placeholder="Enter your email" class="w-full text-center p-4 rounded-xl border-2 border-gray-300 focus:border-[--brand-accent] focus:ring-2 focus:ring-[--brand-accent]/50 outline-none transition">
+                <p id="email-error" class="text-red-500 text-sm h-4"></p>
                 <button id="email-confirm-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Send Report</button>
             </div>`;
             const emailInput = footerWrapper.querySelector('#email-input');
+            const emailError = footerWrapper.querySelector('#email-error');
             footerWrapper.querySelector('#email-confirm-btn')?.addEventListener('click', () => {
                 if (emailInput && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
+                    emailError.textContent = '';
                     handleAnswer(question.key, emailInput.value);
                 } else {
                     emailInput.classList.add('border-red-500');
-                    setTimeout(() => emailInput.classList.remove('border-red-500'), 1500);
+                    emailError.textContent = 'Please enter a valid email address.';
+                    setTimeout(() => {
+                        emailInput.classList.remove('border-red-500');
+                        emailError.textContent = '';
+                    }, 2500);
                 }
             });
         }
@@ -488,11 +508,16 @@ document.addEventListener('DOMContentLoaded', () => {
         let displayHTML = `${value} ${question.unit || ''}`;
         if (question.unit === 'cm') {
             const totalInches = value / 2.54;
-            const feet = Math.floor(totalInches / 12);
-            const inches = Math.round(totalInches % 12);
+            let feet = Math.floor(totalInches / 12);
+            let inches = Math.round(totalInches % 12);
+             // --- FIX: Correctly handle 12 inches -> 1 foot ---
+            if (inches === 12) {
+                feet++;
+                inches = 0;
+            }
             displayHTML = `${feet}'${inches}" <span class="text-lg text-gray-400 font-medium">(${value} cm)</span>`;
         } else if (question.unit === 'kg') {
-            const lbs = (value * 2.20462).toFixed(0);
+            const lbs = Math.round(value * 2.20462);
             displayHTML = `${lbs} lbs <span class="text-lg text-gray-400 font-medium">(${value} kg)</span>`;
         }
         valueDisplay.innerHTML = displayHTML;
@@ -537,18 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         switch(key) {
             case 'bmi_calculation':
-                 animationHTML = `
-                    <div class="widget-wrapper">
-                        <div class="widget-label">Calculating Your BMI...</div>
-                        <div id="bmi-figure-container" class="relative w-40 h-40 mx-auto">
-                            <div class="bmi-figure absolute inset-0 bg-contain bg-center bg-no-repeat transition-opacity duration-500" style="background-image: url('https://api.iconify.design/healthicons/body-outline.svg?color=%23facc15'); opacity: 0;"></div>
-                            <div class="bmi-figure absolute inset-0 bg-contain bg-center bg-no-repeat transition-opacity duration-500" style="background-image: url('https://api.iconify.design/healthicons/body-outline.svg?color=%234ade80'); opacity: 1;"></div>
-                            <div class="bmi-figure absolute inset-0 bg-contain bg-center bg-no-repeat transition-opacity duration-500" style="background-image: url('https://api.iconify.design/healthicons/body-outline.svg?color=%23f97316'); opacity: 0;"></div>
-                            <div class="bmi-figure absolute inset-0 bg-contain bg-center bg-no-repeat transition-opacity duration-500" style="background-image: url('https://api.iconify.design/healthicons/body-outline.svg?color=%23ef4444'); opacity: 0;"></div>
-                        </div>
-                        <div id="bmi-value-anim" class="text-4xl font-extrabold text-[--brand-dark-text]">0.0</div>
-                        <div id="bmi-category-anim" class="text-sm font-medium text-gray-600 mt-1">&nbsp;</div>
-                    </div>`;
+                 animationHTML = `<div class="text-center"><h2 class="text-2xl font-bold text-gray-800 mb-4">Calculating Your BMI...</h2><div id="bmi-value-anim" class="text-5xl font-extrabold text-[--brand-dark-text]">0.0</div><div id="bmi-category-anim" class="font-semibold text-gray-600 mt-1">&nbsp;</div></div>`;
                 break;
             case 'sleep_visual':
                 label = 'Sleep Recharge';
@@ -579,13 +593,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const weightKg = App.userAnswers.weight;
             const bmi = weightKg / (heightM * heightM);
             let category = "Normal";
-            let activeIndex = 1;
-            if (bmi < 18.5) { category = "Underweight"; activeIndex = 0; }
-            else if (bmi >= 25 && bmi < 30) { category = "Overweight"; activeIndex = 2; }
-            else if (bmi >= 30) { category = "Obese"; activeIndex = 3; }
+            let color = 'text-green-600';
+            if (bmi < 18.5) { category = "Underweight"; color = 'text-yellow-500'; }
+            else if (bmi >= 25 && bmi < 30) { category = "Overweight"; color = 'text-orange-500'; }
+            else if (bmi >= 30) { category = "Obese"; color = 'text-red-500'; }
             
-            document.querySelectorAll('.bmi-figure').forEach((el, i) => el.style.opacity = i === activeIndex ? '1' : '0');
-            document.getElementById('bmi-category-anim').textContent = category;
+            const categoryEl = document.getElementById('bmi-category-anim');
+            categoryEl.textContent = category;
+            categoryEl.className = `font-semibold mt-1 ${color}`;
             animateCountUp(document.getElementById('bmi-value-anim'), bmi, 2000, false);
         } else if (key === 'sleep_visual') {
             const hours = parseInt(App.userAnswers.sleep || 4);
@@ -803,7 +818,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const faqContainer = document.getElementById('payment-faq');
         faqContainer.innerHTML = App.faq.map(item => 
-            `<details class="bg-white p-4 rounded-xl border cursor-pointer"><summary class="font-semibold flex justify-between items-center">${item.q}<span class="accordion-arrow transition-transform text-gray-400">&darr;</span></summary><p class="text-sm text-gray-600 mt-2">${item.a}</p></details>`
+            `<details class="bg-white p-4 rounded-xl border cursor-pointer group"><summary class="font-semibold flex justify-between items-center list-none">${item.q}<span class="accordion-arrow transition-transform group-open:rotate-180 text-gray-400">&darr;</span></summary><p class="text-sm text-gray-600 mt-2">${item.a}</p></details>`
         ).join('');
         
         const pricingCards = document.querySelectorAll('.pricing-card');
@@ -813,6 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.classList.add('selected');
             });
         });
+        // --- UX IMPROVEMENT: Select best value plan by default ---
         document.querySelector('.pricing-card[data-plan="annual"]')?.classList.add('selected');
     }
 
@@ -954,17 +970,4 @@ document.addEventListener('DOMContentLoaded', () => {
     burgerBtn.addEventListener('click', toggleMenu);
     menuOverlay.addEventListener('click', toggleMenu);
     setVh();
-    window.addEventListener('resize', setVh);
-    AnimationManager.add('lottie-onboarding-2', 'arrow.json');
-    initOnboarding();
-    document.getElementById('back-btn').addEventListener('click', previous);
-    document.getElementById('profile-continue-btn').addEventListener('click', () => {
-        goToStep(5);
-        preparePaymentPage();
-    });
-    document.getElementById('camera-modal').querySelector('#capture-btn')?.addEventListener('click', capturePhoto);
-    document.getElementById('camera-modal').querySelector('#close-camera-btn')?.addEventListener('click', closeCamera);
-});
-</script>
-</body>
-</html>
+    window
