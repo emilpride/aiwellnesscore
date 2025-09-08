@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Wellness Quiz 2.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core/dist/tf-core.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter/dist/tf-converter.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl/dist/tf-backend-webgl.js" crossorigin="anonymous"></script>
+
+    <style>
+        :root { 
+            --brand-accent: #debea9;
+            --brand-dark-text: #3c3b31; 
+        }
+        html, body { 
+            overscroll-behavior: none; 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f3f4f6;
+        }
+        #quiz-container { 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+            width: 100vw; 
+            height: 100vh; 
+            height: calc(var(--vh, 1vh) * 100); 
+            overflow: hidden;
+        }
+        main#steps-wrapper { 
+            position: relative; 
+            width: 100%; 
+            flex-grow: 1; 
+            overflow: hidden; 
+        }
+        .quiz-step {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 1rem; background-color: #f3f4f6;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease-out;
+            opacity: 1; overflow-y: auto;
+        }
+        .quiz-step:not(.active) { opacity: 0; pointer-events: none; transform: translateX(30px) scale(0.98); }
+        .quiz-step.active { transform: translateX(0) scale(1); }
+        .quiz-step.prev { transform: translateX(-30px) scale(0.98); }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        #quiz-header { 
+            flex-shrink: 0; 
+            background: rgba(243, 244, 246, 0.8); 
+            backdrop-filter: blur(8px); 
+            border-bottom: 1px solid #e5e7eb; 
+            visibility: hidden;
+        }
+        #quiz-footer { 
+            flex-shrink: 0; 
+            background-color: #fff; 
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.05); 
+            display: none; 
+            padding: 1rem; 
+        }
+
+        button.answer-option, button.gender-option {
+            background: none; color: inherit; border: none; padding: 0;
+            font: inherit; cursor: pointer; outline: inherit;
+            text-align: inherit; width: 100%;
+        }
+
+        .answer-option, .gender-option { 
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; 
+        }
+        .answer-option:hover:not(:disabled), .gender-option:hover:not(:disabled) { 
+            transform: translateY(-5px); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+        }
+        .answer-option.selected, .gender-option.selected { 
+            transform: translateY(-5px) scale(1.02); 
+            border-color: var(--brand-accent); 
+            box-shadow: 0 0 20px rgba(222, 190, 169, 0.6); 
+        }
+        .answer-option:disabled, .gender-option:disabled { 
+            opacity: 0.6; 
+            cursor: not-allowed; 
+        }
+
+        #progress-bar-inner { 
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
+            background: linear-gradient(270deg, #43B7FF 0%, #33C75A 25%, #FBF447 50%, #FFA64D 75%, #FF7D7E 100%);
+        }
+
+        /* BMI Animation Styles */
+        #bmi-scale-container {
+            position: relative;
+            width: 32px; 
+            height: 344px;
+        }
+        #bmi-scale-gradient {
+            width: 344px;
+            height: 18px;
+            background: linear-gradient(270deg, #43B7FF 0%, #33C75A 25%, #FBF447 50%, #FFA64D 75%, #FF7D7E 100%);
+            border-radius: 100px;
+            position: absolute;
+            left: -155px;
+            top: 163px;
+            transform: rotate(90deg);
+        }
+        #bmi-thumb {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(180deg, #F2F2F2 0%, #E8E8E8 100%);
+            border: 2px solid #FFFFFF;
+            box-shadow: 0px 0px 6.9px rgba(0, 0, 0, 0.25);
+            border-radius: 50%;
+            bottom: 0%; /* Start at the bottom */
+            left: 0px;
+            transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Camera Styles */
+        #camera-modal { position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        #camera-modal.active { opacity: 1; pointer-events: all; }
+        #camera-container { position: relative; width: 90%; max-width: 400px; aspect-ratio: 3/4; overflow: hidden; border-radius: 1.5rem; background: #111; border: 1px solid rgba(255,255,255,0.2); }
+        #camera-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        #camera-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
+        #camera-guide-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); text-align: center; pointer-events: none; }
+        #camera-guide-box { width: 70%; aspect-ratio: 1/1.2; border: 2px dashed rgba(255,255,255,0.5); border-radius: 50%; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+        #camera-guide-box.locked { border-color: #34d399; box-shadow: 0 0 20px #34d399; }
+        #camera-countdown { font-size: 5rem; font-weight: 800; position: absolute; }
+        #close-camera-btn { position: absolute; top: 1rem; right: 1rem; background-color: rgba(0,0,0,0.5); border-radius: 50%; color: white; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
+
+        /* Widget Styles */
+        .widget-wrapper { background-color: #fff; padding: 1.5rem; border-radius: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #f3f4f6; width: 100%; max-width: 320px; text-align: center; }
+        .widget-label { font-weight: 600; color: #4b5563; margin-bottom: 1rem; }
+        .sleep-ring-bg { stroke: #e5e7eb; }
+        .sleep-ring-fg { stroke: #818cf8; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .activity-week { display: flex; justify-content: space-around; gap: 8px; }
+        .activity-day { width: 36px; height: 36px; border-radius: 10px; background-color: #e5e7eb; color: #6b7280; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .activity-day.active { background-color: var(--brand-accent); color: var(--brand-dark-text); transform: scale(1.15) translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <header id="quiz-header" class="w-full p-4 z-20">
+        <div class="flex items-center gap-4 max-w-2xl mx-auto">
+            <button id="back-btn" class="text-gray-600 hover:text-gray-900 transition hidden p-2 -ml-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <div class="flex-grow h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div id="progress-bar-inner" class="h-full"></div>
+            </div>
+        </div>
+    </header>
+
+    <main id="steps-wrapper">
+        <section id="step-0" class="quiz-step active">
+            <div id="question-wrapper-0" class="w-full max-w-2xl"></div>
+        </section>
+        
+        <section id="step-1" class="quiz-step prev">
+             <div class="flex flex-col md:flex-row items-center justify-center gap-8 w-full max-w-4xl">
+                <div id="bmi-scale-container">
+                    <div id="bmi-scale-gradient"></div>
+                    <div id="bmi-thumb"></div>
+                </div>
+                <div class="flex-1 text-center md:text-left">
+                    <div id="bmi-value-container" class="text-6xl font-extrabold text-gray-800 transition-opacity duration-500 opacity-0">...</div>
+                    <div id="bmi-image-container" class="mt-4 transition-opacity duration-500 opacity-0">
+                        <img id="bmi-image" src="" alt="BMI category illustration" class="max-w-xs mx-auto md:mx-0">
+                    </div>
+                    <div id="bmi-text-container" class="mt-4 transition-opacity duration-500 opacity-0">
+                        <h3 id="bmi-title" class="text-2xl font-bold"></h3>
+                        <p id="bmi-description" class="text-gray-600 mt-1"></p>
+                    </div>
+                     <div id="bmi-continue-button-container" class="mt-8 transition-opacity duration-500 opacity-0">
+                        <button id="bmi-continue-btn" class="w-full sm:max-w-xs mx-auto md:mx-0 block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Continue</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="step-2" class="quiz-step prev">
+            <div id="loading-animation" class="w-48 h-48"></div>
+            <h2 class="text-3xl font-bold text-gray-800 mt-4 text-center">Analyzing Your Unique Profile...</h2>
+        </section>
+    </main>
+    
+    <footer id="quiz-footer" class="w-full z-10">
+        <div id="footer-actions" class="w-full max-w-2xl mx-auto"></div>
+    </footer>
+</div>
+
+<div id="camera-modal">
+    <div id="camera-container">
+        <video id="camera-video" autoplay playsinline></video>
+        <canvas id="camera-canvas"></canvas>
+        <div id="camera-guide-overlay">
+            <h3 id="camera-guide-text" class="text-lg font-semibold">Center your face in the oval</h3>
+            <div id="camera-guide-box"></div>
+            <div id="camera-countdown"></div>
+        </div>
+        <button id="close-camera-btn" title="Close Camera">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+    </div>
+</div>
+<canvas id="photo-canvas" style="display: none;"></canvas>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const App = {
+        currentStep: 0,
+        currentQuestionIndex: -1,
+        userAnswers: {},
+        cameraStream: null,
+        faceMesh: null,
+        cameraAnimFrame: null,
+        countdownTimer: null,
+        countdownValue: 3,
+        quizQuestions: [
+            { key: 'userGoal', type: 'options', text: "What’s your main goal?", options: ['Find out my Biological Age', 'Get a Skin Health Analysis', 'Receive a 7-Day Improvement Plan', 'All of the above!'] },
+            { key: 'age', type: 'slider', text: "How old are you?", min: 18, max: 90, defaultValue: 30, unit: 'years' },
+            { key: 'gender', type: 'gender_selection', text: "What’s your biological sex?", options: [{value: 'male', img: 'male.png'}, {value: 'female', img: 'female.png'}] },
+            { key: 'height', type: 'slider', text: "What’s your height?", min: 140, max: 220, defaultValue: 175, unit: 'cm' },
+            { key: 'weight', type: 'slider', text: "What’s your weight?", min: 40, max: 150, defaultValue: 77, unit: 'kg' },
+            { key: 'bmi_display', type: 'animation' },
+            { key: 'sleep', type: 'options', text: "On average, how much do you sleep?", options: ["Less than 5 hours per night", "5–6 hours per night", "7–8 hours per night", "More than 8 hours per night"] },
+            { key: 'sleep_visual', type: 'animation' },
+            { key: 'activity', type: 'options', text: "How often do you exercise?", options: ["Rarely / Never", "1–2 times a week", "3–4 times a week", "5+ times a week"] },
+            { key: 'activity_visual', type: 'animation' },
+            { key: 'nutrition', type: 'options', text: "How many servings of fruits & veggies do you eat daily?", options: ["0–1 serving", "2–3 servings", "4–5 servings", "More than 5 servings"] },
+            { key: 'processed_food', type: 'options', text: "How often do you eat processed or fast food?", options: ["Rarely", "1–2 times a week", "3–4 times a week", "Daily"] },
+            { key: 'hydration', type: 'options', text: "How much water do you drink per day?", options: ["1–3 cups (8–24 oz / 250–700 ml)", "4–6 cups (32–48 oz / 1–1.5 L)", "7–9 cups (56–72 oz / 2 L)", "10+ cups (80+ oz / 2.5+ L)"] },
+            { key: 'hydration_visual', type: 'animation' },
+            { key: 'stress', type: 'slider', text: "How stressed do you usually feel? (1 = relaxed, 10 = extremely stressed)", min: 1, max: 10, defaultValue: 5, unit: ''},
+            { key: 'mindfulness', type: 'options', text: "How often do you practice mindfulness (meditation, breathing, journaling)?", options: ["Never", "Sometimes", "Weekly", "Daily"] },
+            { key: 'mood', type: 'options', text: "How would you describe your overall mood?", options: [ { text: '😊', value: 'Happy & energetic' }, { text: '🙂', value: 'Mostly content' }, { text: '😐', value: 'Changes a lot' }, { text: '😟', value: 'Often stressed or down' } ] },
+            { key: 'alcohol', type: 'options', text: "How much alcohol do you drink weekly?", options: ["None", "1–3 drinks", "4–7 drinks", "8+ drinks"] },
+            { key: 'smoking', type: 'options', text: "Do you smoke?", options: ["Never", "Used to, but quit", "Occasionally", "Yes, daily"] },
+            { key: 'screen_time', type: 'options', text: "How much screen time do you have daily (phone, computer, TV)?", options: ["Less than 2 hours", "2–4 hours", "4–6 hours", "More than 6 hours"] },
+            { key: 'selfie', type: 'camera_step', text: 'Upload a selfie 📸', subtext: '(Optional – helps us analyze skin health & fine lines)'},
+            { key: 'email', type: 'email_step', text: "Enter your email 📩", subtext: "to get your personalized report summary. We respect your privacy." }
+        ],
+    };
+
+    const AnimationManager = {
+        animations: new Map(),
+        add(id, path) {
+            if (this.animations.has(id) || !document.getElementById(id)) return;
+            const container = document.getElementById(id);
+            if(!container) return;
+            try {
+                const anim = lottie.loadAnimation({ container, renderer: 'svg', loop: true, autoplay: true, path });
+                this.animations.set(id, anim);
+            } catch(e) { console.error(`Lottie error on container #${id}:`, e); }
+        }
+    };
+    
+    const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+
+    function goToStep(stepIndex) {
+        App.currentStep = stepIndex;
+        document.querySelectorAll('.quiz-step').forEach((step, index) => {
+            step.classList.remove('active', 'prev');
+            if (index === stepIndex) step.classList.add('active');
+            else if (index < stepIndex) step.classList.add('prev');
+        });
+        const isQuizActive = (stepIndex === 0);
+        document.getElementById('quiz-header').style.visibility = (stepIndex >= 0 && stepIndex < 2) ? 'visible' : 'hidden';
+        document.getElementById('quiz-footer').style.display = isQuizActive ? 'block' : 'none';
+    }
+
+    function handleAnswer(questionKey, answer) {
+        App.userAnswers[questionKey] = answer;
+        next();
+    }
+    
+    function next() {
+        App.currentQuestionIndex++;
+        const stepConfig = App.quizQuestions[App.currentQuestionIndex];
+        
+        if (!stepConfig) {
+            startAnalysis();
+            return;
+        }
+
+        document.getElementById('back-btn').classList.toggle('hidden', App.currentQuestionIndex <= 0);
+        
+        if (stepConfig.type === 'animation') {
+            renderAnimation(stepConfig.key);
+        } else {
+            goToStep(0);
+            renderQuestion();
+        }
+        updateProgressBar();
+    }
+
+    function previous() {
+        if (App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') App.currentQuestionIndex--;
+        App.currentQuestionIndex--;
+        if (App.currentQuestionIndex < 0) App.currentQuestionIndex = 0;
+        
+        document.getElementById('back-btn').classList.toggle('hidden', App.currentQuestionIndex <= 0);
+        goToStep(0);
+        renderQuestion();
+        updateProgressBar();
+    }
+    
+    function updateProgressBar() {
+        const questionsWithProgressBar = App.quizQuestions.filter(q => q.type !== 'animation');
+        const totalSteps = questionsWithProgressBar.length;
+        const currentProgressStep = questionsWithProgressBar.findIndex(q => q.key === App.quizQuestions[App.currentQuestionIndex]?.key);
+        const progress = totalSteps > 0 ? ((currentProgressStep + 1) / totalSteps) * 100 : 0;
+        document.getElementById('progress-bar-inner').style.width = `${Math.min(100, progress)}%`;
+    }
+
+    function renderQuestion() {
+        const question = App.quizQuestions[App.currentQuestionIndex];
+        if (!question) return;
+
+        const wrapper = document.getElementById('question-wrapper-0');
+        const footerWrapper = document.getElementById('footer-actions');
+        footerWrapper.innerHTML = '';
+        
+        let contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>`;
+        
+        if (question.type === 'camera_step' || question.type === 'email_step') {
+            contentHTML = `
+                <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
+                <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
+        }
+        
+        wrapper.innerHTML = `<div class="question-content w-full">${contentHTML}</div>`;
+        
+        if (question.type === 'options') {
+            const optionsHTML = question.options.map(opt => {
+                const displayText = typeof opt === 'object' ? opt.text : opt;
+                const value = typeof opt === 'object' ? opt.value : opt;
+                return `<button class="answer-option w-full bg-white p-4 rounded-xl border-2 border-gray-200 text-lg font-semibold text-gray-700 text-center" data-value="${value}">${displayText}</button>`;
+            }).join('');
+            footerWrapper.innerHTML = `<div class="grid grid-cols-1 gap-3 max-w-md mx-auto">${optionsHTML}</div>`;
+            footerWrapper.querySelectorAll('.answer-option').forEach(btn => {
+                 btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
+            });
+        } else if (question.type === 'slider') {
+            const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-inner"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
+            wrapper.insertAdjacentHTML('beforeend', sliderContent);
+            updateSliderDisplay(question, App.userAnswers[question.key] || question.defaultValue);
+            footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;
+            const sliderInput = document.getElementById('slider-input');
+            sliderInput.addEventListener('input', () => updateSliderDisplay(question, sliderInput.value));
+            footerWrapper.querySelector('#slider-confirm-btn').addEventListener('click', () => {
+                handleAnswer(question.key, sliderInput.value)
+            });
+        } else if (question.type === 'gender_selection') {
+            const optionsHTML = question.options.map(opt => `
+                <button class="gender-option text-center p-4 rounded-2xl border-2 border-gray-200 bg-white transition" data-value="${opt.value}">
+                    <img src="${opt.img}" alt="${opt.value}" class="w-full h-auto object-cover rounded-xl mb-3 aspect-square">
+                    <span class="text-lg font-semibold text-gray-800 capitalize">${opt.value}</span>
+                </button>`).join('');
+            footerWrapper.innerHTML = `<div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">${optionsHTML}</div>`;
+            footerWrapper.querySelectorAll('.gender-option').forEach(btn => {
+                btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
+            });
+        } else if (question.type === 'camera_step') {
+            footerWrapper.innerHTML = `<div class="max-w-sm mx-auto space-y-3 mt-4"><button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button></div>`;
+            footerWrapper.querySelector('#open-camera-btn').addEventListener('click', openCamera);
+            footerWrapper.querySelector('#skip-photo-btn').addEventListener('click', () => handleAnswer('selfie', 'skipped'));
+        } else if (question.type === 'email_step') {
+             footerWrapper.innerHTML = `<div class="flex gap-2 max-w-sm mx-auto"><input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border-gray-300 rounded-lg shadow-sm focus:ring-[--brand-accent] focus:border-[--brand-accent]"><button id="email-submit-btn" class="bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-5 rounded-lg hover:opacity-90 transition">Submit</button></div>`;
+             footerWrapper.querySelector('#email-submit-btn').addEventListener('click', () => {
+                const email = document.getElementById('email-input').value;
+                if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) handleAnswer('email', email);
+                else alert('Please enter a valid email address.');
+            });
+        }
+    }
+    
+    function handleOptionClick(event, key, value) {
+        const clickedButton = event.currentTarget;
+        const parent = clickedButton.closest('.grid');
+        parent.querySelectorAll('button').forEach(btn => btn.disabled = true);
+        clickedButton.classList.add('selected');
+        setTimeout(() => handleAnswer(key, value), 400);
+    }
+
+    function updateSliderDisplay(question, value) {
+        const valueDisplay = document.getElementById('slider-value-display');
+        if (!valueDisplay) return;
+        let displayHTML = `${value} ${question.unit || ''}`;
+        if (question.unit === 'cm') {
+            const totalInches = value / 2.54;
+            let feet = Math.floor(totalInches / 12);
+            let inches = Math.round(totalInches % 12);
+            if (inches === 12) { feet++; inches = 0; }
+            displayHTML = `${feet}'${inches}" <span class="text-lg text-gray-400 font-medium">(${value} cm)</span>`;
+        } else if (question.unit === 'kg') {
+            const lbs = Math.round(value * 2.20462);
+            displayHTML = `${lbs} lbs <span class="text-lg text-gray-400 font-medium">(${value} kg)</span>`;
+        }
+        valueDisplay.innerHTML = displayHTML;
+    }
+
+    function renderAnimation(key) {
+        goToStep(0);
+        const wrapper = document.getElementById('question-wrapper-0');
+        document.getElementById('footer-actions').innerHTML = '';
+        document.getElementById('back-btn').classList.add('hidden');
+
+        let animationHTML = '';
+        if (key === 'bmi_display') {
+            goToStep(1); // Go to the special BMI step
+            renderBmiResult();
+            return;
+        } else if (key === 'sleep_visual') {
+            animationHTML = `<div class="widget-wrapper"><div class="widget-label">Sleep Recharge</div><div class="relative mx-auto my-3 w-36 h-36"><svg class="w-full h-full" viewBox="0 0 120 120"><circle class="sleep-ring-bg" stroke-width="10" cx="60" cy="60" r="52" /><circle id="sleep-ring-fg-anim" class="sleep-ring-fg" stroke-width="10" cx="60" cy="60" r="52" style="stroke-dasharray: 327; stroke-dashoffset: 327;"/></svg><div class="absolute inset-0 flex flex-col items-center justify-center text-3xl">🌙</div></div></div>`;
+        } else if (key === 'activity_visual') {
+            animationHTML = `<div class="widget-wrapper"><div class="widget-label">Your Active Week</div><div class="activity-week" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div></div>`;
+        } else if (key === 'hydration_visual') {
+            animationHTML = `<div class="widget-wrapper"><div class="widget-label">Hydration Status</div><div id="hydration-lottie" class="w-48 h-48 mx-auto"></div></div>`;
+        }
+        
+        wrapper.innerHTML = `<div class="question-content w-full">${animationHTML}</div>`;
+        
+        setTimeout(() => playAnimation(key), 100); 
+        setTimeout(next, 2200);
+    }
+
+    function playAnimation(key) {
+        if (key === 'sleep_visual') {
+            const answer = App.userAnswers.sleep || "";
+            let percent = 50;
+            if (answer.startsWith("Less than 5")) percent = 25;
+            else if (answer.startsWith("5–6")) percent = 50;
+            else if (answer.startsWith("7–8")) percent = 90;
+            else if (answer.startsWith("More than 8")) percent = 100;
+            
+            const ringEl = document.getElementById('sleep-ring-fg-anim');
+            const circumference = 327;
+            if(ringEl) ringEl.style.strokeDashoffset = circumference - (percent / 100) * circumference;
+        } else if (key === 'activity_visual') {
+            const answer = App.userAnswers.activity || "";
+            let days = 1;
+            if (answer.includes("1–2")) days = 2;
+            if (answer.includes("3–4")) days = 4;
+            if (answer.includes("5+")) days = 6;
+            
+            const dayElements = document.querySelectorAll('#activity-week-anim .activity-day');
+            if (dayElements.length) {
+                for (let i = 0; i < Math.min(days, 7); i++) {
+                    setTimeout(() => { dayElements[i]?.classList.add('active'); }, i * 200);
+                }
+            }
+        } else if (key === 'hydration_visual') {
+            AnimationManager.add('hydration-lottie', 'water.json');
+        }
+    }
+
+    function renderBmiResult() {
+        const heightM = App.userAnswers.height / 100;
+        const weightKg = App.userAnswers.weight;
+        const gender = App.userAnswers.gender;
+        const bmi = (weightKg / (heightM * heightM));
+
+        const categories = [
+            { max: 16, img: 'under16', title: 'Severely Underweight', desc: 'Extremely low body mass. May cause fatigue, low immunity.' },
+            { max: 18.4, img: '16-18.4', title: 'Underweight', desc: 'Below healthy weight. Risk of nutrient deficiency.' },
+            { max: 24.9, img: '18.5-24.9', title: 'Normal Weight', desc: 'Ideal weight range. Lowest risk of health issues.' },
+            { max: 29.9, img: '25.0-29.9', title: 'Overweight', desc: 'Slightly above normal. Risk of heart and metabolic issues.' },
+            { max: 34.9, img: '30-above', title: 'Obesity (Class I)', desc: 'Increased risk of diabetes, high blood pressure etc.' },
+            { max: 39.9, img: '30-above', title: 'Obesity (Class II)', desc: 'High risk of serious health conditions.' },
+            { max: Infinity, img: '30-above', title: 'Obesity (Class III)', desc: 'Very high risk. Medical advice strongly recommended.' }
+        ];
+
+        const result = categories.find(c => bmi < c.max);
+        const prefix = gender === 'female' ? 'f' : 'm';
+        
+        document.getElementById('bmi-image').src = `${prefix}-${result.img}.svg`;
+        document.getElementById('bmi-title').textContent = result.title;
+        document.getElementById('bmi-description').textContent = result.desc;
+        
+        // Animate thumb
+        const minBmi = 15, maxBmi = 40;
+        const percent = Math.max(0, Math.min(100, ((bmi - minBmi) / (maxBmi - minBmi)) * 100));
+        document.getElementById('bmi-thumb').style.bottom = `${percent}%`;
+
+        // Animate value and fade in details
+        const valueEl = document.getElementById('bmi-value-container');
+        let currentBmi = 0;
+        const interval = setInterval(() => {
+            currentBmi += 0.5;
+            if (currentBmi >= bmi) {
+                clearInterval(interval);
+                valueEl.textContent = bmi.toFixed(1);
+                // Fade in other elements after number animation
+                document.getElementById('bmi-image-container').style.opacity = 1;
+                document.getElementById('bmi-text-container').style.opacity = 1;
+                document.getElementById('bmi-continue-button-container').style.opacity = 1;
+            } else {
+                valueEl.textContent = currentBmi.toFixed(1);
+            }
+        }, 20);
+        valueEl.style.opacity = 1;
+
+        document.getElementById('bmi-continue-btn').onclick = next;
+    }
+
+    function startAnalysis() {
+        goToStep(2);
+        AnimationManager.add('loading-animation', 'https://assets2.lottiefiles.com/packages/lf20_lit5sbnq.json');
+        setTimeout(() => {
+            // Redirect after animation
+            window.location.href = 'profile.html';
+        }, 4000);
+    }
+    
+    // --- Camera Logic with Face Mesh ---
+    async function openCamera() {
+        const cameraModal = document.getElementById('camera-modal');
+        const video = document.getElementById('camera-video');
+        
+        cameraModal.classList.add('active');
+        
+        if (!App.faceMesh) {
+            App.faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
+            App.faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+            await App.faceMesh.initialize();
+        }
+
+        try {
+            App.cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 1280 } } });
+            video.srcObject = App.cameraStream;
+            video.addEventListener('loadeddata', cameraLoop);
+        } catch (err) {
+            alert('Camera access denied. Please allow camera access to continue.');
+            closeCamera();
+        }
+    }
+
+    function closeCamera() {
+        const cameraModal = document.getElementById('camera-modal');
+        if (App.cameraStream) {
+            App.cameraStream.getTracks().forEach(track => track.stop());
+        }
+        cancelAnimationFrame(App.cameraAnimFrame);
+        clearInterval(App.countdownTimer);
+        App.countdownValue = 3;
+        cameraModal.classList.remove('active');
+        guideBox.classList.remove('locked');
+        countdownText.textContent = '';
+    }
+
+    const cameraLoop = async () => {
+        const video = document.getElementById('camera-video');
+        const canvas = document.getElementById('camera-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = video.clientWidth;
+        canvas.height = video.clientHeight;
+
+        await App.faceMesh.send({image: video});
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (App.faceMesh.results.multiFaceLandmarks && App.faceMesh.results.multiFaceLandmarks.length > 0) {
+            for (const landmarks of App.faceMesh.results.multiFaceLandmarks) {
+                // Draw mesh logic here if needed
+            }
+            if (isFaceCentered(App.faceMesh.results.multiFaceLandmarks[0])) {
+                guideBox.classList.add('locked');
+                guideText.textContent = 'Hold still...';
+                if (!App.countdownTimer) {
+                    startCountdown();
+                }
+            } else {
+                guideBox.classList.remove('locked');
+                guideText.textContent = 'Center your face in the oval';
+                clearInterval(App.countdownTimer);
+                App.countdownTimer = null;
+                App.countdownValue = 3;
+                countdownText.textContent = '';
+            }
+        } else {
+            guideBox.classList.remove('locked');
+            clearInterval(App.countdownTimer);
+            App.countdownTimer = null;
+        }
+
+        App.cameraAnimFrame = requestAnimationFrame(cameraLoop);
+    };
+
+    function isFaceCentered(landmarks) {
+        const nose = landmarks[4]; // Tip of the nose landmark
+        return nose.x > 0.3 && nose.x < 0.7 && nose.y > 0.3 && nose.y < 0.7;
+    }
+
+    function startCountdown() {
+        App.countdownTimer = setInterval(() => {
+            countdownText.textContent = App.countdownValue;
+            App.countdownValue--;
+            if (App.countdownValue < 0) {
+                clearInterval(App.countdownTimer);
+                takePhoto();
+            }
+        }, 1000);
+    }
+    
+    function takePhoto() {
+        const video = document.getElementById('camera-video');
+        const canvas = document.getElementById('photo-canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const photoDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        closeCamera();
+        handleAnswer('selfie', photoDataUrl);
+    }
+
+    // --- App Initialization ---
+    setVh();
+    window.addEventListener('resize', setVh);
+    document.getElementById('back-btn').addEventListener('click', previous);
+    document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
+    
+    next();
+});
+</script>
+</body>
+</html>
