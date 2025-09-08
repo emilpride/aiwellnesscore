@@ -461,7 +461,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderGenderSelection() {
         const questionContent = document.querySelector('#step-1 .question-content');
-        // Clear footer for this specific step
         document.getElementById('footer-actions').innerHTML = '';
 
         questionContent.innerHTML = `
@@ -618,7 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const bmi = (weight / ((height/100)**2)).toFixed(1);
-        calculateBiologicalAge(); // Ensure bio age and wellness score are calculated
+        calculateBiologicalAge();
         
         const radius = 52;
         const circumference = 2 * Math.PI * radius;
@@ -633,8 +632,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <circle id="wellness-score-circle" class="progress-ring-fg" stroke-width="10" cx="60" cy="60" r="${radius}" style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${circumference};"/>
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                         <span id="wellness-score-value" class="text-4xl font-extrabold text-[--brand-dark-text]">0</span>
-                         <span class="text-xs text-gray-500 font-medium">out of 100</span>
+                         <div class="w-28 h-28 bg-white rounded-full flex flex-col items-center justify-center shadow-inner">
+                            <span id="wellness-score-value" class="text-4xl font-extrabold text-[--brand-dark-text]">0</span>
+                            <span class="text-xs text-gray-500 font-medium">out of 100</span>
+                         </div>
                     </div>
                 </div>
             </div>
@@ -684,33 +685,28 @@ document.addEventListener('DOMContentLoaded', () => {
         let bioAge = baseAge;
         let score = 100;
 
-        // BMI impact
         const bmi = (App.userAnswers.weight / ((App.userAnswers.height/100)**2));
         if (bmi > 25) { bioAge += (bmi - 25) * 0.5; score -= (bmi - 25) * 2; }
         else if (bmi < 18.5) { bioAge += (18.5 - bmi) * 0.3; score -= (18.5 - bmi); }
-        else { score += 5; } // Bonus for normal BMI
+        else { score += 5; }
 
-        // Sleep impact
         const sleep = parseInt(App.userAnswers.sleep || 7);
         if (sleep < 7) { bioAge += (7 - sleep) * 0.8; score -= (7-sleep) * 4; }
         else { score += 5; }
         
-        // Activity impact
         const activity = parseInt(App.userAnswers.activity || 3);
         if (activity < 3) { bioAge += (3 - activity) * 0.7; score -= (3-activity) * 5; }
         else { bioAge -= (activity - 3) * 0.5; score += (activity - 3) * 2; }
 
-        // Stress impact
         const stress = parseInt(App.userAnswers.stress || 4);
         bioAge += (stress / 10) * 3;
         score -= (stress/10) * 25;
 
-        // Photo "impact" (simulated)
         if (App.userPhotoUrl && App.userPhotoUrl !== 'skipped') {
             bioAge += (Math.random() * 2 - 1);
         }
 
-        App.biologicalAge = Math.max(18, Math.round(bioAge - 2)); // Make it a bit lower
+        App.biologicalAge = Math.max(18, Math.round(bioAge - 2));
         App.wellnessScore = Math.max(40, Math.min(99, Math.round(score)));
     }
     
@@ -751,9 +747,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const chronoAgeEl = document.getElementById('chrono-age-value');
         const bioAgeEl = document.getElementById('bio-age-value');
         
-        // Final calculation before showing the page
         calculateBiologicalAge();
-
         AnimationManager.add('lottie-age-arrow', 'arrow.json');
         
         const chronoAge = App.userAnswers.age || 30;
@@ -817,9 +811,9 @@ document.addEventListener('DOMContentLoaded', () => {
             slide.addEventListener('touchstart', e => { App.onboarding.touchStartX = e.changedTouches[0].screenX; resetOnboardingTimer(); });
             slide.addEventListener('touchend', e => {
                 const touchEndX = e.changedTouches[0].screenX;
-                if (App.onboarding.touchStartX - touchEndX > 50) { // Swipe left
+                if (App.onboarding.touchStartX - touchEndX > 50) {
                     updateOnboardingView(true, (App.onboarding.slideIndex + 1) % App.onboarding.slides.length);
-                } else if (App.onboarding.touchStartX - touchEndX < -50) { // Swipe right
+                } else if (App.onboarding.touchStartX - touchEndX < -50) {
                     updateOnboardingView(true, (App.onboarding.slideIndex - 1 + App.onboarding.slides.length) % App.onboarding.slides.length);
                 }
             });
@@ -832,7 +826,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
-        updateOnboardingView();
+        updateOnboardingView(false, 0); 
         resetOnboardingTimer();
     }
     
@@ -841,7 +835,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const { slides, dots } = App.onboarding;
         if (!slides || slides.length === 0) return;
 
-        let newIndex = nextIndex !== undefined ? nextIndex : (App.onboarding.slideIndex + 1) % slides.length;
+        let newIndex;
+        if (nextIndex !== undefined) {
+            newIndex = nextIndex;
+        } else {
+            newIndex = (App.onboarding.slideIndex + 1) % slides.length;
+        }
+        
         App.onboarding.slideIndex = newIndex;
         
         document.querySelector('.swiper-wrapper').style.transform = `translateX(-${newIndex * 100}%)`;
