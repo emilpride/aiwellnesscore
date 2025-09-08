@@ -73,10 +73,10 @@
         }
 
         /* Question Options */
-        .answer-option { transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
-        .answer-option:hover:not(:disabled) { transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .answer-option.selected { transform: translateY(-5px) scale(1.02); border-color: var(--brand-accent); box-shadow: 0 0 20px rgba(222, 190, 169, 0.6); }
-        .answer-option:disabled { opacity: 0.6; cursor: not-allowed; }
+        .answer-option, .gender-option { transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+        .answer-option:hover:not(:disabled), .gender-option:hover:not(:disabled) { transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .answer-option.selected, .gender-option.selected { transform: translateY(-5px) scale(1.02); border-color: var(--brand-accent); box-shadow: 0 0 20px rgba(222, 190, 169, 0.6); }
+        .answer-option:disabled, .gender-option:disabled { opacity: 0.6; cursor: not-allowed; }
         .gender-option .gender-image { transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
         .gender-option:hover:not(:disabled) .gender-image { transform: scale(1.05); }
 
@@ -312,14 +312,12 @@ document.addEventListener('DOMContentLoaded', () => {
         biologicalAge: null,
         wellnessScore: null,
         cameraStream: null,
-        // AR State
         faceMesh: null,
         cameraAnimFrame: null,
         countdownTimer: null,
         countdownValue: 3,
-        // Quiz Data
         quizQuestions: [
-            { key: 'gender', type: 'gender_selection' },
+            { key: 'gender', type: 'gender_selection', text: "First, select your gender" },
             { key: 'userGoal', type: 'options', text: "What's your primary wellness goal?", options: ['Find out my biological age', 'Get a skin condition analysis', 'Get a 7-day improvement plan', 'All of the above!'] },
             { key: 'age', type: 'slider', text: "What's your current age?", min: 18, max: 90, defaultValue: 30, unit: 'years' },
             { key: 'height', type: 'slider', text: "What is your height?", min: 140, max: 220, defaultValue: 175, unit: 'cm' },
@@ -377,7 +375,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.requestAnimationFrame(step);
     }
     
-    // --- State Management (LocalStorage) ---
     function saveState() {
         const stateToSave = {
             answers: App.userAnswers,
@@ -395,13 +392,11 @@ document.addEventListener('DOMContentLoaded', () => {
             App.userPhotoUrl = data.photoUrl || null;
             App.currentQuestionIndex = (data.index != null ? data.index : -1);
             
-            // If the quiz was finished, just show the last step
             if(App.currentQuestionIndex >= App.quizQuestions.length) {
                 goToStep(6);
                 return;
             }
 
-            // Restore to the saved question, skipping onboarding.
             if(App.currentQuestionIndex > -1) {
                 const stepConfig = App.quizQuestions[App.currentQuestionIndex];
                 if (!stepConfig) return;
@@ -416,12 +411,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderQuestion();
                 updateProgressBar();
                 document.getElementById('back-btn').classList.toggle('hidden', App.currentQuestionIndex <= 0);
-
             }
         }
     }
 
-    // --- Core App Logic ---
     function goToStep(stepIndex) {
         App.currentStep = stepIndex;
         document.querySelectorAll('.quiz-step').forEach((step, index) => {
@@ -453,7 +446,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function next() {
         if(App.currentQuestionIndex > -1 && App.quizQuestions[App.currentQuestionIndex].type === 'animation') {
-            // Do nothing if we're in an animation timeout
         } else {
             App.currentQuestionIndex++;
         }
@@ -504,12 +496,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function updateProgressBar() {
-        const totalQuestions = App.quizQuestions.length;
-        const progress = totalQuestions > 0 ? ((App.currentQuestionIndex + 1) / totalQuestions) * 100 : 0;
+        const questionsWithProgressBar = App.quizQuestions.filter(q => q.type !== 'animation');
+        const totalSteps = questionsWithProgressBar.length;
+        const currentProgressStep = questionsWithProgressBar.findIndex(q => q.key === App.quizQuestions[App.currentQuestionIndex]?.key);
+
+        const progress = totalSteps > 0 ? ((currentProgressStep + 1) / totalSteps) * 100 : 0;
         document.getElementById('progress-bar-inner').style.width = `${Math.min(100, progress)}%`;
     }
 
-    // --- Rendering Functions ---
     function renderQuestion() {
         const question = App.quizQuestions[App.currentQuestionIndex];
         if (!question) return;
@@ -520,10 +514,26 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (question.type === 'gender_selection') {
             wrapper = document.querySelector('#step-1 .question-content');
-            wrapper.querySelectorAll('button').forEach(btn => {
+            // *** FIX STARTS HERE: GENERATE HTML FOR GENDER SELECTION ***
+            wrapper.innerHTML = `
+                <h2 class="text-3xl font-bold text-gray-900 text-center mb-8">${question.text}</h2>
+                <div class="grid grid-cols-2 gap-4 sm:gap-8 max-w-sm mx-auto">
+                    <button class="gender-option text-center p-4 rounded-2xl border-2 border-gray-200 transition" data-value="female">
+                        <img src="https://img.freepik.com/free-photo/portrait-beautiful-young-woman-with-blond-hair-smiling-against-blue-background_662251-460.jpg" alt="Female" class="gender-image w-full h-auto object-cover rounded-xl mb-3 aspect-square">
+                        <span class="text-lg font-semibold text-gray-800">Female</span>
+                    </button>
+                    <button class="gender-option text-center p-4 rounded-2xl border-2 border-gray-200 transition" data-value="male">
+                        <img src="https://t4.ftcdn.net/jpg/02/99/04/20/360_F_299042079_vGBD7wIlSeNl7vOevWspNNceUavCzfex.jpg" alt="Male" class="gender-image w-full h-auto object-cover rounded-xl mb-3 aspect-square">
+                        <span class="text-lg font-semibold text-gray-800">Male</span>
+                    </button>
+                </div>
+            `;
+            // Add event listeners to the NEWLY CREATED buttons
+            wrapper.querySelectorAll('.gender-option').forEach(btn => {
                 btn.addEventListener('click', (e) => handleOptionClick(e, 'gender', btn.dataset.value));
             });
-            return;
+            // *** FIX ENDS HERE ***
+            return; 
         }
         
         wrapper = document.getElementById('question-wrapper');
@@ -579,7 +589,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
                     emailError.textContent = '';
                     App.userAnswers[question.key] = emailInput.value;
-                    App.currentQuestionIndex++; // Manually increment to mark quiz as finished
+                    App.currentQuestionIndex++; 
                     saveState();
                     goToStep(6);
                     try {
@@ -601,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const clickedButton = event.currentTarget;
         const parent = clickedButton.closest('.grid');
         
-        parent.querySelectorAll('.answer-option').forEach(btn => {
+        parent.querySelectorAll('button').forEach(btn => {
             btn.disabled = true;
         });
         
@@ -630,7 +640,6 @@ document.addEventListener('DOMContentLoaded', () => {
         valueDisplay.innerHTML = displayHTML;
     }
     
-    // --- Animation Logic ---
     function renderAnimation(key) {
         const wrapper = document.getElementById('question-wrapper');
         document.getElementById('footer-actions').innerHTML = '';
@@ -691,7 +700,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         wrapper.innerHTML = `<div class="question-content w-full">${animationHTML}</div>`;
         setTimeout(() => playAnimation(key), 100); 
-        setTimeout(next, 2200); // Shorter, more responsive delay
+        setTimeout(next, 2200);
     }
 
     function playAnimation(key) {
@@ -768,26 +777,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function onFaceResults(results) {
+        if (!videoElement.videoWidth) return; 
         canvasElement.width = videoElement.videoWidth;
         canvasElement.height = videoElement.videoHeight;
         canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
         if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
             const landmarks = results.multiFaceLandmarks[0];
-            canvasCtx.beginPath();
-            const ovalPoints = [10, 338, 297, 299, 270, 269, 267, 0, 37, 39, 40, 60, 61, 62, 133, 173, 155, 154, 153, 145, 144, 168, 10];
-            for(let i = 0; i < ovalPoints.length; i++) {
-                const p = landmarks[ovalPoints[i]];
-                if (!p) { resetCountdown(); return; }
-                const x = p.x * canvasElement.width;
-                const y = p.y * canvasElement.height;
-                if (i === 0) canvasCtx.moveTo(x, y);
-                else canvasCtx.lineTo(x, y);
-            }
-            canvasCtx.closePath();
-            canvasCtx.strokeStyle = 'rgba(222, 190, 169, 0.8)';
-            canvasCtx.lineWidth = 4;
-            canvasCtx.stroke();
             checkFacePosition(landmarks);
         } else {
              resetCountdown();
@@ -858,7 +854,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         } catch (err) {
             console.error("Error accessing camera: ", err);
-            alert("Could not access the camera. Please ensure you have given permission.");
+            alert("Could not access the camera. Please ensure you have given permission. This feature requires HTTPS.");
         }
     }
 
@@ -888,10 +884,43 @@ document.addEventListener('DOMContentLoaded', () => {
         handleAnswer('selfie', dataUrl);
     }
     
-    // --- Other Functions ---
-    // (onboarding, profile analysis, payment page prep, etc.)
-    // These would be the full functions from previous answers.
-    
+    // *** FIX: ADDED ONBOARDING SWIPER LOGIC ***
+    function initOnboarding() {
+        const swiperWrapper = document.querySelector('.swiper-wrapper');
+        const slides = document.querySelectorAll('.swiper-slide');
+        const dotsContainer = document.getElementById('dots-container');
+        if (!swiperWrapper || !slides.length || !dotsContainer) return;
+        
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+        
+        slides.forEach((_, i) => {
+            const dot = document.createElement('button');
+            dot.classList.add('dot', 'w-2.5', 'h-2.5', 'bg-gray-300', 'rounded-full');
+            if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => goToSlide(i));
+            dotsContainer.appendChild(dot);
+        });
+
+        const dots = dotsContainer.querySelectorAll('.dot');
+        
+        function goToSlide(index) {
+            if (index < 0 || index >= totalSlides) return;
+            currentSlide = index;
+            swiperWrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+            
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === currentSlide);
+            });
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+        }
+        
+        // Initial state
+        slides[0].classList.add('active');
+    }
+
     // --- App Initialization ---
     setVh();
     window.addEventListener('resize', setVh);
@@ -901,8 +930,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadState();
     
     if (App.currentQuestionIndex === -1) {
-        // Only setup onboarding if we are not restoring a session
-        // initOnboarding();
+        initOnboarding(); // *** FIX: UNCOMMENTED AND ADDED THIS FUNCTION ***
         AnimationManager.add('lottie-onboarding-2', 'arrow.json');
         document.getElementById('start-quiz-btn').addEventListener('click', next);
     }
