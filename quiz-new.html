@@ -1,571 +1,724 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Wellness Quiz 4.0</title>
+    <title>Wellness Assessment</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core/dist/tf-core.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter/dist/tf-converter.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl/dist/tf-backend-webgl.js" crossorigin="anonymous"></script>
-
     <style>
-        :root {
-            --bg-color: #f4f4f7;
-            --text-primary: #111827;
-            --text-secondary: #4b5563;
-            --accent-primary: #7c3aed;
-            --accent-secondary: #a78bfa;
-            --accent-glow: rgba(124, 58, 237, 0.3);
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.9);
+        :root { 
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
         }
-        @keyframes aurora {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            50% { transform: translate(-50%, -50%) rotate(180deg) scale(1.2); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
+
+        body { 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+            color: var(--gray-900);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gray-200);
+            z-index: 100;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+
+        /* Step Container */
+        .step {
+            min-height: 100vh;
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+            padding: 2rem 0;
+        }
+
+        .step.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fadeInUp { animation: fadeInUp 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
 
-        html, body { 
-            overscroll-behavior: none; 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-        }
-        body::before {
-            content: '';
-            position: fixed;
-            top: 50%; left: 50%;
-            width: 150vmax; height: 150vmax;
-            background-image: radial-gradient(circle at 20% 20%, var(--accent-secondary) 0%, transparent 30%),
-                              radial-gradient(circle at 80% 70%, #60a5fa 0%, transparent 30%);
-            filter: blur(100px);
-            opacity: 0.3;
-            animation: aurora 25s linear infinite;
-            z-index: -1;
+        /* Question Styles */
+        .question-header {
+            text-align: center;
+            margin-bottom: 3rem;
         }
 
-        #quiz-wrapper {
+        .question-number {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .question-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-subtitle {
+            color: var(--gray-600);
+            font-size: 1rem;
+        }
+
+        /* Option Cards */
+        .options-grid {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-card {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .option-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-card.selected {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .option-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gray-100);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 100vw;
-            height: 100vh;
-            height: calc(var(--vh, 1vh) * 100);
-            padding: 1rem;
+            font-size: 1.5rem;
+            flex-shrink: 0;
         }
-        
-        #quiz-container { 
-            background: var(--glass-bg);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px 0 rgba(0,0,0, 0.1);
+
+        .option-card.selected .option-icon {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .option-text {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        /* Slider Styles */
+        .slider-container {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .slider-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-input {
             width: 100%;
-            height: 100%;
-            max-width: 420px;
-            max-height: 850px;
-            border-radius: 2rem;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--gray-200);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .slider-input::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .slider-labels {
             display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--gray-500);
         }
 
-        main#steps-wrapper { position: relative; width: 100%; flex-grow: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        
-        .quiz-step {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        /* Button Styles */
+        .btn {
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--gray-700);
+            border: 2px solid var(--gray-200);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-300);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .welcome-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.3);
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-description {
+            font-size: 1.125rem;
+            color: var(--gray-600);
+            max-width: 500px;
+            margin: 0 auto 3rem;
+            line-height: 1.6;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+
+        .feature-card {
+            background: white;
             padding: 1.5rem;
-            transition: opacity 0.5s ease-in-out, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0; transform: scale(0.98);
-            pointer-events: none;
-        }
-        .quiz-step.active { opacity: 1; transform: scale(1); pointer-events: all; }
-
-        .progress-bar-fg { 
-            background: var(--accent-primary);
-            box-shadow: 0 0 10px var(--accent-glow);
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
-        .btn-primary { 
-            background-color: var(--accent-primary); color: white;
-            font-weight: 600; padding: 1rem 1.5rem; border-radius: 0.75rem;
-            box-shadow: 0 4px 15px var(--accent-glow);
-            transition: all 0.2s ease-out;
-        }
-        .btn-primary:hover { background-color: #6d28d9; transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px var(--accent-glow); }
-        .btn-primary:active { transform: translateY(-1px) scale(0.98); }
-        .btn-secondary { color: var(--text-secondary); font-weight: 500; transition: color 0.2s; }
-        .btn-secondary:hover { color: var(--text-primary); }
-        
-        .answer-option {
-            background-color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.9);
-            border-radius: 1rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-        }
-        .answer-option:hover:not(:disabled) { 
-            transform: translateY(-4px); 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05); 
-            border-color: var(--accent-primary);
-        }
-        .answer-option.selected { 
-            border-color: var(--accent-primary); 
-            box-shadow: 0 0 0 3px var(--accent-glow);
-            transform: translateY(-4px);
-        }
-        .answer-option:disabled { opacity: 0.6; cursor: not-allowed; }
-        .answer-icon {
-            background-color: rgba(124, 58, 237, 0.1); color: var(--accent-primary);
-            border-radius: 0.75rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
-        input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: #e5e7eb; border-radius: 99px; outline: none; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 26px; height: 26px; background: white; cursor: pointer; border-radius: 50%; border: 3px solid var(--accent-primary); box-shadow: 0 2px 5px rgba(0,0,0,0.15); transition: transform 0.2s; }
-        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .feature-description {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        /* Results Screen */
+        .results-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .score-display {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 1.5rem;
+            position: relative;
+        }
+
+        .score-circle svg {
+            transform: rotate(-90deg);
+        }
+
+        .score-circle-bg {
+            fill: none;
+            stroke: var(--gray-200);
+            stroke-width: 8;
+        }
+
+        .score-circle-progress {
+            fill: none;
+            stroke: url(#gradient);
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s ease;
+        }
+
+        .score-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .score-label {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .score-description {
+            color: var(--gray-600);
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .question-title {
+                font-size: 1.5rem;
+            }
+            
+            .welcome-title {
+                font-size: 2rem;
+            }
+            
+            .slider-value {
+                font-size: 2.5rem;
+            }
+        }
     </style>
 </head>
-<body class="antialiased">
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+    </div>
 
-<div id="quiz-wrapper">
-    <div id="quiz-container">
-        <header id="quiz-header" class="w-full p-4 flex-shrink-0 z-50 transition-opacity duration-300 opacity-0 pointer-events-none">
-            <div class="flex items-center gap-4 max-w-3xl mx-auto">
-                <button id="back-btn" class="text-gray-500 hover:text-gray-900 transition p-2 -ml-2 opacity-0 pointer-events-none">
-                    <svg xmlns="http://www.w.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
-                </button>
-                <div class="flex-grow h-2 bg-gray-200/70 rounded-full overflow-hidden">
-                    <div id="progress-bar-inner" class="h-full progress-bar-fg rounded-full"></div>
-                </div>
-            </div>
-        </header>
-
-        <main id="steps-wrapper">
-            <section id="step-onboarding" class="quiz-step active">
-                <div class="text-center">
-                    <div class="w-28 h-28 mx-auto mb-6" id="onboarding-lottie"></div>
-                    <h1 class="text-4xl font-extrabold tracking-tight text-gray-900">Unlock Your<br>True Potential</h1>
-                    <p class="mt-4 text-base text-text-secondary max-w-sm mx-auto">Answer a few questions to reveal your biological age and get a wellness plan shaped by AI.</p>
-                    <div class="mt-10">
-                        <button id="start-quiz-btn" class="btn-primary text-lg">Begin Your Journey</button>
+    <!-- Welcome Step -->
+    <div class="step active" id="step-0">
+        <div class="container">
+            <div class="welcome-screen">
+                <div class="welcome-icon">💪</div>
+                <h1 class="welcome-title">Wellness Assessment</h1>
+                <p class="welcome-description">
+                    Take a comprehensive health evaluation to understand your wellness score 
+                    and receive personalized recommendations for improvement.
+                </p>
+                
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-title">Health Score</div>
+                        <div class="feature-description">Get your overall wellness rating</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📈</div>
+                        <div class="feature-title">Insights</div>
+                        <div class="feature-description">Understand your health patterns</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-title">Action Plan</div>
+                        <div class="feature-description">Personalized recommendations</div>
                     </div>
                 </div>
-            </section>
-
-            <section id="step-quiz" class="quiz-step">
-                </section>
-
-            <section id="step-loading" class="quiz-step">
-                <div id="loading-animation" class="w-48 h-48"></div>
-                <h2 class="text-3xl font-bold text-gray-800 mt-4 text-center">Crafting Your Report...</h2>
-                <div id="analysis-steps" class="mt-6 text-gray-600 space-y-2 w-64 text-left"></div>
-            </section>
-        </main>
-    </div>
-</div>
-
-<div id="camera-modal" class="fixed inset-0 z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300" style="background-color: rgba(0,0,0,0.8); backdrop-filter: blur(4px);">
-    <div id="camera-container" class="relative w-[90%] max-w-md aspect-[3/4] overflow-hidden rounded-3xl bg-gray-900 border border-gray-700 shadow-2xl">
-        <video id="camera-video" class="w-full h-full object-cover transform scale-x-[-1]" autoplay playsinline></video>
-        <canvas id="camera-canvas" class="absolute inset-0 transform scale-x-[-1]"></canvas>
-        <div id="camera-guide-overlay" class="absolute inset-0 flex flex-col items-center justify-center p-8 text-white text-shadow text-center pointer-events-none">
-            <h3 id="camera-guide-text" class="text-lg font-semibold">Center your face in the oval</h3>
-            <div id="camera-guide-box" class="w-[70%] aspect-[1/1.2] mt-4" style="border: 3px dashed rgba(255,255,255,0.5); border-radius: 50%; transition: border-color 0.3s ease, box-shadow 0.3s ease;"></div>
-        </div>
-        <button id="close-camera-btn" title="Close Camera" class="absolute top-4 right-4 bg-black/50 rounded-full text-white w-10 h-10 flex items-center justify-center cursor-pointer z-10">
-            <svg xmlns="http://www.w.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
-    </div>
-</div>
-<canvas id="photo-canvas" class="hidden"></canvas>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-
-    // =================================================================================
-    // 1. STATE MANAGEMENT
-    // =================================================================================
-    const App = {
-        currentStepIndex: -1,
-        userAnswers: {},
-        cameraStream: null,
-        faceMesh: null,
-        cameraAnimFrame: null,
-        captureTimeout: null,
-        quizQuestions: [
-            { key: 'userGoal', type: 'options', text: "What's your primary goal today?", options: [{text: 'Reveal My Biological Age', icon:'⏳'}, {text:'Analyze My Skin Health', icon: '🌿'}, {text:'Get a 7-Day Action Plan', icon:'🗺️'}, {text:'All of the above!', icon:'🚀'}] },
-            { key: 'gender', type: 'gender', text: "Let's start with the basics.", subtext: "Please select your biological sex.", options: [{value: 'male'}, {value: 'female'}] },
-            { key: 'age', type: 'slider', text: "How old are you?", min: 18, max: 90, defaultValue: 30, unit: 'years' },
-            { key: 'height', type: 'slider', text: "What’s your height?", min: 140, max: 220, defaultValue: 175, unit: 'cm' },
-            { key: 'weight', type: 'slider_bmi', text: "And your weight?", min: 40, max: 150, defaultValue: 77, unit: 'kg' },
-            { key: 'sleep', type: 'options', text: "How many hours of quality sleep do you get?", options: [{text:"Less than 5 hours", icon:"😴"}, {text:"5–6 hours", icon:"🥱"}, {text:"7–8 hours", icon:"😎"}, {text:"More than 8 hours", icon:"😍"}] },
-            { key: 'activity', type: 'options', text: "How many days a week are you active?", options: [{text:"0-1 days", icon:"🛋️"}, {text:"2-3 days", icon:"🚶‍♀️"}, {text:"4-5 days", icon:"💪"}, {text:"6-7 days", icon:"🏆"}] },
-            { key: 'stress', type: 'slider', text: "How would you rate your typical stress level?", subtext: "(1 = Zen, 10 = Overwhelmed)", min: 1, max: 10, defaultValue: 5 },
-            { key: 'selfie', type: 'camera', text: 'AI Skin & Stress Analysis', subtext: '(Optional) A quick scan helps us provide a more accurate biological age.'},
-            { key: 'email', type: 'email', text: "Your report is ready!", subtext: "Enter your email to get your full personalized analysis. No spam, ever." }
-        ]
-    };
-
-    // =================================================================================
-    // 2. DOM ELEMENTS
-    // =================================================================================
-    const quizStepContainer = document.getElementById('step-quiz');
-    const quizHeader = document.getElementById('quiz-header');
-    const backBtn = document.getElementById('back-btn');
-    const progressBar = document.getElementById('progress-bar-inner');
-
-    // =================================================================================
-    // 3. RENDERING LOGIC
-    // =================================================================================
-    
-    function renderStep(question) {
-        if (!question) return;
-        
-        const questionHTML = `
-            <div class="w-full max-w-3xl text-center animate-fadeInUp">
-                <h2 class="text-3xl font-bold text-gray-900">${question.text}</h2>
-                ${question.subtext ? `<p class="text-text-secondary mt-2 max-w-lg mx-auto">${question.subtext}</p>` : ''}
-            </div>
-            <div id="answers-container" class="w-full max-w-xl mt-8 animate-fadeInUp" style="animation-delay: 150ms;"></div>
-            <div id="footer-container" class="w-full max-w-xl mt-8 animate-fadeInUp" style="animation-delay: 300ms;"></div>
-        `;
-        quizStepContainer.innerHTML = questionHTML;
-
-        const answersContainer = document.getElementById('answers-container');
-        const footerContainer = document.getElementById('footer-container');
-
-        switch (question.type) {
-            case 'options': renderOptions(answersContainer, question); break;
-            case 'gender': renderGender(answersContainer, question); break;
-            case 'slider':
-            case 'slider_bmi':
-                renderSlider(answersContainer, footerContainer, question);
-                break;
-            case 'camera': renderCameraStep(answersContainer, footerContainer); break;
-            case 'email': renderEmailStep(footerContainer); break;
-        }
-    }
-
-    function renderOptions(container, question) {
-        const optionsHTML = question.options.map(opt => {
-            const text = typeof opt === 'object' ? opt.text : opt;
-            const icon = typeof opt === 'object' ? opt.icon : '➡️';
-            return `
-                <button class="answer-option w-full p-4 flex items-center gap-4" data-value="${text}">
-                    <div class="answer-icon w-11 h-11 text-xl flex items-center justify-center flex-shrink-0">${icon}</div>
-                    <span class="flex-1 text-base font-semibold text-gray-800 text-left">${text}</span>
+                
+                <button class="btn btn-primary" onclick="nextStep()">
+                    Start Assessment
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M7 10h6m0 0l-3-3m3 3l-3 3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                 </button>
-            `;
-        }).join('');
-        container.innerHTML = `<div class="grid grid-cols-1 gap-3">${optionsHTML}</div>`;
-    }
+            </div>
+        </div>
+    </div>
 
-    function renderGender(container, question) {
-        const optionsHTML = question.options.map(opt => `
-            <button class="answer-option text-center p-4" data-value="${opt.value}">
-                <div class="bg-gray-200/50 rounded-lg mb-3 aspect-[4/5] overflow-hidden flex items-center justify-center">
-                    <span class="text-6xl">${opt.value === 'male' ? '👨' : '👩'}</span>
+    <!-- Question Steps will be generated dynamically -->
+    
+    <script>
+        // Quiz Data
+        const questions = [
+            {
+                id: 1,
+                type: 'options',
+                question: 'How would you rate your overall health?',
+                subtitle: 'Be honest - this helps us provide better recommendations',
+                options: [
+                    { icon: '😟', text: 'Poor', value: 1 },
+                    { icon: '😐', text: 'Fair', value: 2 },
+                    { icon: '🙂', text: 'Good', value: 3 },
+                    { icon: '😊', text: 'Excellent', value: 4 }
+                ]
+            },
+            {
+                id: 2,
+                type: 'slider',
+                question: 'How old are you?',
+                subtitle: 'Your age helps us customize recommendations',
+                min: 18,
+                max: 100,
+                default: 30,
+                unit: 'years'
+            },
+            {
+                id: 3,
+                type: 'options',
+                question: 'How many hours do you sleep on average?',
+                subtitle: 'Quality sleep is crucial for wellness',
+                options: [
+                    { icon: '😴', text: 'Less than 6 hours', value: 1 },
+                    { icon: '🥱', text: '6-7 hours', value: 2 },
+                    { icon: '😌', text: '7-8 hours', value: 3 },
+                    { icon: '😊', text: 'More than 8 hours', value: 4 }
+                ]
+            },
+            {
+                id: 4,
+                type: 'options',
+                question: 'How often do you exercise?',
+                subtitle: 'Include any physical activity',
+                options: [
+                    { icon: '🛋️', text: 'Rarely', value: 1 },
+                    { icon: '🚶', text: '1-2 times/week', value: 2 },
+                    { icon: '🏃', text: '3-4 times/week', value: 3 },
+                    { icon: '💪', text: '5+ times/week', value: 4 }
+                ]
+            },
+            {
+                id: 5,
+                type: 'slider',
+                question: 'Rate your stress level',
+                subtitle: '1 = Very low, 10 = Very high',
+                min: 1,
+                max: 10,
+                default: 5,
+                unit: ''
+            }
+        ];
+
+        let currentStep = 0;
+        const answers = {};
+
+        // Initialize quiz
+        function initQuiz() {
+            // Create question steps
+            questions.forEach((q, index) => {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'step';
+                stepDiv.id = `step-${index + 1}`;
+                stepDiv.innerHTML = createQuestionHTML(q, index + 1);
+                document.body.appendChild(stepDiv);
+            });
+
+            // Create results step
+            const resultsDiv = document.createElement('div');
+            resultsDiv.className = 'step';
+            resultsDiv.id = `step-${questions.length + 1}`;
+            resultsDiv.innerHTML = createResultsHTML();
+            document.body.appendChild(resultsDiv);
+        }
+
+        function createQuestionHTML(question, number) {
+            let optionsHTML = '';
+            let navigationHTML = `
+                <div class="nav-buttons">
+                    ${number > 1 ? '<button class="btn btn-secondary" onclick="previousStep()">Back</button>' : '<div></div>'}
+                    ${question.type === 'slider' ? '<button class="btn btn-primary" onclick="nextStep()">Continue</button>' : '<div></div>'}
                 </div>
-                <span class="text-lg font-bold text-gray-800 capitalize">${opt.value}</span>
-            </button>`).join('');
-        container.innerHTML = `<div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">${optionsHTML}</div>`;
-    }
+            `;
 
-    function renderSlider(answersContainer, footerContainer, question) {
-        const initialValue = App.userAnswers[question.key] || question.defaultValue;
-        answersContainer.innerHTML = `
-            <div>
-                <div id="slider-value-display" class="text-4xl font-extrabold text-text-primary mb-6 text-center"></div>
-                <input type="range" min="${question.min}" max="${question.max}" value="${initialValue}" id="slider-input">
-            </div>
-            ${question.type === 'slider_bmi' ? `<div id="bmi-result-container" class="mt-8 h-20 transition-opacity duration-500 opacity-0"></div>` : ''}
-        `;
-        footerContainer.innerHTML = `<button class="btn-primary mx-auto" id="slider-confirm-btn">Confirm</button>`;
-        updateSliderDisplay(question, initialValue);
-        if(question.type === 'slider_bmi') updateBmiResult();
-    }
+            if (question.type === 'options') {
+                optionsHTML = `
+                    <div class="options-grid">
+                        ${question.options.map((opt, i) => `
+                            <div class="option-card" onclick="selectOption(${question.id}, ${opt.value}, this)">
+                                <div class="option-icon">${opt.icon}</div>
+                                <div class="option-text">${opt.text}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (question.type === 'slider') {
+                optionsHTML = `
+                    <div class="slider-container">
+                        <div class="slider-value" id="slider-value-${question.id}">${question.default} ${question.unit}</div>
+                        <input type="range" class="slider-input" 
+                               id="slider-${question.id}"
+                               min="${question.min}" 
+                               max="${question.max}" 
+                               value="${question.default}"
+                               oninput="updateSlider(${question.id}, this.value, '${question.unit}')">
+                        <div class="slider-labels">
+                            <span>${question.min} ${question.unit}</span>
+                            <span>${question.max} ${question.unit}</span>
+                        </div>
+                    </div>
+                `;
+            }
 
-    function renderCameraStep(answersContainer, footerContainer) {
-        answersContainer.innerHTML = `<div class="w-40 h-40 mx-auto rounded-full bg-cover bg-center shadow-lg border-4 border-white/80" style="background-image: url('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1780&q=80')"></div>`;
-        footerContainer.innerHTML = `
-            <div class="flex flex-col items-center gap-4">
-                <button id="open-camera-btn" class="btn-primary w-full max-w-xs">Start Secure Scan</button>
-                <button id="skip-photo-btn" class="btn-secondary text-sm">Skip for now</button>
-            </div>`;
-    }
-
-    function renderEmailStep(footerContainer) {
-        footerContainer.innerHTML = `
-            <div class="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
-                <input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border-gray-300 rounded-lg shadow-sm focus:ring-[--accent-primary] focus:border-[--accent-primary]">
-                <button id="email-submit-btn" class="btn-primary flex-shrink-0">Submit</button>
-            </div>`;
-    }
-
-    function updateSliderDisplay(question, value) {
-        const display = document.getElementById('slider-value-display');
-        if(!display) return;
-        let displayHTML = `${value} ${question.unit || ''}`;
-        if (question.unit === 'cm') {
-            const inches = Math.round(value / 2.54);
-            const feet = Math.floor(inches / 12);
-            const remInches = inches % 12;
-            displayHTML = `${feet}'${remInches}" <span class="text-lg text-gray-400 font-medium">(${value} cm)</span>`;
-        } else if (question.unit === 'kg') {
-            const lbs = Math.round(value * 2.20462);
-            displayHTML = `${lbs} lbs <span class="text-lg text-gray-400 font-medium">(${value} kg)</span>`;
+            return `
+                <div class="container">
+                    <div class="question-header">
+                        <span class="question-number">Question ${number} of ${questions.length}</span>
+                        <h2 class="question-title">${question.question}</h2>
+                        <p class="question-subtitle">${question.subtitle}</p>
+                    </div>
+                    ${optionsHTML}
+                    ${navigationHTML}
+                </div>
+            `;
         }
-        display.innerHTML = displayHTML;
-    }
 
-    function updateBmiResult() {
-        const container = document.getElementById('bmi-result-container');
-        const height = App.userAnswers.height;
-        const weightInput = document.getElementById('slider-input');
-        if(!container || !height || !weightInput) return;
-        
-        container.style.opacity = 1;
-        const weight = weightInput.value;
-        const heightM = height / 100;
-        const bmi = (weight / (heightM * heightM)).toFixed(1);
-        
-        let category, color;
-        if (bmi < 18.5) { category = 'Underweight'; color = 'text-blue-500'; }
-        else if (bmi < 25) { category = 'Normal weight'; color = 'text-green-500'; }
-        else if (bmi < 30) { category = 'Overweight'; color = 'text-yellow-500'; }
-        else { category = 'Obesity'; color = 'text-red-500'; }
-        
-        container.innerHTML = `
-            <div class="text-center bg-white/60 p-3 rounded-lg">
-                <span class="text-sm font-medium text-text-secondary">Your BMI</span>
-                <p class="text-2xl font-bold text-text-primary">${bmi}</p>
-                <p class="font-semibold text-sm ${color}">${category}</p>
-            </div>
-        `;
-    }
-
-    // =================================================================================
-    // 4. NAVIGATION & LOGIC
-    // =================================================================================
-    function navigateToStep(index) {
-        document.querySelectorAll('.quiz-step').forEach(step => step.classList.remove('active'));
-        App.currentStepIndex = index;
-
-        if (index < 0) {
-            document.getElementById('step-onboarding').classList.add('active');
-        } else if (index >= App.quizQuestions.length) {
-            startAnalysis();
-            return;
-        } else {
-            document.getElementById('step-quiz').classList.add('active');
-            renderStep(App.quizQuestions[index]);
+        function createResultsHTML() {
+            return `
+                <div class="container">
+                    <div class="results-card">
+                        <div class="score-display">
+                            <div class="score-circle">
+                                <svg width="200" height="200">
+                                    <defs>
+                                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#818cf8;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle cx="100" cy="100" r="90" class="score-circle-bg"></circle>
+                                    <circle cx="100" cy="100" r="90" class="score-circle-progress"
+                                            stroke-dasharray="565.48" stroke-dashoffset="141.37"></circle>
+                                </svg>
+                                <div class="score-number">75</div>
+                            </div>
+                            <h2 class="score-label">Your Wellness Score</h2>
+                            <p class="score-description">Good health with room for improvement</p>
+                        </div>
+                    </div>
+                    
+                    <div class="results-card">
+                        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Key Recommendations</h3>
+                        <ul style="space-y: 0.75rem; color: var(--gray-700);">
+                            <li style="margin-bottom: 0.75rem;">✅ Maintain your exercise routine</li>
+                            <li style="margin-bottom: 0.75rem;">💤 Aim for 7-8 hours of sleep consistently</li>
+                            <li style="margin-bottom: 0.75rem;">🧘 Consider stress management techniques</li>
+                            <li style="margin-bottom: 0.75rem;">💧 Stay hydrated throughout the day</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn btn-primary" onclick="location.reload()">
+                            Start Over
+                        </button>
+                    </div>
+                </div>
+            `;
         }
-        updateHeader(index);
-    }
-    
-    function handleAnswer(key, value) {
-        App.userAnswers[key] = value;
-        navigateToStep(App.currentStepIndex + 1);
-    }
-    
-    function updateHeader(index) {
-        const isQuizActive = index > -1 && index < App.quizQuestions.length;
-        quizHeader.classList.toggle('opacity-0', !isQuizActive);
-        quizHeader.classList.toggle('pointer-events-none', !isQuizActive);
-        backBtn.classList.toggle('opacity-0', index < 1);
-        backBtn.classList.toggle('pointer-events-none', index < 1);
-        const progress = isQuizActive ? ((index + 1) / App.quizQuestions.length) * 100 : 0;
-        progressBar.style.width = `${progress}%`;
-    }
 
-    function startAnalysis() {
-        document.querySelectorAll('.quiz-step').forEach(step => step.classList.remove('active'));
-        document.getElementById('step-loading').classList.add('active');
-        updateHeader(App.quizQuestions.length);
+        function selectOption(questionId, value, element) {
+            // Store answer
+            answers[questionId] = value;
+            
+            // Update UI
+            element.parentNode.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            
+            // Auto-advance after short delay
+            setTimeout(() => nextStep(), 300);
+        }
 
-        lottie.loadAnimation({ container: document.getElementById('loading-animation'), renderer: 'svg', loop: true, autoplay: true, path: 'https://assets2.lottiefiles.com/packages/lf20_lit5sbnq.json' });
-        
-        const analysisStepsContainer = document.getElementById('analysis-steps');
-        const steps = ["Analyzing lifestyle data...", "Calculating metabolic rate...", "Processing facial biomarkers...", "Compiling wellness report..."];
-        steps.forEach((text, i) => {
-            setTimeout(() => {
-                const p = document.createElement('p');
-                p.className = 'opacity-0';
-                p.style.animation = `fadeInUp 0.5s ${i*0.5}s forwards`;
-                p.textContent = `✓ ${text}`;
-                analysisStepsContainer.appendChild(p);
-            }, i * 700);
-        });
+        function updateSlider(questionId, value, unit) {
+            document.getElementById(`slider-value-${questionId}`).textContent = `${value} ${unit}`;
+            answers[questionId] = value;
+        }
 
-        setTimeout(() => {
-            alert('Analysis complete! Redirecting to your profile...');
-        }, (steps.length * 700) + 1000);
-    }
-
-    // =================================================================================
-    // 5. CAMERA LOGIC (MediaPipe)
-    // =================================================================================
-    async function openCamera() {
-        const cameraModal = document.getElementById('camera-modal');
-        cameraModal.classList.remove('opacity-0', 'pointer-events-none');
-        
-        if (!App.faceMesh) {
-            try {
-                App.faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
-                App.faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
-                App.faceMesh.onResults(onFaceMeshResults);
-                await App.faceMesh.initialize();
-            } catch (error) {
-                alert('Failed to initialize AI model. Please refresh and try again.');
-                closeCamera(); return;
+        function nextStep() {
+            // Hide current step
+            document.getElementById(`step-${currentStep}`).classList.remove('active');
+            
+            // Show next step
+            currentStep++;
+            const nextStepElement = document.getElementById(`step-${currentStep}`);
+            if (nextStepElement) {
+                nextStepElement.classList.add('active');
+                updateProgress();
+            }
+            
+            // If we're at results, calculate score
+            if (currentStep > questions.length) {
+                calculateResults();
             }
         }
-        try {
-            const video = document.getElementById('camera-video');
-            App.cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-            video.srcObject = App.cameraStream;
-            video.addEventListener('loadeddata', cameraLoop);
-        } catch (err) {
-            alert('Camera access denied. Please allow camera access in your browser settings.');
-            closeCamera();
-        }
-    }
 
-    function closeCamera() {
-        const cameraModal = document.getElementById('camera-modal');
-        if (App.cameraStream) App.cameraStream.getTracks().forEach(track => track.stop());
-        cancelAnimationFrame(App.cameraAnimFrame);
-        clearTimeout(App.captureTimeout);
-        App.captureTimeout = null;
-        cameraModal.classList.add('opacity-0', 'pointer-events-none');
-        document.getElementById('camera-guide-box').classList.remove('locked');
-    }
-    
-    async function cameraLoop() {
-        const video = document.getElementById('camera-video');
-        if (video.readyState >= 2) {
-           await App.faceMesh.send({image: video});
+        function previousStep() {
+            if (currentStep > 0) {
+                document.getElementById(`step-${currentStep}`).classList.remove('active');
+                currentStep--;
+                document.getElementById(`step-${currentStep}`).classList.add('active');
+                updateProgress();
+            }
         }
-        App.cameraAnimFrame = requestAnimationFrame(cameraLoop);
-    };
 
-    function onFaceMeshResults(results) {
-        const guideBox = document.getElementById('camera-guide-box');
-        const guideText = document.getElementById('camera-guide-text');
-        
-        const guideBoxEl = document.getElementById('camera-guide-box');
-        if (!guideBoxEl) return;
-        
-        if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-            const landmarks = results.multiFaceLandmarks[0];
-            if (isFaceCentered(landmarks)) {
-                guideBox.style.borderColor = '#34d399';
-                guideBox.style.boxShadow = '0 0 25px #34d399';
-                guideText.textContent = 'Perfect, hold still!';
-                if (!App.captureTimeout) {
-                    App.captureTimeout = setTimeout(takePhoto, 1200);
+        function updateProgress() {
+            const progress = ((currentStep - 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = `${Math.max(0, Math.min(100, progress))}%`;
+        }
+
+        function calculateResults() {
+            // Simple scoring logic (would be more complex in real app)
+            let totalScore = 0;
+            let maxScore = 0;
+            
+            questions.forEach(q => {
+                if (answers[q.id]) {
+                    if (q.type === 'options') {
+                        totalScore += answers[q.id];
+                        maxScore += 4;
+                    } else if (q.type === 'slider' && q.id === 5) {
+                        // For stress, lower is better
+                        totalScore += (11 - answers[q.id]) / 2.5;
+                        maxScore += 4;
+                    }
                 }
-            } else {
-                guideBox.style.borderColor = 'rgba(255,255,255,0.5)';
-                guideBox.style.boxShadow = 'none';
-                guideText.textContent = 'Center your face';
-                clearTimeout(App.captureTimeout);
-                App.captureTimeout = null;
+            });
+            
+            const finalScore = Math.round((totalScore / maxScore) * 100);
+            
+            // Update results display
+            const scoreElement = document.querySelector('.score-number');
+            if (scoreElement) {
+                scoreElement.textContent = finalScore;
+                
+                // Update progress circle
+                const circle = document.querySelector('.score-circle-progress');
+                const circumference = 565.48;
+                const offset = circumference - (finalScore / 100) * circumference;
+                circle.style.strokeDashoffset = offset;
             }
-        } else {
-            guideBox.style.borderColor = 'rgba(255,255,255,0.5)';
-            guideBox.style.boxShadow = 'none';
-            guideText.textContent = 'Looking for a face...';
-            clearTimeout(App.captureTimeout);
-            App.captureTimeout = null;
         }
-    }
 
-    function isFaceCentered(landmarks) {
-        const nose = landmarks[4];
-        return nose.x > 0.3 && nose.x < 0.7 && nose.y > 0.3 && nose.y < 0.7 && nose.z < -0.03;
-    }
-
-    function takePhoto() {
-        const video = document.getElementById('camera-video');
-        const canvas = document.getElementById('photo-canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.translate(canvas.width, 0);
-        ctx.scale(-1, 1);
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const photoDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-        closeCamera();
-        handleAnswer('selfie', photoDataUrl);
-    }
-
-    // =================================================================================
-    // 6. INITIALIZATION & EVENT LISTENERS
-    // =================================================================================
-    function init() {
-        const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
-        setVh();
-        window.addEventListener('resize', setVh);
-        
-        lottie.loadAnimation({ container: document.getElementById('onboarding-lottie'), renderer: 'svg', loop: true, autoplay: true, path: 'https://assets9.lottiefiles.com/packages/lf20_g33gacj2.json' });
-
-        document.getElementById('start-quiz-btn').addEventListener('click', () => navigateToStep(0));
-        backBtn.addEventListener('click', () => navigateToStep(App.currentStepIndex - 1));
-        document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
-        
-        document.body.addEventListener('click', e => {
-            const question = App.quizQuestions[App.currentStepIndex];
-            if (!question) return;
-
-            const optionBtn = e.target.closest('.answer-option');
-            if (optionBtn) {
-                optionBtn.closest('#answers-container').querySelectorAll('.answer-option').forEach(btn => btn.disabled = true);
-                optionBtn.classList.add('selected');
-                setTimeout(() => handleAnswer(question.key, optionBtn.dataset.value), 400);
-                return;
-            }
-
-            if (e.target.id === 'slider-confirm-btn') {
-                handleAnswer(question.key, document.getElementById('slider-input').value);
-                return;
-            }
-
-            if (e.target.id === 'open-camera-btn') openCamera();
-            if (e.target.id === 'skip-photo-btn') handleAnswer('selfie', 'skipped');
-
-            if (e.target.id === 'email-submit-btn') {
-                const email = document.getElementById('email-input').value;
-                if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) handleAnswer('email', email);
-                else alert('Please enter a valid email address.');
-            }
-        });
-
-        document.body.addEventListener('input', e => {
-            if (e.target.id === 'slider-input') {
-                const question = App.quizQuestions[App.currentStepIndex];
-                updateSliderDisplay(question, e.target.value);
-                if(question.type === 'slider_bmi') updateBmiResult();
-            }
-        });
-        
-        navigateToStep(-1);
-    }
-
-    init();
-});
-</script>
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initQuiz);
+    </script>
 </body>
 </html>
