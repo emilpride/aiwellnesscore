@@ -64,7 +64,7 @@
         .answer-option.selected { transform: translateY(-5px) scale(1.02); border-color: var(--brand-accent); box-shadow: 0 0 20px rgba(222, 190, 169, 0.6); }
 
         /* Gender Selection */
-        #step-1 { justify-content: flex-start; padding-top: 8vh; }
+        #step-1 { justify-content: flex-start; padding-top: 4vh; }
         .gender-option { overflow: hidden; }
         .gender-option .gender-image { transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
         .gender-option:hover .gender-image { transform: scale(1.05); }
@@ -86,9 +86,9 @@
         .activity-day.active { background-color: var(--brand-accent); color: var(--brand-dark-text); box-shadow: 0 4px 10px rgba(222, 190, 169, 0.4); }
         .stress-bar-track { height: 16px; background-color: #f3f0eb; border-radius: 9999px; overflow: hidden; }
         .stress-bar-fill { height: 100%; width: 0%; background-image: linear-gradient(to right, #4ade80, #facc15, #f87171); border-radius: 9999px; transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .metric-widget { background-color: white; border: 1px solid #f3f4f6; border-radius: 1.5rem; padding: 1.5rem; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .metric-widget { background-color: white; border: 1px solid #f3f4f6; border-radius: 1.5rem; padding: 1rem; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         .progress-ring-bg { stroke: #e5e7eb; }
-        .progress-ring-fg { stroke: var(--brand-accent); transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1); transform: rotate(-90deg); transform-origin: 50% 50%; }
+        .progress-ring-fg { stroke: var(--brand-accent); stroke-linecap: round; transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1); transform: rotate(-90deg); transform-origin: 50% 50%; }
 
         /* Testimonials */
         .testimonial-swiper { overflow: hidden; position: relative; }
@@ -128,7 +128,17 @@
              <div id="onboarding-swiper" class="relative w-full h-full flex flex-col">
                  <div class="flex-grow w-full h-full overflow-hidden">
                      <div class="swiper-wrapper">
-                         <div class="swiper-slide !p-0"><video class="absolute top-0 left-0 w-full h-full object-cover -z-10" autoplay loop muted playsinline><source src="https://assets.mixkit.co/videos/preview/mixkit-woman-in-pajamas-stretches-in-bed-in-the-morning-4228-large.mp4" type="video/mp4"></video><div class="w-full h-full flex flex-col justify-end items-center text-center p-8 bg-black/30 text-white"><div class="flex-grow"></div><h1 class="text-4xl font-extrabold tracking-tight">Unlock Your Inner Potential.</h1><p class="mt-3 max-w-md text-lg text-gray-200">Discover your biological age and get a personalized wellness plan based on AI analysis.</p><div class="h-[15vh]"></div></div></div>
+                         <div class="swiper-slide !p-0">
+                             <video class="absolute top-0 left-0 w-full h-full object-cover -z-10" autoplay loop muted playsinline>
+                                 <source src="fon.webm" type="video/webm">
+                             </video>
+                             <div class="w-full h-full flex flex-col justify-end items-center text-center p-8 bg-black/30 text-white">
+                                 <div class="flex-grow"></div>
+                                 <h1 class="text-4xl font-extrabold tracking-tight">Unlock Your Inner Potential.</h1>
+                                 <p class="mt-3 max-w-md text-lg text-gray-200">Discover your biological age and get a personalized wellness plan based on AI analysis.</p>
+                                 <div class="h-[15vh]"></div>
+                             </div>
+                         </div>
                          <div class="swiper-slide"><div class="text-left w-full max-w-sm"><h2 class="text-2xl font-bold text-gray-800 text-center mb-6">What you'll get:</h2><ul class="space-y-4"><li class="flex items-center"><span class="text-2xl mr-3">🎯</span><div><h3 class="font-semibold">Wellness Score</h3><p class="text-sm text-gray-500">Your comprehensive health rating</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">⏳</span><div><h3 class="font-semibold">Biological Age</h3><p class="text-sm text-gray-500">How "young" you are for your years</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🌿</span><div><h3 class="font-semibold">Skin & Stress Analysis</h3><p class="text-sm text-gray-500">Learn about hidden factors</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🗺️</span><div><h3 class="font-semibold">Personalized Plan</h3><p class="text-sm text-gray-500">A 7-day plan for improvement</p></div></li></ul></div></div>
                          <div class="swiper-slide"><div class="text-center"><h2 class="text-2xl font-bold text-gray-800 mb-6">Lower Your Biological Age</h2><div class="flex justify-center items-center space-x-4"><div class="text-center"><p class="text-gray-500">Chronological</p><p class="text-5xl font-bold text-gray-400">35</p></div><div id="lottie-onboarding-2" class="w-20 h-20"></div><div class="text-center"><p class="font-semibold" style="color: var(--brand-dark-text);">Biological</p><p class="text-6xl font-extrabold" style="color: var(--brand-dark-text);">32</p></div></div><p class="text-gray-600 mt-6 max-w-xs mx-auto">Our plan is designed to help you feel younger and more energetic.</p></div></div>
                          <div class="swiper-slide"><div class="text-center max-w-sm"><h2 class="text-2xl font-bold text-gray-800 mb-8">Your Privacy is Our Priority</h2><div class="space-y-6 text-left"><div class="flex items-center"><span class="text-3xl mr-4">📸</span><p class="text-gray-600">Your photo is analyzed on-the-fly and never stored.</p></div><div class="flex items-center"><span class="text-3xl mr-4">🔒</span><p class="text-gray-600">All your data is anonymized and protected by encryption.</p></div><div class="flex items-center"><span class="text-3xl mr-4">⚕️</span><p class="text-gray-600">This is not medical advice. For informational purposes only.</p></div></div></div></div>
@@ -139,7 +149,7 @@
         </section>
 
         <section id="step-1" class="quiz-step prev">
-            <div class="question-content w-full max-w-3xl text-center"></div>
+            <div class="question-content w-full max-w-4xl text-center"></div>
         </section>
 
         <section id="step-2" class="quiz-step prev">
@@ -148,12 +158,12 @@
 
         <section id="step-3" class="quiz-step prev p-0 justify-start">
             <div class="w-full h-full overflow-y-auto p-4 sm:p-6 text-center bg-gray-50">
-                 <div class="max-w-3xl mx-auto">
+                 <div class="max-w-4xl mx-auto">
                     <h2 class="text-3xl font-extrabold text-gray-900">Here's Your Wellness Profile</h2>
                     <p class="text-gray-600 mt-1">A snapshot of your current wellbeing.</p>
                     <div id="profile-page-content" class="mt-8 grid grid-cols-1 md:grid-cols-5 gap-6">
                         <div id="profile-avatar-area" class="md:col-span-2"></div>
-                        <div id="profile-metrics-area" class="md:col-span-3 grid grid-cols-2 gap-4 sm:gap-6"></div>
+                        <div id="profile-metrics-area" class="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
                     </div>
                 </div>
             </div>
@@ -258,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
         userAnswers: {},
         userPhotoUrl: null,
         biologicalAge: null,
+        wellnessScore: null,
         onboarding: { slideIndex: 0, slides: null, dots: null, timer: null, touchStartX: 0 },
         cameraStream: null,
         quizQuestions: [
@@ -400,7 +411,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!question) return;
         const questionWrapper = document.getElementById('question-wrapper');
         const footerWrapper = document.getElementById('footer-actions');
-        questionWrapper.innerHTML = `<div class="question-content w-full"><h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2></div>`;
+        let contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>`;
+
+        if (question.type === 'camera_step') {
+            contentHTML = `
+                <img src="face.jpeg" alt="Face scan illustration" class="w-48 h-48 mx-auto rounded-full object-cover mb-6 shadow-lg">
+                <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
+                <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>
+            `;
+        }
+        
+        questionWrapper.innerHTML = `<div class="question-content w-full">${contentHTML}</div>`;
+        
         let footerHTML = '';
         if (question.type === 'options') {
              const optionsHTML = question.options.map((opt, index) => {
@@ -415,8 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSliderDisplay(question, question.defaultValue);
             footerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;
         } else if (question.type === 'camera_step') {
-            questionWrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', `<p class="text-gray-600 mt-2 text-center">${question.subtext}</p>`);
-            footerHTML = `<div class="max-w-sm mx-auto space-y-3"><button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button></div>`;
+            footerHTML = `<div class="max-w-sm mx-auto space-y-3 mt-4"><button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button></div>`;
         }
         footerWrapper.innerHTML = footerHTML;
         addQuestionEventListeners(question);
@@ -440,24 +461,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderGenderSelection() {
         const questionContent = document.querySelector('#step-1 .question-content');
+        // Clear footer for this specific step
+        document.getElementById('footer-actions').innerHTML = '';
+
         questionContent.innerHTML = `
             <h2 class="text-3xl font-bold text-gray-900">To personalize your plan...</h2>
-            <p class="mt-2 text-lg text-gray-600">Which do you identify with?</p>`;
-
-        const footerWrapper = document.getElementById('footer-actions');
-        footerWrapper.innerHTML = `
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto mt-8">
-                <div class="gender-option answer-option cursor-pointer bg-white p-4 rounded-2xl flex flex-col items-center justify-end aspect-[3/4] border-2 border-transparent" data-value="Female">
+            <p class="mt-2 text-lg text-gray-600">Which do you identify with?</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-4xl mx-auto mt-6">
+                <div class="gender-option answer-option cursor-pointer bg-white p-2 sm:p-4 rounded-2xl flex flex-col items-center justify-end aspect-[3/4] border-2 border-transparent" data-value="Female">
                     <img src="https://i.ibb.co/L661Fj5/female-render.png" alt="Female" class="h-full object-contain gender-image">
-                    <p class="mt-4 text-xl font-bold text-gray-800">Female</p>
+                    <p class="mt-2 sm:mt-4 text-lg sm:text-xl font-bold text-gray-800">Female</p>
                 </div>
-                <div class="gender-option answer-option cursor-pointer bg-white p-4 rounded-2xl flex flex-col items-center justify-end aspect-[3/4] border-2 border-transparent" data-value="Male">
+                <div class="gender-option answer-option cursor-pointer bg-white p-2 sm:p-4 rounded-2xl flex flex-col items-center justify-end aspect-[3/4] border-2 border-transparent" data-value="Male">
                     <img src="https://i.ibb.co/n6R0K9B/male-render.png" alt="Male" class="h-full object-contain gender-image">
-                    <p class="mt-4 text-xl font-bold text-gray-800">Male</p>
+                    <p class="mt-2 sm:mt-4 text-lg sm:text-xl font-bold text-gray-800">Male</p>
                 </div>
-                <div class="gender-option answer-option cursor-pointer bg-white p-4 rounded-2xl flex flex-col items-center justify-end aspect-[3/4] border-2 border-transparent" data-value="Other">
+                <div class="gender-option answer-option cursor-pointer bg-white p-2 sm:p-4 rounded-2xl flex flex-col items-center justify-end aspect-[3/4] border-2 border-transparent col-span-2 sm:col-span-1" data-value="Other">
                      <img src="https://i.ibb.co/P9b2N7T/other-render.png" alt="Other" class="h-full object-contain gender-image">
-                    <p class="mt-4 text-xl font-bold text-gray-800">Other</p>
+                    <p class="mt-2 sm:mt-4 text-lg sm:text-xl font-bold text-gray-800">Other</p>
                 </div>
             </div>`;
         addQuestionEventListeners({type: 'gender_selection', key: 'gender'});
@@ -466,10 +487,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function addQuestionEventListeners(question) {
         if (!question) return;
         const footer = document.getElementById('footer-actions');
-        const questionWrapper = document.getElementById('question-wrapper');
+        const mainContent = document.getElementById(`step-${App.currentStep}`);
         
         if (question.type === 'options' || question.type === 'gender_selection') {
-            const container = footer;
+            const container = question.type === 'gender_selection' ? mainContent : footer;
             container.querySelectorAll('.answer-option').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.currentTarget.classList.add('selected');
@@ -477,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
         } else if (question.type === 'slider') {
-            const sliderInput = questionWrapper.querySelector('#slider-input');
+            const sliderInput = document.getElementById('slider-input');
             if (sliderInput) sliderInput.addEventListener('input', () => updateSliderDisplay(question, sliderInput.value));
             footer.querySelector('#slider-confirm-btn')?.addEventListener('click', () => {
                 if (sliderInput) handleAnswer(question.key, sliderInput.value)
@@ -576,7 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderWellnessProfile() {
-        const { age, sleep, activity, stress, weight, height } = App.userAnswers;
+        const { age, sleep, activity, stress, weight, height, gender } = App.userAnswers;
         const avatarArea = document.getElementById('profile-avatar-area');
         const metricsArea = document.getElementById('profile-metrics-area');
 
@@ -584,33 +605,74 @@ document.addEventListener('DOMContentLoaded', () => {
             avatarArea.innerHTML = `
                 <div class="aspect-[4/5] bg-gray-200 rounded-2xl overflow-hidden shadow-lg animate-fade-in">
                     <img src="${App.userPhotoUrl}" alt="User Photo" class="w-full h-full object-cover">
-                </div>`;
+                </div>
+                <div class="text-center mt-4 text-gray-700 font-semibold">${age} y.o. ${gender}</div>`;
         } else {
             avatarArea.innerHTML = `
                 <div class="aspect-[4/5] bg-white rounded-2xl flex flex-col items-center justify-center text-center p-6 shadow-lg border animate-fade-in">
                     <svg class="w-16 h-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     <h3 class="mt-4 font-bold text-gray-800">Photo Analysis Skipped</h3>
-                    <p class="mt-1 text-sm text-gray-500">Your profile is based on the answers you provided.</p>
-                </div>`;
+                    <p class="mt-1 text-sm text-gray-500">Profile is based on your answers.</p>
+                </div>
+                <div class="text-center mt-4 text-gray-700 font-semibold">${age} y.o. ${gender}</div>`;
         }
         
         const bmi = (weight / ((height/100)**2)).toFixed(1);
+        calculateBiologicalAge(); // Ensure bio age and wellness score are calculated
+        
+        const radius = 52;
+        const circumference = 2 * Math.PI * radius;
+        const scoreOffset = circumference - (App.wellnessScore / 100) * circumference;
+
         metricsArea.innerHTML = `
-            <div class="metric-widget col-span-2 animate-fade-in" style="animation-delay: 100ms;">
-                <h3 class="font-semibold text-gray-700">Body Mass Index (BMI)</h3>
-                <p class="text-4xl font-extrabold text-[--brand-dark-text] mt-2" id="bmi-profile-value">0.0</p>
-                <div class="mt-3 h-4 w-full rounded-full bg-gray-200"><div class="h-full rounded-full unified-gradient-bar" style="width: ${Math.min(100, ((bmi - 15) / 25) * 100)}%;"></div></div>
+            <div class="metric-widget sm:col-span-2 animate-fade-in" style="animation-delay: 100ms;">
+                <h3 class="font-semibold text-gray-700 text-lg">Wellness Score</h3>
+                <div class="relative mx-auto my-3 w-36 h-36">
+                    <svg class="w-full h-full" viewBox="0 0 120 120">
+                        <circle class="progress-ring-bg" stroke-width="10" cx="60" cy="60" r="${radius}" />
+                        <circle id="wellness-score-circle" class="progress-ring-fg" stroke-width="10" cx="60" cy="60" r="${radius}" style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${circumference};"/>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                         <span id="wellness-score-value" class="text-4xl font-extrabold text-[--brand-dark-text]">0</span>
+                         <span class="text-xs text-gray-500 font-medium">out of 100</span>
+                    </div>
+                </div>
             </div>
-            <div class="metric-widget animate-fade-in" style="animation-delay: 200ms;">
-                 <h3 class="font-semibold text-gray-700 text-sm mb-2">Sleep Quality</h3>
-                 <p class="text-3xl font-bold text-[--brand-dark-text]"><span id="sleep-profile-value">0</span>h</p>
+            <div class="metric-widget flex flex-col justify-center animate-fade-in" style="animation-delay: 200ms;">
+                 <h3 class="font-semibold text-gray-700 text-sm mb-2">Biological Age</h3>
+                 <p class="text-5xl font-extrabold text-green-600" id="bio-age-profile-value">${App.biologicalAge}</p>
+                 <p class="text-xs text-gray-500">vs ${age} chronological</p>
             </div>
-            <div class="metric-widget animate-fade-in" style="animation-delay: 300ms;">
-                 <h3 class="font-semibold text-gray-700 text-sm mb-2">Activity Level</h3>
-                 <p class="text-3xl font-bold text-[--brand-dark-text]"><span id="activity-profile-value">0</span>/week</p>
-            </div>`;
+            <div class="metric-widget flex flex-col justify-center animate-fade-in" style="animation-delay: 300ms;">
+                 <h3 class="font-semibold text-gray-700 text-sm mb-2">Body Mass Index</h3>
+                 <p class="text-4xl font-bold text-[--brand-dark-text]"><span id="bmi-profile-value">0.0</span></p>
+                 <p class="text-xs text-gray-500">${weight} kg / ${height} cm</p>
+            </div>
+             <div class="metric-widget animate-fade-in" style="animation-delay: 400ms;">
+                 <h3 class="font-semibold text-gray-700 text-sm mb-2">Lifestyle</h3>
+                 <div class="flex justify-around items-center mt-2">
+                    <div class="text-center">
+                        <span class="text-3xl">😴</span>
+                        <p class="text-xl font-bold text-[--brand-dark-text] mt-1"><span id="sleep-profile-value">0</span>h</p>
+                        <p class="text-xs text-gray-500">Sleep</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-3xl">🏃‍♀️</span>
+                        <p class="text-xl font-bold text-[--brand-dark-text] mt-1"><span id="activity-profile-value">0</span>/w</p>
+                        <p class="text-xs text-gray-500">Activity</p>
+                    </div>
+                 </div>
+            </div>
+             <div class="metric-widget animate-fade-in" style="animation-delay: 500ms;">
+                 <h3 class="font-semibold text-gray-700 text-sm mb-1">Stress Level</h3>
+                 <div class="stress-bar-track mt-4 mx-auto max-w-[150px]"><div class="stress-bar-fill" style="width: ${stress/10 * 100}%"></div></div>
+                 <p class="text-xs text-gray-500 mt-2">${['Low', 'Normal', 'Elevated', 'High'][Math.floor((stress-1)/2.5)]}</p>
+            </div>
+        `;
         
         setTimeout(() => {
+            document.getElementById('wellness-score-circle').style.strokeDashoffset = scoreOffset;
+            animateCountUp(document.getElementById('wellness-score-value'), App.wellnessScore);
             animateCountUp(document.getElementById('bmi-profile-value'), bmi, 1500, false);
             animateCountUp(document.getElementById('sleep-profile-value'), sleep || 0);
             animateCountUp(document.getElementById('activity-profile-value'), activity || 0);
@@ -620,37 +682,42 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateBiologicalAge() {
         const baseAge = parseInt(App.userAnswers.age || 30);
         let bioAge = baseAge;
+        let score = 100;
 
         // BMI impact
         const bmi = (App.userAnswers.weight / ((App.userAnswers.height/100)**2));
-        if (bmi > 25) bioAge += (bmi - 25) * 0.5;
-        if (bmi < 18.5) bioAge += (18.5 - bmi) * 0.3;
+        if (bmi > 25) { bioAge += (bmi - 25) * 0.5; score -= (bmi - 25) * 2; }
+        else if (bmi < 18.5) { bioAge += (18.5 - bmi) * 0.3; score -= (18.5 - bmi); }
+        else { score += 5; } // Bonus for normal BMI
 
         // Sleep impact
         const sleep = parseInt(App.userAnswers.sleep || 7);
-        if (sleep < 7) bioAge += (7 - sleep) * 0.8;
+        if (sleep < 7) { bioAge += (7 - sleep) * 0.8; score -= (7-sleep) * 4; }
+        else { score += 5; }
         
         // Activity impact
         const activity = parseInt(App.userAnswers.activity || 3);
-        if (activity < 3) bioAge += (3 - activity) * 0.7;
-        else bioAge -= (activity - 3) * 0.5;
+        if (activity < 3) { bioAge += (3 - activity) * 0.7; score -= (3-activity) * 5; }
+        else { bioAge -= (activity - 3) * 0.5; score += (activity - 3) * 2; }
 
         // Stress impact
         const stress = parseInt(App.userAnswers.stress || 4);
         bioAge += (stress / 10) * 3;
+        score -= (stress/10) * 25;
 
         // Photo "impact" (simulated)
         if (App.userPhotoUrl && App.userPhotoUrl !== 'skipped') {
-            bioAge += (Math.random() * 2 - 1); // Add/subtract up to 1 year
+            bioAge += (Math.random() * 2 - 1);
         }
 
-        App.biologicalAge = Math.max(18, Math.round(bioAge - 3 + Math.random())); // Make it a bit lower for positive reinforcement
+        App.biologicalAge = Math.max(18, Math.round(bioAge - 2)); // Make it a bit lower
+        App.wellnessScore = Math.max(40, Math.min(99, Math.round(score)));
     }
     
     function startAnalysis() {
         const analysisSteps = document.getElementById('analysis-steps');
         const loadingAnim = document.getElementById('loading-animation');
-        lottie.loadAnimation({ container: loadingAnim, renderer: 'svg', loop: true, autoplay: true, path: 'https://assets4.lottiefiles.com/packages/lf20_gdaso5dg.json' });
+        lottie.loadAnimation({ container: loadingAnim, renderer: 'svg', loop: true, autoplay: true, path: 'loader.json' });
 
         const steps = [
             'Evaluating lifestyle factors...',
@@ -675,7 +742,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         setTimeout(() => {
-            calculateBiologicalAge();
             goToStep(5);
             preparePaymentPage();
         }, steps.length * 900 + 500);
@@ -684,8 +750,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function preparePaymentPage() {
         const chronoAgeEl = document.getElementById('chrono-age-value');
         const bioAgeEl = document.getElementById('bio-age-value');
+        
+        // Final calculation before showing the page
+        calculateBiologicalAge();
 
-        AnimationManager.add('lottie-age-arrow', 'https://assets1.lottiefiles.com/packages/lf20_3rqw3wdf.json');
+        AnimationManager.add('lottie-age-arrow', 'arrow.json');
         
         const chronoAge = App.userAnswers.age || 30;
         chronoAgeEl.textContent = chronoAge;
@@ -840,7 +909,7 @@ document.addEventListener('DOMContentLoaded', () => {
     menuOverlay.addEventListener('click', toggleMenu);
     setVh();
     window.addEventListener('resize', setVh);
-    AnimationManager.add('lottie-onboarding-2', 'https://assets9.lottiefiles.com/packages/lf20_cHA3rG.json');
+    AnimationManager.add('lottie-onboarding-2', 'arrow.json');
     initOnboarding();
     document.getElementById('back-btn').addEventListener('click', previous);
     document.getElementById('profile-continue-btn').addEventListener('click', next);
