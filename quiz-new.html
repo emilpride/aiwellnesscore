@@ -1,724 +1,754 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wellness Assessment</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { 
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;
-            --gray-400: #9ca3af;
-            --gray-500: #6b7280;
-            --gray-600: #4b5563;
-            --gray-700: #374151;
-            --gray-800: #1f2937;
-            --gray-900: #111827;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Wellness Quiz 2.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core/dist/tf-core.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter/dist/tf-converter.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl/dist/tf-backend-webgl.js" crossorigin="anonymous"></script>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <style>
+        :root { 
+            --brand-accent: #debea9;
+            --brand-dark-text: #3c3b31; 
+        }
+        html, body { 
+            overscroll-behavior: none; 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f3f4f6;
+        }
+        #quiz-container { 
+            display: flex; flex-direction: column; position: relative; 
+            width: 100vw; height: 100vh; height: calc(var(--vh, 1vh) * 100); 
+            overflow: hidden;
+        }
+        main#steps-wrapper { position: relative; width: 100%; flex-grow: 1; overflow: hidden; }
+        .quiz-step {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 1rem; background-color: #f3f4f6;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease-out;
+            opacity: 1; overflow-y: auto;
+        }
+        .quiz-step:not(.active) { opacity: 0; pointer-events: none; transform: translateX(30px) scale(0.98); }
+        .quiz-step.active { transform: translateX(0) scale(1); }
+        .quiz-step.prev { transform: translateX(-30px) scale(0.98); }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        #quiz-header { 
+            flex-shrink: 0; background: rgba(243, 244, 246, 0.8); backdrop-filter: blur(8px); 
+            border-bottom: 1px solid #e5e7eb; visibility: hidden; z-index: 50;
+        }
+        #side-menu { position: fixed; top: 0; right: 0; height: 100%; width: 280px; background-color: white; z-index: 150; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -10px 0 30px rgba(0,0,0,0.1); }
+        #side-menu.active { transform: translateX(0); }
+        #menu-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 140; opacity: 0; transition: opacity 0.3s ease-in-out; pointer-events: none; }
+        #menu-overlay.active { opacity: 1; pointer-events: all; }
 
-        body { 
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
-            color: var(--gray-900);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+        #onboarding-swiper { background-color: #fff; }
+        .swiper-wrapper { display: flex; height: 100%; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .swiper-slide { flex-shrink: 0; width: 100%; height: 100%; opacity: 0; transform: scale(0.95); transition: opacity 0.6s ease-out, transform 0.6s ease-out; display: flex; align-items: center; justify-content: center; padding: 2rem;}
+        .swiper-slide.active { opacity: 1; transform: scale(1); }
+        .dot { transition: background-color 0.3s, transform 0.3s; }
+        .dot.active { background-color: var(--brand-accent); transform: scale(1.25); }
 
-        .container {
-            max-width: 720px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
+        button.answer-option, button.gender-option {
+            background: none; color: inherit; border: none; padding: 0;
+            font: inherit; cursor: pointer; outline: inherit;
+            text-align: left; width: 100%;
+        }
 
-        /* Progress Bar */
-        .progress-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gray-200);
-            z-index: 100;
-        }
+        .answer-option, .gender-option { transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+        .answer-option:hover:not(:disabled), .gender-option:hover:not(:disabled) { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.07); }
+        .answer-option.selected, .gender-option.selected { transform: translateY(-5px) scale(1.02); border-color: var(--brand-accent); box-shadow: 0 0 20px rgba(222, 190, 169, 0.8); }
+        .answer-option:disabled, .gender-option:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .gender-option { padding: 1rem; }
+        .gender-option .gender-image-container { overflow: hidden; border-radius: 0.75rem; margin-bottom: 0.75rem; aspect-ratio: 4/5;}
+        .gender-option .gender-image { width: 100%; height: 100%; object-cover; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+        .gender-option:hover:not(:disabled) .gender-image { transform: scale(1.05); }
 
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
-        }
+        .answer-icon { width: 40px; height: 40px; background-color: #f3f4f6; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0; }
 
-        /* Step Container */
-        .step {
-            min-height: 100vh;
-            display: none;
-            animation: fadeIn 0.3s ease-out;
-            padding: 2rem 0;
-        }
+        #progress-bar-inner { 
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(to right, #a855f7, #6366f1);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow { from { box-shadow: 0 0 2px #a855f7, 0 0 4px #a855f7; } to { box-shadow: 0 0 6px #6366f1, 0 0 8px #6366f1; } }
 
-        .step.active {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+        #bmi-scale-container { position: relative; width: 32px; height: 344px; }
+        #bmi-scale-gradient { width: 344px; height: 18px; background: linear-gradient(270deg, #43B7FF 0%, #33C75A 25%, #FBF447 50%, #FFA64D 75%, #FF7D7E 100%); border-radius: 100px; position: absolute; left: -155px; top: 163px; transform: rotate(90deg); }
+        #bmi-thumb { position: absolute; width: 32px; height: 32px; background: linear-gradient(180deg, #F2F2F2 0%, #E8E8E8 100%); border: 2px solid #FFFFFF; box-shadow: 0px 0px 6.9px rgba(0, 0, 0, 0.25); border-radius: 50%; bottom: 0%; left: 0px; transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        #camera-modal { position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        #camera-modal.active { opacity: 1; pointer-events: all; }
+        #camera-container { position: relative; width: 90%; max-width: 400px; aspect-ratio: 3/4; overflow: hidden; border-radius: 1.5rem; background: #111; border: 1px solid rgba(255,255,255,0.2); }
+        #camera-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        #camera-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
+        #camera-guide-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); text-align: center; pointer-events: none; }
+        #camera-guide-box { width: 70%; aspect-ratio: 1/1.2; border: 2px dashed rgba(255,255,255,0.5); border-radius: 50%; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+        #camera-guide-box.locked { border-color: #34d399; box-shadow: 0 0 20px #34d399; }
+        #close-camera-btn { position: absolute; top: 1rem; right: 1rem; background-color: rgba(0,0,0,0.5); border-radius: 50%; color: white; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
 
-        /* Question Styles */
-        .question-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
+        .widget-wrapper { background-color: #fff; padding: 1.5rem; border-radius: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #f3f4f6; width: 100%; max-width: 320px; text-align: center; margin: 0 auto; }
+        .widget-label { font-weight: 600; color: #4b5563; margin-bottom: 1rem; }
+        .sleep-ring-bg { stroke: #e5e7eb; }
+        .sleep-ring-fg { stroke: #818cf8; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .activity-week { display: flex; justify-content: space-around; gap: 8px; }
+        .activity-day { width: 36px; height: 36px; border-radius: 10px; background-color: #e5e7eb; color: #6b7280; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .activity-day.active { background-color: var(--brand-accent); color: var(--brand-dark-text); transform: scale(1.15) translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+        #mood-slider-container { max-width: 320px; margin: 0 auto; }
+        #mood-emojis { display: flex; justify-content: space-between; font-size: 2.5rem; margin-bottom: 0.5rem; padding: 0 0.5rem; }
+        #mood-emojis span { transition: transform 0.2s, opacity 0.2s; }
+        #mood-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 10px; background: #e5e7eb; border-radius: 5px; outline: none; }
+        #mood-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 28px; height: 28px; background: white; cursor: pointer; border-radius: 50%; border: 4px solid var(--brand-accent); box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
 
-        .question-number {
-            display: inline-block;
-            background: var(--primary);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .question-title {
-            font-size: 1.875rem;
-            font-weight: 700;
-            line-height: 1.3;
-            margin-bottom: 0.5rem;
-        }
-
-        .question-subtitle {
-            color: var(--gray-600);
-            font-size: 1rem;
-        }
-
-        /* Option Cards */
-        .options-grid {
-            display: grid;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .option-card {
-            background: white;
-            border: 2px solid var(--gray-200);
-            border-radius: 12px;
-            padding: 1.25rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .option-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .option-card.selected {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            border-color: var(--primary);
-            color: white;
-        }
-
-        .option-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--gray-100);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            flex-shrink: 0;
-        }
-
-        .option-card.selected .option-icon {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .option-text {
-            flex: 1;
-            font-weight: 500;
-        }
-
-        /* Slider Styles */
-        .slider-container {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .slider-value {
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--primary);
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .slider-input {
-            width: 100%;
-            height: 8px;
-            border-radius: 4px;
-            background: var(--gray-200);
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        .slider-input::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .slider-input::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-            border: none;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .slider-labels {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 0.5rem;
-            font-size: 0.875rem;
-            color: var(--gray-500);
-        }
-
-        /* Button Styles */
-        .btn {
-            padding: 0.875rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            color: white;
-            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-secondary {
-            background: white;
-            color: var(--gray-700);
-            border: 2px solid var(--gray-200);
-        }
-
-        .btn-secondary:hover {
-            background: var(--gray-50);
-            border-color: var(--gray-300);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        /* Navigation */
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        /* Welcome Screen */
-        .welcome-screen {
-            text-align: center;
-            padding: 3rem 0;
-        }
-
-        .welcome-icon {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 2rem;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.3);
-        }
-
-        .welcome-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-
-        .welcome-description {
-            font-size: 1.125rem;
-            color: var(--gray-600);
-            max-width: 500px;
-            margin: 0 auto 3rem;
-            line-height: 1.6;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin: 3rem 0;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-
-        .feature-icon {
-            font-size: 2rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .feature-title {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .feature-description {
-            font-size: 0.875rem;
-            color: var(--gray-600);
-        }
-
-        /* Results Screen */
-        .results-card {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1.5rem;
-        }
-
-        .score-display {
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .score-circle {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto 1.5rem;
-            position: relative;
-        }
-
-        .score-circle svg {
-            transform: rotate(-90deg);
-        }
-
-        .score-circle-bg {
-            fill: none;
-            stroke: var(--gray-200);
-            stroke-width: 8;
-        }
-
-        .score-circle-progress {
-            fill: none;
-            stroke: url(#gradient);
-            stroke-width: 8;
-            stroke-linecap: round;
-            transition: stroke-dashoffset 1s ease;
-        }
-
-        .score-number {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .score-label {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .score-description {
-            color: var(--gray-600);
-        }
-
-        /* Responsive */
-        @media (max-width: 640px) {
-            .question-title {
-                font-size: 1.5rem;
-            }
-            
-            .welcome-title {
-                font-size: 2rem;
-            }
-            
-            .slider-value {
-                font-size: 2.5rem;
-            }
-        }
-    </style>
+        #quiz-footer { 
+            flex-shrink: 0; background-color: #fff; 
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.05); 
+            display: none; padding: 1rem; 
+        }
+    </style>
 </head>
 <body>
-    <!-- Progress Bar -->
-    <div class="progress-bar">
-        <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
-    </div>
 
-    <!-- Welcome Step -->
-    <div class="step active" id="step-0">
-        <div class="container">
-            <div class="welcome-screen">
-                <div class="welcome-icon">💪</div>
-                <h1 class="welcome-title">Wellness Assessment</h1>
-                <p class="welcome-description">
-                    Take a comprehensive health evaluation to understand your wellness score 
-                    and receive personalized recommendations for improvement.
-                </p>
-                
-                <div class="features-grid">
-                    <div class="feature-card">
-                        <div class="feature-icon">📊</div>
-                        <div class="feature-title">Health Score</div>
-                        <div class="feature-description">Get your overall wellness rating</div>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">📈</div>
-                        <div class="feature-title">Insights</div>
-                        <div class="feature-description">Understand your health patterns</div>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">🎯</div>
-                        <div class="feature-title">Action Plan</div>
-                        <div class="feature-description">Personalized recommendations</div>
-                    </div>
-                </div>
-                
-                <button class="btn btn-primary" onclick="nextStep()">
-                    Start Assessment
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M7 10h6m0 0l-3-3m3 3l-3 3" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
+<div id="quiz-container">
+    <header id="quiz-header" class="w-full p-4">
+        <div class="flex items-center gap-4 max-w-2xl mx-auto">
+            <a href="index.html" class="flex-shrink-0">
+                <img src="logo.png" alt="Logo" class="h-8 w-auto">
+            </a>
+            <button id="back-btn" class="text-gray-600 hover:text-gray-900 transition hidden p-2 -ml-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <div class="flex-grow h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div id="progress-bar-inner" class="h-full"></div>
+            </div>
+            <button id="burger-menu-btn" class="text-gray-600 hover:text-gray-900 transition p-2 -mr-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+            </button>
+        </div>
+    </header>
 
-    <!-- Question Steps will be generated dynamically -->
-    
-    <script>
-        // Quiz Data
-        const questions = [
-            {
-                id: 1,
-                type: 'options',
-                question: 'How would you rate your overall health?',
-                subtitle: 'Be honest - this helps us provide better recommendations',
-                options: [
-                    { icon: '😟', text: 'Poor', value: 1 },
-                    { icon: '😐', text: 'Fair', value: 2 },
-                    { icon: '🙂', text: 'Good', value: 3 },
-                    { icon: '😊', text: 'Excellent', value: 4 }
-                ]
-            },
-            {
-                id: 2,
-                type: 'slider',
-                question: 'How old are you?',
-                subtitle: 'Your age helps us customize recommendations',
-                min: 18,
-                max: 100,
-                default: 30,
-                unit: 'years'
-            },
-            {
-                id: 3,
-                type: 'options',
-                question: 'How many hours do you sleep on average?',
-                subtitle: 'Quality sleep is crucial for wellness',
-                options: [
-                    { icon: '😴', text: 'Less than 6 hours', value: 1 },
-                    { icon: '🥱', text: '6-7 hours', value: 2 },
-                    { icon: '😌', text: '7-8 hours', value: 3 },
-                    { icon: '😊', text: 'More than 8 hours', value: 4 }
-                ]
-            },
-            {
-                id: 4,
-                type: 'options',
-                question: 'How often do you exercise?',
-                subtitle: 'Include any physical activity',
-                options: [
-                    { icon: '🛋️', text: 'Rarely', value: 1 },
-                    { icon: '🚶', text: '1-2 times/week', value: 2 },
-                    { icon: '🏃', text: '3-4 times/week', value: 3 },
-                    { icon: '💪', text: '5+ times/week', value: 4 }
-                ]
-            },
-            {
-                id: 5,
-                type: 'slider',
-                question: 'Rate your stress level',
-                subtitle: '1 = Very low, 10 = Very high',
-                min: 1,
-                max: 10,
-                default: 5,
-                unit: ''
-            }
-        ];
+    <main id="steps-wrapper">
+        <section id="step-onboarding" class="quiz-step active p-0">
+             <div id="onboarding-swiper" class="relative w-full h-full flex flex-col">
+                <div class="flex-grow w-full h-full overflow-hidden">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide !p-0">
+                            <video class="absolute top-0 left-0 w-full h-full object-cover -z-10" autoplay loop muted playsinline>
+                                <source src="fon.webm" type="video/webm">
+                                <source src="fon.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="w-full h-full flex flex-col justify-end items-center text-center p-8 bg-black/30 text-white">
+                                <div class="flex-grow"></div>
+                                <h1 class="text-4xl font-extrabold tracking-tight">Unlock Your Inner Potential.</h1>
+                                <p class="mt-3 max-w-md text-lg text-gray-200">Discover your biological age and get a personalized wellness plan based on AI analysis.</p>
+                                <div class="h-[15vh]"></div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide"><div class="text-left w-full max-w-sm"><h2 class="text-2xl font-bold text-gray-800 text-center mb-6">What you'll get:</h2><ul class="space-y-4"><li class="flex items-center"><span class="text-2xl mr-3">🎯</span><div><h3 class="font-semibold">Wellness Score</h3><p class="text-sm text-gray-500">Your comprehensive health rating</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">⏳</span><div><h3 class="font-semibold">Biological Age</h3><p class="text-sm text-gray-500">How "young" you are for your years</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🌿</span><div><h3 class="font-semibold">Skin & Stress Analysis</h3><p class="text-sm text-gray-500">Learn about hidden factors</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🗺️</span><div><h3 class="font-semibold">Personalized Plan</h3><p class="text-sm text-gray-500">A 7-day plan for improvement</p></div></li></ul></div></div>
+                        <div class="swiper-slide"><div class="text-center"><h2 class="text-2xl font-bold text-gray-800 mb-6">Lower Your Biological Age</h2><div class="flex justify-center items-center space-x-4"><div class="text-center"><p class="text-gray-500">Chronological</p><p class="text-5xl font-bold text-gray-400">35</p></div><div id="lottie-onboarding-2" class="w-20 h-20"></div><div class="text-center"><p class="font-semibold" style="color: var(--brand-dark-text);">Biological</p><p class="text-6xl font-extrabold" style="color: var(--brand-dark-text);">32</p></div></div><p class="text-gray-600 mt-6 max-w-xs mx-auto">Our plan is designed to help you feel younger and more energetic.</p></div></div>
+                        <div class="swiper-slide"><div class="text-center max-w-sm"><h2 class="text-2xl font-bold text-gray-800 mb-8">Your Privacy is Our Priority</h2><div class="space-y-6 text-left"><div class="flex items-center"><span class="text-3xl mr-4">📸</span><p class="text-gray-600">Your photo is analyzed on-the-fly and never stored.</p></div><div class="flex items-center"><span class="text-3xl mr-4">🔒</span><p class="text-gray-600">All your data is anonymized and protected by encryption.</p></div><div class="flex items-center"><span class="text-3xl mr-4">⚕️</span><p class="text-gray-600">This is not medical advice. For informational purposes only.</p></div></div></div></div>
+                    </div>
+                </div>
+                <div class="py-6 px-6 bg-white"><div id="dots-container" class="flex justify-center items-center space-x-3 mb-6"></div><button id="start-quiz-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[--brand-accent]/40">Let's start</button></div>
+            </div>
+        </section>
 
-        let currentStep = 0;
-        const answers = {};
+        <section id="step-quiz" class="quiz-step prev">
+            <div id="question-wrapper" class="w-full max-w-2xl"></div>
+        </section>
+        
+        <section id="step-bmi" class="quiz-step prev">
+             <div class="flex flex-col md:flex-row items-center justify-center gap-8 w-full max-w-4xl">
+                <div id="bmi-scale-container" class="flex-shrink-0">
+                    <div id="bmi-scale-gradient"></div>
+                    <div id="bmi-thumb"></div>
+                </div>
+                <div class="flex-1 text-center md:text-left">
+                    <div id="bmi-value-container" class="text-6xl font-extrabold text-gray-800 transition-opacity duration-500 opacity-0">...</div>
+                    <div id="bmi-image-container" class="mt-4 transition-opacity duration-500 opacity-0">
+                        <img id="bmi-image" src="" alt="BMI category illustration" class="w-full h-auto max-w-[200px] md:max-w-[250px] mx-auto md:mx-0">
+                    </div>
+                    <div id="bmi-text-container" class="mt-4 transition-opacity duration-500 opacity-0">
+                        <h3 id="bmi-title" class="text-2xl font-bold"></h3>
+                        <p id="bmi-description" class="text-gray-600 mt-1"></p>
+                    </div>
+                     <div id="bmi-continue-button-container" class="mt-8 transition-opacity duration-500 opacity-0">
+                        <button id="bmi-continue-btn" class="w-full sm:max-w-xs mx-auto md:mx-0 block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Continue</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="step-loading" class="quiz-step prev">
+            <div id="loading-animation" class="w-48 h-48"></div>
+            <h2 class="text-3xl font-bold text-gray-800 mt-4 text-center">Analyzing Your Unique Profile...</h2>
+            <div id="analysis-steps" class="mt-6 text-gray-600 space-y-2 w-64 text-left"></div>
+        </section>
+    </main>
+    
+    <footer id="quiz-footer" class="w-full z-10">
+        <div id="footer-actions" class="w-full max-w-2xl mx-auto"></div>
+    </footer>
+</div>
 
-        // Initialize quiz
-        function initQuiz() {
-            // Create question steps
-            questions.forEach((q, index) => {
-                const stepDiv = document.createElement('div');
-                stepDiv.className = 'step';
-                stepDiv.id = `step-${index + 1}`;
-                stepDiv.innerHTML = createQuestionHTML(q, index + 1);
-                document.body.appendChild(stepDiv);
-            });
+<div id="menu-overlay"></div>
+<nav id="side-menu" class="p-6">
+    <div class="flex justify-between items-center mb-8">
+        <h3 class="text-xl font-bold">Menu</h3>
+        <button id="close-menu-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+    </div>
+    <div class="flex flex-col space-y-2">
+        <a href="index.html" class="text-lg text-gray-700 hover:text-[--brand-dark-text] p-3 rounded-md transition-colors">Home</a>
+        <a href="terms.html" class="text-lg text-gray-700 hover:text-[--brand-dark-text] p-3 rounded-md transition-colors">Terms of Service</a>
+        <a href="privacy.html" class="text-lg text-gray-700 hover:text-[--brand-dark-text] p-3 rounded-md transition-colors">Privacy Policy</a>
+        <a href="contact.html" class="text-lg text-gray-700 hover:text-[--brand-dark-text] p-3 rounded-md transition-colors">Contact</a>
+    </div>
+</nav>
 
-            // Create results step
-            const resultsDiv = document.createElement('div');
-            resultsDiv.className = 'step';
-            resultsDiv.id = `step-${questions.length + 1}`;
-            resultsDiv.innerHTML = createResultsHTML();
-            document.body.appendChild(resultsDiv);
-        }
+<div id="camera-modal">
+    <div id="camera-container">
+        <video id="camera-video" autoplay playsinline></video>
+        <canvas id="camera-canvas"></canvas>
+        <div id="camera-guide-overlay">
+            <h3 id="camera-guide-text" class="text-lg font-semibold">Center your face in the oval</h3>
+            <div id="camera-guide-box"></div>
+        </div>
+        <button id="close-camera-btn" title="Close Camera">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+    </div>
+</div>
+<canvas id="photo-canvas" style="display: none;"></canvas>
 
-        function createQuestionHTML(question, number) {
-            let optionsHTML = '';
-            let navigationHTML = `
-                <div class="nav-buttons">
-                    ${number > 1 ? '<button class="btn btn-secondary" onclick="previousStep()">Back</button>' : '<div></div>'}
-                    ${question.type === 'slider' ? '<button class="btn btn-primary" onclick="nextStep()">Continue</button>' : '<div></div>'}
-                </div>
-            `;
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const App = {
+        currentStep: 'onboarding',
+        currentQuestionIndex: -1,
+        userAnswers: {},
+        cameraStream: null,
+        faceMesh: null,
+        cameraAnimFrame: null,
+        captureTimeout: null,
+        quizQuestions: [
+            { key: 'userGoal', type: 'options', text: "What’s your main goal?", options: [{text: 'Find out my Biological Age', icon:'⏳'}, {text:'Get a Skin Health Analysis', icon: '🌿'}, {text:'Receive a 7-Day Improvement Plan', icon:'🗺️'}, {text:'All of the above!', icon:'🚀'}] },
+            { key: 'age', type: 'slider', text: "How old are you?", min: 18, max: 90, defaultValue: 30, unit: 'years' },
+            { key: 'gender', type: 'gender_selection', text: "What’s your biological sex?", options: [{value: 'male', img: 'male.png'}, {value: 'female', img: 'female.png'}] },
+            { key: 'height', type: 'slider', text: "What’s your height?", min: 140, max: 220, defaultValue: 175, unit: 'cm' },
+            { key: 'weight', type: 'slider', text: "What’s your weight?", min: 40, max: 150, defaultValue: 77, unit: 'kg' },
+            { key: 'bmi_display', type: 'animation' },
+            { key: 'sleep', type: 'options', text: "On average, how much do you sleep?", options: [{text:"Less than 5 hours", icon:"😴"}, {text:"5–6 hours", icon:"🥱"}, {text:"7–8 hours", icon:"😎"}, {text:"More than 8 hours", icon:"😍"}] },
+            { key: 'sleep_visual', type: 'animation' },
+            { key: 'activity', type: 'options', text: "How often do you exercise?", options: [{text:"Rarely / Never", icon:"🛋️"}, {text:"1–2 times a week", icon:"🚶"}, {text:"3–4 times a week", icon:"💪"}, {text:"5+ times a week", icon:"🏆"}] },
+            { key: 'activity_visual', type: 'animation' },
+            { key: 'nutrition', type: 'options', text: "How many servings of fruits & veggies do you eat daily?", options: ["0–1 serving", "2–3 servings", "4–5 servings", "More than 5 servings"] },
+            { key: 'processed_food', type: 'options', text: "How often do you eat processed or fast food?", options: ["Rarely", "1–2 times a week", "3–4 times a week", "Daily"] },
+            { key: 'hydration', type: 'options', text: "How much water do you drink per day?", options: ["1–3 cups (8–24 oz / 250–700 ml)", "4–6 cups (32–48 oz / 1–1.5 L)", "7–9 cups (56–72 oz / 2 L)", "10+ cups (80+ oz / 2.5+ L)"] },
+            { key: 'stress', type: 'slider', text: "How stressed do you usually feel? (1 = relaxed, 10 = extremely stressed)", min: 1, max: 10, defaultValue: 5, unit: ''},
+            { key: 'mindfulness', type: 'options', text: "How often do you practice mindfulness?", options: ["Never", "Sometimes", "Weekly", "Daily"] },
+            { key: 'mood', type: 'emoji_slider', text: "How would you describe your overall mood?", options: [ { text: '😟', value: 'Often stressed or down' }, { text: '😐', value: 'Changes a lot' }, { text: '🙂', value: 'Mostly content' }, { text: '😊', value: 'Happy & energetic' } ] },
+            { key: 'alcohol', type: 'options', text: "How much alcohol do you drink weekly?", options: ["None", "1–3 drinks", "4–7 drinks", "8+ drinks"] },
+            { key: 'smoking', type: 'options', text: "Do you smoke?", options: ["Never", "Used to, but quit", "Occasionally", "Yes, daily"] },
+            { key: 'screen_time', type: 'options', text: "How much screen time do you have daily (outside of work)?", options: ["Less than 2 hours", "2–4 hours", "4–6 hours", "More than 6 hours"] },
+            { key: 'selfie', type: 'camera_step', text: 'AI Photo Analysis 📸', subtext: '(Optional – helps us analyze skin health & fine lines)'},
+            { key: 'email', type: 'email_step', text: "Enter your email 📩", subtext: "to get your personalized report summary. We respect your privacy." }
+        ],
+    };
 
-            if (question.type === 'options') {
-                optionsHTML = `
-                    <div class="options-grid">
-                        ${question.options.map((opt, i) => `
-                            <div class="option-card" onclick="selectOption(${question.id}, ${opt.value}, this)">
-                                <div class="option-icon">${opt.icon}</div>
-                                <div class="option-text">${opt.text}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            } else if (question.type === 'slider') {
-                optionsHTML = `
-                    <div class="slider-container">
-                        <div class="slider-value" id="slider-value-${question.id}">${question.default} ${question.unit}</div>
-                        <input type="range" class="slider-input" 
-                               id="slider-${question.id}"
-                               min="${question.min}" 
-                               max="${question.max}" 
-                               value="${question.default}"
-                               oninput="updateSlider(${question.id}, this.value, '${question.unit}')">
-                        <div class="slider-labels">
-                            <span>${question.min} ${question.unit}</span>
-                            <span>${question.max} ${question.unit}</span>
-                        </div>
-                    </div>
-                `;
-            }
+    const AnimationManager = {
+        animations: new Map(),
+        add(id, path) {
+            if (this.animations.has(id) || !document.getElementById(id)) return;
+            const container = document.getElementById(id);
+            if(!container) return;
+            try {
+                const anim = lottie.loadAnimation({ container, renderer: 'svg', loop: true, autoplay: true, path });
+                this.animations.set(id, anim);
+            } catch(e) { console.error(`Lottie error on container #${id}:`, e); }
+        }
+    };
+    
+    const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
 
-            return `
-                <div class="container">
-                    <div class="question-header">
-                        <span class="question-number">Question ${number} of ${questions.length}</span>
-                        <h2 class="question-title">${question.question}</h2>
-                        <p class="question-subtitle">${question.subtitle}</p>
-                    </div>
-                    ${optionsHTML}
-                    ${navigationHTML}
-                </div>
-            `;
-        }
+    function goToStep(stepKey) {
+        App.currentStep = stepKey;
+        document.querySelectorAll('.quiz-step').forEach(step => {
+            const isActive = step.id === `step-${stepKey}`;
+            const wasActive = step.classList.contains('active');
+            if (isActive) {
+                step.classList.remove('prev');
+                step.classList.add('active');
+            } else {
+                step.classList.remove('active');
+                if (wasActive) step.classList.add('prev');
+            }
+        });
+        const isQuizActive = (stepKey === 'quiz');
+        document.getElementById('quiz-header').style.visibility = (stepKey !== 'onboarding') ? 'visible' : 'hidden';
+        document.getElementById('quiz-footer').style.display = isQuizActive ? 'block' : 'none';
+    }
 
-        function createResultsHTML() {
-            return `
-                <div class="container">
-                    <div class="results-card">
-                        <div class="score-display">
-                            <div class="score-circle">
-                                <svg width="200" height="200">
-                                    <defs>
-                                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                            <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
-                                            <stop offset="100%" style="stop-color:#818cf8;stop-opacity:1" />
-                                        </linearGradient>
-                                    </defs>
-                                    <circle cx="100" cy="100" r="90" class="score-circle-bg"></circle>
-                                    <circle cx="100" cy="100" r="90" class="score-circle-progress"
-                                            stroke-dasharray="565.48" stroke-dashoffset="141.37"></circle>
-                                </svg>
-                                <div class="score-number">75</div>
-                            </div>
-                            <h2 class="score-label">Your Wellness Score</h2>
-                            <p class="score-description">Good health with room for improvement</p>
-                        </div>
-                    </div>
-                    
-                    <div class="results-card">
-                        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Key Recommendations</h3>
-                        <ul style="space-y: 0.75rem; color: var(--gray-700);">
-                            <li style="margin-bottom: 0.75rem;">✅ Maintain your exercise routine</li>
-                            <li style="margin-bottom: 0.75rem;">💤 Aim for 7-8 hours of sleep consistently</li>
-                            <li style="margin-bottom: 0.75rem;">🧘 Consider stress management techniques</li>
-                            <li style="margin-bottom: 0.75rem;">💧 Stay hydrated throughout the day</li>
-                        </ul>
-                    </div>
-                    
-                    <div style="text-align: center; margin-top: 2rem;">
-                        <button class="btn btn-primary" onclick="location.reload()">
-                            Start Over
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
+    function handleAnswer(questionKey, answer) {
+        App.userAnswers[questionKey] = answer;
+        next();
+    }
+    
+    function next() {
+        App.currentQuestionIndex++;
+        const stepConfig = App.quizQuestions[App.currentQuestionIndex];
+        
+        if (!stepConfig) {
+            startAnalysis();
+            return;
+        }
 
-        function selectOption(questionId, value, element) {
-            // Store answer
-            answers[questionId] = value;
-            
-            // Update UI
-            element.parentNode.querySelectorAll('.option-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            element.classList.add('selected');
-            
-            // Auto-advance after short delay
-            setTimeout(() => nextStep(), 300);
-        }
+        document.getElementById('back-btn').classList.toggle('hidden', App.currentQuestionIndex <= 0);
+        
+        if (stepConfig.type === 'animation') {
+            renderAnimation(stepConfig.key);
+        } else {
+            goToStep('quiz');
+            renderQuestion();
+        }
+        updateProgressBar();
+    }
 
-        function updateSlider(questionId, value, unit) {
-            document.getElementById(`slider-value-${questionId}`).textContent = `${value} ${unit}`;
-            answers[questionId] = value;
-        }
+    function previous() {
+        if (App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') App.currentQuestionIndex--;
+        App.currentQuestionIndex--;
+        if (App.currentQuestionIndex < 0) {
+            goToStep('onboarding');
+            return;
+        };
+        
+        document.getElementById('back-btn').classList.toggle('hidden', App.currentQuestionIndex <= 0);
+        goToStep('quiz');
+        renderQuestion();
+        updateProgressBar();
+    }
+    
+    function updateProgressBar() {
+        const questionsWithProgressBar = App.quizQuestions.filter(q => q.type !== 'animation');
+        const totalSteps = questionsWithProgressBar.length;
+        const currentProgressStep = questionsWithProgressBar.findIndex(q => q.key === App.quizQuestions[App.currentQuestionIndex]?.key);
+        const progress = totalSteps > 0 ? ((currentProgressStep + 1) / totalSteps) * 100 : 0;
+        document.getElementById('progress-bar-inner').style.width = `${Math.min(100, progress)}%`;
+    }
 
-        function nextStep() {
-            // Hide current step
-            document.getElementById(`step-${currentStep}`).classList.remove('active');
-            
-            // Show next step
-            currentStep++;
-            const nextStepElement = document.getElementById(`step-${currentStep}`);
-            if (nextStepElement) {
-                nextStepElement.classList.add('active');
-                updateProgress();
-            }
-            
-            // If we're at results, calculate score
-            if (currentStep > questions.length) {
-                calculateResults();
-            }
-        }
+    function renderQuestion() {
+        const question = App.quizQuestions[App.currentQuestionIndex];
+        if (!question) return;
 
-        function previousStep() {
-            if (currentStep > 0) {
-                document.getElementById(`step-${currentStep}`).classList.remove('active');
-                currentStep--;
-                document.getElementById(`step-${currentStep}`).classList.add('active');
-                updateProgress();
-            }
-        }
+        const wrapper = document.getElementById('question-wrapper');
+        const footerWrapper = document.getElementById('footer-actions');
+        footerWrapper.innerHTML = '';
+        
+        let contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>`;
+        
+        if (question.key === 'hydration') {
+             contentHTML += `<div id="hydration-lottie" class="w-48 h-48 mx-auto -mb-8 -mt-4"></div>`;
+        }
 
-        function updateProgress() {
-            const progress = ((currentStep - 1) / questions.length) * 100;
-            document.getElementById('progressBar').style.width = `${Math.max(0, Math.min(100, progress))}%`;
-        }
+        if (question.type === 'camera_step') {
+            contentHTML = `
+                <img src="face.jpeg" alt="Face scan illustration" class="w-48 h-48 mx-auto rounded-full object-cover mb-6 shadow-lg">
+                <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
+                <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
+        } else if (question.type === 'email_step') {
+             contentHTML = `
+                <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
+                <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
+        }
+        
+        wrapper.innerHTML = `<div class="question-content w-full">${contentHTML}</div>`;
 
-        function calculateResults() {
-            // Simple scoring logic (would be more complex in real app)
-            let totalScore = 0;
-            let maxScore = 0;
-            
-            questions.forEach(q => {
-                if (answers[q.id]) {
-                    if (q.type === 'options') {
-                        totalScore += answers[q.id];
-                        maxScore += 4;
-                    } else if (q.type === 'slider' && q.id === 5) {
-                        // For stress, lower is better
-                        totalScore += (11 - answers[q.id]) / 2.5;
-                        maxScore += 4;
-                    }
-                }
-            });
-            
-            const finalScore = Math.round((totalScore / maxScore) * 100);
-            
-            // Update results display
-            const scoreElement = document.querySelector('.score-number');
-            if (scoreElement) {
-                scoreElement.textContent = finalScore;
-                
-                // Update progress circle
-                const circle = document.querySelector('.score-circle-progress');
-                const circumference = 565.48;
-                const offset = circumference - (finalScore / 100) * circumference;
-                circle.style.strokeDashoffset = offset;
-            }
-        }
+        if (question.key === 'hydration') {
+             AnimationManager.add('hydration-lottie', 'water.json');
+        }
+        
+        if (question.type === 'options') {
+            const optionsHTML = question.options.map(opt => {
+                const displayText = typeof opt === 'object' ? opt.text : opt;
+                const value = typeof opt === 'object' ? opt.value : opt;
+                const iconHTML = typeof opt === 'object' && opt.icon ? `<div class="answer-icon">${opt.icon}</div>` : `<div class="answer-icon">➡️</div>`;
 
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', initQuiz);
-    </script>
+                return `<button class="answer-option w-full bg-white p-4 rounded-2xl border-2 border-gray-200" data-value="${value}">
+                            <div class="flex items-center gap-4">
+                                ${iconHTML}
+                                <span class="flex-1 text-lg font-semibold text-gray-800">${displayText}</span>
+                            </div>
+                        </button>`;
+            }).join('');
+            footerWrapper.innerHTML = `<div class="grid grid-cols-1 gap-3 max-w-md mx-auto">${optionsHTML}</div>`;
+            footerWrapper.querySelectorAll('.answer-option').forEach(btn => {
+                 btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
+            });
+        } else if (question.type === 'slider') {
+            const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-inner"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
+            wrapper.insertAdjacentHTML('beforeend', sliderContent);
+            updateSliderDisplay(question, App.userAnswers[question.key] || question.defaultValue);
+            footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;
+            const sliderInput = document.getElementById('slider-input');
+            sliderInput.addEventListener('input', () => updateSliderDisplay(question, sliderInput.value));
+            footerWrapper.querySelector('#slider-confirm-btn').addEventListener('click', () => handleAnswer(question.key, sliderInput.value));
+        } else if (question.type === 'gender_selection') {
+            const optionsHTML = question.options.map(opt => `
+                <button class="gender-option text-center rounded-2xl border-2 border-gray-200 bg-white transition" data-value="${opt.value}">
+                    <div class="gender-image-container">
+                        <img src="${opt.img}" alt="${opt.value}" class="gender-image">
+                    </div>
+                    <span class="text-xl font-bold text-gray-800 capitalize p-4 pt-0">${opt.value}</span>
+                </button>`).join('');
+            footerWrapper.innerHTML = `<div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">${optionsHTML}</div>`;
+            footerWrapper.querySelectorAll('.gender-option').forEach(btn => {
+                btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
+            });
+        } else if (question.type === 'camera_step') {
+            footerWrapper.innerHTML = `<div class="max-w-sm mx-auto space-y-3 mt-4"><button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button></div>`;
+            footerWrapper.querySelector('#open-camera-btn').addEventListener('click', openCamera);
+            footerWrapper.querySelector('#skip-photo-btn').addEventListener('click', () => handleAnswer('selfie', 'skipped'));
+        } else if (question.type === 'email_step') {
+             footerWrapper.innerHTML = `<div class="flex gap-2 max-w-sm mx-auto"><input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border-gray-300 rounded-lg shadow-sm focus:ring-[--brand-accent] focus:border-[--brand-accent]"><button id="email-submit-btn" class="bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-5 rounded-lg hover:opacity-90 transition">Submit</button></div>`;
+             footerWrapper.querySelector('#email-submit-btn').addEventListener('click', () => {
+                const email = document.getElementById('email-input').value;
+                if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) handleAnswer('email', email);
+                else alert('Please enter a valid email address.');
+            });
+        } else if (question.type === 'emoji_slider') {
+            const emojis = question.options.map(opt => `<span>${opt.text}</span>`).join('');
+            const sliderContent = `
+                <div id="mood-slider-container">
+                    <div id="mood-emojis">${emojis}</div>
+                    <input type="range" min="0" max="${question.options.length - 1}" value="1" step="1" id="mood-slider">
+                </div>`;
+            wrapper.insertAdjacentHTML('beforeend', sliderContent);
+            footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="mood-confirm-btn">Confirm</button>`;
+            
+            const moodSlider = document.getElementById('mood-slider');
+            const emojiSpans = document.querySelectorAll('#mood-emojis span');
+            const updateEmojiSelection = () => {
+                emojiSpans.forEach((span, index) => {
+                    span.style.transform = index == moodSlider.value ? 'scale(1.5)' : 'scale(1)';
+                    span.style.opacity = index == moodSlider.value ? '1' : '0.5';
+                });
+            };
+            moodSlider.addEventListener('input', updateEmojiSelection);
+            updateEmojiSelection();
+
+            footerWrapper.querySelector('#mood-confirm-btn').addEventListener('click', () => {
+                const selectedValue = question.options[moodSlider.value].value;
+                handleAnswer(question.key, selectedValue);
+            });
+        }
+    }
+    
+    function handleOptionClick(event, key, value) {
+        const clickedButton = event.currentTarget;
+        const parent = clickedButton.closest('.grid');
+        parent.querySelectorAll('button').forEach(btn => btn.disabled = true);
+        clickedButton.classList.add('selected');
+        setTimeout(() => handleAnswer(key, value), 400);
+    }
+
+    function updateSliderDisplay(question, value) {
+        const valueDisplay = document.getElementById('slider-value-display');
+        if (!valueDisplay) return;
+        let displayHTML = `${value} ${question.unit || ''}`;
+        if (question.unit === 'cm') {
+            const totalInches = value / 2.54;
+            let feet = Math.floor(totalInches / 12);
+            let inches = Math.round(totalInches % 12);
+            if (inches === 12) { feet++; inches = 0; }
+            displayHTML = `${feet}'${inches}" <span class="text-lg text-gray-400 font-medium">(${value} cm)</span>`;
+        } else if (question.unit === 'kg') {
+            const lbs = Math.round(value * 2.20462);
+            displayHTML = `${lbs} lbs <span class="text-lg text-gray-400 font-medium">(${value} kg)</span>`;
+        }
+        valueDisplay.innerHTML = displayHTML;
+    }
+    
+    function renderAnimation(key) {
+        goToStep('quiz');
+        const wrapper = document.getElementById('question-wrapper');
+        document.getElementById('footer-actions').innerHTML = '';
+        document.getElementById('back-btn').classList.add('hidden');
+        let animationHTML = '';
+
+        if (key === 'bmi_display') {
+            goToStep('bmi');
+            renderBmiResult();
+            return;
+        } else if (key === 'sleep_visual') {
+            animationHTML = `<div class="widget-wrapper"><div class="widget-label">Sleep Recharge</div><div class="relative mx-auto my-3 w-36 h-36"><svg class="w-full h-full" viewBox="0 0 120 120"><circle class="sleep-ring-bg" stroke-width="10" cx="60" cy="60" r="52" /><circle id="sleep-ring-fg-anim" class="sleep-ring-fg" stroke-width="10" cx="60" cy="60" r="52" style="stroke-dasharray: 327; stroke-dashoffset: 327;"/></svg><div class="absolute inset-0 flex flex-col items-center justify-center text-3xl">🌙</div></div></div>`;
+        } else if (key === 'activity_visual') {
+            animationHTML = `<div class="widget-wrapper"><div class="widget-label">Your Active Week</div><div class="activity-week" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div></div>`;
+        }
+        
+        wrapper.innerHTML = `<div class="question-content w-full">${animationHTML}</div>`;
+        
+        setTimeout(() => playAnimation(key), 100); 
+        setTimeout(next, 2200);
+    }
+
+    function playAnimation(key) {
+        if (key === 'sleep_visual') {
+            const answer = App.userAnswers.sleep || "";
+            let percent = 50;
+            if (answer.startsWith("Less than 5")) percent = 25;
+            else if (answer.startsWith("5–6")) percent = 50;
+            else if (answer.startsWith("7–8")) percent = 90;
+            else if (answer.startsWith("More than 8")) percent = 100;
+            
+            const ringEl = document.getElementById('sleep-ring-fg-anim');
+            const circumference = 327;
+            if(ringEl) ringEl.style.strokeDashoffset = circumference - (percent / 100) * circumference;
+        } else if (key === 'activity_visual') {
+            const answer = App.userAnswers.activity || "";
+            let days = 0;
+            if (answer.includes("Rarely")) days = 1;
+            if (answer.includes("1–2")) days = 2;
+            if (answer.includes("3–4")) days = 4;
+            if (answer.includes("5+")) days = 6;
+            
+            const dayElements = document.querySelectorAll('#activity-week-anim .activity-day');
+            if (dayElements.length) {
+                for (let i = 0; i < Math.min(days, 7); i++) {
+                    setTimeout(() => { dayElements[i]?.classList.add('active'); }, i * 200);
+                }
+            }
+        }
+    }
+    
+    function renderBmiResult() {
+        const heightM = App.userAnswers.height / 100;
+        const weightKg = App.userAnswers.weight;
+        const gender = App.userAnswers.gender;
+        const bmi = (weightKg / (heightM * heightM));
+
+        const categories = [
+            { max: 16, img: 'under16', title: 'Severely Underweight', desc: 'Extremely low body mass. May cause fatigue, low immunity.' },
+            { max: 18.4, img: '16-18.4', title: 'Underweight', desc: 'Below healthy weight. Risk of nutrient deficiency.' },
+            { max: 24.9, img: '18.5-24.9', title: 'Normal Weight', desc: 'Ideal weight range. Lowest risk of health issues.' },
+            { max: 29.9, img: '25.0-29.9', title: 'Overweight', desc: 'Slightly above normal. Risk of heart and metabolic issues.' },
+            { max: 34.9, img: '30-above', title: 'Obesity (Class I)', desc: 'Increased risk of diabetes, high blood pressure etc.' },
+            { max: 39.9, img: '30-above', title: 'Obesity (Class II)', desc: 'High risk of serious health conditions.' },
+            { max: Infinity, img: '30-above', title: 'Obesity (Class III)', desc: 'Very high risk. Medical advice strongly recommended.' }
+        ];
+
+        const result = categories.find(c => bmi < c.max);
+        const prefix = gender === 'female' ? 'f' : 'm';
+        
+        document.getElementById('bmi-image').src = `${prefix}-${result.img}.svg`;
+        document.getElementById('bmi-title').textContent = result.title;
+        document.getElementById('bmi-description').textContent = result.desc;
+        
+        const minBmi = 15, maxBmi = 40;
+        const percent = Math.max(0, Math.min(100, ((bmi - minBmi) / (maxBmi - minBmi)) * 100));
+        document.getElementById('bmi-thumb').style.bottom = `${percent}%`;
+
+        const valueEl = document.getElementById('bmi-value-container');
+        let currentBmi = 0;
+        const anim = () => {
+            currentBmi += 0.5;
+            if(currentBmi >= bmi) {
+                valueEl.textContent = bmi.toFixed(1);
+                 document.getElementById('bmi-image-container').style.opacity = 1;
+                 document.getElementById('bmi-text-container').style.opacity = 1;
+                 document.getElementById('bmi-continue-button-container').style.opacity = 1;
+            } else {
+                 valueEl.textContent = currentBmi.toFixed(1);
+                 requestAnimationFrame(anim);
+            }
+        };
+        valueEl.style.opacity = 1;
+        requestAnimationFrame(anim);
+
+        document.getElementById('bmi-continue-btn').onclick = next;
+    }
+
+    function startAnalysis() {
+        goToStep('loading');
+        AnimationManager.add('loading-animation', 'https://assets2.lottiefiles.com/packages/lf20_lit5sbnq.json');
+        const analysisStepsContainer = document.getElementById('analysis-steps');
+        analysisStepsContainer.innerHTML = '';
+        const steps = ["Analyzing lifestyle data...", "Calculating metabolic rate...", "Processing facial biomarkers...", "Compiling wellness report..."];
+        steps.forEach((text, i) => {
+            setTimeout(() => {
+                const p = document.createElement('p');
+                p.className = 'animate-fade-in';
+                p.textContent = `✓ ${text}`;
+                analysisStepsContainer.appendChild(p);
+            }, i * 900);
+        });
+
+        setTimeout(() => {
+            window.location.href = `profile.html?session_id=${App.sessionId || ''}`;
+        }, (steps.length * 900) + 500);
+    }
+    
+    async function openCamera() {
+        const cameraModal = document.getElementById('camera-modal');
+        const video = document.getElementById('camera-video');
+        
+        cameraModal.classList.add('active');
+        
+        if (!App.faceMesh) {
+            try {
+                App.faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
+                App.faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+                App.faceMesh.onResults(onFaceMeshResults);
+                await App.faceMesh.initialize();
+            } catch (error) {
+                 alert('Failed to initialize AI model for camera. Please try again.');
+                 closeCamera(); return;
+            }
+        }
+
+        try {
+            App.cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 1280 } } });
+            video.srcObject = App.cameraStream;
+            video.addEventListener('loadeddata', cameraLoop);
+        } catch (err) {
+            alert('Camera access denied. Please allow camera access in your browser settings to continue.');
+            closeCamera();
+        }
+    }
+
+    function closeCamera() {
+        const cameraModal = document.getElementById('camera-modal');
+        if (App.cameraStream) App.cameraStream.getTracks().forEach(track => track.stop());
+        cancelAnimationFrame(App.cameraAnimFrame);
+        clearTimeout(App.captureTimeout);
+        App.captureTimeout = null;
+        cameraModal.classList.remove('active');
+        guideBox.classList.remove('locked');
+    }
+    
+    async function cameraLoop() {
+        const video = document.getElementById('camera-video');
+        if (video.readyState >= 2) {
+           await App.faceMesh.send({image: video});
+        }
+        App.cameraAnimFrame = requestAnimationFrame(cameraLoop);
+    };
+
+    function onFaceMeshResults(results) {
+        const guideBox = document.getElementById('camera-guide-box');
+        const guideText = document.getElementById('camera-guide-text');
+        const canvas = document.getElementById('camera-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+        ctx.clearRect(0,0,canvas.width, canvas.height);
+
+        if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+            const landmarks = results.multiFaceLandmarks[0];
+            if (window.drawConnectors) { // Check if drawing utility is loaded
+                 drawConnectors(ctx, landmarks, FACEMESH_TESSELATION, {color: 'rgba(222, 190, 169, 0.3)'});
+            }
+
+            if (isFaceCentered(landmarks)) {
+                guideBox.classList.add('locked');
+                guideText.textContent = 'Perfect, hold still!';
+                if (!App.captureTimeout) {
+                    App.captureTimeout = setTimeout(takePhoto, 1000); // Capture after 1 sec of stability
+                }
+            } else {
+                guideBox.classList.remove('locked');
+                guideText.textContent = 'Center your face in the oval';
+                clearTimeout(App.captureTimeout);
+                App.captureTimeout = null;
+            }
+        } else {
+            guideBox.classList.remove('locked');
+            guideText.textContent = 'Center your face in the oval';
+            clearTimeout(App.captureTimeout);
+            App.captureTimeout = null;
+        }
+    }
+
+    function isFaceCentered(landmarks) {
+        const nose = landmarks[4];
+        return nose.x > 0.3 && nose.x < 0.7 && nose.y > 0.3 && nose.y < 0.7 && nose.z < -0.03;
+    }
+
+    function takePhoto() {
+        const video = document.getElementById('camera-video');
+        const canvas = document.getElementById('photo-canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const photoDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        closeCamera();
+        handleAnswer('selfie', photoDataUrl);
+    }
+
+    function initOnboarding() {
+        const swiperWrapper = document.querySelector('.swiper-wrapper');
+        const slides = document.querySelectorAll('.swiper-slide');
+        const dotsContainer = document.getElementById('dots-container');
+        if (!swiperWrapper || !slides.length || !dotsContainer) return;
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+        slides.forEach((_, i) => {
+            const dot = document.createElement('button');
+            dot.className = 'dot w-2.5 h-2.5 bg-gray-300 rounded-full transition';
+            dot.onclick = () => goToSlide(i);
+            dotsContainer.appendChild(dot);
+        });
+        const dots = dotsContainer.querySelectorAll('.dot');
+        function goToSlide(index) {
+            currentSlide = index;
+            swiperWrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+            slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+        }
+        goToSlide(0);
+        setInterval(() => goToSlide((currentSlide + 1) % totalSlides), 5000);
+    }
+    
+    function initMenu() {
+        const menuBtn = document.getElementById('burger-menu-btn');
+        const closeBtn = document.getElementById('close-menu-btn');
+        const overlay = document.getElementById('menu-overlay');
+        const menu = document.getElementById('side-menu');
+        const toggleMenu = () => {
+            overlay.classList.toggle('active');
+            menu.classList.toggle('active');
+        };
+        menuBtn.addEventListener('click', toggleMenu);
+        closeBtn.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+    }
+
+    // --- App Initialization ---
+    setVh();
+    window.addEventListener('resize', setVh);
+    initOnboarding();
+    AnimationManager.add('lottie-onboarding-1', 'https://assets1.lottiefiles.com/packages/lf20_q7B4f9.json');
+    AnimationManager.add('lottie-onboarding-2', 'https://assets3.lottiefiles.com/packages/lf20_c9hh3d6z.json');
+    initMenu();
+
+    document.getElementById('start-quiz-btn').addEventListener('click', next);
+    document.getElementById('back-btn').addEventListener('click', previous);
+    document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
+});
+</script>
 </body>
 </html>
