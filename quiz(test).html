@@ -445,10 +445,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function next() {
-        if(App.currentQuestionIndex > -1 && App.quizQuestions[App.currentQuestionIndex].type === 'animation') {
-        } else {
-            App.currentQuestionIndex++;
-        }
+        // *** FIX for animation loop: Simplified the function start ***
+        App.currentQuestionIndex++;
 
         const stepConfig = App.quizQuestions[App.currentQuestionIndex];
         
@@ -514,25 +512,22 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (question.type === 'gender_selection') {
             wrapper = document.querySelector('#step-1 .question-content');
-            // *** FIX STARTS HERE: GENERATE HTML FOR GENDER SELECTION ***
             wrapper.innerHTML = `
                 <h2 class="text-3xl font-bold text-gray-900 text-center mb-8">${question.text}</h2>
                 <div class="grid grid-cols-2 gap-4 sm:gap-8 max-w-sm mx-auto">
                     <button class="gender-option text-center p-4 rounded-2xl border-2 border-gray-200 transition" data-value="female">
-                        <img src="https://img.freepik.com/free-photo/portrait-beautiful-young-woman-with-blond-hair-smiling-against-blue-background_662251-460.jpg" alt="Female" class="gender-image w-full h-auto object-cover rounded-xl mb-3 aspect-square">
+                        <img src="female.png" alt="Female" class="gender-image w-full h-auto object-cover rounded-xl mb-3 aspect-square">
                         <span class="text-lg font-semibold text-gray-800">Female</span>
                     </button>
                     <button class="gender-option text-center p-4 rounded-2xl border-2 border-gray-200 transition" data-value="male">
-                        <img src="https://t4.ftcdn.net/jpg/02/99/04/20/360_F_299042079_vGBD7wIlSeNl7vOevWspNNceUavCzfex.jpg" alt="Male" class="gender-image w-full h-auto object-cover rounded-xl mb-3 aspect-square">
+                        <img src="male.png" alt="Male" class="gender-image w-full h-auto object-cover rounded-xl mb-3 aspect-square">
                         <span class="text-lg font-semibold text-gray-800">Male</span>
                     </button>
                 </div>
             `;
-            // Add event listeners to the NEWLY CREATED buttons
             wrapper.querySelectorAll('.gender-option').forEach(btn => {
                 btn.addEventListener('click', (e) => handleOptionClick(e, 'gender', btn.dataset.value));
             });
-            // *** FIX ENDS HERE ***
             return; 
         }
         
@@ -884,7 +879,6 @@ document.addEventListener('DOMContentLoaded', () => {
         handleAnswer('selfie', dataUrl);
     }
     
-    // *** FIX: ADDED ONBOARDING SWIPER LOGIC ***
     function initOnboarding() {
         const swiperWrapper = document.querySelector('.swiper-wrapper');
         const slides = document.querySelectorAll('.swiper-slide');
@@ -917,7 +911,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        // Initial state
         slides[0].classList.add('active');
     }
 
@@ -930,7 +923,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadState();
     
     if (App.currentQuestionIndex === -1) {
-        initOnboarding(); // *** FIX: UNCOMMENTED AND ADDED THIS FUNCTION ***
+        initOnboarding();
         AnimationManager.add('lottie-onboarding-2', 'arrow.json');
         document.getElementById('start-quiz-btn').addEventListener('click', next);
     }
