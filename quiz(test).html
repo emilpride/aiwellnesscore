@@ -38,9 +38,7 @@
 
         /* Animations */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 50% { transform: scale(1.05); box-shadow: 0 0 25px var(--brand-accent); } }
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        .animate-pulse-button { animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1); }
 
         /* Header & Burger Menu */
         #quiz-header { flex-shrink: 0; position: relative; z-index: 30; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px); border-bottom: 1px solid #e5e7eb; visibility: hidden; }
@@ -62,12 +60,6 @@
         .answer-option:hover { transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .answer-option.selected { transform: translateY(-5px) scale(1.02); border-color: var(--brand-accent); box-shadow: 0 0 20px rgba(222, 190, 169, 0.6); }
 
-        /* Gender Selection */
-        #step-1 { justify-content: flex-start; padding-top: 4vh; }
-        .gender-option { overflow: hidden; }
-        .gender-option .gender-image { transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
-        .gender-option:hover .gender-image { transform: scale(1.05); }
-
         /* Progress Bar & Gradients */
         #progress-bar-inner { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); background-image: linear-gradient(90deg, var(--brand-gradient-start), var(--brand-gradient-end), var(--brand-gradient-start)); background-size: 200% auto; animation: animate-gradient 2s linear infinite; }
         @keyframes animate-gradient { to { background-position: 200% center; } }
@@ -82,14 +74,80 @@
         .pricing-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05); }
         .pricing-card.selected { border-color: var(--brand-accent); transform: translateY(-4px) scale(1.02); box-shadow: 0 0 25px rgba(222, 190, 169, 0.6); }
         
+        /* --- НАЧАЛО БЛОКА НОВЫХ СТИЛЕЙ ДЛЯ АНИМАЦИЙ --- */
+        .widget-wrapper {
+            background-color: #fff;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            border: 1px solid #f3f4f6;
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+        }
+        .widget-label { font-weight: 600; color: #4b5563; margin-bottom: 1rem; }
+
+        /* Стили для анимации ИМТ (Gauge) */
+        .bmi-gauge-bg { fill: none; stroke: #e5e7eb; }
+        .bmi-gauge-fg {
+            fill: none;
+            stroke: url(#bmi-gradient);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Стили для анимации Сна (Ring) */
+        .sleep-ring-bg { stroke: #e5e7eb; }
+        .sleep-ring-fg {
+            stroke: #818cf8;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Стили для анимации Активности (Pop) */
+        .activity-week { display: flex; justify-content: space-around; gap: 8px; }
+        .activity-day {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background-color: #e5e7eb;
+            color: #6b7280;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .activity-day.active {
+            background-color: var(--brand-accent);
+            color: var(--brand-dark-text);
+            transform: scale(1.15) translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Стили для анимации Стресса (Breathe) */
+        @keyframes breathe {
+            0%, 100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.1); }
+            50% { transform: scale(1); box-shadow: 0 0 20px 10px rgba(0, 0, 0, 0.05); }
+        }
+        .stress-breather {
+            width: 120px;
+            height: 120px;
+            margin: 1rem auto;
+            border-radius: 50%;
+            animation-name: breathe;
+            animation-iteration-count: infinite;
+            transition: background-color 1s ease, animation-duration 1s ease;
+        }
+        /* --- КОНЕЦ БЛОКА НОВЫХ СТИЛЕЙ --- */
+
         /* Other */
         #quiz-footer { flex-shrink: 0; background-color: #fff; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); display: none; padding: 1rem; }
         #camera-modal { position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(5px); }
         #camera-modal.active { opacity: 1; pointer-events: all; }
         #camera-container { position: relative; width: 90%; max-width: 400px; aspect-ratio: 3/4; overflow: hidden; border-radius: 1.5rem; background: #111; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
-        #camera-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        #capture-btn { width: 70px; height: 70px; border-radius: 50%; background-color: white; border: 5px solid white; box-shadow: 0 0 0 5px rgba(255,255,255,0.3); cursor: pointer; transition: transform 0.2s; position: absolute; bottom: 1.5rem; }
-        #close-camera-btn { position: absolute; top: 1rem; right: 1rem; background-color: rgba(0,0,0,0.5); border-radius: 50%; color: white; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -267,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentStep: 0,
         currentQuestionIndex: -1,
         userAnswers: {},
-        userPhotoUrl: null, // This will store the photo Data URL
+        userPhotoUrl: null,
         biologicalAge: null,
         wellnessScore: null,
         onboarding: { slideIndex: 0, slides: null, dots: null, timer: null, touchStartX: 0 },
@@ -277,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { key: 'userGoal', type: 'options', text: "What's your primary wellness goal?", options: ['Find out my biological age', 'Get a skin condition analysis', 'Get a 7-day improvement plan', 'All of the above!'] },
             { key: 'age', type: 'slider', text: "What's your current age?", min: 18, max: 90, defaultValue: 30, unit: 'years' },
             { key: 'height', type: 'slider', text: "What is your height?", min: 140, max: 220, defaultValue: 175, unit: 'cm' },
-            { key: 'weight', type: 'slider', text: "And your current weight?", min: 40, max: 150, defaultValue: 77, unit: 'kg' }, // Changed default to ~170lbs
+            { key: 'weight', type: 'slider', text: "And your current weight?", min: 40, max: 150, defaultValue: 77, unit: 'kg' },
             { key: 'bmi_calculation', type: 'animation' },
             { key: 'sleep', type: 'options', text: "😴 How many hours of quality sleep do you get on average?", options: ["Less than 5 hours", "5-6 hours", "7-8 hours", "More than 8 hours"], values: [4, 6, 8, 9] },
             { key: 'sleep_visual', type: 'animation' },
@@ -307,7 +365,8 @@ document.addEventListener('DOMContentLoaded', () => {
             { q: "What if I have dietary restrictions?", a: "Our nutrition plans are adaptable. You can easily substitute ingredients to fit your vegetarian, vegan, gluten-free, or other dietary needs." }
         ]
     };
-
+    
+    // ... (All other initial functions like AnimationManager, setVh, etc. remain the same) ...
     const AnimationManager = {
         animations: new Map(),
         add(id, path) {
@@ -319,13 +378,11 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch(e) { console.error(`Lottie error on container #${id}:`, e); }
         }
     };
-
     const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
-
     function animateCountUp(element, finalValue, duration = 1500, isInt = true) {
         if (!element) return;
         let startTimestamp = null;
-        const startValue = parseInt(element.textContent.replace(/[^0-9.]/g, '')) || 0;
+        const startValue = parseFloat(element.textContent.replace(/[^0-9.]/g, '')) || 0;
         const step = (timestamp) => {
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
@@ -337,57 +394,34 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         window.requestAnimationFrame(step);
     }
-
     function goToStep(stepIndex) {
         App.currentStep = stepIndex;
-        
         const isQuizActive = (stepIndex === 1 || stepIndex === 2);
-        
         const header = document.getElementById('quiz-header');
         const progressBarContainer = document.getElementById('progress-bar-container');
         const burgerBtn = document.getElementById('burger-menu-btn');
-        
         const showHeader = stepIndex > 0 && stepIndex !== 3;
         header.style.visibility = showHeader ? 'visible' : 'hidden';
-        
         progressBarContainer.style.visibility = isQuizActive ? 'visible' : 'hidden';
         burgerBtn.style.visibility = (stepIndex >= 4) ? 'visible' : 'hidden';
-        
         document.getElementById('quiz-footer').style.display = isQuizActive ? 'block' : 'none';
-
         document.querySelectorAll('.quiz-step').forEach((step, index) => {
             step.classList.remove('active', 'prev');
             if (index === stepIndex) step.classList.add('active');
             else if (index < stepIndex) step.classList.add('prev');
         });
     }
-
     function handleAnswer(questionKey, answer) {
         App.userAnswers[questionKey] = answer;
-        
-        // --- FIX: Store the photo URL in the App state ---
-        if (questionKey === 'selfie') {
-            App.userPhotoUrl = answer;
-        }
-
+        if (questionKey === 'selfie') { App.userPhotoUrl = answer; }
         next();
     }
-
     function next() {
         App.currentQuestionIndex++;
         const stepConfig = App.quizQuestions[App.currentQuestionIndex];
-        if (!stepConfig) {
-            startAnalysis();
-            return;
-        }
-
+        if (!stepConfig) { startAnalysis(); return; }
         const backBtn = document.getElementById('back-btn');
-        if (App.currentQuestionIndex > 0) {
-             backBtn.classList.remove('hidden');
-        } else {
-             backBtn.classList.add('hidden');
-        }
-        
+        if (App.currentQuestionIndex > 0) { backBtn.classList.remove('hidden'); } else { backBtn.classList.add('hidden'); }
         switch (stepConfig.type) {
             case 'animation': goToStep(2); renderAnimation(stepConfig.key); break;
             case 'gender_selection': goToStep(1); renderGenderSelection(); break;
@@ -395,139 +429,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateProgressBar();
     }
-
     function previous() {
         App.currentQuestionIndex--;
         if (App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') App.currentQuestionIndex--;
         if (App.currentQuestionIndex < 0) App.currentQuestionIndex = 0;
-        
         const stepConfig = App.quizQuestions[App.currentQuestionIndex];
-        if (!stepConfig) return; 
-
+        if (!stepConfig) return;
         const backBtn = document.getElementById('back-btn');
-         if (App.currentQuestionIndex > 0) {
-             backBtn.classList.remove('hidden');
-        } else {
-             backBtn.classList.add('hidden');
-        }
-
-        if (stepConfig.type === 'gender_selection') {
-            goToStep(1);
-            renderGenderSelection();
-        } else {
-            goToStep(2);
-            renderQuestion();
-        }
+        if (App.currentQuestionIndex > 0) { backBtn.classList.remove('hidden'); } else { backBtn.classList.add('hidden'); }
+        if (stepConfig.type === 'gender_selection') { goToStep(1); renderGenderSelection(); } else { goToStep(2); renderQuestion(); }
         updateProgressBar();
     }
-
     function updateProgressBar() {
         const totalQuestions = App.quizQuestions.length;
         const progress = totalQuestions > 0 ? ((App.currentQuestionIndex + 1) / totalQuestions) * 100 : 0;
         document.getElementById('progress-bar-inner').style.width = `${Math.min(100, progress)}%`;
     }
 
-    function renderQuestion() {
-        const question = App.quizQuestions[App.currentQuestionIndex];
-        if(!question) return;
-
-        const questionWrapper = document.getElementById('question-wrapper');
-        const footerWrapper = document.getElementById('footer-actions');
-        let contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>`;
-
-        if (question.type === 'camera_step') {
-            contentHTML = `
+    // --- RENDER QUESTION, GENDER SELECTION, AND OTHER UI FUNCTIONS ... ---
+    // (These functions remain largely unchanged from the previous corrected version)
+    function renderQuestion(){
+        const question=App.quizQuestions[App.currentQuestionIndex];if(!question)return;const questionWrapper=document.getElementById('question-wrapper');const footerWrapper=document.getElementById('footer-actions');let contentHTML=`<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>`;if(question.type==='camera_step'){contentHTML=`
                 <img src="face.jpeg" alt="Face scan illustration" class="w-48 h-48 mx-auto rounded-full object-cover mb-6 shadow-lg">
                 <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
-                <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
-        } else if (question.type === 'email_input') {
-             contentHTML = `
+                <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`}else if(question.type==='email_input'){contentHTML=`
                 <span class="text-5xl mb-4">📧</span>
                 <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
-                <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
-        }
-        
-        questionWrapper.innerHTML = `<div class="question-content w-full">${contentHTML}</div>`;
-        footerWrapper.innerHTML = ''; // Clear previous buttons
-
-        if (question.type === 'options') {
-            const optionsHTML = question.options.map((opt, index) => {
-                const displayText = typeof opt === 'object' ? opt.text : opt;
-                const value = typeof opt === 'object' ? opt.value : (question.values ? question.values[index] : opt);
-                return `<button class="answer-option w-full bg-white p-4 rounded-xl border-2 border-gray-200 text-lg font-semibold text-gray-700" data-value="${value}">${displayText}</button>`;
-            }).join('');
-            footerWrapper.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto">${optionsHTML}</div>`;
-            footerWrapper.querySelectorAll('.answer-option').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.currentTarget.classList.add('selected');
-                    setTimeout(() => handleAnswer(question.key, btn.dataset.value), 400);
-                });
-            });
-        } else if (question.type === 'slider') {
-            const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-inner"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" value="${question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
-            questionWrapper.insertAdjacentHTML('beforeend', sliderContent);
-            updateSliderDisplay(question, question.defaultValue);
-
-            footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;
-            const sliderInput = document.getElementById('slider-input');
-            if (sliderInput) sliderInput.addEventListener('input', () => updateSliderDisplay(question, sliderInput.value));
-            footerWrapper.querySelector('#slider-confirm-btn')?.addEventListener('click', () => {
-                if (sliderInput) handleAnswer(question.key, sliderInput.value)
-            });
-        } else if (question.type === 'camera_step') {
-            footerWrapper.innerHTML = `<div class="max-w-sm mx-auto space-y-3 mt-4"><button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button></div>`;
-            footerWrapper.querySelector('#open-camera-btn')?.addEventListener('click', openCamera);
-            footerWrapper.querySelector('#skip-photo-btn')?.addEventListener('click', () => handleAnswer('selfie', 'skipped'));
-        } else if (question.type === 'email_input') {
-            footerWrapper.innerHTML = `<div class="max-w-sm mx-auto space-y-3 mt-4">
+                <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`}
+questionWrapper.innerHTML=`<div class="question-content w-full">${contentHTML}</div>`;footerWrapper.innerHTML='';if(question.type==='options'){const optionsHTML=question.options.map((opt,index)=>{const displayText=typeof opt==='object'?opt.text:opt;const value=typeof opt==='object'?opt.value:(question.values?question.values[index]:opt);return`<button class="answer-option w-full bg-white p-4 rounded-xl border-2 border-gray-200 text-lg font-semibold text-gray-700" data-value="${value}">${displayText}</button>`}).join('');footerWrapper.innerHTML=`<div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto">${optionsHTML}</div>`;footerWrapper.querySelectorAll('.answer-option').forEach(btn=>{btn.addEventListener('click',e=>{e.currentTarget.classList.add('selected');setTimeout(()=>handleAnswer(question.key,btn.dataset.value),400)})})}else if(question.type==='slider'){const sliderContent=`<div class="bg-white p-6 rounded-2xl shadow-inner"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" value="${question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;questionWrapper.insertAdjacentHTML('beforeend',sliderContent);updateSliderDisplay(question,question.defaultValue);footerWrapper.innerHTML=`<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;const sliderInput=document.getElementById('slider-input');if(sliderInput)sliderInput.addEventListener('input',()=>updateSliderDisplay(question,sliderInput.value));footerWrapper.querySelector('#slider-confirm-btn')?.addEventListener('click',()=>{if(sliderInput)handleAnswer(question.key,sliderInput.value)})}else if(question.type==='camera_step'){footerWrapper.innerHTML=`<div class="max-w-sm mx-auto space-y-3 mt-4"><button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button></div>`;footerWrapper.querySelector('#open-camera-btn')?.addEventListener('click',openCamera);footerWrapper.querySelector('#skip-photo-btn')?.addEventListener('click',()=>handleAnswer('selfie','skipped'))}else if(question.type==='email_input'){footerWrapper.innerHTML=`<div class="max-w-sm mx-auto space-y-3 mt-4">
                 <input id="email-input" type="email" placeholder="Enter your email" class="w-full text-center p-4 rounded-xl border-2 border-gray-300 focus:border-[--brand-accent] focus:ring-2 focus:ring-[--brand-accent]/50 outline-none transition">
                 <p id="email-error" class="text-red-500 text-sm h-4"></p>
                 <button id="email-confirm-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Send Report</button>
-            </div>`;
-            const emailInput = footerWrapper.querySelector('#email-input');
-            const emailError = footerWrapper.querySelector('#email-error');
-            footerWrapper.querySelector('#email-confirm-btn')?.addEventListener('click', () => {
-                if (emailInput && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
-                    emailError.textContent = '';
-                    handleAnswer(question.key, emailInput.value);
-                } else {
-                    emailInput.classList.add('border-red-500');
-                    emailError.textContent = 'Please enter a valid email address.';
-                    setTimeout(() => {
-                        emailInput.classList.remove('border-red-500');
-                        emailError.textContent = '';
-                    }, 2500);
-                }
-            });
-        }
-    }
-    
-    function updateSliderDisplay(question, value) {
-        const valueDisplay = document.getElementById('slider-value-display');
-        if (!valueDisplay) return;
-        let displayHTML = `${value} ${question.unit || ''}`;
-        if (question.unit === 'cm') {
-            const totalInches = value / 2.54;
-            let feet = Math.floor(totalInches / 12);
-            let inches = Math.round(totalInches % 12);
-             // --- FIX: Correctly handle 12 inches -> 1 foot ---
-            if (inches === 12) {
-                feet++;
-                inches = 0;
-            }
-            displayHTML = `${feet}'${inches}" <span class="text-lg text-gray-400 font-medium">(${value} cm)</span>`;
-        } else if (question.unit === 'kg') {
-            const lbs = Math.round(value * 2.20462);
-            displayHTML = `${lbs} lbs <span class="text-lg text-gray-400 font-medium">(${value} kg)</span>`;
-        }
-        valueDisplay.innerHTML = displayHTML;
-    }
-
-    function renderGenderSelection() {
-        const questionContent = document.querySelector('#step-1 .question-content');
-        document.getElementById('footer-actions').innerHTML = '';
-
-        questionContent.innerHTML = `
+            </div>`;const emailInput=footerWrapper.querySelector('#email-input');const emailError=footerWrapper.querySelector('#email-error');footerWrapper.querySelector('#email-confirm-btn')?.addEventListener('click',()=>{if(emailInput&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)){emailError.textContent='';handleAnswer(question.key,emailInput.value)}else{emailInput.classList.add('border-red-500');emailError.textContent='Please enter a valid email address.';setTimeout(()=>{emailInput.classList.remove('border-red-500');emailError.textContent=''},2500)}})}}
+    function updateSliderDisplay(question,value){const valueDisplay=document.getElementById('slider-value-display');if(!valueDisplay)return;let displayHTML=`${value} ${question.unit||''}`;if(question.unit==='cm'){const totalInches=value/2.54;let feet=Math.floor(totalInches/12);let inches=Math.round(totalInches%12);if(inches===12){feet++;inches=0}
+displayHTML=`${feet}'${inches}" <span class="text-lg text-gray-400 font-medium">(${value} cm)</span>`}else if(question.unit==='kg'){const lbs=Math.round(value*2.20462);displayHTML=`${lbs} lbs <span class="text-lg text-gray-400 font-medium">(${value} kg)</span>`}
+valueDisplay.innerHTML=displayHTML}
+    function renderGenderSelection(){const questionContent=document.querySelector('#step-1 .question-content');document.getElementById('footer-actions').innerHTML='';questionContent.innerHTML=`
             <h2 class="text-3xl font-bold text-gray-900">To personalize your plan...</h2>
             <p class="mt-2 text-lg text-gray-600">Which do you identify with?</p>
             <div class="grid grid-cols-3 gap-4 max-w-4xl mx-auto mt-6">
@@ -543,43 +480,69 @@ document.addEventListener('DOMContentLoaded', () => {
                      <img src="other.png" alt="Other" class="h-full object-contain gender-image">
                     <p class="mt-2 sm:mt-4 text-lg sm:text-xl font-bold text-gray-800">Other</p>
                 </div>
-            </div>`;
-        
-        questionContent.querySelectorAll('.answer-option').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.currentTarget.classList.add('selected');
-                setTimeout(() => handleAnswer('gender', btn.dataset.value), 400);
-            });
-        });
-    }
-    
+            </div>`;questionContent.querySelectorAll('.answer-option').forEach(btn=>{btn.addEventListener('click',e=>{e.currentTarget.classList.add('selected');setTimeout(()=>handleAnswer('gender',btn.dataset.value),400)})})}
+
+
+    /**
+     * ---- NEW ANIMATION RENDERER ----
+     * This function now creates more complex SVG-based widgets.
+     */
     function renderAnimation(key) {
         const wrapper = document.getElementById('question-wrapper');
         document.getElementById('footer-actions').innerHTML = '';
         let animationHTML = '';
-        let label = '';
-        let content = '';
 
         switch(key) {
             case 'bmi_calculation':
-                 animationHTML = `<div class="text-center"><h2 class="text-2xl font-bold text-gray-800 mb-4">Calculating Your BMI...</h2><div id="bmi-value-anim" class="text-5xl font-extrabold text-[--brand-dark-text]">0.0</div><div id="bmi-category-anim" class="font-semibold text-gray-600 mt-1">&nbsp;</div></div>`;
+                animationHTML = `
+                    <div class="widget-wrapper">
+                        <div class="widget-label">Calculating Your BMI...</div>
+                        <div class="relative w-48 h-48 mx-auto">
+                            <svg viewBox="0 0 120 120" class="w-full h-full transform -rotate-[135deg]">
+                                <defs>
+                                    <linearGradient id="bmi-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#34d399" />
+                                        <stop offset="50%" stop-color="#fbbf24" />
+                                        <stop offset="100%" stop-color="#ef4444" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M 30 105 A 45 45 0 1 1 90 105" stroke-width="12" class="bmi-gauge-bg" />
+                                <path id="bmi-gauge-fg-anim" d="M 30 105 A 45 45 0 1 1 90 105" stroke-width="12" class="bmi-gauge-fg" style="stroke-dasharray: 212; stroke-dashoffset: 212;" />
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <div id="bmi-value-anim" class="text-4xl font-extrabold text-[--brand-dark-text]">0.0</div>
+                                <div id="bmi-category-anim" class="font-semibold text-gray-600 mt-1">&nbsp;</div>
+                            </div>
+                        </div>
+                    </div>`;
                 break;
             case 'sleep_visual':
-                label = 'Sleep Recharge';
-                content = `<div class="sleep-battery"><div id="sleep-battery-level-anim" class="sleep-battery-level"></div></div>`;
+                animationHTML = `
+                    <div class="widget-wrapper">
+                        <div class="widget-label">Sleep Recharge</div>
+                         <div class="relative mx-auto my-3 w-36 h-36">
+                            <svg class="w-full h-full" viewBox="0 0 120 120">
+                                <circle class="sleep-ring-bg" stroke-width="10" cx="60" cy="60" r="52" />
+                                <circle id="sleep-ring-fg-anim" class="sleep-ring-fg" stroke-width="10" cx="60" cy="60" r="52" style="stroke-dasharray: 327; stroke-dashoffset: 327;"/>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center text-3xl">🌙</div>
+                        </div>
+                    </div>`;
                 break;
             case 'activity_visual':
-                label = 'Your Active Week';
-                content = `<div class="activity-week" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div>`;
+                animationHTML = `
+                    <div class="widget-wrapper">
+                        <div class="widget-label">Your Active Week</div>
+                        <div class="activity-week" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div>
+                    </div>`;
                 break;
             case 'stress_visual':
-                label = 'Reported Stress Level';
-                content = `<div class="stress-bar-track"><div id="stress-bar-fill-anim" class="stress-bar-fill"></div></div>`;
+                animationHTML = `
+                     <div class="widget-wrapper">
+                        <div class="widget-label">Reported Stress Level</div>
+                        <div id="stress-breather-anim" class="stress-breather"></div>
+                    </div>`;
                 break;
-        }
-        
-        if (key !== 'bmi_calculation') {
-            animationHTML = `<div class="widget-wrapper"><div class="widget-label">${label}</div>${content}</div>`;
         }
         
         wrapper.innerHTML = `<div class="question-content w-full">${animationHTML}</div>`;
@@ -587,6 +550,10 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(next, 2800);
     }
 
+    /**
+     * ---- NEW ANIMATION PLAYER ----
+     * This function now controls the new SVG and CSS animations.
+     */
     function playAnimation(key) {
         if (key === 'bmi_calculation') {
             const heightM = App.userAnswers.height / 100;
@@ -594,6 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const bmi = weightKg / (heightM * heightM);
             let category = "Normal";
             let color = 'text-green-600';
+
             if (bmi < 18.5) { category = "Underweight"; color = 'text-yellow-500'; }
             else if (bmi >= 25 && bmi < 30) { category = "Overweight"; color = 'text-orange-500'; }
             else if (bmi >= 30) { category = "Obese"; color = 'text-red-500'; }
@@ -602,97 +570,67 @@ document.addEventListener('DOMContentLoaded', () => {
             categoryEl.textContent = category;
             categoryEl.className = `font-semibold mt-1 ${color}`;
             animateCountUp(document.getElementById('bmi-value-anim'), bmi, 2000, false);
+            
+            // Animate gauge
+            const gaugeEl = document.getElementById('bmi-gauge-fg-anim');
+            const circumference = 212;
+            const minBmi = 15, maxBmi = 40;
+            const percent = Math.max(0, Math.min(1, (bmi - minBmi) / (maxBmi - minBmi)));
+            gaugeEl.style.strokeDashoffset = circumference * (1 - percent);
+
         } else if (key === 'sleep_visual') {
             const hours = parseInt(App.userAnswers.sleep || 4);
-            const level = Math.min(100, (hours / 8) * 100);
-            const levelEl = document.getElementById('sleep-battery-level-anim');
-            let color = '#ef4444'; if (level > 60) color = '#f59e0b'; if (level > 85) color = '#22c55e';
-            if(levelEl) { levelEl.style.backgroundColor = color; levelEl.style.width = `${level}%`; }
+            const percent = Math.min(100, (hours / 8) * 100);
+            
+            const ringEl = document.getElementById('sleep-ring-fg-anim');
+            const circumference = 327;
+            const offset = circumference - (percent / 100) * circumference;
+            ringEl.style.strokeDashoffset = offset;
+
         } else if (key === 'activity_visual') {
             const days = parseInt(App.userAnswers.activity || 0);
             const dayElements = document.querySelectorAll('#activity-week-anim .activity-day');
-            if(dayElements.length) {
-                for (let i = 0; i < Math.min(days, 7); i++) { 
-                    setTimeout(() => {
-                        const day = dayElements[i];
-                        if (day) {
-                           day.classList.add('activating');
-                           setTimeout(() => day.classList.add('active'), 50);
-                        }
-                    }, i * 200);
+            if (dayElements.length) {
+                for (let i = 0; i < Math.min(days, 7); i++) {
+                    setTimeout(() => { dayElements[i]?.classList.add('active'); }, i * 200);
                 }
             }
         } else if (key === 'stress_visual') {
-            const level = parseInt(App.userAnswers.stress || 5);
-            const percent = (level / 10) * 100;
-            const fillEl = document.getElementById('stress-bar-fill-anim');
-            if(fillEl) fillEl.style.width = `${percent}%`;
+            const level = parseInt(App.userAnswers.stress || 5); // From 2 to 8
+            const percent = (level - 2) / (8 - 2); // Normalize to 0-1
+            
+            const breatherEl = document.getElementById('stress-breather-anim');
+            const duration = 4 - (percent * 2.5); // Faster for higher stress (4s down to 1.5s)
+            
+            // Interpolate color from calm blue to tense red
+            const blue = [60, 128, 255];
+            const red = [239, 68, 68];
+            const color = blue.map((b, i) => Math.round(b + percent * (red[i] - b)));
+            
+            if (breatherEl) {
+                breatherEl.style.animationDuration = `${duration}s`;
+                breatherEl.style.backgroundColor = `rgb(${color.join(',')})`;
+            }
         }
     }
     
-    function generateProfileAnalysis() {
-        const { sleep, activity, stress, weight, height } = App.userAnswers;
-        const bmi = (weight / ((height/100)**2));
-        let analysis = {};
-
-        if (bmi >= 25) {
-            analysis.bmi = { icon: '⚠️', text: 'Your BMI is in the <strong>overweight</strong> range. Small, consistent changes to diet and incorporating more movement can have a significant positive impact.'};
-        } else if (bmi < 18.5) {
-             analysis.bmi = { icon: '⚠️', text: 'Your BMI is in the <strong>underweight</strong> range. Ensuring you get enough nutrients and energy is key to feeling your best.'};
-        } else {
-             analysis.bmi = { icon: '✅', text: 'You have a <strong>healthy BMI</strong>. This is a fantastic foundation for overall wellness and longevity.'};
-        }
-
-        if (sleep < 7) {
-            analysis.sleep = { icon: '🌙', text: `Getting <strong>less than 7 hours of sleep</strong> can affect recovery and cognitive function. Aiming for a consistent sleep schedule could boost your energy.`};
-        } else {
-            analysis.sleep = { icon: '✅', text: `You're getting a <strong>healthy amount of sleep</strong>. This is crucial for mental clarity, physical recovery, and stress management.`};
-        }
-        
-        if (activity < 3) {
-            analysis.activity = { icon: '🏃‍♀️', text: `Your current activity level is low. Just <strong>2-3 short walks</strong> a week can dramatically improve your energy and reduce your biological age.`};
-        } else {
-             analysis.activity = { icon: '✅', text: `Great job staying active! Your <strong>consistent physical activity</strong> is one of the best things you can do for your health.`};
-        }
-
-        if (stress > 5) {
-             analysis.stress = { icon: '🧠', text: `You've reported <strong>elevated stress levels</strong>. Incorporating mindfulness or short breathing exercises into your day can be highly effective.`};
-        } else {
-             analysis.stress = { icon: '✅', text: `You're managing your stress well. This mental resilience is key to preventing burnout and maintaining <strong>emotional balance</strong>.`};
-        }
-        
-        return analysis;
-    }
-
-    function renderWellnessProfile() {
-        const { age, gender, weight, height } = App.userAnswers;
-        const avatarArea = document.getElementById('profile-avatar-area');
-        const metricsArea = document.getElementById('profile-metrics-area');
-        const analysisArea = document.getElementById('profile-analysis-area');
-
-        if (App.userPhotoUrl && App.userPhotoUrl !== 'skipped') {
-            avatarArea.innerHTML = `
+    // ... (All other functions like generateProfileAnalysis, startAnalysis, initOnboarding, camera, etc. remain the same) ...
+    function generateProfileAnalysis(){const{sleep,activity,stress,weight,height}=App.userAnswers;const bmi=(weight/((height/100)**2));let analysis={};if(bmi>=25){analysis.bmi={icon:'⚠️',text:'Your BMI is in the <strong>overweight</strong> range. Small, consistent changes to diet and incorporating more movement can have a significant positive impact.'}}else if(bmi<18.5){analysis.bmi={icon:'⚠️',text:'Your BMI is in the <strong>underweight</strong> range. Ensuring you get enough nutrients and energy is key to feeling your best.'}}else{analysis.bmi={icon:'✅',text:'You have a <strong>healthy BMI</strong>. This is a fantastic foundation for overall wellness and longevity.'}}
+if(sleep<7){analysis.sleep={icon:'🌙',text:`Getting <strong>less than 7 hours of sleep</strong> can affect recovery and cognitive function. Aiming for a consistent sleep schedule could boost your energy.`}}else{analysis.sleep={icon:'✅',text:`You're getting a <strong>healthy amount of sleep</strong>. This is crucial for mental clarity, physical recovery, and stress management.`}}
+if(activity<3){analysis.activity={icon:'🏃‍♀️',text:`Your current activity level is low. Just <strong>2-3 short walks</strong> a week can dramatically improve your energy and reduce your biological age.`}}else{analysis.activity={icon:'✅',text:`Great job staying active! Your <strong>consistent physical activity</strong> is one of the best things you can do for your health.`}}
+if(stress>5){analysis.stress={icon:'🧠',text:`You've reported <strong>elevated stress levels</strong>. Incorporating mindfulness or short breathing exercises into your day can be highly effective.`}}else{analysis.stress={icon:'✅',text:`You're managing your stress well. This mental resilience is key to preventing burnout and maintaining <strong>emotional balance</strong>.`}}
+return analysis}
+function renderWellnessProfile(){const{age,gender,weight,height}=App.userAnswers;const avatarArea=document.getElementById('profile-avatar-area');const metricsArea=document.getElementById('profile-metrics-area');const analysisArea=document.getElementById('profile-analysis-area');if(App.userPhotoUrl&&App.userPhotoUrl!=='skipped'){avatarArea.innerHTML=`
                 <div class="aspect-square bg-gray-200 rounded-2xl overflow-hidden shadow-lg animate-fade-in">
                     <img src="${App.userPhotoUrl}" alt="User Photo" class="w-full h-full object-cover">
                 </div>
-                <div class="text-center mt-4 text-gray-700 font-semibold">${age} y.o. ${gender}</div>`;
-        } else {
-            avatarArea.innerHTML = `
+                <div class="text-center mt-4 text-gray-700 font-semibold">${age} y.o. ${gender}</div>`}else{avatarArea.innerHTML=`
                 <div class="aspect-square bg-white rounded-2xl flex flex-col items-center justify-center text-center p-6 shadow-lg border animate-fade-in">
                     <svg class="w-16 h-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     <h3 class="mt-4 font-bold text-gray-800">Photo Analysis Skipped</h3>
                 </div>
-                <div class="text-center mt-4 text-gray-700 font-semibold">${age} y.o. ${gender}</div>`;
-        }
-        
-        const bmi = (weight / ((height/100)**2)).toFixed(1);
-        calculateBiologicalAge();
-        
-        const radius = 52;
-        const circumference = 2 * Math.PI * radius;
-        const scoreOffset = circumference - (App.wellnessScore / 100) * circumference;
-
-        metricsArea.innerHTML = `
+                <div class="text-center mt-4 text-gray-700 font-semibold">${age} y.o. ${gender}</div>`}
+const bmi=(weight/((height/100)**2)).toFixed(1);calculateBiologicalAge();const radius=52;const circumference=2*Math.PI*radius;const scoreOffset=circumference-(App.wellnessScore/100)*circumference;metricsArea.innerHTML=`
             <div class="metric-widget sm:col-span-2 animate-fade-in" style="animation-delay: 100ms;">
                 <h3 class="font-semibold text-gray-700 text-lg">Wellness Score</h3>
                 <div class="relative mx-auto my-3 w-36 h-36">
@@ -716,10 +654,7 @@ document.addEventListener('DOMContentLoaded', () => {
                  <p class="text-4xl font-bold text-[--brand-dark-text]"><span id="bmi-profile-value">0.0</span></p>
                  <p class="text-xs text-gray-500">${weight} kg / ${height} cm</p>
             </div>
-        `;
-        
-        const analysis = generateProfileAnalysis();
-        analysisArea.innerHTML = `
+        `;const analysis=generateProfileAnalysis();analysisArea.innerHTML=`
             <div class="bg-white p-5 rounded-2xl border animate-fade-in md:col-span-3" style="animation-delay: 400ms;">
                 <h3 class="font-bold text-lg text-gray-800 mb-4">AI Recommendations</h3>
                 <ul class="space-y-3">
@@ -729,257 +664,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     <li class="flex items-start gap-3"><span class="text-xl pt-1">${analysis.stress.icon}</span> <p class="text-gray-600">${analysis.stress.text}</p></li>
                 </ul>
             </div>
-        `;
-
-        setTimeout(() => {
-            document.getElementById('wellness-score-circle').style.strokeDashoffset = scoreOffset;
-            animateCountUp(document.getElementById('wellness-score-value'), App.wellnessScore);
-            animateCountUp(document.getElementById('bmi-profile-value'), bmi, 1500, false);
-        }, 300);
-    }
-    
-    function calculateBiologicalAge() {
-        const baseAge = parseInt(App.userAnswers.age || 30);
-        let bioAge = baseAge;
-        let score = 100;
-
-        const bmi = (App.userAnswers.weight / ((App.userAnswers.height/100)**2));
-        if (bmi > 25) { bioAge += (bmi - 25) * 0.5; score -= (bmi - 25) * 2; }
-        else if (bmi < 18.5) { bioAge += (18.5 - bmi) * 0.3; score -= (18.5 - bmi); }
-        else { score += 5; }
-
-        const sleep = parseInt(App.userAnswers.sleep || 7);
-        if (sleep < 7) { bioAge += (7 - sleep) * 0.8; score -= (7-sleep) * 4; }
-        else { score += 5; }
-        
-        const activity = parseInt(App.userAnswers.activity || 3);
-        if (activity < 3) { bioAge += (3 - activity) * 0.7; score -= (3-activity) * 5; }
-        else { bioAge -= (activity - 3) * 0.5; score += (activity - 3) * 2; }
-
-        const stress = parseInt(App.userAnswers.stress || 4);
-        bioAge += (stress / 10) * 3;
-        score -= (stress/10) * 25;
-
-        if (App.userPhotoUrl && App.userPhotoUrl !== 'skipped') {
-            bioAge += (Math.random() * 2 - 1);
-        }
-
-        App.biologicalAge = Math.max(18, Math.round(bioAge - 2));
-        App.wellnessScore = Math.max(40, Math.min(99, Math.round(score)));
-    }
-    
-    function startAnalysis() {
-        goToStep(3);
-        const analysisSteps = document.getElementById('analysis-steps');
-        const loadingAnim = document.getElementById('loading-animation');
-        lottie.loadAnimation({ container: loadingAnim, renderer: 'svg', loop: true, autoplay: true, path: 'loader.json' });
-
-        const steps = [
-            'Evaluating lifestyle factors...',
-            'Calculating BMI impact...',
-            'Assessing stress & sleep data...',
-            'Processing facial biomarkers (simulated)...',
-            'Compiling personalized recommendations...'
-        ];
-        
-        analysisSteps.innerHTML = '';
-        steps.forEach((stepText, i) => {
-            setTimeout(() => {
-                const stepEl = document.createElement('div');
-                stepEl.className = 'flex items-center gap-3 animate-fade-in';
-                stepEl.innerHTML = `<div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center check-mark-container"><svg class="w-4 h-4 text-green-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg></div><span>${stepText}</span>`;
-                analysisSteps.appendChild(stepEl);
-                setTimeout(() => {
-                    stepEl.querySelector('.check-mark-container').style.backgroundColor = '#dcfce7';
-                    stepEl.querySelector('svg').style.opacity = '1';
-                }, 400);
-            }, i * 900);
-        });
-
-        setTimeout(() => {
-            goToStep(4);
-            renderWellnessProfile();
-        }, steps.length * 900 + 500);
-    }
-
-    function preparePaymentPage() {
-        const chronoAgeEl = document.getElementById('chrono-age-value');
-        const bioAgeEl = document.getElementById('bio-age-value');
-        
-        calculateBiologicalAge();
-
-        AnimationManager.add('lottie-age-arrow', 'arrow.json');
-        
-        const chronoAge = App.userAnswers.age || 30;
-        chronoAgeEl.textContent = chronoAge;
-        animateCountUp(bioAgeEl, App.biologicalAge);
-
-        initTestimonialSlider();
-
-        const faqContainer = document.getElementById('payment-faq');
-        faqContainer.innerHTML = App.faq.map(item => 
-            `<details class="bg-white p-4 rounded-xl border cursor-pointer group"><summary class="font-semibold flex justify-between items-center list-none">${item.q}<span class="accordion-arrow transition-transform group-open:rotate-180 text-gray-400">&darr;</span></summary><p class="text-sm text-gray-600 mt-2">${item.a}</p></details>`
-        ).join('');
-        
-        const pricingCards = document.querySelectorAll('.pricing-card');
-        pricingCards.forEach(card => {
-            card.addEventListener('click', () => {
-                pricingCards.forEach(c => c.classList.remove('selected'));
-                card.classList.add('selected');
-            });
-        });
-        // --- UX IMPROVEMENT: Select best value plan by default ---
-        document.querySelector('.pricing-card[data-plan="annual"]')?.classList.add('selected');
-    }
-
-    function initTestimonialSlider() {
-        const wrapper = document.querySelector('.testimonial-wrapper');
-        const dotsContainer = document.querySelector('.testimonial-dots-container');
-        if (!wrapper || !dotsContainer) return;
-        
-        const createStars = (rating) => Array(5).fill(0).map((_, i) => `<svg class="w-5 h-5 ${i < rating ? 'text-yellow-400' : 'text-gray-300'}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>`).join('');
-
-        wrapper.innerHTML = App.testimonials.map(t => `
+        `;setTimeout(()=>{document.getElementById('wellness-score-circle').style.strokeDashoffset=scoreOffset;animateCountUp(document.getElementById('wellness-score-value'),App.wellnessScore);animateCountUp(document.getElementById('bmi-profile-value'),bmi,1500,false)},300)}
+function calculateBiologicalAge(){const baseAge=parseInt(App.userAnswers.age||30);let bioAge=baseAge;let score=100;const bmi=(App.userAnswers.weight/((App.userAnswers.height/100)**2));if(bmi>25){bioAge+=(bmi-25)*0.5;score-=(bmi-25)*2}else if(bmi<18.5){bioAge+=(18.5-bmi)*0.3;score-=(18.5-bmi)}else{score+=5}
+const sleep=parseInt(App.userAnswers.sleep||7);if(sleep<7){bioAge+=(7-sleep)*0.8;score-=(7-sleep)*4}else{score+=5}
+const activity=parseInt(App.userAnswers.activity||3);if(activity<3){bioAge+=(3-activity)*0.7;score-=(3-activity)*5}else{bioAge-=(activity-3)*0.5;score+=(activity-3)*2}
+const stress=parseInt(App.userAnswers.stress||4);bioAge+=(stress/10)*3;score-=(stress/10)*25;if(App.userPhotoUrl&&App.userPhotoUrl!=='skipped'){bioAge+=(Math.random()*2-1)}
+App.biologicalAge=Math.max(18,Math.round(bioAge-2));App.wellnessScore=Math.max(40,Math.min(99,Math.round(score)))}
+function startAnalysis(){goToStep(3);const analysisSteps=document.getElementById('analysis-steps');const loadingAnim=document.getElementById('loading-animation');lottie.loadAnimation({container:loadingAnim,renderer:'svg',loop:true,autoplay:true,path:'loader.json'});const steps=['Evaluating lifestyle factors...','Calculating BMI impact...','Assessing stress & sleep data...','Processing facial biomarkers (simulated)...','Compiling personalized recommendations...'];analysisSteps.innerHTML='';steps.forEach((stepText,i)=>{setTimeout(()=>{const stepEl=document.createElement('div');stepEl.className='flex items-center gap-3 animate-fade-in';stepEl.innerHTML=`<div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center check-mark-container"><svg class="w-4 h-4 text-green-600 opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg></div><span>${stepText}</span>`;analysisSteps.appendChild(stepEl);setTimeout(()=>{stepEl.querySelector('.check-mark-container').style.backgroundColor='#dcfce7';stepEl.querySelector('svg').style.opacity='1'},400)},i*900)});setTimeout(()=>{goToStep(4);renderWellnessProfile()},steps.length*900+500)}
+function preparePaymentPage(){const chronoAgeEl=document.getElementById('chrono-age-value');const bioAgeEl=document.getElementById('bio-age-value');calculateBiologicalAge();AnimationManager.add('lottie-age-arrow','arrow.json');const chronoAge=App.userAnswers.age||30;chronoAgeEl.textContent=chronoAge;animateCountUp(bioAgeEl,App.biologicalAge);initTestimonialSlider();const faqContainer=document.getElementById('payment-faq');faqContainer.innerHTML=App.faq.map(item=>`<details class="bg-white p-4 rounded-xl border cursor-pointer group"><summary class="font-semibold flex justify-between items-center list-none">${item.q}<span class="accordion-arrow transition-transform group-open:rotate-180 text-gray-400">&darr;</span></summary><p class="text-sm text-gray-600 mt-2">${item.a}</p></details>`).join('');const pricingCards=document.querySelectorAll('.pricing-card');pricingCards.forEach(card=>{card.addEventListener('click',()=>{pricingCards.forEach(c=>c.classList.remove('selected'));card.classList.add('selected')})});document.querySelector('.pricing-card[data-plan="annual"]')?.classList.add('selected')}
+function initTestimonialSlider(){const wrapper=document.querySelector('.testimonial-wrapper');const dotsContainer=document.querySelector('.testimonial-dots-container');if(!wrapper||!dotsContainer)return;const createStars=rating=>Array(5).fill(0).map((_,i)=>`<svg class="w-5 h-5 ${i<rating?'text-yellow-400':'text-gray-300'}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>`).join('');wrapper.innerHTML=App.testimonials.map(t=>`
             <div class="testimonial-slide">
                 <div class="bg-white p-6 rounded-2xl border">
                     <div class="flex items-center mb-2"><div class="flex">${createStars(t.rating)}</div></div>
                     <p class="text-gray-700 italic">"${t.text}"</p>
                     <p class="font-bold text-right mt-3 text-sm text-gray-800">- ${t.name}</p>
                 </div>
-            </div>
-        `).join('');
-
-        dotsContainer.innerHTML = App.testimonials.map((_, i) => `<button class="dot w-2.5 h-2.5 rounded-full ${i === 0 ? 'bg-gray-800' : 'bg-gray-300'}" data-index="${i}"></button>`).join('');
-
-        const goToSlide = (index) => {
-            wrapper.style.transform = `translateX(-${index * 100}%)`;
-            dotsContainer.querySelectorAll('.dot').forEach((d, i) => {
-                d.classList.toggle('bg-gray-800', i === index);
-                d.classList.toggle('bg-gray-300', i !== index);
-            });
-        }
-
-        dotsContainer.addEventListener('click', e => {
-            if (e.target.matches('.dot')) {
-                goToSlide(parseInt(e.target.dataset.index));
-            }
-        });
-    }
-
-    function initOnboarding() {
-        App.onboarding.slides = document.querySelectorAll('#onboarding-swiper .swiper-slide');
-        const dotsContainer = document.getElementById('dots-container');
-        if (App.onboarding.slides.length === 0) return;
-
-        dotsContainer.innerHTML = Array.from(App.onboarding.slides).map((_, i) => `<button class="dot w-2 h-2 bg-gray-300 rounded-full" data-index="${i}"></button>`).join('');
-        App.onboarding.dots = dotsContainer.querySelectorAll('.dot');
-        
-        App.onboarding.slides.forEach((slide) => {
-            slide.addEventListener('touchstart', e => { App.onboarding.touchStartX = e.changedTouches[0].screenX; resetOnboardingTimer(); });
-            slide.addEventListener('touchend', e => {
-                const touchEndX = e.changedTouches[0].screenX;
-                if (App.onboarding.touchStartX - touchEndX > 50) {
-                    updateOnboardingView(true, (App.onboarding.slideIndex + 1) % App.onboarding.slides.length);
-                } else if (App.onboarding.touchStartX - touchEndX < -50) {
-                    updateOnboardingView(true, (App.onboarding.slideIndex - 1 + App.onboarding.slides.length) % App.onboarding.slides.length);
-                }
-            });
-        });
-
-        dotsContainer.addEventListener('click', e => {
-            if (e.target.matches('.dot')) {
-                updateOnboardingView(true, parseInt(e.target.dataset.index));
-            }
-        });
-        
-        document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
-        updateOnboardingView(true, 0);
-        resetOnboardingTimer();
-    }
-    
-    function updateOnboardingView(manual = false, nextIndex) {
-        if (manual) resetOnboardingTimer();
-        const { slides, dots } = App.onboarding;
-        if (!slides || slides.length === 0) return;
-
-        let newIndex = nextIndex !== undefined ? nextIndex : (App.onboarding.slideIndex + 1) % slides.length;
-        
-        App.onboarding.slideIndex = newIndex;
-        
-        document.querySelector('.swiper-wrapper').style.transform = `translateX(-${newIndex * 100}%)`;
-        
-        slides.forEach((s, i) => s.classList.toggle('active', i === newIndex));
-        dots.forEach((d, i) => d.classList.toggle('active', i === newIndex));
-
-        document.getElementById('start-quiz-btn').textContent = (newIndex === slides.length - 1) ? "Get My Plan" : "Let's start";
-    }
-    
-    function resetOnboardingTimer() {
-        clearInterval(App.onboarding.timer);
-        App.onboarding.timer = setInterval(() => updateOnboardingView(false), 5000);
-    }
-    
-    function startQuiz() { clearInterval(App.onboarding.timer); next(); }
-    
-    async function openCamera() {
-        const modal = document.getElementById('camera-modal');
-        const video = document.getElementById('camera-video');
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            alert("Camera API is not supported in your browser.");
-            return;
-        }
-        try {
-            App.cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-            video.srcObject = App.cameraStream;
-            modal.classList.add('active');
-        } catch (err) {
-            console.error("Error accessing camera: ", err);
-            alert("Could not access the camera. Please ensure you have given permission.");
-        }
-    }
-
-    function closeCamera() {
-        if (App.cameraStream) {
-            App.cameraStream.getTracks().forEach(track => track.stop());
-        }
-        document.getElementById('camera-modal').classList.remove('active');
-    }
-
-    function capturePhoto() {
-        const video = document.getElementById('camera-video');
-        const canvas = document.getElementById('photo-canvas');
-        const context = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.translate(canvas.width, 0);
-        context.scale(-1, 1);
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataUrl = canvas.toDataURL('image/jpeg');
-        closeCamera();
-        handleAnswer('selfie', dataUrl);
-    }
-    
-    const burgerBtn = document.getElementById('burger-menu-btn');
-    const sideMenu = document.getElementById('side-menu');
-    const menuOverlay = document.getElementById('menu-overlay');
-    function toggleMenu() {
-        sideMenu.classList.toggle('active');
-        menuOverlay.classList.toggle('active');
-    }
-    
-    burgerBtn.addEventListener('click', toggleMenu);
-    menuOverlay.addEventListener('click', toggleMenu);
-    setVh();
-    window.addEventListener('resize', setVh);
-    AnimationManager.add('lottie-onboarding-2', 'arrow.json');
-    initOnboarding();
-    document.getElementById('back-btn').addEventListener('click', previous);
-    document.getElementById('profile-continue-btn').addEventListener('click', () => {
-        goToStep(5);
-        preparePaymentPage();
-    });
-    document.getElementById('capture-btn').addEventListener('click', capturePhoto);
-    document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
+            </div>`).join('');dotsContainer.innerHTML=App.testimonials.map((_,i)=>`<button class="dot w-2.5 h-2.5 rounded-full ${i===0?'bg-gray-800':'bg-gray-300'}" data-index="${i}"></button>`).join('');const goToSlide=index=>{wrapper.style.transform=`translateX(-${index*100}%)`;dotsContainer.querySelectorAll('.dot').forEach((d,i)=>{d.classList.toggle('bg-gray-800',i===index);d.classList.toggle('bg-gray-300',i!==index)})};dotsContainer.addEventListener('click',e=>{if(e.target.matches('.dot')){goToSlide(parseInt(e.target.dataset.index))}})}
+function initOnboarding(){App.onboarding.slides=document.querySelectorAll('#onboarding-swiper .swiper-slide');const dotsContainer=document.getElementById('dots-container');if(App.onboarding.slides.length===0)return;dotsContainer.innerHTML=Array.from(App.onboarding.slides).map((_,i)=>`<button class="dot w-2 h-2 bg-gray-300 rounded-full" data-index="${i}"></button>`).join('');App.onboarding.dots=dotsContainer.querySelectorAll('.dot');App.onboarding.slides.forEach(slide=>{slide.addEventListener('touchstart',e=>{App.onboarding.touchStartX=e.changedTouches[0].screenX;resetOnboardingTimer()});slide.addEventListener('touchend',e=>{const touchEndX=e.changedTouches[0].screenX;if(App.onboarding.touchStartX-touchEndX>50){updateOnboardingView(true,(App.onboarding.slideIndex+1)%App.onboarding.slides.length)}else if(App.onboarding.touchStartX-touchEndX<-50){updateOnboardingView(true,(App.onboarding.slideIndex-1+App.onboarding.slides.length)%App.onboarding.slides.length)}})});dotsContainer.addEventListener('click',e=>{if(e.target.matches('.dot')){updateOnboardingView(true,parseInt(e.target.dataset.index))}});document.getElementById('start-quiz-btn').addEventListener('click',startQuiz);updateOnboardingView(true,0);resetOnboardingTimer()}
+function updateOnboardingView(manual=false,nextIndex){if(manual)resetOnboardingTimer();const{slides,dots}=App.onboarding;if(!slides||slides.length===0)return;let newIndex=nextIndex!==undefined?nextIndex:(App.onboarding.slideIndex+1)%slides.length;App.onboarding.slideIndex=newIndex;document.querySelector('.swiper-wrapper').style.transform=`translateX(-${newIndex*100}%)`;slides.forEach((s,i)=>s.classList.toggle('active',i===newIndex));dots.forEach((d,i)=>d.classList.toggle('active',i===newIndex));document.getElementById('start-quiz-btn').textContent=(newIndex===slides.length-1)?"Get My Plan":"Let's start"}
+function resetOnboardingTimer(){clearInterval(App.onboarding.timer);App.onboarding.timer=setInterval(()=>updateOnboardingView(false),5000)}
+function startQuiz(){clearInterval(App.onboarding.timer);next()}
+async function openCamera(){const modal=document.getElementById('camera-modal');const video=document.getElementById('camera-video');if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){alert("Camera API is not supported in your browser.");return}
+try{App.cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}});video.srcObject=App.cameraStream;modal.classList.add('active')}catch(err){console.error("Error accessing camera: ",err);alert("Could not access the camera. Please ensure you have given permission.")}}
+function closeCamera(){if(App.cameraStream){App.cameraStream.getTracks().forEach(track=>track.stop())}
+document.getElementById('camera-modal').classList.remove('active')}
+function capturePhoto(){const video=document.getElementById('camera-video');const canvas=document.getElementById('photo-canvas');const context=canvas.getContext('2d');canvas.width=video.videoWidth;canvas.height=video.videoHeight;context.translate(canvas.width,0);context.scale(-1,1);context.drawImage(video,0,0,canvas.width,canvas.height);const dataUrl=canvas.toDataURL('image/jpeg');closeCamera();handleAnswer('selfie',dataUrl)}
+const burgerBtn=document.getElementById('burger-menu-btn');const sideMenu=document.getElementById('side-menu');const menuOverlay=document.getElementById('menu-overlay');function toggleMenu(){sideMenu.classList.toggle('active');menuOverlay.classList.toggle('active')}
+burgerBtn.addEventListener('click',toggleMenu);menuOverlay.addEventListener('click',toggleMenu);setVh();window.addEventListener('resize',setVh);AnimationManager.add('lottie-onboarding-2','arrow.json');initOnboarding();document.getElementById('back-btn').addEventListener('click',previous);document.getElementById('profile-continue-btn').addEventListener('click',()=>{goToStep(5);preparePaymentPage()});document.getElementById('capture-btn').addEventListener('click',capturePhoto);document.getElementById('close-camera-btn').addEventListener('click',closeCamera);
 });
 </script>
 </body>
