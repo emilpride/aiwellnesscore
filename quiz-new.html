@@ -113,6 +113,37 @@
             background-color: white; padding: 1.5rem 2rem; border-radius: 1.5rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 1.5rem;
         }
+        /* New styles for gradient slider in stress widget */
+        .stress-widget #slider-input {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 16px; /* Increased height for better visibility */
+            background: linear-gradient(to right, #4CAF50, #FFEB3B, #FF5722); /* Green to Yellow to Red */
+            border-radius: 8px;
+            outline: none;
+            transition: opacity .2s;
+        }
+        .stress-widget #slider-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px; /* Slightly larger thumb */
+            height: 28px;
+            background: white;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 4px solid var(--brand-accent); /* Accent border */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .stress-widget #slider-input::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            background: white;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 4px solid var(--brand-accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
 
         #mood-slider-container { width: 100%; max-width: 360px; margin: 1.5rem auto 0; }
         #mood-slider {
@@ -132,10 +163,102 @@
         #mood-emojis { display: flex; justify-content: space-between; font-size: 2.5rem; margin-bottom: 1rem; padding: 0 0.5rem; }
         #mood-emojis span { transition: transform 0.2s, opacity 0.2s; }
         
-        #bmi-scale-container { position: relative; width: 32px; height: 344px; }
-        #bmi-scale-gradient { width: 344px; height: 18px; background: linear-gradient(270deg, #43B7FF 0%, #33C75A 25%, #FBF447 50%, #FFA64D 75%, #FF7D7E 100%); border-radius: 100px; position: absolute; left: -155px; top: 163px; transform: rotate(90deg); }
-        #bmi-thumb { position: absolute; width: 32px; height: 32px; background: linear-gradient(180deg, #F2F2F2 0%, #E8E8E8 100%); border: 2px solid #FFFFFF; box-shadow: 0px 0px 6.9px rgba(0, 0, 0, 0.25); border-radius: 50%; bottom: 0%; left: 0px; transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .bmi-content-container { height: 344px; }
+        /* BMI Visualization Styles - Exact match to screenshot */
+        #bmi-display-wrapper {
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 2rem 1.5rem;
+            max-width: 450px; /* Adjust as needed */
+            width: 100%;
+            position: relative;
+        }
+        #bmi-info-box {
+            position: relative;
+            z-index: 10;
+            background-color: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        #bmi-category {
+            background-color: #debea9; /* Brand Accent */
+            color: #3c3b31; /* Brand Dark Text */
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+        #bmi-details {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center horizontally for mobile */
+            gap: 1.5rem; /* Space between scale and image */
+            margin-top: 1rem;
+        }
+        @media (min-width: 768px) { /* On larger screens, align items to start */
+            #bmi-details {
+                justify-content: flex-start;
+            }
+        }
+        #bmi-scale-container {
+            position: relative;
+            width: 32px; /* Width of the scale */
+            height: 250px; /* Height of the scale, matched to image */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #bmi-scale-gradient-vertical {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, #43B7FF, #33C75A, #FBF447, #FFA64D, #FF7D7E); /* Bottom to Top */
+            border-radius: 100px; /* Fully rounded caps */
+            position: absolute;
+        }
+        #bmi-thumb {
+            position: absolute;
+            width: 40px; /* Larger thumb */
+            height: 40px;
+            background: linear-gradient(180deg, #F2F2F2 0%, #E8E8E8 100%);
+            border: 2px solid #FFFFFF;
+            box-shadow: 0px 0px 6.9px rgba(0, 0, 0, 0.25);
+            border-radius: 50%;
+            left: 50%; /* Center horizontally */
+            transform: translateX(-50%); /* Adjust for thumb width */
+            bottom: 0%; /* Initial position, will be animated */
+            transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1; /* Above the gradient */
+        }
+        #bmi-value-display {
+            position: absolute;
+            font-size: 3rem; /* Large font size */
+            font-weight: 800;
+            color: #FBF447; /* Yellow color from the screenshot */
+            left: calc(100% + 1rem); /* Position next to the scale */
+            bottom: var(--thumb-position, 0%); /* Matches thumb position */
+            transform: translateY(50%); /* Vertically center with thumb */
+            transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        #bmi-image-section {
+            display: flex;
+            align-items: flex-end; /* Align image to the bottom of its container */
+            height: 250px; /* Same height as the scale */
+            flex-grow: 1;
+            justify-content: center;
+        }
+        #bmi-image {
+            height: 100%; /* Make image fill container height */
+            width: auto;
+            object-fit: contain;
+            user-select: none;
+            pointer-events: none;
+        }
+        /* End BMI visualization styles */
         
         .sleep-animation-container {
             background-color: #1c2a4e; border-radius: 50%;
@@ -165,7 +288,7 @@
         <div class="flex items-center gap-4 max-w-2xl mx-auto">
             <a href="index.html" class="flex-shrink-0"><img src="logo.png" alt="Logo" class="h-8 w-auto"></a>
             <button id="back-btn" class="text-gray-600 hover:text-gray-900 transition hidden p-2 -ml-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg></button>
-            <div id="progress-container" class="flex-grow h-2 bg-gray-200/50 rounded-full overflow-hidden"><div id="progress-bar-inner" class="h-full"></div></div>
+            <div id="progress-container" class="flex-grow h-2 bg-gray-200/50 rounded-full overflow-hidden"><div id="progress-bar-inner" class="h-full bg-blue-500 transition-all duration-500 ease-out"></div></div>
             <button id="burger-menu-btn" class="text-gray-600 hover:text-gray-900 transition p-2 -mr-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
         </div>
     </header>
@@ -195,24 +318,21 @@
         </section>
         
         <section id="step-bmi" class="quiz-step prev">
-             <div class="flex flex-row flex-wrap items-center justify-center gap-8 md:gap-12 w-full max-w-4xl px-4">
-                 <div id="bmi-scale-container" class="flex-shrink-0">
-                     <div id="bmi-scale-gradient"></div>
-                     <div id="bmi-thumb"></div>
-                 </div>
-                 <div class="flex-1 text-center md:text-left bmi-content-container flex flex-col justify-center">
-                     <div id="bmi-value-container" class="text-6xl font-extrabold text-gray-800 transition-opacity duration-500 opacity-0">...</div>
-                     <div id="bmi-image-container" class="mt-4 transition-opacity duration-500 opacity-0">
-                         <img id="bmi-image" src="" alt="BMI category illustration" class="h-32 md:h-40 w-auto mx-auto md:mx-0">
+             <div id="bmi-display-wrapper" class="flex flex-col items-center">
+                 <div id="bmi-category" class="text-lg"></div>
+                 <p id="bmi-description" class="text-gray-600 mt-1 text-center max-w-xs"></p>
+
+                 <div id="bmi-details" class="w-full mt-6">
+                     <div id="bmi-scale-container" class="relative">
+                         <div id="bmi-scale-gradient-vertical"></div>
+                         <div id="bmi-thumb"></div>
+                         <div id="bmi-value-display" style="--thumb-position: 0%;"></div>
                      </div>
-                     <div id="bmi-text-container" class="mt-4 transition-opacity duration-500 opacity-0">
-                         <h3 id="bmi-title" class="text-2xl font-bold"></h3>
-                         <p id="bmi-description" class="text-gray-600 mt-1"></p>
-                     </div>
-                      <div id="bmi-continue-button-container" class="mt-8 transition-opacity duration-500 opacity-0">
-                         <button id="bmi-continue-btn" class="w-full sm:max-w-xs mx-auto md:mx-0 block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Continue</button>
+                     <div id="bmi-image-section">
+                         <img id="bmi-image" src="" alt="BMI category illustration">
                      </div>
                  </div>
+                 <button id="bmi-continue-btn" class="w-full sm:max-w-xs block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition mt-8">Continue</button>
              </div>
         </section>
         
@@ -332,7 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
             backBtn.classList.toggle('hidden', App.currentQuestionIndex <= 0);
         }
 
-        document.getElementById('quiz-footer').style.display = (stepKey === 'quiz') ? 'block' : 'none';
+        document.getElementById('quiz-footer').style.display = (stepKey === 'quiz' || stepKey === 'bmi') ? 'block' : 'none';
     }
 
     function handleAnswer(questionKey, answer) {
@@ -360,8 +480,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function previous() {
         if (App.currentQuestionIndex < 0) return;
-        if (App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') App.currentQuestionIndex--;
-        App.currentQuestionIndex--;
+        // Adjust currentQuestionIndex to skip animation steps when going back
+        if (App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') {
+             App.currentQuestionIndex--; // Skip the current animation step
+             // If previous step was also an animation, skip it too
+             if (App.currentQuestionIndex >= 0 && App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') {
+                 App.currentQuestionIndex--;
+             }
+        } else {
+            App.currentQuestionIndex--;
+        }
         
         if (App.currentQuestionIndex < 0) {
             goToStep('onboarding');
@@ -374,11 +502,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function updateProgressBar() {
-        const questionsWithProgressBar = App.quizQuestions.filter(q => q.type !== 'animation');
-        const totalSteps = questionsWithProgressBar.length;
-        const currentProgressStep = questionsWithProgressBar.findIndex(q => q.key === App.quizQuestions[App.currentQuestionIndex]?.key);
-        const progress = totalSteps > 0 ? ((currentProgressStep + 1) / totalSteps) * 100 : 0;
+        const totalSteps = App.quizQuestions.length;
+        // Count only non-animation steps for progress bar
+        const nonAnimationQuestions = App.quizQuestions.filter(q => q.type !== 'animation');
+        const currentNonAnimationIndex = nonAnimationQuestions.findIndex(q => q.key === App.quizQuestions[App.currentQuestionIndex]?.key);
+        
+        const progress = (currentNonAnimationIndex >= 0) ? ((currentNonAnimationIndex + 1) / nonAnimationQuestions.length) * 100 : 0;
         document.getElementById('progress-bar-inner').style.width = `${Math.min(100, progress)}%`;
+        
+        document.getElementById('back-btn').classList.toggle('hidden', App.currentQuestionIndex <= 0);
     }
 
     function renderQuestion() {
@@ -497,14 +629,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function renderAnimation(key) {
-        goToStep('quiz');
+        goToStep('quiz'); // Keep quiz step active for animation
         const wrapper = document.getElementById('question-wrapper');
         document.getElementById('footer-actions').innerHTML = '';
-        document.getElementById('back-btn').classList.add('hidden');
+        document.getElementById('back-btn').classList.add('hidden'); // Hide back button for animations
+
         let animationHTML = '';
 
         if (key === 'bmi_display') {
-            goToStep('bmi');
+            goToStep('bmi'); // Switch to dedicated BMI step
             renderBmiResult();
             return;
         } else if (key === 'sleep_visual') {
@@ -529,13 +662,16 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (answer.startsWith("More than 8")) percent = 100;
             
             const ringEl = document.getElementById('sleep-ring-fg-anim');
-            const circumference = 327;
-            if(ringEl) ringEl.style.strokeDashoffset = String(circumference - (percent / 100) * circumference);
+            const circumference = 2 * Math.PI * 52; // For r=52
+            if(ringEl) {
+                ringEl.style.strokeDasharray = circumference;
+                ringEl.style.strokeDashoffset = String(circumference - (percent / 100) * circumference);
+            }
         } else if (key === 'activity_visual') {
             let days = 0;
             const answer = App.userAnswers.activity || "";
             if (answer.includes("5+")) {
-                days = 6;
+                days = 7; // Changed to 7 for all days if 5+ times a week
             } else if (answer.includes("3–4")) {
                 days = 4;
             } else if (answer.includes("1–2")) {
@@ -546,6 +682,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const dayElements = document.querySelectorAll('#activity-week-anim .activity-day');
             if (dayElements.length > 0) {
+                dayElements.forEach(day => day.classList.remove('active')); // Reset
                 for (let i = 0; i < Math.min(days, 7); i++) {
                     setTimeout(() => { dayElements[i]?.classList.add('active'); }, i * 200);
                 }
@@ -558,39 +695,55 @@ document.addEventListener('DOMContentLoaded', () => {
         const weightKg = App.userAnswers.weight;
         const gender = App.userAnswers.gender;
         const bmi = (weightKg / (heightM * heightM));
+
         const categories = [
-            { max: 16, img: 'under16', title: 'Severely Underweight', desc: 'Extremely low body mass.' },
-            { max: 18.4, img: '16-18.4', title: 'Underweight', desc: 'Below healthy weight.' },
-            { max: 24.9, img: '18.5-24.9', title: 'Normal Weight', desc: 'Ideal weight range.' },
-            { max: 29.9, img: '25.0-29.9', title: 'Overweight', desc: 'Slightly above normal.' },
-            { max: 34.9, img: '30-above', title: 'Obesity (Class I)', desc: 'Increased health risk.' },
-            { max: 39.9, img: '30-above', title: 'Obesity (Class II)', desc: 'High health risk.' },
-            { max: Infinity, img: '30-above', title: 'Obesity (Class III)', desc: 'Very high health risk.' }
+            { max: 16, img: 'under16', title: 'Severely Underweight', desc: 'Extremely low body mass.', color: '#43B7FF' },
+            { max: 18.4, img: '16-18.4', title: 'Underweight', desc: 'Below healthy weight.', color: '#33C75A' },
+            { max: 24.9, img: '18.5-24.9', title: 'Normal Weight', desc: 'Ideal weight range.', color: '#FBF447' },
+            { max: 29.9, img: '25.0-29.9', title: 'Overweight', desc: 'Slightly above normal. Risk of heart and metabolic issues.', color: '#FFA64D' },
+            { max: 34.9, img: '30-above', title: 'Obesity (Class I)', desc: 'Increased health risk.', color: '#FF7D7E' },
+            { max: 39.9, img: '30-above', title: 'Obesity (Class II)', desc: 'High health risk.', color: '#FF7D7E' },
+            { max: Infinity, img: '30-above', title: 'Obesity (Class III)', desc: 'Very high health risk.', color: '#FF7D7E' }
         ];
         const result = categories.find(c => bmi < c.max);
         const prefix = gender === 'female' ? 'f' : 'm';
+        
         document.getElementById('bmi-image').src = `${prefix}-${result.img}.svg`;
-        document.getElementById('bmi-title').textContent = result.title;
+        document.getElementById('bmi-category').textContent = result.title;
         document.getElementById('bmi-description').textContent = result.desc;
-        const minBmi = 15, maxBmi = 40;
-        const percent = Math.max(0, Math.min(100, ((bmi - minBmi) / (maxBmi - minBmi)) * 100));
-        document.getElementById('bmi-thumb').style.bottom = `${percent}%`;
-        const valueEl = document.getElementById('bmi-value-container');
+
+        const minBmi = 15, maxBmi = 40; // Define min/max BMI for the scale visually
+        const normalizedBmi = Math.max(0, Math.min(1, (bmi - minBmi) / (maxBmi - minBmi)));
+        const thumbBottomPosition = normalizedBmi * 100; // In percentage
+        
+        const bmiThumb = document.getElementById('bmi-thumb');
+        const bmiValueDisplay = document.getElementById('bmi-value-display');
+        
+        // Update custom CSS property for value display position
+        bmiValueDisplay.style.setProperty('--thumb-position', `${thumbBottomPosition}%`);
+        
+        // Animate thumb position
+        bmiThumb.style.bottom = `${thumbBottomPosition}%`;
+
+        // Animate BMI value count-up
         let currentBmi = 0;
-        const anim = () => {
-            currentBmi += 0.5;
-            if(currentBmi >= bmi) {
-                valueEl.textContent = bmi.toFixed(1);
-                 document.getElementById('bmi-image-container').style.opacity = '1';
-                 document.getElementById('bmi-text-container').style.opacity = '1';
-                 document.getElementById('bmi-continue-button-container').style.opacity = '1';
+        const startTimestamp = performance.now();
+        const duration = 1500; // 1.5 seconds for animation
+
+        const animateBmiValue = (timestamp) => {
+            const elapsed = timestamp - startTimestamp;
+            const progress = Math.min(elapsed / duration, 1);
+            currentBmi = progress * bmi;
+            bmiValueDisplay.textContent = currentBmi.toFixed(1);
+
+            if (progress < 1) {
+                requestAnimationFrame(animateBmiValue);
             } else {
-                 valueEl.textContent = currentBmi.toFixed(1);
-                 requestAnimationFrame(anim);
+                bmiValueDisplay.textContent = bmi.toFixed(1);
             }
         };
-        valueEl.style.opacity = '1';
-        requestAnimationFrame(anim);
+        requestAnimationFrame(animateBmiValue);
+        
         document.getElementById('bmi-continue-btn').onclick = next;
     }
 
