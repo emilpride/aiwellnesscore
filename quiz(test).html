@@ -970,4 +970,17 @@ document.addEventListener('DOMContentLoaded', () => {
     burgerBtn.addEventListener('click', toggleMenu);
     menuOverlay.addEventListener('click', toggleMenu);
     setVh();
-    window
+    window.addEventListener('resize', setVh);
+    AnimationManager.add('lottie-onboarding-2', 'arrow.json');
+    initOnboarding();
+    document.getElementById('back-btn').addEventListener('click', previous);
+    document.getElementById('profile-continue-btn').addEventListener('click', () => {
+        goToStep(5);
+        preparePaymentPage();
+    });
+    document.getElementById('capture-btn').addEventListener('click', capturePhoto);
+    document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
+});
+</script>
+</body>
+</html>
