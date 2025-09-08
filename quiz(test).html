@@ -44,7 +44,6 @@
 
         /* Header & Burger Menu */
         #quiz-header { flex-shrink: 0; position: relative; z-index: 30; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px); border-bottom: 1px solid #e5e7eb; visibility: hidden; }
-        #burger-menu-btn { visibility: hidden; }
         #side-menu { position: fixed; top: 0; right: 0; height: 100%; width: 280px; background-color: white; z-index: 150; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -10px 0 30px rgba(0,0,0,0.1); }
         #side-menu.active { transform: translateX(0); }
         #menu-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 140; opacity: 0; transition: opacity 0.3s ease-in-out; pointer-events: none; }
@@ -72,30 +71,17 @@
         /* Progress Bar & Gradients */
         #progress-bar-inner { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); background-image: linear-gradient(90deg, var(--brand-gradient-start), var(--brand-gradient-end), var(--brand-gradient-start)); background-size: 200% auto; animation: animate-gradient 2s linear infinite; }
         @keyframes animate-gradient { to { background-position: 200% center; } }
-        .unified-gradient-bar { background-image: linear-gradient(to right, #fbbf24, #4ade80 35%, #fbbf24 75%, #f87171 100%); }
         
-        /* Widgets (Intermediate Animations & Profile) */
-        .widget-wrapper { padding: 1.5rem; background-color: #ffffff; border-radius: 1.5rem; width: 100%; max-width: 340px; margin: auto; text-align: center; box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
-        .widget-label { font-weight: 600; color: var(--brand-dark-text); margin-bottom: 1rem; font-size: 1.125rem; }
-        .sleep-battery { width: 120px; height: 50px; border: 4px solid #e4d8c8; border-radius: 12px; position: relative; margin: 0 auto; }
-        .sleep-battery::after { content:''; position: absolute; top: 50%; right: -12px; transform: translateY(-50%); width: 6px; height: 24px; background-color: #e4d8c8; border-radius: 0 4px 4px 0; }
-        .sleep-battery-level { position: absolute; top: 4px; left: 4px; bottom: 4px; border-radius: 6px; width: 0%; background-color: #ef4444; transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1), background-color 1s ease; }
-        .activity-week { display:flex; justify-content:center; gap: 0.75rem; }
-        .activity-day { width: 32px; height: 32px; border-radius: 0.5rem; background-color: #f3f0eb; color: #8c7f6b; font-weight: 600; display:flex; align-items:center; justify-content:center; font-size:0.875rem; transform: scale(0.9); opacity: 0.5; transition: all 0.4s ease-out; }
-        .activity-day.activating { transform: scale(1.1); opacity: 1; }
-        .activity-day.active { background-color: var(--brand-accent); color: var(--brand-dark-text); box-shadow: 0 4px 10px rgba(222, 190, 169, 0.4); }
-        .stress-bar-track { height: 16px; background-color: #f3f0eb; border-radius: 9999px; overflow: hidden; }
-        .stress-bar-fill { height: 100%; width: 0%; background-image: linear-gradient(to right, #4ade80, #facc15, #f87171); border-radius: 9999px; transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* Widgets & Profile */
         .metric-widget { background-color: white; border: 1px solid #f3f4f6; border-radius: 1.5rem; padding: 1rem; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         .progress-ring-bg { stroke: #e5e7eb; }
         .progress-ring-fg { stroke: var(--brand-accent); stroke-linecap: round; transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1); transform: rotate(-90deg); transform-origin: 50% 50%; }
 
-        /* Testimonials */
-        .testimonial-swiper { overflow: hidden; position: relative; }
-        .testimonial-wrapper { display: flex; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .testimonial-slide { flex-shrink: 0; width: 100%; padding: 0 0.5rem; }
-        .star-rating svg { color: #facc15; }
-
+        /* Pricing Cards */
+        .pricing-card { transition: all 0.2s ease-in-out; border-color: #e5e7eb; }
+        .pricing-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05); }
+        .pricing-card.selected { border-color: var(--brand-accent); transform: translateY(-4px) scale(1.02); box-shadow: 0 0 25px rgba(222, 190, 169, 0.6); }
+        
         /* Other */
         #quiz-footer { flex-shrink: 0; background-color: #fff; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); display: none; padding: 1rem; }
         #camera-modal { position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(5px); }
@@ -114,7 +100,7 @@
             <button id="back-btn" class="text-gray-600 hover:text-gray-900 transition invisible p-2 -ml-2">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <div class="flex-grow h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div id="progress-bar-container" class="flex-grow h-1.5 bg-gray-200 rounded-full overflow-hidden">
                 <div id="progress-bar-inner" class="h-full"></div>
             </div>
             <button id="burger-menu-btn" class="text-gray-600 hover:text-gray-900 transition p-2 -mr-2">
@@ -193,13 +179,34 @@
                              </div>
                         </div>
                     </div>
-                    <div class="mt-6 max-w-md mx-auto">
-                        <div id="payment-form-container" class="space-y-4">
-                             <button id="payment-submit-btn" class="w-full block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[--brand-accent]/40 mt-6 !text-lg animate-pulse-button">Unlock My Plan Now</button>
+                    
+                    <div id="pricing-options" class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                        <div class="pricing-card border-2 rounded-xl p-4 cursor-pointer text-center" data-plan="monthly">
+                            <h3 class="font-bold text-lg">1 Month</h3>
+                            <p class="text-3xl font-extrabold my-2">$9.99<span class="text-base font-medium text-gray-500">/mo</span></p>
+                            <p class="text-sm text-gray-500">Billed monthly</p>
                         </div>
-                        <p class="text-xs text-gray-500 mt-3 text-center">You'll be charged $9.99/month after a 7-day trial. Cancel anytime.</p>
+                        
+                        <div class="pricing-card border-2 rounded-xl p-4 cursor-pointer text-center relative" data-plan="annual">
+                            <div class="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 bg-[--brand-accent] text-[--brand-dark-text] text-xs font-bold px-3 py-1 rounded-full uppercase">Best Value</div>
+                            <h3 class="font-bold text-lg">12 Months</h3>
+                            <p class="text-3xl font-extrabold my-2">$4.99<span class="text-base font-medium text-gray-500">/mo</span></p>
+                            <p class="text-sm text-gray-500">Billed as $59.88 annually</p>
+                        </div>
+
+                        <div class="pricing-card border-2 rounded-xl p-4 cursor-pointer text-center" data-plan="half-year">
+                            <h3 class="font-bold text-lg">6 Months</h3>
+                            <p class="text-3xl font-extrabold my-2">$7.99<span class="text-base font-medium text-gray-500">/mo</span></p>
+                            <p class="text-sm text-gray-500">Billed as $47.94</p>
+                        </div>
+                    </div>
+
+                    <div class="max-w-md mx-auto">
+                         <button id="payment-submit-btn" class="w-full block bg-gray-800 text-white font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg mt-6 !text-lg">Continue</button>
+                        <p class="text-xs text-gray-500 mt-3 text-center">7-day trial, then billed based on selected plan. Cancel anytime.</p>
                     </div>
                 </div>
+
                 <div class="bg-gray-50/70 p-6 mt-8">
                     <div class="max-w-md mx-auto">
                         <h3 class="font-bold text-xl text-center mb-4">Trusted by thousands of users</h3>
@@ -209,16 +216,7 @@
                         </div>
                     </div>
                 </div>
-                 <div class="p-6">
-                     <div class="max-w-md mx-auto">
-                         <h3 class="font-bold text-xl text-center">What you get</h3>
-                         <ul class="mt-4 space-y-4">
-                            <li class="flex items-start gap-3"><span class="text-2xl">🤸</span><div><h4 class="font-semibold">Slim toned body</h4><p class="text-sm text-gray-600">10-20 min beginner-friendly workouts for target areas.</p></div></li>
-                            <li class="flex items-start gap-3"><span class="text-2xl">🧘</span><div><h4 class="font-semibold">Improved posture</h4><p class="text-sm text-gray-600">Reduced tension in back, neck, and shoulders.</p></div></li>
-                             <li class="flex items-start gap-3"><span class="text-2xl">🥗</span><div><h4 class="font-semibold">Personalized nutrition plan</h4><p class="text-sm text-gray-600">Reach your goal weight faster with our guidance.</p></div></li>
-                         </ul>
-                     </div>
-                 </div>
+                 
                  <div class="bg-gray-50/70 p-6 mt-2">
                     <div class="max-w-md mx-auto">
                         <h3 class="font-bold text-xl text-center">People often ask</h3>
@@ -340,11 +338,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function goToStep(stepIndex) {
         App.currentStep = stepIndex;
+        
         const isQuizActive = (stepIndex === 1 || stepIndex === 2);
-        const showHeader = isQuizActive;
+        
+        // --- BURGER MENU FIX ---
+        const header = document.getElementById('quiz-header');
+        const progressBarContainer = document.getElementById('progress-bar-container');
+        const burgerBtn = document.getElementById('burger-menu-btn');
+        
+        const showHeader = stepIndex > 0 && stepIndex !== 3; // Show header on all steps except 0 (onboarding) and 3 (loader)
+        header.style.visibility = showHeader ? 'visible' : 'hidden';
+        
+        // Show progress bar only during quiz, hide on profile/payment
+        progressBarContainer.style.visibility = isQuizActive ? 'visible' : 'hidden';
 
-        document.getElementById('quiz-header').style.visibility = showHeader ? 'visible' : 'hidden';
-        document.getElementById('burger-menu-btn').style.visibility = (stepIndex >= 4) ? 'visible' : 'hidden';
+        // Show burger only on profile/payment
+        burgerBtn.style.visibility = (stepIndex >= 4) ? 'visible' : 'hidden';
+        
         document.getElementById('quiz-footer').style.display = isQuizActive ? 'block' : 'none';
 
         document.querySelectorAll('.quiz-step').forEach((step, index) => {
@@ -366,7 +376,10 @@ document.addEventListener('DOMContentLoaded', () => {
             startAnalysis();
             return;
         }
-        document.getElementById('back-btn').classList.toggle('invisible', App.currentQuestionIndex <= 0);
+
+        const backBtn = document.getElementById('back-btn');
+        backBtn.style.visibility = (App.currentQuestionIndex > 0) ? 'visible' : 'hidden';
+        
         switch (stepConfig.type) {
             case 'animation': goToStep(2); renderAnimation(stepConfig.key); break;
             case 'gender_selection': goToStep(1); renderGenderSelection(); break;
@@ -383,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const stepConfig = App.quizQuestions[App.currentQuestionIndex];
         if (!stepConfig) return; 
 
-        document.getElementById('back-btn').classList.toggle('invisible', App.currentQuestionIndex <= 0);
+        document.getElementById('back-btn').style.visibility = (App.currentQuestionIndex > 0) ? 'visible' : 'hidden';
 
         if (stepConfig.type === 'gender_selection') {
             goToStep(1);
@@ -422,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         questionWrapper.innerHTML = `<div class="question-content w-full">${contentHTML}</div>`;
-        footerWrapper.innerHTML = '';
+        footerWrapper.innerHTML = ''; // Clear previous buttons
 
         if (question.type === 'options') {
             const optionsHTML = question.options.map((opt, index) => {
@@ -792,6 +805,15 @@ document.addEventListener('DOMContentLoaded', () => {
         faqContainer.innerHTML = App.faq.map(item => 
             `<details class="bg-white p-4 rounded-xl border cursor-pointer"><summary class="font-semibold flex justify-between items-center">${item.q}<span class="accordion-arrow transition-transform text-gray-400">&darr;</span></summary><p class="text-sm text-gray-600 mt-2">${item.a}</p></details>`
         ).join('');
+        
+        const pricingCards = document.querySelectorAll('.pricing-card');
+        pricingCards.forEach(card => {
+            card.addEventListener('click', () => {
+                pricingCards.forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+            });
+        });
+        document.querySelector('.pricing-card[data-plan="annual"]')?.classList.add('selected');
     }
 
     function initTestimonialSlider() {
@@ -836,7 +858,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dotsContainer.innerHTML = Array.from(App.onboarding.slides).map((_, i) => `<button class="dot w-2 h-2 bg-gray-300 rounded-full" data-index="${i}"></button>`).join('');
         App.onboarding.dots = dotsContainer.querySelectorAll('.dot');
         
-        App.onboarding.slides.forEach((slide, i) => {
+        App.onboarding.slides.forEach((slide) => {
             slide.addEventListener('touchstart', e => { App.onboarding.touchStartX = e.changedTouches[0].screenX; resetOnboardingTimer(); });
             slide.addEventListener('touchend', e => {
                 const touchEndX = e.changedTouches[0].screenX;
@@ -855,7 +877,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
-        updateOnboardingView(true, 0); // <-- FIX: Start on slide 0
+        updateOnboardingView(true, 0);
         resetOnboardingTimer();
     }
     
@@ -864,12 +886,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const { slides, dots } = App.onboarding;
         if (!slides || slides.length === 0) return;
 
-        let newIndex;
-        if (nextIndex !== undefined) {
-            newIndex = nextIndex;
-        } else {
-            newIndex = (App.onboarding.slideIndex + 1) % slides.length;
-        }
+        let newIndex = nextIndex !== undefined ? nextIndex : (App.onboarding.slideIndex + 1) % slides.length;
         
         App.onboarding.slideIndex = newIndex;
         
@@ -883,7 +900,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function resetOnboardingTimer() {
         clearInterval(App.onboarding.timer);
-        App.onboarding.timer = setInterval(updateOnboardingView, 5000);
+        App.onboarding.timer = setInterval(() => updateOnboardingView(false), 5000);
     }
     
     function startQuiz() { clearInterval(App.onboarding.timer); next(); }
