@@ -155,27 +155,28 @@
         <section id="step-2" class="quiz-step prev">
             <div id="question-wrapper" class="w-full max-w-2xl"></div>
         </section>
-
-        <section id="step-3" class="quiz-step prev p-0 justify-start">
+        
+        <section id="step-3" class="quiz-step prev">
+            <div id="loading-animation" class="w-48 h-48"></div>
+            <h2 class="text-3xl font-bold text-gray-800 mt-4 text-center">Analyzing Your Unique Profile...</h2>
+            <div id="analysis-steps" class="mt-6 text-gray-600 space-y-2 w-64 text-left"></div>
+        </section>
+        
+        <section id="step-4" class="quiz-step prev p-0 justify-start">
             <div class="w-full h-full overflow-y-auto p-4 sm:p-6 text-center bg-gray-50">
                  <div class="max-w-4xl mx-auto">
-                    <h2 class="text-3xl font-extrabold text-gray-900">Here's Your Wellness Profile</h2>
-                    <p class="text-gray-600 mt-1">A snapshot of your current wellbeing.</p>
+                    <h2 class="text-3xl font-extrabold text-gray-900">Your Wellness Profile is Ready!</h2>
+                    <p class="text-gray-600 mt-1">Here is a snapshot of your current wellbeing.</p>
                     <div id="profile-page-content" class="mt-8 grid grid-cols-1 md:grid-cols-5 gap-6">
                         <div id="profile-avatar-area" class="md:col-span-2"></div>
                         <div id="profile-metrics-area" class="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
                     </div>
+                    <div id="profile-analysis-area" class="mt-6 text-left"></div>
                 </div>
             </div>
              <div class="w-full p-4 bg-white border-t sticky bottom-0">
                  <button id="profile-continue-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-dark-text] text-white font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Continue</button>
              </div>
-        </section>
-        
-        <section id="step-4" class="quiz-step prev">
-            <div id="loading-animation" class="w-48 h-48"></div>
-            <h2 class="text-3xl font-bold text-gray-800 mt-4 text-center">Analyzing Your Unique Profile...</h2>
-            <div id="analysis-steps" class="mt-6 text-gray-600 space-y-2 w-64 text-left"></div>
         </section>
 
         <section id="step-5" class="quiz-step prev p-0 bg-white justify-start">
@@ -292,8 +293,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]
             },
             { key: 'stress_visual', type: 'animation' },
-            { key: 'selfie', type: 'camera_step', text: 'Final Step: AI Photo Analysis', subtext: 'Our AI analyzes your face for non-medical indicators of stress and fatigue. Your photo is deleted instantly after analysis.'},
-            { key: 'wellness_profile', type: 'wellness_profile_page'},
+            { key: 'selfie', type: 'camera_step', text: 'AI Photo Analysis', subtext: 'Our AI analyzes your face for non-medical indicators of stress and fatigue. Your photo is deleted instantly after analysis.'},
+            { key: 'email', type: 'email_input', text: 'Where should we send your full report?', subtext: 'Get your 10-page wellness analysis delivered to your inbox.' },
         ],
         testimonials: [
             { name: "Jessica M.", rating: 5, text: "I was skeptical, but my energy levels are through the roof! The personalized plan was easy to follow and made a real difference in just a week." },
@@ -340,10 +341,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function goToStep(stepIndex) {
         App.currentStep = stepIndex;
         const isQuizActive = (stepIndex === 1 || stepIndex === 2);
-        const showHeader = stepIndex > 0 && stepIndex < 4;
+        const showHeader = isQuizActive;
 
         document.getElementById('quiz-header').style.visibility = showHeader ? 'visible' : 'hidden';
-        document.getElementById('burger-menu-btn').style.visibility = (stepIndex >= 3) ? 'visible' : 'hidden';
+        document.getElementById('burger-menu-btn').style.visibility = (stepIndex >= 4) ? 'visible' : 'hidden';
         document.getElementById('quiz-footer').style.display = isQuizActive ? 'block' : 'none';
 
         document.querySelectorAll('.quiz-step').forEach((step, index) => {
@@ -354,8 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleAnswer(questionKey, answer) {
-        if (questionKey === 'selfie') { App.userPhotoUrl = answer; }
-        else { App.userAnswers[questionKey] = answer; }
+        App.userAnswers[questionKey] = answer;
         next();
     }
 
@@ -363,13 +363,11 @@ document.addEventListener('DOMContentLoaded', () => {
         App.currentQuestionIndex++;
         const stepConfig = App.quizQuestions[App.currentQuestionIndex];
         if (!stepConfig) {
-            goToStep(4);
-            startAnalysis();
+            startAnalysis(); // Start analysis after the last question (email)
             return;
         }
         document.getElementById('back-btn').classList.toggle('invisible', App.currentQuestionIndex <= 0);
         switch (stepConfig.type) {
-            case 'wellness_profile_page': goToStep(3); renderWellnessProfile(); break;
             case 'animation': goToStep(2); renderAnimation(stepConfig.key); break;
             case 'gender_selection': goToStep(1); renderGenderSelection(); break;
             default: goToStep(2); renderQuestion(); break;
@@ -378,12 +376,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function previous() {
-        if (App.currentStep === 3) {
-            App.currentQuestionIndex = App.quizQuestions.findIndex(q => q.type === 'wellness_profile_page');
-        }
         App.currentQuestionIndex--;
         if (App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') App.currentQuestionIndex--;
         if (App.currentQuestionIndex < 0) App.currentQuestionIndex = 0;
+        
         const stepConfig = App.quizQuestions[App.currentQuestionIndex];
         if (!stepConfig) return; 
 
@@ -400,8 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateProgressBar() {
-        const quizPart = App.quizQuestions.filter(q => q.type !== 'wellness_profile_page');
-        const totalQuestions = quizPart.length;
+        const totalQuestions = App.quizQuestions.length;
         const progress = totalQuestions > 0 ? ((App.currentQuestionIndex + 1) / totalQuestions) * 100 : 0;
         document.getElementById('progress-bar-inner').style.width = `${Math.min(100, progress)}%`;
     }
@@ -416,6 +411,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (question.type === 'camera_step') {
             contentHTML = `
                 <img src="face.jpeg" alt="Face scan illustration" class="w-48 h-48 mx-auto rounded-full object-cover mb-6 shadow-lg">
+                <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
+                <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>
+            `;
+        } else if (question.type === 'email_input') {
+             contentHTML = `
+                <span class="text-5xl mb-4">📧</span>
                 <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
                 <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>
             `;
@@ -438,7 +439,13 @@ document.addEventListener('DOMContentLoaded', () => {
             footerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;
         } else if (question.type === 'camera_step') {
             footerHTML = `<div class="max-w-sm mx-auto space-y-3 mt-4"><button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button></div>`;
+        } else if (question.type === 'email_input') {
+            footerHTML = `<div class="max-w-sm mx-auto space-y-3 mt-4">
+                <input id="email-input" type="email" placeholder="Enter your email" class="w-full text-center p-4 rounded-xl border-2 border-gray-300 focus:border-[--brand-accent] focus:ring-2 focus:ring-[--brand-accent]/50 outline-none transition">
+                <button id="email-confirm-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Send Report</button>
+            </div>`;
         }
+
         footerWrapper.innerHTML = footerHTML;
         addQuestionEventListeners(question);
     }
@@ -505,6 +512,16 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (question.type === 'camera_step') {
             footer.querySelector('#open-camera-btn')?.addEventListener('click', openCamera);
             footer.querySelector('#skip-photo-btn')?.addEventListener('click', () => handleAnswer('selfie', 'skipped'));
+        } else if (question.type === 'email_input') {
+            const emailInput = footer.querySelector('#email-input');
+            footer.querySelector('#email-confirm-btn')?.addEventListener('click', () => {
+                if (emailInput && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
+                    handleAnswer(question.key, emailInput.value);
+                } else {
+                    emailInput.classList.add('border-red-500');
+                    setTimeout(() => emailInput.classList.remove('border-red-500'), 1500);
+                }
+            });
         }
     }
 
@@ -594,11 +611,46 @@ document.addEventListener('DOMContentLoaded', () => {
             if(fillEl) fillEl.style.width = `${percent}%`;
         }
     }
+    
+    function generateProfileAnalysis() {
+        const { sleep, activity, stress, weight, height } = App.userAnswers;
+        const bmi = (weight / ((height/100)**2));
+        let analysis = {};
+
+        if (bmi >= 25) {
+            analysis.bmi = { icon: '⚠️', text: 'Your BMI is in the <strong>overweight</strong> range. Small, consistent changes to diet and incorporating more movement can have a significant positive impact.'};
+        } else if (bmi < 18.5) {
+             analysis.bmi = { icon: '⚠️', text: 'Your BMI is in the <strong>underweight</strong> range. Ensuring you get enough nutrients and energy is key to feeling your best.'};
+        } else {
+             analysis.bmi = { icon: '✅', text: 'You have a <strong>healthy BMI</strong>. This is a fantastic foundation for overall wellness and longevity.'};
+        }
+
+        if (sleep < 7) {
+            analysis.sleep = { icon: '🌙', text: `Getting <strong>less than 7 hours of sleep</strong> can affect recovery and cognitive function. Aiming for a consistent sleep schedule could boost your energy.`};
+        } else {
+            analysis.sleep = { icon: '✅', text: `You're getting a <strong>healthy amount of sleep</strong>. This is crucial for mental clarity, physical recovery, and stress management.`};
+        }
+        
+        if (activity < 3) {
+            analysis.activity = { icon: '🏃‍♀️', text: `Your current activity level is low. Just <strong>2-3 short walks</strong> a week can dramatically improve your energy and reduce your biological age.`};
+        } else {
+             analysis.activity = { icon: '✅', text: `Great job staying active! Your <strong>consistent physical activity</strong> is one of the best things you can do for your health.`};
+        }
+
+        if (stress > 5) {
+             analysis.stress = { icon: '🧠', text: `You've reported <strong>elevated stress levels</strong>. Incorporating mindfulness or short breathing exercises into your day can be highly effective.`};
+        } else {
+             analysis.stress = { icon: '✅', text: `You're managing your stress well. This mental resilience is key to preventing burnout and maintaining <strong>emotional balance</strong>.`};
+        }
+        
+        return analysis;
+    }
 
     function renderWellnessProfile() {
-        const { age, sleep, activity, stress, weight, height, gender } = App.userAnswers;
+        const { age, gender, weight, height, sleep, activity, stress } = App.userAnswers;
         const avatarArea = document.getElementById('profile-avatar-area');
         const metricsArea = document.getElementById('profile-metrics-area');
+        const analysisArea = document.getElementById('profile-analysis-area');
 
         if (App.userPhotoUrl && App.userPhotoUrl !== 'skipped') {
             avatarArea.innerHTML = `
@@ -632,10 +684,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <circle id="wellness-score-circle" class="progress-ring-fg" stroke-width="10" cx="60" cy="60" r="${radius}" style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${circumference};"/>
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                         <div class="w-28 h-28 bg-white rounded-full flex flex-col items-center justify-center shadow-inner">
-                            <span id="wellness-score-value" class="text-4xl font-extrabold text-[--brand-dark-text]">0</span>
-                            <span class="text-xs text-gray-500 font-medium">out of 100</span>
-                         </div>
+                         <span id="wellness-score-value" class="text-4xl font-extrabold text-[--brand-dark-text]">0</span>
+                         <span class="text-xs text-gray-500 font-medium">out of 100</span>
                     </div>
                 </div>
             </div>
@@ -649,34 +699,25 @@ document.addEventListener('DOMContentLoaded', () => {
                  <p class="text-4xl font-bold text-[--brand-dark-text]"><span id="bmi-profile-value">0.0</span></p>
                  <p class="text-xs text-gray-500">${weight} kg / ${height} cm</p>
             </div>
-             <div class="metric-widget animate-fade-in" style="animation-delay: 400ms;">
-                 <h3 class="font-semibold text-gray-700 text-sm mb-2">Lifestyle</h3>
-                 <div class="flex justify-around items-center mt-2">
-                    <div class="text-center">
-                        <span class="text-3xl">😴</span>
-                        <p class="text-xl font-bold text-[--brand-dark-text] mt-1"><span id="sleep-profile-value">0</span>h</p>
-                        <p class="text-xs text-gray-500">Sleep</p>
-                    </div>
-                    <div class="text-center">
-                        <span class="text-3xl">🏃‍♀️</span>
-                        <p class="text-xl font-bold text-[--brand-dark-text] mt-1"><span id="activity-profile-value">0</span>/w</p>
-                        <p class="text-xs text-gray-500">Activity</p>
-                    </div>
-                 </div>
-            </div>
-             <div class="metric-widget animate-fade-in" style="animation-delay: 500ms;">
-                 <h3 class="font-semibold text-gray-700 text-sm mb-1">Stress Level</h3>
-                 <div class="stress-bar-track mt-4 mx-auto max-w-[150px]"><div class="stress-bar-fill" style="width: ${stress/10 * 100}%"></div></div>
-                 <p class="text-xs text-gray-500 mt-2">${['Low', 'Normal', 'Elevated', 'High'][Math.floor((stress-1)/2.5)]}</p>
-            </div>
         `;
         
+        const analysis = generateProfileAnalysis();
+        analysisArea.innerHTML = `
+            <div class="bg-white p-5 rounded-2xl border animate-fade-in" style="animation-delay: 400ms;">
+                <h3 class="font-bold text-lg text-gray-800 mb-4">AI Recommendations</h3>
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-3"><span class="text-xl pt-1">${analysis.bmi.icon}</span> <p class="text-gray-600">${analysis.bmi.text}</p></li>
+                    <li class="flex items-start gap-3"><span class="text-xl pt-1">${analysis.sleep.icon}</span> <p class="text-gray-600">${analysis.sleep.text}</p></li>
+                    <li class="flex items-start gap-3"><span class="text-xl pt-1">${analysis.activity.icon}</span> <p class="text-gray-600">${analysis.activity.text}</p></li>
+                    <li class="flex items-start gap-3"><span class="text-xl pt-1">${analysis.stress.icon}</span> <p class="text-gray-600">${analysis.stress.text}</p></li>
+                </ul>
+            </div>
+        `;
+
         setTimeout(() => {
             document.getElementById('wellness-score-circle').style.strokeDashoffset = scoreOffset;
             animateCountUp(document.getElementById('wellness-score-value'), App.wellnessScore);
             animateCountUp(document.getElementById('bmi-profile-value'), bmi, 1500, false);
-            animateCountUp(document.getElementById('sleep-profile-value'), sleep || 0);
-            animateCountUp(document.getElementById('activity-profile-value'), activity || 0);
         }, 300);
     }
     
@@ -711,6 +752,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function startAnalysis() {
+        goToStep(3); // Go to loader screen
         const analysisSteps = document.getElementById('analysis-steps');
         const loadingAnim = document.getElementById('loading-animation');
         lottie.loadAnimation({ container: loadingAnim, renderer: 'svg', loop: true, autoplay: true, path: 'loader.json' });
@@ -738,8 +780,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         setTimeout(() => {
-            goToStep(5);
-            preparePaymentPage();
+            goToStep(4); // Go to NEW profile screen
+            renderWellnessProfile();
         }, steps.length * 900 + 500);
     }
 
@@ -748,6 +790,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const bioAgeEl = document.getElementById('bio-age-value');
         
         calculateBiologicalAge();
+
         AnimationManager.add('lottie-age-arrow', 'arrow.json');
         
         const chronoAge = App.userAnswers.age || 30;
@@ -781,15 +824,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         dotsContainer.innerHTML = App.testimonials.map((_, i) => `<button class="dot w-2.5 h-2.5 rounded-full ${i === 0 ? 'bg-gray-800' : 'bg-gray-300'}" data-index="${i}"></button>`).join('');
 
-        let currentIndex = 0;
-        const slides = wrapper.children;
-        const dots = dotsContainer.children;
-
         const goToSlide = (index) => {
             wrapper.style.transform = `translateX(-${index * 100}%)`;
-            Array.from(dots).forEach((d, i) => d.classList.toggle('bg-gray-800', i === index));
-            Array.from(dots).forEach((d, i) => d.classList.toggle('bg-gray-300', i !== index));
-            currentIndex = index;
+            dotsContainer.querySelectorAll('.dot').forEach((d, i) => {
+                d.classList.toggle('bg-gray-800', i === index);
+                d.classList.toggle('bg-gray-300', i !== index);
+            });
         }
 
         dotsContainer.addEventListener('click', e => {
@@ -811,9 +851,9 @@ document.addEventListener('DOMContentLoaded', () => {
             slide.addEventListener('touchstart', e => { App.onboarding.touchStartX = e.changedTouches[0].screenX; resetOnboardingTimer(); });
             slide.addEventListener('touchend', e => {
                 const touchEndX = e.changedTouches[0].screenX;
-                if (App.onboarding.touchStartX - touchEndX > 50) {
+                if (App.onboarding.touchStartX - touchEndX > 50) { // Swipe left
                     updateOnboardingView(true, (App.onboarding.slideIndex + 1) % App.onboarding.slides.length);
-                } else if (App.onboarding.touchStartX - touchEndX < -50) {
+                } else if (App.onboarding.touchStartX - touchEndX < -50) { // Swipe right
                     updateOnboardingView(true, (App.onboarding.slideIndex - 1 + App.onboarding.slides.length) % App.onboarding.slides.length);
                 }
             });
@@ -826,7 +866,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
-        updateOnboardingView(false, 0); 
+        updateOnboardingView();
         resetOnboardingTimer();
     }
     
@@ -835,13 +875,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const { slides, dots } = App.onboarding;
         if (!slides || slides.length === 0) return;
 
-        let newIndex;
-        if (nextIndex !== undefined) {
-            newIndex = nextIndex;
-        } else {
-            newIndex = (App.onboarding.slideIndex + 1) % slides.length;
-        }
-        
+        let newIndex = nextIndex !== undefined ? nextIndex : (App.onboarding.slideIndex + 1) % slides.length;
         App.onboarding.slideIndex = newIndex;
         
         document.querySelector('.swiper-wrapper').style.transform = `translateX(-${newIndex * 100}%)`;
@@ -912,7 +946,10 @@ document.addEventListener('DOMContentLoaded', () => {
     AnimationManager.add('lottie-onboarding-2', 'arrow.json');
     initOnboarding();
     document.getElementById('back-btn').addEventListener('click', previous);
-    document.getElementById('profile-continue-btn').addEventListener('click', next);
+    document.getElementById('profile-continue-btn').addEventListener('click', () => {
+        goToStep(5);
+        preparePaymentPage();
+    });
     document.getElementById('camera-modal').querySelector('#capture-btn')?.addEventListener('click', capturePhoto);
     document.getElementById('camera-modal').querySelector('#close-camera-btn')?.addEventListener('click', closeCamera);
 });
