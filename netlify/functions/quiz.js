@@ -1,7 +1,6 @@
 // /netlify/functions/quiz.js
 
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
-// Добавляем FieldValue в импорт для чистоты кода
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 
 if (!getApps().length) {
@@ -76,6 +75,7 @@ exports.handler = async (event, context) => {
         body: JSON.stringify({ message: 'Answer saved' }),
       };
 
+    // --- НОВЫЙ БЛОК ДЛЯ СОХРАНЕНИЯ РЕЗУЛЬТАТОВ АНАЛИЗА ---
     } else if (action === 'saveAnalysisData') {
       const { sessionId, analysisData } = data;
       if (!sessionId || !analysisData) {
@@ -83,13 +83,14 @@ exports.handler = async (event, context) => {
       }
       const sessionRef = db.collection('sessions').doc(sessionId);
       await sessionRef.update({
-        faceAnalysis: analysisData,
+        faceAnalysis: analysisData, // <--- Сохраняем результат в поле 'faceAnalysis'
         updatedAt: new Date().toISOString()
       });
       return {
         statusCode: 200,
         body: JSON.stringify({ message: 'Analysis data saved successfully' })
       };
+    // --- КОНЕЦ НОВОГО БЛОКА ---
 
     } else if (action === 'endQuiz') {
       const { sessionId } = data;
@@ -104,39 +105,6 @@ exports.handler = async (event, context) => {
         body: JSON.stringify({ message: 'Quiz end time recorded' })
       };
 
-    } else if (action === 'updatePayment') {
-        const { sessionId, status, amountUSD } = data;
-        if (!sessionId) return { statusCode: 400, body: 'Missing sessionId' };
-        const sessionRef = db.collection('sessions').doc(sessionId);
-        await sessionRef.update({
-            paymentStatus: status,
-            paymentAmountUSD: amountUSD
-        });
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'Payment details updated' })
-        };
-
-    } else if (action === 'checkPaymentStatus') {
-        const { sessionId } = data;
-        if (!sessionId) return { statusCode: 400, body: 'Missing sessionId' };
-        
-        const sessionRef = db.collection('sessions').doc(sessionId);
-        const doc = await sessionRef.get();
-        
-        if (!doc.exists) {
-            return { statusCode: 404, body: JSON.stringify({ status: 'not_found' }) };
-        }
-        
-        const sessionData = doc.data();
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ 
-                status: sessionData.paymentStatus || 'pending',
-                amount: sessionData.paymentAmountUSD || null
-            })
-        };
-        
     } else if (action === 'logError') {
         const { sessionId, error } = data;
         if (!sessionId || !error) {
@@ -159,7 +127,6 @@ exports.handler = async (event, context) => {
         };
     }
 
-    // Эта строка выполнится, если ни один из if/else if не сработал
     return { statusCode: 400, body: 'Invalid action' };
 
   } catch (error) {
