@@ -325,7 +325,7 @@
         <div class="flex items-center gap-4 max-w-2xl mx-auto">
             <a href="index.html" class="flex-shrink-0"><img src="logo.png" alt="Logo" class="h-8 w-auto"></a>
             <button id="back-btn" class="text-gray-600 hover:text-gray-900 transition hidden p-2 -ml-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg></button>
-            <div id="progress-container" class="flex-grow h-2 bg-gray-200/50 rounded-full overflow-hidden"><div id="progress-bar-inner" class="h-full transition-all duration-500 ease-out" style="background-image: linear-gradient(to right, var(--brand-accent), var(--brand-dark-text));"></div></div>
+            <div id="progress-container" class="flex-grow h-2 bg-gray-200/50 rounded-full overflow-hidden"><div id="progress-bar-inner" class="h-full transition-all duration-500 ease-out" style="background-image: linear-gradient(to right, #debea9, #f7b784);"></div></div>
             <button id="burger-menu-btn" class="text-gray-600 hover:text-gray-900 transition p-2 -mr-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
         </div>
     </header>
@@ -424,6 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
         faceMesh: null,
         cameraAnimFrame: null,
         captureTimeout: null,
+        faceMeshDrawState: { startTime: null, duration: 500 }, // Added for mesh fade-in
         quizQuestions: [
             { key: 'userGoal', type: 'options', text: "What’s your main goal?", subtext: "This helps us tailor the final report to your interests.", options: [{text: 'Find out my Biological Age', value:'bio_age'}, {text:'Get a Skin Health Analysis', value: 'skin'}, {text:'Receive a 7-Day Improvement Plan', value:'plan'}, {text:'All of the above!', value: 'all'}] },
             { key: 'age', type: 'slider', text: "How old are you?", subtext: "Your age is a key factor in calculating your biological age baseline.", min: 18, max: 90, defaultValue: 30, unit: 'years' },
@@ -873,15 +874,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
             const landmarks = results.multiFaceLandmarks[0];
+            
+            // --- Mesh Fade-in Logic ---
+            if (App.faceMeshDrawState.startTime === null) {
+                App.faceMeshDrawState.startTime = performance.now();
+            }
+            const elapsed = performance.now() - App.faceMeshDrawState.startTime;
+            const finalOpacity = 0.3; // The final opacity of the mesh
+            const opacity = Math.min(1, elapsed / App.faceMeshDrawState.duration) * finalOpacity;
+            // --- End Fade-in Logic ---
+
             if (window.drawConnectors && window.FACEMESH_TESSELATION) {
-                drawConnectors(ctx, landmarks, window.FACEMESH_TESSELATION, {color: 'rgba(222, 190, 169, 0.3)', lineWidth: 1});
+                drawConnectors(ctx, landmarks, window.FACEMESH_TESSELATION, {color: `rgba(222, 190, 169, ${opacity})`, lineWidth: 1});
             }
 
             if (isFaceCentered(landmarks)) {
                 guideBox.classList.add('locked');
                 guideText.textContent = 'Perfect, hold still!';
                 if (!App.captureTimeout) {
-                    App.captureTimeout = setTimeout(takePhoto, 1000);
+                    // Increased timeout to 2 seconds for a smoother experience
+                    App.captureTimeout = setTimeout(takePhoto, 2000);
                 }
             } else {
                 guideBox.classList.remove('locked');
@@ -890,6 +902,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 App.captureTimeout = null;
             }
         } else {
+            // Reset when face is lost
+            App.faceMeshDrawState.startTime = null; 
             guideBox.classList.remove('locked');
             guideText.textContent = 'Center your face in the oval';
             clearTimeout(App.captureTimeout);
@@ -1007,4 +1021,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
