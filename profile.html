@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Your Preliminary Wellness Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { 
+            --brand-accent: #debea9;
+            --brand-dark-text: #3c3b31; 
+        }
+        
+        html, body { 
+            overscroll-behavior: none; 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(120deg, #fdfcfb, #f9f7f5, #f5f2ef, #f9f7f5, #fdfcfb);
+            background-size: 400% 400%;
+            animation: moveBackground 40s ease infinite;
+        }
+
+        @keyframes moveBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .content-card {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+        }
+        
+        .cta-button {
+            background-color: var(--brand-dark-text);
+            color: white;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 15px rgba(60, 59, 49, 0.2);
+        }
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(60, 59, 49, 0.3);
+        }
+
+        .highlight-stat {
+            background-color: #ffffff;
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .highlight-stat .value {
+            font-weight: 900;
+            font-size: 4rem;
+            line-height: 1;
+            color: var(--brand-dark-text);
+        }
+        
+        .highlight-stat .label {
+            font-weight: 600;
+            color: #78716c; /* stone-500 */
+            margin-top: 0.5rem;
+        }
+
+        .bio-age {
+            background: linear-gradient(to right, #cdaa8d, #b69882);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .factor-list li {
+            background-color: #f9fafb;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #f3f4f6;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        #loading-overlay { transition: opacity 0.5s ease-out; }
+        
+        #bmi-thumb {
+            position: absolute; width: 40px; height: 40px;
+            background: linear-gradient(180deg, #F2F2F2 0%, #E8E8E8 100%);
+            border: 2px solid #FFFFFF; box-shadow: 0px 0px 6.9px rgba(0, 0, 0, 0.25);
+            border-radius: 50%; left: 50%; transform: translateX(-50%);
+            bottom: 0%; transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1;
+        }
+        #bmi-image {
+            height: 100%; width: auto; object-fit: contain;
+            user-select: none; pointer-events: none;
+        }
+
+        /* NEW: Scroll Animations */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .animate-on-scroll.delay-1 { transition-delay: 150ms; }
+        .animate-on-scroll.delay-2 { transition-delay: 300ms; }
+
+        /* NEW: Testimonial Slider */
+        #testimonial-slider-container { overflow: hidden; position: relative; }
+        #testimonial-slider-wrapper { display: flex; transition: transform 0.5s ease-in-out; }
+        .testimonial-slide { flex: 0 0 100%; width: 100%; box-sizing: border-box; }
+        .star-rating svg { color: #f59e0b; }
+        .slider-dots { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1rem; }
+        .slider-dot { width: 0.5rem; height: 0.5rem; background-color: #d1d5db; border-radius: 9999px; cursor: pointer; transition: background-color 0.3s; }
+        .slider-dot.active { background-color: var(--brand-dark-text); }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+        <div class="w-16 h-16 border-4 border-gray-300 border-t-[--brand-accent] rounded-full animate-spin"></div>
+        <p class="mt-4 text-lg font-semibold text-gray-700">Preparing your profile...</p>
+    </div>
+
+    <div id="profile-content" class="min-h-screen p-4 sm:p-6 lg:p-8 opacity-0 transition-opacity duration-500">
+        <header class="max-w-5xl mx-auto mb-8 text-center animate-on-scroll">
+            <img src="logo.png" alt="Logo" class="h-12 w-auto mx-auto">
+            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight mt-4">Your Preliminary Wellness Profile</h1>
+            <p class="mt-2 text-lg text-gray-600">Based on your answers, we've calculated your key metrics.</p>
+        </header>
+
+        <main class="max-w-5xl mx-auto space-y-8 sm:space-y-12">
+            <!-- Key Metrics -->
+            <section class="grid md:grid-cols-3 gap-6">
+                <div class="md:col-span-1 animate-on-scroll">
+                    <img id="user-photo" src="https://placehold.co/400x533/f5f2ef/3c3b31?text=Your+Photo" alt="User Photo" class="w-full h-full object-cover rounded-2xl shadow-lg">
+                </div>
+                <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="highlight-stat animate-on-scroll delay-1">
+                        <p id="chrono-age" class="value">0</p>
+                        <p class="label">Chronological Age</p>
+                    </div>
+                    <div class="highlight-stat animate-on-scroll delay-2">
+                        <p id="bio-age" class="value bio-age">0</p>
+                        <p class="label">Biological Age</p>
+                    </div>
+                    <div class="sm:col-span-2 content-card p-6 flex flex-col items-center animate-on-scroll delay-2">
+                        <p id="bmi-category" class="font-bold text-lg text-green-600">Normal Weight</p>
+                        <p id="bmi-description" class="text-sm text-gray-600 mt-1 text-center max-w-xs"></p>
+                        <div class="w-full flex items-center justify-center gap-6 mt-4 flex-grow">
+                             <div class="relative w-8 h-48 sm:h-56">
+                                 <div class="w-full h-full bg-gradient-to-t from-blue-300 via-green-300 to-red-400 rounded-full"></div>
+                                 <div id="bmi-thumb"></div>
+                             </div>
+                             <div class="h-48 sm:h-56 flex items-end">
+                                <img id="bmi-image" src="" alt="BMI illustration">
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="age-summary-card" class="content-card p-6 text-center animate-on-scroll">
+                <p id="age-summary-text" class="text-2xl font-bold"></p>
+            </section>
+            
+            <section class="grid md:grid-cols-2 gap-6">
+                <div class="content-card p-6 text-center animate-on-scroll">
+                    <p class="font-semibold text-gray-600">Your Wellness Archetype</p>
+                    <p id="archetype-name" class="text-3xl font-extrabold mt-2" style="color: var(--brand-dark-text);">The Driven Achiever</p>
+                    <p id="archetype-desc" class="mt-2 text-gray-700">You excel at work and stay active, but high stress and lack of sleep are holding you back from your full potential.</p>
+                </div>
+                 <div class="content-card p-6 text-center bg-yellow-50 border-yellow-200 animate-on-scroll delay-1">
+                    <p class="font-semibold text-yellow-800">Your Key Focus Area</p>
+                    <p id="focus-area-name" class="text-3xl font-extrabold text-yellow-900 mt-2">Stress Management</p>
+                    <p id="focus-area-desc" class="mt-2 text-yellow-800">Lowering your stress is the single most effective way to improve your biological age and overall well-being.</p>
+                </div>
+            </section>
+
+            <section class="grid md:grid-cols-2 gap-6">
+                <div class="content-card p-6 animate-on-scroll">
+                    <h3 class="text-xl font-bold flex items-center"><span class="text-2xl mr-2">❌</span>What's Increasing Your Age</h3>
+                    <ul id="negative-factors" class="mt-4 space-y-3 factor-list"></ul>
+                </div>
+                <div class="content-card p-6 animate-on-scroll delay-1">
+                    <h3 class="text-xl font-bold flex items-center"><span class="text-2xl mr-2">✅</span>What Helps You</h3>
+                    <ul id="positive-factors" class="mt-4 space-y-3 factor-list"></ul>
+                </div>
+            </section>
+
+            <section class="content-card p-6 sm:p-8 animate-on-scroll">
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold">Lower Your Biological Age With Our Plan</h2>
+                        <p class="mt-4 text-gray-700">Our personalized <span class="font-bold">21-day plan</span> is designed to help you build habits that rejuvenate your body from the inside out. You will see and feel the difference.</p>
+                        
+                        <div class="mt-6 pt-4 border-t border-gray-200">
+                             <h4 class="font-bold text-lg">What's inside the full plan:</h4>
+                             <ul class="mt-2 space-y-2 text-gray-600">
+                                <li class="flex items-center gap-2">✅ <span class="font-semibold">Step-by-step daily tasks:</span> Simple and effective actions.</li>
+                                <li class="flex items-center gap-2">✅ <span class="font-semibold">Detailed skin analysis:</span> Learn about hidden factors.</li>
+                                <li class="flex items-center gap-2">✅ <span class="font-semibold">Increase your potential lifespan:</span> Habits that promote longevity.</li>
+                             </ul>
+                        </div>
+
+                        <a href="#" id="cta-link" class="cta-button inline-block w-full sm:w-auto text-center font-bold py-4 px-8 rounded-xl mt-6">
+                            🚀 Unlock My Full Plan
+                        </a>
+                    </div>
+                    <div>
+                        <canvas id="ageChart"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="animate-on-scroll">
+                <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">See What Others Have Achieved</h2>
+                <div id="testimonial-slider-container" class="content-card p-6">
+                    <div id="testimonial-slider-wrapper">
+                        <!-- Testimonials will be injected here by JS -->
+                    </div>
+                </div>
+                <div id="slider-dots-container" class="slider-dots"></div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- MOCK DATA ---
+            const mockData = {
+                userPhotoUrl: null, gender: 'female', chronoAge: 35,
+                bioAgeResult: { biologicalAge: 39, totalScore: 8, ageCorrection: 4 },
+                bmi: { value: 28.2 },
+                wellnessArchetype: { name: 'The Driven Achiever', description: 'You excel at work and stay active, but high stress and lack of sleep are holding you back from your full potential.' },
+                focusArea: { name: 'Stress Management', description: 'Lowering your stress is the single most effective way to improve your biological age and overall well-being.' },
+                factors: {
+                    positive: [
+                        { text: 'Exercising 3-4 times a week', icon: '🏃', detail: 'Regular exercise boosts cardiovascular health and reduces stress.' },
+                        { text: 'No smoking habit', icon: '🚭', detail: 'Avoiding tobacco is the top factor for longevity.' },
+                        { text: 'Sufficient water intake', icon: '💧', detail: 'Proper hydration supports skin health and energy levels.' },
+                    ],
+                    negative: [
+                        { text: 'Frequent processed food consumption', icon: '🍔', detail: 'Can lead to inflammation and impact gut health.' },
+                        { text: 'High stress levels', icon: '😟', detail: 'Chronic stress accelerates cellular aging.' },
+                        { text: 'Sleeping less than 5 hours', icon: '😴', detail: 'Lack of sleep impairs recovery and cognitive function.' },
+                    ]
+                },
+                testimonials: [
+                    { name: 'Sarah K.', bioAgeChange: 3, review: "I was shocked by my biological age. It was the wake-up call I needed. The 21-day plan was so easy to follow and made a real difference in my energy levels.", rating: 5 },
+                    { name: 'Michael B.', bioAgeChange: null, review: "Finally, a wellness tool that isn't about guilt. Identifying my archetype made me feel understood. The focus on stress was spot-on.", rating: 5 },
+                    { name: 'Jessica M.', bioAgeChange: 4, review: "The photo analysis was fascinating. I had no idea my screen time was showing up as visible eye strain. This service connected the dots for me.", rating: 5 },
+                    { name: 'David L.', bioAgeChange: 2, review: "I've tried other apps, but this one felt the most personalized. The daily tasks are small but powerful. I feel less bloated and more focused.", rating: 4 },
+                ]
+            };
+
+            const sessionId = new URLSearchParams(window.location.search).get('session_id');
+
+            async function fetchData() {
+                return new Promise(resolve => setTimeout(() => resolve(mockData), 1500));
+            }
+            
+            function populateUI(data) {
+                if (data.userPhotoUrl) { document.getElementById('user-photo').src = data.userPhotoUrl; }
+                
+                animateValue('chrono-age', 0, data.chronoAge, 1500);
+                animateValue('bio-age', 0, data.bioAgeResult.biologicalAge, 1500);
+
+                const ageDifference = data.bioAgeResult.biologicalAge - data.chronoAge;
+                const summaryCard = document.getElementById('age-summary-card');
+                const summaryText = document.getElementById('age-summary-text');
+                if (ageDifference > 0) {
+                    summaryText.innerHTML = `You appear to be <span class="text-orange-600">${ageDifference} ${ageDifference === 1 ? 'year' : 'years'} older</span> than your age.`;
+                    summaryCard.classList.add('bg-orange-50', 'border', 'border-orange-200');
+                } else if (ageDifference < 0) {
+                    const absDiff = Math.abs(ageDifference);
+                    summaryText.innerHTML = `Excellent! You appear to be <span class="text-green-600">${absDiff} ${absDiff === 1 ? 'year' : 'years'} younger</span> than your age.`;
+                     summaryCard.classList.add('bg-green-50', 'border', 'border-green-200');
+                } else {
+                    summaryText.textContent = 'Your biological age matches your chronological age.';
+                    summaryCard.classList.add('bg-blue-50', 'border', 'border-blue-200');
+                }
+
+                renderBmiWidget(data.bmi.value, data.gender);
+
+                document.getElementById('archetype-name').textContent = data.wellnessArchetype.name;
+                document.getElementById('archetype-desc').textContent = data.wellnessArchetype.description;
+                document.getElementById('focus-area-name').textContent = data.focusArea.name;
+                document.getElementById('focus-area-desc').textContent = data.focusArea.description;
+
+                const populateFactors = (elementId, factors) => {
+                    const list = document.getElementById(elementId);
+                    list.innerHTML = factors.map(f => `<li><span class="text-xl mr-3">${f.icon}</span><div><p class="font-semibold">${f.text}</p><p class="text-sm text-gray-600">${f.detail}</p></div></li>`).join('');
+                };
+                populateFactors('positive-factors', data.factors.positive);
+                populateFactors('negative-factors', data.factors.negative);
+
+                renderChart(data.bioAgeResult.biologicalAge);
+                initTestimonialSlider(data.testimonials);
+                
+                document.getElementById('cta-link').href = `payment.html?session_id=${sessionId || ''}`;
+            }
+            
+            function animateValue(id, start, end, duration) {
+                const obj = document.getElementById(id);
+                if (!obj) return;
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    obj.innerHTML = Math.floor(progress * (end - start) + start);
+                    if (progress < 1) { window.requestAnimationFrame(step); }
+                };
+                window.requestAnimationFrame(step);
+            }
+
+            function renderBmiWidget(bmiValue, gender) {
+                const categories = [
+                    { max: 18.4, img: '16-18.4', title: 'Underweight', desc: 'Below a healthy weight range.', color: 'text-blue-600' },
+                    { max: 24.9, img: '18.5-24.9', title: 'Normal Weight', desc: 'Ideal weight range.', color: 'text-green-600' },
+                    { max: 29.9, img: '25.0-29.9', title: 'Overweight', desc: 'Slightly above the normal range.', color: 'text-yellow-600' },
+                    { max: Infinity, img: '30-above', title: 'Obesity', desc: 'Increased health risk.', color: 'text-red-600' }
+                ];
+                const result = categories.find(c => bmiValue <= c.max);
+                const prefix = gender === 'female' ? 'f' : 'm';
+                
+                document.getElementById('bmi-image').src = `${prefix}-${result.img}.svg`;
+                document.getElementById('bmi-category').textContent = result.title;
+                document.getElementById('bmi-category').className = `font-bold text-lg ${result.color}`;
+                document.getElementById('bmi-description').textContent = result.desc;
+                
+                const minBmi = 15, maxBmi = 40;
+                const normalizedBmi = Math.max(0, Math.min(1, (bmiValue - minBmi) / (maxBmi - minBmi)));
+                document.getElementById('bmi-thumb').style.bottom = `${normalizedBmi * 100}%`;
+            }
+            
+            function renderChart(biologicalAge) {
+                const ctx = document.getElementById('ageChart').getContext('2d');
+                const potentialAge = Math.round(biologicalAge * 0.85);
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Now', 'With Our Plan'],
+                        datasets: [{
+                            label: 'Biological Age', data: [biologicalAge, potentialAge],
+                            backgroundColor: ['rgba(60, 59, 49, 0.2)', 'rgba(222, 190, 169, 0.8)'],
+                            borderColor: ['rgba(60, 59, 49, 1)', 'rgba(222, 190, 169, 1)'],
+                            borderWidth: 2, borderRadius: 8,
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                        scales: {
+                            y: { beginAtZero: false, suggestedMin: potentialAge - 5, grid: { drawOnChartArea: false, drawBorder: false, }, ticks: { font: { weight: 'bold' } } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            function initTestimonialSlider(testimonials) {
+                const wrapper = document.getElementById('testimonial-slider-wrapper');
+                const dotsContainer = document.getElementById('slider-dots-container');
+                if (!wrapper || !dotsContainer) return;
+
+                wrapper.innerHTML = testimonials.map(t => {
+                    const stars = Array(5).fill(0).map((_, i) => `
+                        <svg class="w-5 h-5 ${i < t.rating ? 'text-yellow-400' : 'text-gray-300'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>`).join('');
+                    const bioAgeText = t.bioAgeChange ? `Lowered bio-age by ${t.bioAgeChange} years` : 'Feels more energetic';
+                    return `
+                        <div class="testimonial-slide p-4">
+                            <div class="flex items-center mb-2">${stars}</div>
+                            <p class="text-gray-700 italic">"${t.review}"</p>
+                            <div class="mt-4 text-right">
+                                <p class="font-bold">- ${t.name}</p>
+                                <p class="text-sm text-gray-500">${bioAgeText}</p>
+                            </div>
+                        </div>`;
+                }).join('');
+                
+                let currentSlide = 0;
+                let slideInterval;
+                
+                const goToSlide = (index) => {
+                    currentSlide = index;
+                    wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+                    dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
+                };
+
+                testimonials.forEach((_, i) => {
+                    const dot = document.createElement('button');
+                    dot.className = 'slider-dot';
+                    dot.onclick = () => {
+                        goToSlide(i);
+                        clearInterval(slideInterval);
+                        slideInterval = setInterval(() => goToSlide((currentSlide + 1) % testimonials.length), 5000);
+                    };
+                    dotsContainer.appendChild(dot);
+                });
+
+                const dots = dotsContainer.querySelectorAll('.slider-dot');
+                goToSlide(0);
+                slideInterval = setInterval(() => goToSlide((currentSlide + 1) % testimonials.length), 5000);
+            }
+            
+            // --- SCROLL ANIMATION OBSERVER ---
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.2 });
+
+            document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+
+
+            // --- INITIALIZATION ---
+            fetchData().then(data => {
+                populateUI(data);
+                const loadingOverlay = document.getElementById('loading-overlay');
+                const profileContent = document.getElementById('profile-content');
+                loadingOverlay.style.opacity = 0;
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                    profileContent.style.opacity = 1;
+                }, 500);
+            }).catch(error => {
+                document.getElementById('loading-overlay').innerHTML = `<p class="text-lg font-semibold text-red-600">Failed to load profile. Please try again.</p>`;
+            });
+        });
+    </script>
+
+</body>
+</html>
+
