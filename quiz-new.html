@@ -349,7 +349,7 @@
                          <div class="swiper-slide"><div class="text-center max-w-sm"><h2 class="text-2xl font-bold text-gray-800 mb-8">Your Privacy is Our Priority</h2><div class="space-y-6 text-left"><div class="flex items-center"><span class="text-3xl mr-4">📸</span><p class="text-gray-600">Your photo is analyzed on-the-fly and never stored.</p></div><div class="flex items-center"><span class="text-3xl mr-4">🔒</span><p class="text-gray-600">All your data is anonymized and protected by encryption.</p></div><div class="flex items-center"><span class="text-3xl mr-4">⚕️</span><p class="text-gray-600">This is not medical advice. For informational purposes only.</p></div></div></div></div>
                      </div>
                  </div>
-                 <div class="py-6 px-6 bg-white"><div id="dots-container" class="flex justify-center items-center space-x-3 mb-6"></div><button id="start-quiz-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[--brand-accent]/40">Let's start</button></div>
+                 <div class="py-6 px-6 bg-white"><div id="dots-container" class="flex justify-center items-center space-x-3 mb-6"></div><button id="start-quiz-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[--brand-accent]/40" disabled>Let's start</button></div>
              </div>
         </section>
 
@@ -1148,6 +1148,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function startQuizSession() {
+        const startBtn = document.getElementById('start-quiz-btn');
         try {
             const response = await fetch('/.netlify/functions/quiz', {
                 method: 'POST',
@@ -1160,11 +1161,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             App.sessionId = data.sessionId;
             console.log('Session successfully started:', App.sessionId);
+
+            // !!! РАЗБЛОКИРУЕМ КНОПКУ ЗДЕСЬ !!!
+            if(startBtn) {
+                startBtn.disabled = false;
+            }
+
         } catch (error) {
             console.error('CRITICAL: Failed to start session:', error);
+            if(startBtn) {
+                startBtn.textContent = 'Error: Refresh Page';
+            }
+            // ... остальной код обработки ошибки
             document.body.innerHTML = `<div class="w-full h-screen flex items-center justify-center text-center p-4"><div><h1 class="text-2xl font-bold text-red-600">Initialization Error</h1><p class="text-gray-700 mt-2">Could not start a new session. Please refresh the page to try again.</p></div></div>`;
         }
     }
+
 
     // --- App Initialization ---
     setVh();
