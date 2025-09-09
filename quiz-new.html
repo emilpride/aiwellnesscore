@@ -493,7 +493,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
 
-    // --- НАЧАЛО НОВОЙ ФУНКЦИИ ---
     async function processAndSavePhoto() {
         const confirmBtn = document.getElementById('selfie-confirm-btn');
         const btnText = confirmBtn.querySelector('.btn-text');
@@ -551,7 +550,6 @@ document.addEventListener('DOMContentLoaded', () => {
             spinner.classList.add('hidden');
         }
     }
-    // --- КОНЕЦ НОВОЙ ФУНКЦИИ ---
 
     // --- НАЧАЛО ИСПРАВЛЕНИЯ ---
 
@@ -918,14 +916,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('bmi-continue-btn').onclick = next;
     }
 
-    async function startAnalysis() { // Добавляем async
+    async function startAnalysis() {
         goToStep('loading');
         AnimationManager.add('loading-animation', 'loader.json');
         const analysisStepsContainer = document.getElementById('analysis-steps');
         analysisStepsContainer.innerHTML = '';
         const steps = ["Analyzing lifestyle data...", "Calculating metabolic rate...", "Processing facial biomarkers...", "Compiling wellness report..."];
         
-        // Поочередно отображаем шаги анализа
         for (let i = 0; i < steps.length; i++) {
             await new Promise(resolve => setTimeout(resolve, 900));
             const p = document.createElement('p');
@@ -934,8 +931,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // --- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ ---
-            // Вызываем серверную функцию для расчета и сохранения данных
             const response = await fetch('/.netlify/functions/generateProfile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -943,17 +938,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                // Если сервер вернул ошибку, показываем ее
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Failed to generate profile.');
             }
 
-            // После успешного ответа от сервера, перенаправляем на страницу профиля
             window.location.href = `profile.html?session_id=${App.sessionId || ''}`;
 
         } catch (error) {
             console.error('Failed to generate profile:', error);
-            // Отображаем ошибку пользователю, если что-то пошло не так
             analysisStepsContainer.innerHTML = `<p class="text-red-500 font-bold">Error: Could not generate your profile. ${error.message}</p>`;
         }
     }
@@ -977,7 +969,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // Use aspectRatio to avoid zoom issues on mobile
             App.cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', aspectRatio: { ideal: 9/16 } } });
             video.srcObject = App.cameraStream;
             video.addEventListener('loadeddata', cameraLoop);
@@ -1023,14 +1014,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
             const landmarks = results.multiFaceLandmarks[0];
             
-            // --- Mesh Fade-in Logic ---
             if (App.faceMeshDrawState.startTime === null) {
                 App.faceMeshDrawState.startTime = performance.now();
             }
             const elapsed = performance.now() - App.faceMeshDrawState.startTime;
-            const finalOpacity = 0.3; // The final opacity of the mesh
+            const finalOpacity = 0.3; 
             const opacity = Math.min(1, elapsed / App.faceMeshDrawState.duration) * finalOpacity;
-            // --- End Fade-in Logic ---
 
             if (window.drawConnectors && window.FACEMESH_TESSELATION) {
                 drawConnectors(ctx, landmarks, window.FACEMESH_TESSELATION, {color: `rgba(222, 190, 169, ${opacity})`, lineWidth: 1});
@@ -1040,7 +1029,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 guideBox.classList.add('locked');
                 guideText.textContent = 'Perfect, hold still!';
                 if (!App.captureTimeout) {
-                    // Increased timeout to 2 seconds for a smoother experience
                     App.captureTimeout = setTimeout(takePhoto, 2000);
                 }
             } else {
@@ -1050,7 +1038,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 App.captureTimeout = null;
             }
         } else {
-            // Reset when face is lost
             App.faceMeshDrawState.startTime = null; 
             guideBox.classList.remove('locked');
             guideText.textContent = 'Center your face in the oval';
@@ -1075,11 +1062,11 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const photoDataUrl = canvas.toDataURL('image/jpeg', 0.9);
         
-        App.lastPhotoDataUrl = photoDataUrl; // Store the photo data
+        App.lastPhotoDataUrl = photoDataUrl;
         document.getElementById('selfie-preview-img').src = photoDataUrl;
 
         closeCamera();
-        goToStep('selfie-confirm'); // Go to the new confirmation step
+        goToStep('selfie-confirm');
     }
 
     function initOnboarding() {
@@ -1157,7 +1144,6 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.addEventListener('click', toggleMenu);
     }
 
-    // --- НАЧАЛО ИСПРАВЛЕННОГО БЛОКА ---
     async function startQuizSession() {
         try {
             const response = await fetch('/.netlify/functions/quiz', {
@@ -1166,7 +1152,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ action: 'startSession' })
             });
             if (!response.ok) {
-                // Если сервер вернул ошибку, мы узнаем об этом
                 throw new Error(`Could not start session. Status: ${response.status}`);
             }
             const data = await response.json();
@@ -1174,12 +1159,9 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Session successfully started:', App.sessionId);
         } catch (error) {
             console.error('CRITICAL: Failed to start session:', error);
-            // Показываем пользователю критическую ошибку, так как без сессии ничего не будет работать
             document.body.innerHTML = `<div class="w-full h-screen flex items-center justify-center text-center p-4"><div><h1 class="text-2xl font-bold text-red-600">Initialization Error</h1><p class="text-gray-700 mt-2">Could not start a new session. Please refresh the page to try again.</p></div></div>`;
         }
     }
-    // --- КОНЕЦ ИСПРАВЛЕННОГО БЛОКА ---
-
 
     // --- App Initialization ---
     setVh();
