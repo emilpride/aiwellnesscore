@@ -192,7 +192,7 @@
         }
     </style>
 </head>
-<body class="antialiased text-gray-800 pb-28 md:pb-0">
+<body class="antialiased text-gray-800">
 
     <div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex-col items-center justify-center">
         <div class="w-16 h-16 border-4 border-gray-300 border-t-[--brand-accent] rounded-full animate-spin"></div>
@@ -317,7 +317,7 @@
                 </div>
             </section>
 
-            <section class="mt-12 text-center hidden md:flex flex-col items-center">
+            <section class="mt-12 text-center flex flex-col items-center">
                  <button id="cta-button-desktop" class="cta-button pulsating w-full max-w-md mx-auto font-bold py-4 px-8 rounded-xl text-lg mb-6 open-payment-modal">
                     Unlock My Plan
                 </button>
@@ -366,11 +366,11 @@
                 <div class="grid md:grid-cols-2 gap-8">
                     <div class="content-card p-6 sm:p-8">
                         <h3 class="text-xl font-bold text-center mb-4" style="color: var(--brand-dark-text);">Bio-Age Transformation</h3>
-                        <div class="h-64"><canvas id="bioAgeChart"></canvas></div>
+                        <div class="h-56 sm:h-64"><canvas id="bioAgeChart"></canvas></div>
                     </div>
                      <div class="content-card p-6 sm:p-8">
                         <h3 class="text-xl font-bold text-center mb-4" style="color: var(--brand-dark-text);">Life Expectancy Forecast</h3>
-                        <div class="h-64"><canvas id="lifespanChart"></canvas></div>
+                        <div class="h-56 sm:h-64"><canvas id="lifespanChart"></canvas></div>
                     </div>
                 </div>
             </section>
@@ -429,12 +429,6 @@
 
         </main>
     </div>
-    
-    <footer class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg p-4 border-t border-gray-200 md:hidden z-20">
-        <button class="cta-button pulsating w-full font-bold py-4 px-8 rounded-xl text-lg open-payment-modal">
-            Unlock My Plan
-        </button>
-    </footer>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
