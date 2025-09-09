@@ -382,14 +382,12 @@
             <div id="analysis-steps" class="mt-6 text-gray-600 space-y-2 w-64 text-left"></div>
         </section>
 
-        <!-- NEW: Selfie Confirmation Step -->
         <section id="step-selfie-confirm" class="quiz-step prev">
             <div class="text-center max-w-sm mx-auto">
                 <h2 class="text-3xl font-bold text-gray-900">Looks good?</h2>
                 <img id="selfie-preview-img" src="" alt="Your selfie" class="w-full max-w-xs aspect-[3/4] object-cover rounded-2xl my-6 mx-auto shadow-lg border-2 border-white">
                 <div class="flex flex-col sm:flex-row gap-3">
                     <button id="selfie-retake-btn" class="w-full bg-white text-gray-800 font-bold py-3 px-6 rounded-full text-lg hover:bg-gray-100 transition border border-gray-300">Retake</button>
-                    <!-- MODIFIED BUTTON FOR LOADING STATE -->
                     <button id="selfie-confirm-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-6 rounded-full text-lg hover:opacity-90 transition flex items-center justify-center disabled:opacity-75">
                         <span class="btn-text">Confirm Photo</span>
                         <span class="spinner hidden">
@@ -551,7 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- НАЧАЛО ИСПРАВЛЕНИЯ ---
+    // --- НАЧАЛО ИСПРАВЛЕНИЯ (ШАГ 3) ---
 
     // НОВАЯ ФУНКЦИЯ для отправки ответа на сервер
     async function saveAnswerToServer(questionKey, answer) {
@@ -600,7 +598,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Используем await, чтобы дождаться завершения handleAnswer
         await handleAnswer(key, value);
-    }// --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+    }
+    // --- КОНЕЦ ИСПРАВЛЕНИЯ (ШАГ 3) ---
 
     function goToStep(stepKey) {
         const prevStepEl = document.querySelector('.quiz-step.active');
@@ -710,11 +709,11 @@ document.addEventListener('DOMContentLoaded', () => {
              </div>`;
         } else if (question.type === 'camera_step' || question.type === 'email_step') {
             contentHTML = `<img src="face.jpeg" alt="Face scan illustration" class="w-40 h-40 mx-auto rounded-full object-cover mb-6 shadow-lg">
-                                     <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
-                                     <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
+                                         <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
+                                         <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
             if (question.type === 'email_step') {
                  contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
-                                       <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
+                                             <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
             }
         }
         
@@ -735,13 +734,19 @@ document.addEventListener('DOMContentLoaded', () => {
             wrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', sliderContent);
         }
 
-        if (question.type === 'slider') {
+        // --- НАЧАЛО ИСПРАВЛЕНИЯ (ШАГ 2) ---
+        else if (question.type === 'slider') {
              footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;
              const sliderInput = document.getElementById('slider-input');
+             // Добавляем обработчик события 'input' для обновления значения в реальном времени
              sliderInput.addEventListener('input', () => updateSliderDisplay(question, sliderInput.value));
+             // Добавляем обработчик для кнопки подтверждения
              footerWrapper.querySelector('#slider-confirm-btn').addEventListener('click', () => handleAnswer(question.key, sliderInput.value));
+             // Устанавливаем начальное значение
              updateSliderDisplay(question, App.userAnswers[question.key] || question.defaultValue);
-        } else if (question.type === 'gender_selection') {
+        }
+        // --- КОНЕЦ ИСПРАВЛЕНИЯ (ШАГ 2) ---
+        else if (question.type === 'gender_selection') {
             const optionsHTML = question.options.map(opt => `<button class="gender-option text-center rounded-2xl p-4" data-value="${opt.value}"><div class="gender-image-container"><img src="${opt.img}" alt="${opt.value}" class="gender-image"></div><span class="text-xl font-bold text-gray-800 capitalize">${opt.value}</span></button>`).join('');
             footerWrapper.innerHTML = `<div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">${optionsHTML}</div>`;
             footerWrapper.querySelectorAll('.gender-option').forEach(btn => {
@@ -780,6 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    // --- НАЧАЛО ИСПРАВЛЕНИЯ (ШАГ 2) ---
     function updateSliderDisplay(question, value) {
         const valueDisplay = document.getElementById('slider-value-display');
         if (!valueDisplay) return;
@@ -796,6 +802,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         valueDisplay.innerHTML = displayHTML;
     }
+    // --- КОНЕЦ ИСПРАВЛЕНИЯ (ШАГ 2) ---
     
     function renderAnimation(key) {
         goToStep('quiz'); // Keep quiz step active for animation
@@ -916,13 +923,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('bmi-continue-btn').onclick = next;
     }
 
+    // --- НАЧАЛО ИСПРАВЛЕНИЯ (ШАГ 1) ---
     async function startAnalysis() {
         goToStep('loading');
         AnimationManager.add('loading-animation', 'loader.json');
         const analysisStepsContainer = document.getElementById('analysis-steps');
         analysisStepsContainer.innerHTML = '';
         const steps = ["Analyzing lifestyle data...", "Calculating metabolic rate...", "Processing facial biomarkers...", "Compiling wellness report..."];
-        
         for (let i = 0; i < steps.length; i++) {
             await new Promise(resolve => setTimeout(resolve, 900));
             const p = document.createElement('p');
@@ -931,7 +938,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // !!! ДОБАВЛЕН ЭТОТ ВЫЗОВ !!!
+            // !!! НАЧАЛО ВАЖНОГО ИЗМЕНЕНИЯ !!!
+            // Добавляем вызов для генерации предварительного профиля
             const response = await fetch('/.netlify/functions/generateProfile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -942,9 +950,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Failed to generate profile.');
             }
-            // --- Конец добавленного блока ---
+            // --- Конец важного изменения ---
 
-            // Перенаправление только после успешной генерации профиля
+            // Перенаправляем только после успешной генерации
             window.location.href = `profile.html?session_id=${App.sessionId || ''}`;
 
         } catch (error) {
@@ -952,6 +960,7 @@ document.addEventListener('DOMContentLoaded', () => {
             analysisStepsContainer.innerHTML = `<p class="text-red-500 font-bold">Error: Could not generate your profile. ${error.message}</p>`;
         }
     }
+    // --- КОНЕЦ ИСПРАВЛЕНИЯ (ШАГ 1) ---
     
     async function openCamera() {
         const cameraModal = document.getElementById('camera-modal');
@@ -1199,4 +1208,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
-
