@@ -111,27 +111,6 @@
             letter-spacing: 1px;
         }
         
-        details summary::-webkit-details-marker { display: none; }
-        details summary {
-            position: relative;
-            padding-right: 2rem;
-            cursor: pointer;
-            list-style: none;
-        }
-        details summary:after {
-            content: '+';
-            position: absolute;
-            right: 0.25rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.5rem;
-            font-weight: 300;
-            transition: transform 0.3s ease-in-out;
-        }
-        details[open] summary:after {
-            transform: translateY(-50%) rotate(45deg);
-        }
-
         .plan-toggle-group {
             background-color: rgba(0,0,0,0.04);
             border-radius: 9999px;
@@ -176,19 +155,15 @@
         #payment-modal-content {
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
         }
-        .StripeElement {
-            box-sizing: border-box;
-            height: 44px;
-            padding: 10px 12px;
-            border: 1px solid transparent;
-            border-radius: 12px;
+        #payment-element {
+            padding: 1.25rem;
+            border: 1px solid #e5e7eb;
             background-color: white;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            -webkit-transition: box-shadow 150ms ease;
-            transition: box-shadow 150ms ease;
+            border-radius: 12px;
         }
-        .StripeElement--focus {
-             box-shadow: 0 0 0 2px var(--brand-accent);
+        /* Hiding Stripe's default Express Checkout buttons */
+        #payment-element .StripeElement--express-checkout {
+            display: none;
         }
     </style>
 </head>
@@ -201,25 +176,38 @@
     
     <!-- Payment Modal -->
     <div id="payment-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-        <div id="payment-modal-content" class="w-full max-w-md bg-gray-50 rounded-2xl shadow-xl p-6 sm:p-8 transform scale-95 opacity-0">
-            <div class="flex justify-between items-center mb-4">
-                 <h2 class="text-2xl font-bold" style="color: var(--brand-dark-text);">Secure Payment</h2>
-                 <button id="close-modal-btn" class="text-gray-400 hover:text-gray-700 transition">&times;</button>
-            </div>
-            <p class="text-gray-600 mb-6 text-sm">Your transaction is encrypted and secure. Please enter your payment details below.</p>
-            <form id="payment-form">
-                <div id="payment-element" class="mb-6">
-                    <!-- Stripe Payment Element will be inserted here -->
+        <div id="payment-modal-content" class="w-full max-w-md bg-white rounded-2xl shadow-xl transform scale-95 opacity-0">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                     <h2 class="text-xl font-bold text-gray-800">Complete your checkout</h2>
+                     <button id="close-modal-btn" class="text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
                 </div>
-                <button id="submit-payment-btn" class="cta-button w-full font-bold py-3 px-4 rounded-xl text-lg flex items-center justify-center">
-                    <span id="button-text">Pay Now</span>
-                    <svg id="spinner" class="animate-spin h-5 w-5 text-white hidden ml-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </button>
-                <div id="payment-message" class="text-center text-red-500 text-sm mt-4"></div>
-            </form>
+            </div>
+            <div class="p-6">
+                 <div class="flex justify-between items-center text-gray-600 mb-4">
+                    <span>Regular price:</span>
+                    <span id="modal-regular-price">$0.00</span>
+                </div>
+                 <div class="flex justify-between items-center text-gray-900 font-bold text-lg mb-6">
+                    <span>Total today:</span>
+                    <span id="modal-total-price">$0.00</span>
+                </div>
+
+                <form id="payment-form">
+                    <div id="payment-element" class="mb-6">
+                        <!-- Stripe Payment Element will be inserted here -->
+                    </div>
+                    <button id="submit-payment-btn" class="cta-button w-full font-bold py-3 px-4 rounded-xl text-lg flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
+                        <span id="button-text">Continue</span>
+                        <svg id="spinner" class="animate-spin h-5 w-5 text-white hidden ml-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                    <div id="payment-message" class="text-center text-red-500 text-sm mt-4"></div>
+                </form>
+            </div>
         </div>
     </div>
     
@@ -446,6 +434,8 @@
             const openModalButtons = document.querySelectorAll('.open-payment-modal');
             const plansContainer = document.getElementById('plans-container');
             const planToggles = document.getElementById('plan-toggles');
+            const modalRegularPrice = document.getElementById('modal-regular-price');
+            const modalTotalPrice = document.getElementById('modal-total-price');
             
             // --- APP STATE ---
             let selectedPlanKey = 'advanced';
@@ -453,9 +443,9 @@
 
             // --- DATA ---
             const planData = {
-                basic: { price: 9.99, potentialBioAge: 34, potentialLifespan: 84 },
-                advanced: { price: 13.99, potentialBioAge: 33, potentialLifespan: 86 },
-                premium: { price: 19.99, potentialBioAge: 32, potentialLifespan: 87 }
+                basic: { price: 9.99, regularPrice: 19.99, potentialBioAge: 34, potentialLifespan: 84 },
+                advanced: { price: 13.99, regularPrice: 29.99, potentialBioAge: 33, potentialLifespan: 86 },
+                premium: { price: 19.99, regularPrice: 49.99, potentialBioAge: 32, potentialLifespan: 87 }
             };
 
             // --- FUNCTIONS ---
@@ -472,6 +462,11 @@
             
             async function initializePaymentForm() {
                 document.getElementById('loading-overlay').classList.add('active');
+                
+                const selectedPlan = planData[selectedPlanKey];
+                modalRegularPrice.textContent = `$${selectedPlan.regularPrice.toFixed(2)}`;
+                modalTotalPrice.textContent = `$${selectedPlan.price.toFixed(2)}`;
+
                 try {
                     const response = await fetch('/.netlify/functions/payment', {
                         method: 'POST',
@@ -479,7 +474,7 @@
                         body: JSON.stringify({ 
                             sessionId: sessionId,
                             plan: selectedPlanKey,
-                            amount: Math.round(planData[selectedPlanKey].price * 100)
+                            amount: Math.round(selectedPlan.price * 100)
                         })
                     });
                     
@@ -488,21 +483,10 @@
 
                     stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
                     
-                    const appearance = {
-                        theme: 'stripe',
-                        variables: {
-                            colorPrimary: '#3c3b31',
-                            colorBackground: '#ffffff',
-                            colorText: '#3c3b31',
-                            colorDanger: '#df1b41',
-                            fontFamily: 'Inter, sans-serif',
-                            spacingUnit: '4px',
-                            borderRadius: '12px',
-                        }
-                    };
+                    const appearance = { theme: 'stripe' };
                     
                     elements = stripe.elements({ appearance, clientSecret });
-                    const paymentElement = elements.create("payment");
+                    const paymentElement = elements.create("payment", { layout: "tabs" });
                     paymentElement.mount(paymentElementContainer);
 
                     showModal();
