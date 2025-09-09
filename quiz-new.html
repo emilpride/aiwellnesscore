@@ -21,37 +21,304 @@
             --brand-accent: #debea9;
             --brand-dark-text: #3c3b31; 
         }
+        
+        /* --- UPDATED LIGHTER ANIMATED BACKGROUND --- */
         html, body { 
             overscroll-behavior: none; 
             font-family: 'Inter', sans-serif; 
+            /* Lighter, more subtle gradient */
             background: linear-gradient(120deg, #fdfcfb, #f9f7f5, #f5f2ef, #f9f7f5, #fdfcfb);
             background-size: 400% 400%;
             animation: moveBackground 40s ease infinite;
         }
+
         @keyframes moveBackground {
-            0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; }
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        #quiz-container { display: flex; flex-direction: column; position: relative; width: 100vw; height: 100vh; height: calc(var(--vh, 1vh) * 100); overflow: hidden; }
+        /* --- END NEW BACKGROUND --- */
+
+        #quiz-container { 
+            display: flex; flex-direction: column; position: relative; 
+            width: 100vw; height: 100vh; height: calc(var(--vh, 1vh) * 100); 
+            overflow: hidden;
+        }
         main#steps-wrapper { position: relative; width: 100%; flex-grow: 1; overflow: hidden; }
-        .quiz-step { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; background-color: transparent; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1); opacity: 1; overflow-y: auto; }
-        .quiz-step:not(.active) { opacity: 0; pointer-events: none; transform: scale(1.05); }
+        
+        .quiz-step {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 1rem; 
+            background-color: transparent; /* Changed to show animated background */
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1; overflow-y: auto;
+        }
+        .quiz-step:not(.active) { 
+            opacity: 0; 
+            pointer-events: none; 
+            transform: scale(1.05); 
+        }
         .quiz-step.active { transform: scale(1); }
         .quiz-step.prev:not(.active) { transform: scale(0.95); }
-        @keyframes contentFadeInUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
-        .question-content-enter { animation: contentFadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        #quiz-header { flex-shrink: 0; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 0, 0, 0.05); z-index: 50; transition: background-color 0.3s, border-color 0.3s; }
-        #quiz-header.onboarding-header { background: transparent; border-color: transparent; }
-        #quiz-header.onboarding-header .text-gray-600 { color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-        .answer-option.selected { border-color: var(--brand-accent); background-color: var(--brand-accent); color: var(--brand-dark-text); transform: translateY(-3px) scale(1.03); box-shadow: 0 0 20px rgba(222, 190, 169, 0.7); }
-        #camera-modal { position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+
+        @keyframes contentFadeInUp {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .question-content-enter {
+            animation: contentFadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        /* --- UPDATED HEADER STYLE WITH BLUR --- */
+        #quiz-header { 
+            flex-shrink: 0; 
+            background: rgba(255, 255, 255, 0.6); /* Semi-transparent white */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); /* For Safari */
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* Lighter border */
+            z-index: 50; 
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        #quiz-header.onboarding-header {
+            background: transparent; border-color: transparent;
+        }
+        #quiz-header.onboarding-header .text-gray-600 {
+            color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        #side-menu { position: fixed; top: 0; right: 0; height: 100%; width: 280px; background-color: white; z-index: 150; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -10px 0 30px rgba(0,0,0,0.1); }
+        #side-menu.active { transform: translateX(0); }
+        #menu-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 140; opacity: 0; transition: opacity 0.3s ease-in-out; pointer-events: none; }
+        #menu-overlay.active { opacity: 1; pointer-events: all; }
+
+        #onboarding-swiper { cursor: grab; }
+        #onboarding-swiper:active { cursor: grabbing; }
+        .swiper-wrapper { display: flex; height: 100%; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* --- STYLE FOR ONBOARDING SLIDES --- */
+        .swiper-slide { 
+            flex-shrink: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 2rem;
+            background-color: #f3f4f6; /* Keep solid background for readability */
+        }
+        .swiper-wrapper .swiper-slide:first-child {
+            background-color: transparent; /* Allow video to show on first slide */
+        }
+        /* --- END ONBOARDING SLIDES STYLE --- */
+        
+        .dot { transition: background-color 0.3s, transform 0.3s; }
+        .dot.active { background-color: var(--brand-accent); transform: scale(1.25); }
+        
+        button.answer-option {
+            background: #fff; color: var(--brand-dark-text); border: 2px solid #e5e7eb; padding: 0;
+            font: inherit; cursor: pointer; outline: inherit; text-align: center;
+            border-radius: 9999px; padding: 12px 24px; font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+        }
+        .answer-option:hover:not(:disabled) { 
+            transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.07); border-color: #d1d5db;
+        }
+        .answer-option.selected { 
+            border-color: var(--brand-accent); background-color: var(--brand-accent);
+            color: var(--brand-dark-text); transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 20px rgba(222, 190, 169, 0.7); 
+        }
+        .answer-option:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .gender-option { 
+            border: 2px solid #e5e7eb; background-color: #fff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; 
+        }
+        .gender-option:hover:not(:disabled) { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.07); }
+        .gender-option.selected { transform: translateY(-5px) scale(1.02); border-color: var(--brand-accent); box-shadow: 0 0 20px rgba(222, 190, 169, 0.8); }
+        .gender-option .gender-image-container { 
+            overflow: hidden; 
+            border-radius: 9999px; /* Changed to make it circular */
+            margin-bottom: 1rem; 
+            aspect-ratio: 1/1;
+        }
+        .gender-option .gender-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+        .gender-option:hover:not(:disabled) .gender-image { transform: scale(1.05); }
+
+        .stress-widget {
+            background-color: white; padding: 1.5rem 2rem; border-radius: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 1.5rem;
+        }
+        .stress-widget #slider-input {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 16px;
+            background: linear-gradient(to right, #4CAF50, #FFEB3B, #FF5722);
+            border-radius: 8px;
+            outline: none;
+            transition: opacity .2s;
+        }
+        .stress-widget #slider-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            background: white;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 4px solid var(--brand-accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .stress-widget #slider-input::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            background: white;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 4px solid var(--brand-accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        #mood-slider-container { width: 100%; max-width: 360px; margin: 1.5rem auto 0; }
+        #mood-slider {
+            -webkit-appearance: none; appearance: none; width: 100%; height: 16px; 
+            background: linear-gradient(to right, #60a5fa, #facc15, #4ade80);
+            border-radius: 8px; outline: none; transition: opacity .2s;
+        }
+        #mood-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none; width: 32px; height: 32px;
+            background: white; cursor: pointer; border-radius: 50%;
+            border: 5px solid var(--brand-accent); box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        #mood-slider::-moz-range-thumb {
+            width: 32px; height: 32px; background: white; cursor: pointer; border-radius: 50%;
+            border: 5px solid var(--brand-accent); box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        #mood-emojis { display: flex; justify-content: space-between; font-size: 2.5rem; margin-bottom: 1rem; padding: 0 0.5rem; }
+        #mood-emojis span { transition: transform 0.2s, opacity 0.2s; }
+        
+        #bmi-display-wrapper {
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 2rem 1.5rem;
+            max-width: 450px;
+            width: 100%;
+            position: relative;
+        }
+        #bmi-info-box {
+            position: relative;
+            z-index: 10;
+            background-color: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        #bmi-category {
+            background-color: #debea9;
+            color: #3c3b31;
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+        #bmi-details {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        @media (min-width: 768px) {
+            #bmi-details {
+                justify-content: flex-start;
+            }
+        }
+        #bmi-scale-container {
+            position: relative;
+            width: 32px;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #bmi-scale-gradient-vertical {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, #43B7FF, #33C75A, #FBF447, #FFA64D, #FF7D7E);
+            border-radius: 100px;
+            position: absolute;
+        }
+        #bmi-thumb {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(180deg, #F2F2F2 0%, #E8E8E8 100%);
+            border: 2px solid #FFFFFF;
+            box-shadow: 0px 0px 6.9px rgba(0, 0, 0, 0.25);
+            border-radius: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 0%;
+            transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+        #bmi-value-display {
+            position: absolute;
+            font-size: 3rem;
+            font-weight: 800;
+            color: #FBF447;
+            left: calc(100% + 1rem);
+            bottom: var(--thumb-position, 0%);
+            transform: translateY(50%);
+            transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        #bmi-image-section {
+            display: flex;
+            align-items: flex-end;
+            height: 250px;
+            flex-grow: 1;
+            justify-content: center;
+        }
+        #bmi-image {
+            height: 100%;
+            width: auto;
+            object-fit: contain;
+            user-select: none;
+            pointer-events: none;
+        }
+        
+        .sleep-animation-container {
+            background-color: #1c2a4e; border-radius: 50%;
+            box-shadow: 0 0 25px rgba(76, 104, 186, 0.4); color: #f0f0f0;
+        }
+        .sleep-ring-bg { stroke: rgba(255, 255, 255, 0.2); }
+        .sleep-ring-fg { stroke: #a7b2ff; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .activity-day { width: 36px; height: 36px; border-radius: 10px; background-color: #e5e7eb; color: #6b7280; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .activity-day.active { background-color: var(--brand-accent); color: var(--brand-dark-text); transform: scale(1.15) translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+
+        #camera-modal { position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #camera-modal.active { opacity: 1; pointer-events: all; }
-        #camera-container { position: relative; width: 90%; max-width: 400px; aspect-ratio: 3/4; overflow: hidden; border-radius: 1.5rem; background: #111; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;}
+        #camera-container { position: relative; width: 90%; max-width: 400px; aspect-ratio: 3/4; overflow: hidden; border-radius: 1.5rem; background: #111; border: 1px solid rgba(255,255,255,0.2); }
         #camera-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        #camera-canvas { position: absolute; top:0; left:0; width:100%; height:100%; transform: scaleX(-1); }
-        #camera-guide-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.5); text-align: center; padding: 1rem;}
+        #camera-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
+        #camera-guide-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); text-align: center; pointer-events: none; }
         #camera-guide-box { width: 70%; aspect-ratio: 1/1.2; border: 2px dashed rgba(255,255,255,0.5); border-radius: 50%; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
         #camera-guide-box.locked { border-color: #34d399; box-shadow: 0 0 20px #34d399; }
         #close-camera-btn { position: absolute; top: 1rem; right: 1rem; background-color: rgba(0,0,0,0.5); border-radius: 50%; color: white; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
+        
+        /* --- UPDATED FOOTER STYLE WITH BLUR --- */
+        #quiz-footer { 
+            flex-shrink: 0; 
+            background-color: rgba(255, 255, 255, 0.6); /* Semi-transparent white */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); /* For Safari */
+            border-top: 1px solid rgba(0, 0, 0, 0.05); /* Lighter border */
+            box-shadow: none; /* Removed shadow, blur is enough */
+            display: none; 
+            padding: 1rem; 
+        }
     </style>
 </head>
 <body>
@@ -62,15 +329,27 @@
             <a href="index.html" class="flex-shrink-0"><img src="logo.png" alt="Logo" class="h-8 w-auto"></a>
             <button id="back-btn" class="text-gray-600 hover:text-gray-900 transition hidden p-2 -ml-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg></button>
             <div id="progress-container" class="flex-grow h-2 bg-gray-200/50 rounded-full overflow-hidden"><div id="progress-bar-inner" class="h-full transition-all duration-500 ease-out" style="background-image: linear-gradient(to right, #debea9, #f7b784);"></div></div>
+            <button id="burger-menu-btn" class="text-gray-600 hover:text-gray-900 transition p-2 -mr-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
         </div>
     </header>
 
     <main id="steps-wrapper" class="pt-16">
         <section id="step-onboarding" class="quiz-step active p-0 !pt-0">
-             <div class="relative w-full h-full text-center flex flex-col items-center justify-center p-4 bg-gray-800 text-white">
-                <h1 class="text-4xl font-bold">Welcome to the AI Wellness Quiz</h1>
-                <p class="mt-4 text-lg">Let's start your journey.</p>
-                <button onclick="next()" class="mt-8 bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-8 rounded-full text-lg">Start Quiz</button>
+             <div id="onboarding-swiper" class="relative w-full h-full flex flex-col">
+                 <div class="flex-grow w-full h-full overflow-hidden">
+                     <div class="swiper-wrapper">
+                         <div class="swiper-slide !p-0">
+                             <video class="absolute top-0 left-0 w-full h-full object-cover -z-10" autoplay loop muted playsinline><source src="fon.webm" type="video/webm"><source src="fon.mp4" type="video/mp4"></video>
+                             <div class="w-full h-full flex flex-col justify-end items-center text-center p-8 bg-black/30 text-white">
+                                 <div class="flex-grow"></div><h1 class="text-4xl font-extrabold tracking-tight">Unlock Your Inner Potential.</h1><p class="mt-3 max-w-md text-lg text-gray-200">Discover your biological age and get a personalized wellness plan based on AI analysis.</p><div class="h-[15vh]"></div>
+                             </div>
+                         </div>
+                         <div class="swiper-slide"><div class="text-left w-full max-w-sm"><h2 class="text-2xl font-bold text-gray-800 text-center mb-6">What you'll get:</h2><ul class="space-y-4"><li class="flex items-center"><span class="text-2xl mr-3">🎯</span><div><h3 class="font-semibold">Wellness Score</h3><p class="text-sm text-gray-500">Your comprehensive health rating</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">⏳</span><div><h3 class="font-semibold">Biological Age</h3><p class="text-sm text-gray-500">How "young" you are for your years</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🌿</span><div><h3 class="font-semibold">Skin & Stress Analysis</h3><p class="text-sm text-gray-500">Learn about hidden factors</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🗺️</span><div><h3 class="font-semibold">Personalized Plan</h3><p class="text-sm text-gray-500">A 7-day plan for improvement</p></div></li></ul></div></div>
+                         <div class="swiper-slide"><div class="text-center"><h2 class="text-2xl font-bold text-gray-800 mb-6">Lower Your Biological Age</h2><div class="flex justify-center items-center space-x-4"><div class="text-center"><p class="text-gray-500">Chronological</p><p class="text-5xl font-bold text-gray-400">35</p></div><div id="lottie-onboarding-2" class="w-20 h-20"></div><div class="text-center"><p class="font-semibold" style="color: var(--brand-dark-text);">Biological</p><p class="text-6xl font-extrabold" style="color: var(--brand-dark-text);">32</p></div></div><p class="text-gray-600 mt-6 max-w-xs mx-auto">Our plan is designed to help you feel younger and more energetic.</p></div></div>
+                         <div class="swiper-slide"><div class="text-center max-w-sm"><h2 class="text-2xl font-bold text-gray-800 mb-8">Your Privacy is Our Priority</h2><div class="space-y-6 text-left"><div class="flex items-center"><span class="text-3xl mr-4">📸</span><p class="text-gray-600">Your photo is analyzed on-the-fly and never stored.</p></div><div class="flex items-center"><span class="text-3xl mr-4">🔒</span><p class="text-gray-600">All your data is anonymized and protected by encryption.</p></div><div class="flex items-center"><span class="text-3xl mr-4">⚕️</span><p class="text-gray-600">This is not medical advice. For informational purposes only.</p></div></div></div></div>
+                     </div>
+                 </div>
+                 <div class="py-6 px-6 bg-white"><div id="dots-container" class="flex justify-center items-center space-x-3 mb-6"></div><button id="start-quiz-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[--brand-accent]/40">Let's start</button></div>
              </div>
         </section>
 
@@ -79,25 +358,22 @@
         </section>
         
         <section id="step-bmi" class="quiz-step prev">
-             <div id="bmi-display-wrapper" class="text-center">
-                <h2 class="text-3xl font-bold text-gray-900">Calculating your BMI...</h2>
-                <div id="bmi-animation" class="w-48 h-48 mx-auto my-6"></div>
+             <div id="bmi-display-wrapper" class="flex flex-col items-center">
+                 <div id="bmi-category" class="text-lg"></div>
+                 <p id="bmi-description" class="text-gray-600 mt-1 text-center max-w-xs"></p>
+
+                 <div id="bmi-details" class="w-full mt-6">
+                     <div id="bmi-scale-container" class="relative">
+                         <div id="bmi-scale-gradient-vertical"></div>
+                         <div id="bmi-thumb"></div>
+                         <div id="bmi-value-display" style="--thumb-position: 0%;"></div>
+                     </div>
+                     <div id="bmi-image-section">
+                         <img id="bmi-image" src="" alt="BMI category illustration">
+                     </div>
+                 </div>
+                 <button id="bmi-continue-btn" class="w-full sm:max-w-xs block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition mt-8">Continue</button>
              </div>
-        </section>
-        
-        <section id="step-selfie-confirm" class="quiz-step prev">
-            <div class="text-center max-w-sm mx-auto">
-                <h2 class="text-3xl font-bold text-gray-900">Looks good?</h2>
-                <img id="selfie-preview-img" src="" alt="Your selfie" class="w-full max-w-xs aspect-[3/4] object-cover rounded-2xl my-6 mx-auto shadow-lg border-2 border-white">
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <button id="selfie-retake-btn" class="w-full bg-white text-gray-800 font-bold py-3 px-6 rounded-full text-lg hover:bg-gray-100 transition border border-gray-300">Retake</button>
-                    <button id="selfie-confirm-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-6 rounded-full text-lg hover:opacity-90 transition disabled:opacity-70">
-                        <span class="btn-text">Confirm & Analyze Photo</span>
-                        <span class="spinner hidden w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mx-auto"></span>
-                    </button>
-                </div>
-                 <button id="skip-photo-btn" class="mt-4 text-sm text-gray-500 hover:text-gray-800">Skip for now</button>
-            </div>
         </section>
         
         <section id="step-loading" class="quiz-step prev">
@@ -106,12 +382,37 @@
             <div id="analysis-steps" class="mt-6 text-gray-600 space-y-2 w-64 text-left"></div>
         </section>
 
+        <!-- NEW: Selfie Confirmation Step -->
+        <section id="step-selfie-confirm" class="quiz-step prev">
+            <div class="text-center max-w-sm mx-auto">
+                <h2 class="text-3xl font-bold text-gray-900">Looks good?</h2>
+                <img id="selfie-preview-img" src="" alt="Your selfie" class="w-full max-w-xs aspect-[3/4] object-cover rounded-2xl my-6 mx-auto shadow-lg border-2 border-white">
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button id="selfie-retake-btn" class="w-full bg-white text-gray-800 font-bold py-3 px-6 rounded-full text-lg hover:bg-gray-100 transition border border-gray-300">Retake</button>
+                    <button id="selfie-confirm-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-6 rounded-full text-lg hover:opacity-90 transition">Confirm Photo</button>
+                </div>
+            </div>
+        </section>
     </main>
     
-    <footer id="quiz-footer" class="w-full z-10 hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t border-gray-200/80 p-4">
+    <footer id="quiz-footer" class="w-full z-10">
         <div id="footer-actions" class="w-full max-w-2xl mx-auto"></div>
     </footer>
 </div>
+
+<div id="menu-overlay"></div>
+<nav id="side-menu" class="p-6">
+    <div class="flex justify-between items-center mb-8">
+        <h3 class="text-xl font-bold">Menu</h3>
+        <button id="close-menu-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+    </div>
+    <div class="flex flex-col space-y-2">
+        <a href="index.html" class="text-lg text-gray-700 hover:text-[--brand-dark-text] p-3 rounded-md transition-colors">Home</a>
+        <a href="terms.html" class="text-lg text-gray-700 hover:text-[--brand-dark-text] p-3 rounded-md transition-colors">Terms of Service</a>
+        <a href="privacy.html" class="text-lg text-gray-700 hover:text-[--brand-dark-text] p-3 rounded-md transition-colors">Privacy Policy</a>
+        <a href="contact.html" class="text-lg text-gray-700 hover:text-[--brand-dark-text] p-3 rounded-md transition-colors">Contact</a>
+    </div>
+</nav>
 
 <div id="camera-modal">
     <div id="camera-container">
@@ -131,116 +432,90 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const App = {
-        sessionId: null,
         currentStep: 'onboarding',
         currentQuestionIndex: -1,
         userAnswers: {},
-        lastPhotoDataUrl: null,
         cameraStream: null,
         faceMesh: null,
         cameraAnimFrame: null,
         captureTimeout: null,
+        lastPhotoDataUrl: null, // To hold photo data for confirmation
+        faceMeshDrawState: { startTime: null, duration: 500 }, // Added for mesh fade-in
         quizQuestions: [
-            { key: 'userGoal', type: 'options', text: "What’s your main goal?", subtext: "This helps us tailor the final report to your interests.", options: [{text: 'Find out my Biological Age', value:'bio_age'}, {text:'Get a Skin Health Analysis', value: 'skin'}, {text:'Receive a 21-Day Improvement Plan', value:'plan'}, {text:'All of the above!', value: 'all'}] },
+            { key: 'userGoal', type: 'options', text: "What’s your main goal?", subtext: "This helps us tailor the final report to your interests.", options: [{text: 'Find out my Biological Age', value:'bio_age'}, {text:'Get a Skin Health Analysis', value: 'skin'}, {text:'Receive a 7-Day Improvement Plan', value:'plan'}, {text:'All of the above!', value: 'all'}] },
             { key: 'age', type: 'slider', text: "How old are you?", subtext: "Your age is a key factor in calculating your biological age baseline.", min: 18, max: 90, defaultValue: 30, unit: 'years' },
-            { key: 'gender', type: 'gender_selection', text: "What’s your biological sex?", subtext: "Biological sex influences body composition and metabolic rate.", options: [{value: 'male', img: 'male.svg', text: 'Male'}, {value: 'female', img: 'female.svg', text: 'Female'}] },
+            { key: 'gender', type: 'gender_selection', text: "What’s your biological sex?", subtext: "Biological sex influences body composition and metabolic rate.", options: [{value: 'male', img: 'male.svg'}, {value: 'female', img: 'female.svg'}] },
             { key: 'height', type: 'slider', text: "What’s your height?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 140, max: 220, defaultValue: 175, unit: 'cm' },
             { key: 'weight', type: 'slider', text: "What’s your weight?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 40, max: 150, defaultValue: 77, unit: 'kg' },
             { key: 'bmi_display', type: 'animation' },
             { key: 'sleep', type: 'options', text: "On average, how much do you sleep?", subtext: "Quality sleep is crucial for cellular repair and mental clarity.", options: [{text:"Less than 5 hours"}, {text:"5–6 hours"}, {text:"7–8 hours"}, {text:"More than 8 hours"}] },
+            { key: 'sleep_visual', type: 'animation' },
             { key: 'activity', type: 'options', text: "How often do you exercise?", subtext: "Regular exercise impacts cardiovascular health and longevity.", options: [{text:"Rarely / Never"}, {text:"1–2 times a week"}, {text:"3–4 times a week"}, {text:"5+ times a week"}] },
+            { key: 'activity_visual', type: 'animation' },
+            { key: 'nutrition', type: 'options', text: "How many servings of fruits & veggies do you eat daily?", subtext: "A diet rich in nutrients is vital for your overall well-being.", options: ["0–1 serving", "2–3 servings", "4–5 servings", "More than 5 servings"] },
+            { key: 'processed_food', type: 'options', text: "How often do you eat processed or fast food?", subtext: "High consumption can lead to inflammation and other health issues.", options: ["Rarely", "1–2 times a week", "3–4 times a week", "Daily"] },
+            { key: 'hydration', type: 'options', text: "How much water do you drink per day?", subtext: "Proper hydration is essential for every bodily function.", options: ["1–3 cups", "4–6 cups", "7–9 cups", "10+ cups"] },
+            { key: 'hydration_visual', type: 'animation' },
+            { key: 'stress', type: 'slider', text: "How stressed do you usually feel?", subtext: "Chronic stress can significantly accelerate the aging process.", min: 1, max: 10, defaultValue: 5, unit: ''},
+            { key: 'mindfulness', type: 'options', text: "How often do you practice mindfulness?", subtext: "Mindfulness practices can reduce stress and improve focus.", options: ["Never", "Sometimes", "Weekly", "Daily"] },
+            { key: 'mood', type: 'emoji_slider', text: "How would you describe your overall mood?", subtext: "Your mental state is deeply connected to your physical health.", options: [ { text: '😟', value: 'Often stressed or down' }, { text: '😐', value: 'Changes a lot' }, { text: '🙂', value: 'Mostly content' }, { text: '😊', value: 'Happy & energetic' } ] },
+            { key: 'alcohol', type: 'options', text: "How much alcohol do you drink weekly?", subtext: "Alcohol consumption can affect sleep, hydration, and cellular health.", options: ["None", "1–3 drinks", "4–7 drinks", "8+ drinks"] },
+            { key: 'smoking', type: 'options', text: "Do you smoke?", subtext: "Smoking is a major factor in premature aging and disease.", options: ["Never", "Used to, but quit", "Occasionally", "Yes, daily"] },
+            { key: 'screen_time', type: 'options', text: "How much screen time do you have daily (outside of work)?", subtext: "Excessive screen time can impact sleep and mental well-being.", options: ["Less than 2 hours", "2–4 hours", "4–6 hours", "More than 6 hours"] },
             { key: 'selfie', type: 'camera_step', text: 'AI Photo Analysis 📸', subtext: '(Optional – helps us analyze skin health & fine lines)'},
             { key: 'email', type: 'email_step', text: "Enter your email 📩", subtext: "to get your personalized report summary. We respect your privacy." }
         ],
     };
 
-    // --- CORE API FUNCTIONS ---
-
-    async function startQuizSession() {
-        try {
-            const response = await fetch('/.netlify/functions/quiz', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'startSession' })
-            });
-            if (!response.ok) throw new Error('Could not start session');
-            const data = await response.json();
-            App.sessionId = data.sessionId;
-            console.log('Session started:', App.sessionId);
-        } catch (error) {
-            console.error('Failed to start session:', error);
-            // In a real app, you might show a persistent error message
+    const AnimationManager = {
+        animations: new Map(),
+        add(id, path) {
+            if (this.animations.has(id) || !document.getElementById(id)) return;
+            const container = document.getElementById(id);
+            if(!container) return;
+            container.innerHTML = '';
+            try {
+                const anim = lottie.loadAnimation({ container, renderer: 'svg', loop: true, autoplay: true, path });
+                this.animations.set(id, anim);
+            } catch(e) { console.error(`Lottie error on container #${id}:`, e); }
         }
+    };
+    
+    const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+
+    function goToStep(stepKey) {
+        const prevStepEl = document.querySelector('.quiz-step.active');
+        if (prevStepEl) prevStepEl.classList.add('prev');
+
+        App.currentStep = stepKey;
+        document.querySelectorAll('.quiz-step').forEach(step => {
+            const isActive = step.id === `step-${stepKey}`;
+            step.classList.toggle('active', isActive);
+            if (!isActive) step.classList.remove('prev');
+        });
+
+        const quizHeader = document.getElementById('quiz-header');
+        const progressContainer = document.getElementById('progress-container');
+        const backBtn = document.getElementById('back-btn');
+        
+        if (stepKey === 'onboarding') {
+            quizHeader.classList.add('onboarding-header');
+            progressContainer.style.visibility = 'hidden';
+            backBtn.classList.add('hidden');
+        } else {
+            quizHeader.classList.remove('onboarding-header');
+            progressContainer.style.visibility = 'visible';
+            backBtn.classList.toggle('hidden', App.currentQuestionIndex <= 0);
+        }
+
+        document.getElementById('quiz-footer').style.display = (stepKey === 'quiz' || stepKey === 'bmi') ? 'block' : 'none';
     }
 
     function handleAnswer(questionKey, answer) {
         App.userAnswers[questionKey] = answer;
-        const answerToSend = (questionKey === 'selfie' && typeof answer === 'string' && answer.startsWith('data:image'))
-            ? 'Photo taken'
-            : answer;
-
-        if (App.sessionId) {
-            fetch('/.netlify/functions/quiz', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'saveAnswer', sessionId: App.sessionId, questionId: questionKey, answer: answerToSend })
-            }).catch(error => console.error('Failed to save answer:', error));
-        }
-        setTimeout(next, 200); // Small delay for visual feedback
+        setTimeout(next, 100);
     }
-
-    async function processAndSavePhoto() {
-        const confirmBtn = document.getElementById('selfie-confirm-btn');
-        const btnText = confirmBtn.querySelector('.btn-text');
-        const spinner = confirmBtn.querySelector('.spinner');
-        
-        if (!App.lastPhotoDataUrl || !App.sessionId) {
-            alert('An error occurred. Missing photo data or session ID.');
-            return;
-        }
-
-        confirmBtn.disabled = true;
-        btnText.classList.add('hidden');
-        spinner.classList.remove('hidden');
-
-        try {
-            console.log('Sending photo for analysis...');
-            const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ photoDataUrl: App.lastPhotoDataUrl })
-            });
-
-            if (!analyzeResponse.ok) {
-                const errorData = await analyzeResponse.json();
-                throw new Error(`Face analysis failed: ${errorData.error || 'Unknown error'}`);
-            }
-            const analysisData = await analyzeResponse.json();
-            console.log('Analysis successful.');
-
-            console.log('Saving analysis data to Firestore...');
-            const saveResponse = await fetch('/.netlify/functions/quiz', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'saveAnalysisData', sessionId: App.sessionId, analysisData: analysisData })
-            });
-            
-            if (!saveResponse.ok) throw new Error('Failed to save analysis data.');
-            console.log('Data saved successfully.');
-
-            handleAnswer('selfie', App.lastPhotoDataUrl);
-
-        } catch (error) {
-            console.error('Error during photo processing:', error);
-            alert(`An error occurred: ${error.message}. Please try again.`);
-            confirmBtn.disabled = false;
-            btnText.classList.remove('hidden');
-            spinner.classList.add('hidden');
-        }
-    }
-
-    // --- NAVIGATION & STATE MANAGEMENT ---
-
+    
     function next() {
         App.currentQuestionIndex++;
         const stepConfig = App.quizQuestions[App.currentQuestionIndex];
@@ -258,41 +533,294 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateProgressBar();
     }
-    
-    function back() {
-        if (App.currentQuestionIndex <= 0) return;
-        App.currentQuestionIndex--;
-        // Skip backwards over animation steps
-        if (App.quizQuestions[App.currentQuestionIndex].type === 'animation') {
+
+    function previous() {
+        if (App.currentQuestionIndex < 0) return;
+        
+        if (App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') {
+             App.currentQuestionIndex--;
+             if (App.currentQuestionIndex >= 0 && App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') {
+                 App.currentQuestionIndex--;
+             }
+        } else {
             App.currentQuestionIndex--;
         }
+        
+        if (App.currentQuestionIndex < 0) {
+            goToStep('onboarding');
+            return;
+        };
+        
         goToStep('quiz');
         renderQuestion();
         updateProgressBar();
     }
     
+    function updateProgressBar() {
+        const totalNonAnimationCount = App.quizQuestions.filter(q => q.type !== 'animation').length;
+        if (totalNonAnimationCount === 0) return;
+
+        const passedQuestions = App.quizQuestions.slice(0, App.currentQuestionIndex + 1);
+        const passedNonAnimationCount = passedQuestions.filter(q => q.type !== 'animation').length;
+        
+        const progress = (passedNonAnimationCount / totalNonAnimationCount) * 100;
+
+        document.getElementById('progress-bar-inner').style.width = `${Math.min(100, progress)}%`;
+        document.getElementById('back-btn').classList.toggle('hidden', App.currentQuestionIndex <= 0);
+    }
+
+    function renderQuestion() {
+        const question = App.quizQuestions[App.currentQuestionIndex];
+        if (!question) return;
+
+        const wrapper = document.getElementById('question-wrapper');
+        const footerWrapper = document.getElementById('footer-actions');
+        footerWrapper.innerHTML = '';
+        
+        let contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>`;
+        if (question.subtext && question.type !== 'camera_step' && question.type !== 'email_step') {
+            contentHTML += `<p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>`;
+        }
+        
+        if (question.key === 'stress') {
+             contentHTML = `<div class="stress-widget">
+                 <h2 class="text-2xl font-bold text-gray-900 text-center">${question.text}</h2>
+                 <p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>
+                 <div class="my-6">
+                    <input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
+                 </div>
+                 <div class="flex justify-between text-sm text-gray-500 mt-2 px-1">
+                     <span>Relaxed</span>
+                     <span>Stressed</span>
+                 </div>
+             </div>`;
+        } else if (question.type === 'camera_step' || question.type === 'email_step') {
+            contentHTML = `<img src="face.jpeg" alt="Face scan illustration" class="w-40 h-40 mx-auto rounded-full object-cover mb-6 shadow-lg">
+                                 <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
+                                 <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
+            if (question.type === 'email_step') {
+                 contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
+                                    <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
+            }
+        }
+        
+        wrapper.innerHTML = `<div class="question-content w-full question-content-enter">${contentHTML}</div>`;
+        
+        if (question.type === 'options') {
+            const optionsHTML = question.options.map(opt => {
+                const displayText = typeof opt === 'object' ? opt.text : opt;
+                const value = typeof opt === 'object' ? (opt.value || opt.text) : opt;
+                return `<button class="answer-option" data-value="${value}">${displayText}</button>`;
+            }).join('');
+            footerWrapper.innerHTML = `<div class="flex justify-center flex-wrap gap-3 max-w-md mx-auto">${optionsHTML}</div>`;
+            footerWrapper.querySelectorAll('.answer-option').forEach(btn => {
+                btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
+            });
+        } else if (question.type === 'slider' && question.key !== 'stress') {
+            const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-sm mt-6"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
+            wrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', sliderContent);
+        }
+
+        if (question.type === 'slider') {
+             footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;
+             const sliderInput = document.getElementById('slider-input');
+             sliderInput.addEventListener('input', () => updateSliderDisplay(question, sliderInput.value));
+             footerWrapper.querySelector('#slider-confirm-btn').addEventListener('click', () => handleAnswer(question.key, sliderInput.value));
+             updateSliderDisplay(question, App.userAnswers[question.key] || question.defaultValue);
+        } else if (question.type === 'gender_selection') {
+            const optionsHTML = question.options.map(opt => `<button class="gender-option text-center rounded-2xl p-4" data-value="${opt.value}"><div class="gender-image-container"><img src="${opt.img}" alt="${opt.value}" class="gender-image"></div><span class="text-xl font-bold text-gray-800 capitalize">${opt.value}</span></button>`).join('');
+            footerWrapper.innerHTML = `<div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">${optionsHTML}</div>`;
+            footerWrapper.querySelectorAll('.gender-option').forEach(btn => {
+                btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
+            });
+        } else if (question.type === 'camera_step') {
+            footerWrapper.innerHTML = `<div class="max-w-sm mx-auto space-y-3 mt-4"><button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button></div>`;
+            footerWrapper.querySelector('#open-camera-btn').addEventListener('click', openCamera);
+            footerWrapper.querySelector('#skip-photo-btn').addEventListener('click', () => handleAnswer('selfie', 'skipped'));
+        } else if (question.type === 'email_step') {
+             footerWrapper.innerHTML = `<div class="flex gap-2 max-w-sm mx-auto mt-6"><input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-[--brand-accent] focus:border-[--brand-accent]"><button id="email-submit-btn" class="bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-5 rounded-lg hover:opacity-90 transition">Submit</button></div>`;
+             footerWrapper.querySelector('#email-submit-btn').addEventListener('click', () => {
+                 const email = document.getElementById('email-input').value;
+                 if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) handleAnswer('email', email);
+                 else alert('Please enter a valid email address.');
+             });
+        } else if (question.type === 'emoji_slider') {
+            const emojis = question.options.map(opt => `<span>${opt.text}</span>`).join('');
+            const sliderContent = `<div id="mood-slider-container"><div id="mood-emojis">${emojis}</div><input type="range" min="0" max="${question.options.length - 1}" value="1" step="1" id="mood-slider"></div>`;
+            wrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', sliderContent);
+            footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="mood-confirm-btn">Confirm</button>`;
+            const moodSlider = document.getElementById('mood-slider');
+            const emojiSpans = document.querySelectorAll('#mood-emojis span');
+            const updateEmojiSelection = () => {
+                emojiSpans.forEach((span, index) => {
+                    span.style.transform = index == moodSlider.value ? 'scale(1.5)' : 'scale(1)';
+                    span.style.opacity = index == moodSlider.value ? '1' : '0.5';
+                });
+            };
+            moodSlider.addEventListener('input', updateEmojiSelection);
+            updateEmojiSelection();
+            footerWrapper.querySelector('#mood-confirm-btn').addEventListener('click', () => {
+                const selectedValue = question.options[moodSlider.value].value;
+                handleAnswer(question.key, selectedValue);
+            });
+        }
+    }
+    
+    function handleOptionClick(event, key, value) {
+        const clickedButton = event.currentTarget;
+        const parent = clickedButton.parentElement;
+        parent.querySelectorAll('button').forEach(btn => btn.disabled = true);
+        clickedButton.classList.add('selected');
+        setTimeout(() => handleAnswer(key, value), 400);
+    }
+
+    function updateSliderDisplay(question, value) {
+        const valueDisplay = document.getElementById('slider-value-display');
+        if (!valueDisplay) return;
+        let displayHTML = `${value} ${question.unit || ''}`;
+        if (question.unit === 'cm') {
+            const totalInches = value / 2.54;
+            let feet = Math.floor(totalInches / 12);
+            let inches = Math.round(totalInches % 12);
+            if (inches === 12) { feet++; inches = 0; }
+            displayHTML = `${feet}'${inches}" <span class="text-lg text-gray-400 font-medium">(${value} cm)</span>`;
+        } else if (question.unit === 'kg') {
+            const lbs = Math.round(value * 2.20462);
+            displayHTML = `${lbs} lbs <span class="text-lg text-gray-400 font-medium">(${value} kg)</span>`;
+        }
+        valueDisplay.innerHTML = displayHTML;
+    }
+    
+    function renderAnimation(key) {
+        goToStep('quiz'); // Keep quiz step active for animation
+        const wrapper = document.getElementById('question-wrapper');
+        document.getElementById('footer-actions').innerHTML = '';
+        document.getElementById('back-btn').classList.add('hidden'); // Hide back button for animations
+
+        let animationHTML = '';
+
+        if (key === 'bmi_display') {
+            goToStep('bmi'); // Switch to dedicated BMI step
+            renderBmiResult();
+            return;
+        } else if (key === 'sleep_visual') {
+            animationHTML = `<div class="w-full max-w-sm mx-auto"><div class="relative mx-auto my-3 w-48 h-48 sleep-animation-container flex items-center justify-center"><svg class="w-full h-full absolute inset-0" viewBox="0 0 120 120"><circle class="sleep-ring-bg" stroke-width="10" fill="transparent" cx="60" cy="60" r="52" /><circle id="sleep-ring-fg-anim" class="sleep-ring-fg" stroke-width="10" fill="transparent" cx="60" cy="60" r="52" style="stroke-dasharray: 327; stroke-dashoffset: 327;"/></svg><div class="text-5xl">🌙</div></div></div>`;
+        } else if (key === 'activity_visual') {
+            animationHTML = `<div class="w-full max-w-sm mx-auto bg-white p-6 rounded-2xl shadow-sm"><div class="font-semibold text-gray-600 text-center mb-4">Your Active Week</div><div class="activity-week flex justify-around gap-2" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div></div>`;
+        } else if (key === 'hydration_visual') {
+            animationHTML = `<div class="w-full max-w-sm mx-auto"><div id="water-animation" class="w-48 h-48 mx-auto"></div></div>`;
+        }
+        
+        wrapper.innerHTML = `<div class="question-content w-full question-content-enter">${animationHTML}</div>`;
+        
+        setTimeout(() => playAnimation(key), 100); 
+        setTimeout(next, 2200);
+    }
+
+    function playAnimation(key) {
+        if (key === 'sleep_visual') {
+            const answer = App.userAnswers.sleep || "";
+            let percent = 50;
+            if (answer.startsWith("Less than 5")) percent = 25;
+            else if (answer.startsWith("5–6")) percent = 50;
+            else if (answer.startsWith("7–8")) percent = 90;
+            else if (answer.startsWith("More than 8")) percent = 100;
+            
+            const ringEl = document.getElementById('sleep-ring-fg-anim');
+            const circumference = 2 * Math.PI * 52; // For r=52
+            if(ringEl) {
+                ringEl.style.strokeDasharray = circumference;
+                ringEl.style.strokeDashoffset = String(circumference - (percent / 100) * circumference);
+            }
+        } else if (key === 'activity_visual') {
+            let days = 0;
+            const answer = App.userAnswers.activity || "";
+            if (answer.includes("5+")) {
+                days = 7; 
+            } else if (answer.includes("3–4")) {
+                days = 4;
+            } else if (answer.includes("1–2")) {
+                days = 2;
+            } else if (answer.includes("Rarely")) {
+                days = 1;
+            }
+            
+            const dayElements = document.querySelectorAll('#activity-week-anim .activity-day');
+            if (dayElements.length > 0) {
+                dayElements.forEach(day => day.classList.remove('active')); // Reset
+                for (let i = 0; i < Math.min(days, 7); i++) {
+                    setTimeout(() => { dayElements[i]?.classList.add('active'); }, i * 200);
+                }
+            }
+        } else if (key === 'hydration_visual') {
+            AnimationManager.add('water-animation', 'water.json');
+        }
+    }
+    
+    function renderBmiResult() {
+        const heightM = App.userAnswers.height / 100;
+        const weightKg = App.userAnswers.weight;
+        const gender = App.userAnswers.gender;
+        const bmi = (weightKg / (heightM * heightM));
+
+        const categories = [
+            { max: 16, img: 'under16', title: 'Severely Underweight', desc: 'Extremely low body mass.', color: '#43B7FF' },
+            { max: 18.4, img: '16-18.4', title: 'Underweight', desc: 'Below healthy weight.', color: '#33C75A' },
+            { max: 24.9, img: '18.5-24.9', title: 'Normal Weight', desc: 'Ideal weight range.', color: '#FBF447' },
+            { max: 29.9, img: '25.0-29.9', title: 'Overweight', desc: 'Slightly above normal. Risk of heart and metabolic issues.', color: '#FFA64D' },
+            { max: 34.9, img: '30-above', title: 'Obesity (Class I)', desc: 'Increased health risk.', color: '#FF7D7E' },
+            { max: 39.9, img: '30-above', title: 'Obesity (Class II)', desc: 'High health risk.', color: '#FF7D7E' },
+            { max: Infinity, img: '30-above', title: 'Obesity (Class III)', desc: 'Very high health risk.', color: '#FF7D7E' }
+        ];
+        const result = categories.find(c => bmi < c.max);
+        const prefix = gender === 'female' ? 'f' : 'm';
+        
+        document.getElementById('bmi-image').src = `${prefix}-${result.img}.svg`;
+        document.getElementById('bmi-category').textContent = result.title;
+        document.getElementById('bmi-description').textContent = result.desc;
+
+        const minBmi = 15, maxBmi = 40; 
+        const normalizedBmi = Math.max(0, Math.min(1, (bmi - minBmi) / (maxBmi - minBmi)));
+        const thumbBottomPosition = normalizedBmi * 100;
+        
+        const bmiThumb = document.getElementById('bmi-thumb');
+        const bmiValueDisplay = document.getElementById('bmi-value-display');
+        
+        bmiValueDisplay.style.setProperty('--thumb-position', `${thumbBottomPosition}%`);
+        bmiThumb.style.bottom = `${thumbBottomPosition}%`;
+
+        let currentBmi = 0;
+        const startTimestamp = performance.now();
+        const duration = 1500;
+
+        const animateBmiValue = (timestamp) => {
+            const elapsed = timestamp - startTimestamp;
+            const progress = Math.min(elapsed / duration, 1);
+            currentBmi = progress * bmi;
+            bmiValueDisplay.textContent = currentBmi.toFixed(1);
+
+            if (progress < 1) {
+                requestAnimationFrame(animateBmiValue);
+            } else {
+                bmiValueDisplay.textContent = bmi.toFixed(1);
+            }
+        };
+        requestAnimationFrame(animateBmiValue);
+        
+        document.getElementById('bmi-continue-btn').onclick = next;
+    }
+
     function startAnalysis() {
         goToStep('loading');
-        // Lottie loading animation
-        const loadingAnimContainer = document.getElementById('loading-animation');
-        lottie.loadAnimation({
-            container: loadingAnimContainer,
-            renderer: 'svg',
-            loop: true,
-            autoplay: true,
-            path: 'https://assets6.lottiefiles.com/packages/lf20_t9v3t6kh.json' 
-        });
-
+        AnimationManager.add('loading-animation', 'loader.json');
         const analysisStepsContainer = document.getElementById('analysis-steps');
         analysisStepsContainer.innerHTML = '';
         const steps = ["Analyzing lifestyle data...", "Calculating metabolic rate...", "Processing facial biomarkers...", "Compiling wellness report..."];
         steps.forEach((text, i) => {
             setTimeout(() => {
                 const p = document.createElement('p');
-                p.className = 'opacity-0 transition-opacity duration-500';
                 p.textContent = `✓ ${text}`;
                 analysisStepsContainer.appendChild(p);
-                setTimeout(() => p.classList.remove('opacity-0'), 50);
             }, i * 900);
         });
         setTimeout(() => {
@@ -300,351 +828,223 @@ document.addEventListener('DOMContentLoaded', () => {
         }, (steps.length * 900) + 500);
     }
     
-    // --- UI RENDERING FUNCTIONS ---
-    
-    function goToStep(stepKey) {
-        const steps = document.querySelectorAll('.quiz-step');
-        const header = document.getElementById('quiz-header');
-        const footer = document.getElementById('quiz-footer');
-        const backBtn = document.getElementById('back-btn');
-        
-        let previousStepEl = document.querySelector('.quiz-step.active');
-
-        steps.forEach(step => {
-            step.classList.remove('active', 'prev');
-        });
-
-        if(previousStepEl) {
-            previousStepEl.classList.add('prev');
-        }
-
-        const newStepEl = document.getElementById(`step-${stepKey}`);
-        if(newStepEl) {
-            newStepEl.classList.add('active');
-        }
-        
-        App.currentStep = stepKey;
-        
-        // UI adjustments based on step
-        if (stepKey === 'onboarding' || stepKey === 'loading') {
-            header.style.transform = 'translateY(-100%)';
-            footer.classList.add('hidden');
-            backBtn.classList.add('hidden');
-        } else {
-            header.style.transform = 'translateY(0)';
-            footer.classList.remove('hidden');
-            backBtn.classList.toggle('hidden', App.currentQuestionIndex <= 0);
-        }
-    }
-
-    function renderQuestion() {
-        const question = App.quizQuestions[App.currentQuestionIndex];
-        const questionWrapper = document.getElementById('question-wrapper');
-        const footerActions = document.getElementById('footer-actions');
-
-        questionWrapper.innerHTML = '';
-        footerActions.innerHTML = '';
-
-        if (!question) return;
-
-        let contentHTML = `
-            <div class="question-content-enter text-center">
-                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">${question.text}</h2>
-                <p class="mt-2 text-gray-600 max-w-md mx-auto">${question.subtext}</p>
-                <div id="options-container" class="mt-8"></div>
-            </div>`;
-        questionWrapper.innerHTML = contentHTML;
-
-        const optionsContainer = document.getElementById('options-container');
-
-        switch(question.type) {
-            case 'options':
-                const optionsGrid = document.createElement('div');
-                optionsGrid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto';
-                question.options.forEach(opt => {
-                    const button = document.createElement('button');
-                    button.className = 'answer-option w-full text-left p-4 rounded-xl border-2 border-gray-200 bg-white/50 hover:border-[--brand-accent] transition-all duration-300 shadow-sm';
-                    button.innerHTML = `<span class="font-semibold text-lg">${opt.text}</span>`;
-                    button.onclick = () => {
-                        document.querySelectorAll('.answer-option').forEach(btn => btn.classList.remove('selected'));
-                        button.classList.add('selected');
-                        handleAnswer(question.key, opt.value || opt.text);
-                    };
-                    optionsGrid.appendChild(button);
-                });
-                optionsContainer.appendChild(optionsGrid);
-                break;
-
-            case 'slider':
-                const valueDisplay = document.createElement('div');
-                valueDisplay.id = 'slider-value-display';
-                valueDisplay.className = 'text-5xl font-bold text-[--brand-accent] my-4';
-                valueDisplay.textContent = `${question.defaultValue} ${question.unit}`;
-
-                const sliderInput = document.createElement('input');
-                sliderInput.type = 'range';
-                sliderInput.min = question.min;
-                sliderInput.max = question.max;
-                sliderInput.value = question.defaultValue;
-                sliderInput.className = 'w-full max-w-sm mx-auto h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer';
-
-                sliderInput.oninput = () => {
-                    valueDisplay.textContent = `${sliderInput.value} ${question.unit}`;
-                };
-                optionsContainer.append(valueDisplay, sliderInput);
-
-                const nextButton = document.createElement('button');
-                nextButton.className = 'w-full max-w-sm mx-auto bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-6 rounded-full text-lg hover:opacity-90 transition';
-                nextButton.textContent = 'Next';
-                nextButton.onclick = () => handleAnswer(question.key, parseInt(sliderInput.value));
-                footerActions.appendChild(nextButton);
-                break;
-            
-            case 'gender_selection':
-                const genderGrid = document.createElement('div');
-                genderGrid.className = 'flex justify-center gap-6';
-                question.options.forEach(opt => {
-                    const button = document.createElement('button');
-                    button.className = 'answer-option p-4 rounded-2xl border-2 border-gray-200 bg-white/50 hover:border-[--brand-accent] transition-all duration-300 shadow-sm flex flex-col items-center gap-2 w-32';
-                    button.innerHTML = `<img src="${opt.img}" alt="${opt.text}" class="h-16 w-16"><span class="font-semibold text-lg">${opt.text}</span>`;
-                    button.onclick = () => {
-                        document.querySelectorAll('.answer-option').forEach(btn => btn.classList.remove('selected'));
-                        button.classList.add('selected');
-                        handleAnswer(question.key, opt.value);
-                    };
-                    genderGrid.appendChild(button);
-                });
-                optionsContainer.appendChild(genderGrid);
-                break;
-            
-            case 'camera_step':
-                const openCamBtn = document.createElement('button');
-                openCamBtn.className = 'w-full max-w-sm mx-auto bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-6 rounded-full text-lg hover:opacity-90 transition';
-                openCamBtn.textContent = 'Open Camera';
-                openCamBtn.onclick = openCamera;
-
-                const skipBtn = document.createElement('button');
-                skipBtn.className = 'mt-4 text-sm text-gray-500 hover:text-gray-800';
-                skipBtn.textContent = 'Skip for now';
-                skipBtn.onclick = () => handleAnswer('selfie', 'skipped');
-                optionsContainer.append(openCamBtn, skipBtn);
-                break;
-
-            case 'email_step':
-                const emailInput = document.createElement('input');
-                emailInput.type = 'email';
-                emailInput.placeholder = 'your.email@example.com';
-                emailInput.className = 'w-full max-w-sm mx-auto block p-4 rounded-xl border-2 border-gray-300 focus:border-[--brand-accent] focus:ring-2 focus:ring-[--brand-accent]/50 outline-none transition';
-                
-                const submitBtn = document.createElement('button');
-                submitBtn.className = 'w-full max-w-sm mx-auto bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-6 rounded-full text-lg hover:opacity-90 transition';
-                submitBtn.textContent = 'Get My Report';
-                submitBtn.onclick = () => {
-                    if (emailInput.checkValidity()) {
-                        handleAnswer(question.key, emailInput.value);
-                    } else {
-                        alert('Please enter a valid email address.');
-                    }
-                };
-                optionsContainer.appendChild(emailInput);
-                footerActions.appendChild(submitBtn);
-                break;
-        }
-    }
-
-    function updateProgressBar() {
-        const questionsWithProgress = App.quizQuestions.filter(q => q.type !== 'animation' && q.key !== 'userGoal');
-        const totalSteps = questionsWithProgress.length;
-        const currentProgressIndex = App.currentQuestionIndex;
-        
-        let completedSteps = 0;
-        for (let i = 0; i < currentProgressIndex; i++) {
-            if (App.quizQuestions[i].type !== 'animation' && App.quizQuestions[i].key !== 'userGoal') {
-                completedSteps++;
-            }
-        }
-
-        const progress = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
-        document.getElementById('progress-bar-inner').style.width = `${progress}%`;
-    }
-
-    function renderAnimation(key) {
-        if (key === 'bmi_display') {
-            goToStep('bmi');
-            const height = App.userAnswers.height;
-            const weight = App.userAnswers.weight;
-            if (!height || !weight) {
-                setTimeout(next, 500); // Skip if no data
-                return;
-            }
-            const bmi = (weight / Math.pow(height / 100, 2)).toFixed(1);
-            
-            const wrapper = document.getElementById('bmi-display-wrapper');
-            wrapper.innerHTML = `
-                <h2 class="text-3xl font-bold text-gray-900">Your Body Mass Index (BMI) is:</h2>
-                <div class="text-7xl font-bold text-[--brand-accent] my-6">${bmi}</div>
-            `;
-            setTimeout(next, 3000); // Show for 3 seconds then move on
-        }
-    }
-    
-    // --- CAMERA LOGIC FUNCTIONS ---
-    
-    function onResults(results) {
+    async function openCamera() {
+        const cameraModal = document.getElementById('camera-modal');
         const video = document.getElementById('camera-video');
+        
+        cameraModal.classList.add('active');
+        
+        if (!App.faceMesh) {
+            try {
+                App.faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
+                App.faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+                App.faceMesh.onResults(onFaceMeshResults);
+                await App.faceMesh.initialize();
+            } catch (error) {
+                alert('Failed to initialize AI model for camera. Please try again.');
+                closeCamera(); return;
+            }
+        }
+
+        try {
+            // Use aspectRatio to avoid zoom issues on mobile
+            App.cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', aspectRatio: { ideal: 9/16 } } });
+            video.srcObject = App.cameraStream;
+            video.addEventListener('loadeddata', cameraLoop);
+        } catch (err) {
+            console.error("Camera Error:", err);
+            let message = "Camera access was denied. Please allow camera access in your browser settings to continue.";
+            if (window.location.protocol !== 'https:') {
+                message += "\n\nNOTE: Camera access requires a secure connection (https://) or a local server (localhost).";
+            }
+            alert(message);
+            closeCamera();
+        }
+    }
+
+    function closeCamera() {
+        const cameraModal = document.getElementById('camera-modal');
+        const guideBox = document.getElementById('camera-guide-box');
+        if (App.cameraStream) App.cameraStream.getTracks().forEach(track => track.stop());
+        cancelAnimationFrame(App.cameraAnimFrame);
+        clearTimeout(App.captureTimeout);
+        App.captureTimeout = null;
+        cameraModal.classList.remove('active');
+        if(guideBox) guideBox.classList.remove('locked');
+    }
+    
+    async function cameraLoop() {
+        const video = document.getElementById('camera-video');
+        if (video.readyState >= 2) {
+           await App.faceMesh.send({image: video});
+        }
+        App.cameraAnimFrame = requestAnimationFrame(cameraLoop);
+    };
+
+    function onFaceMeshResults(results) {
         const guideBox = document.getElementById('camera-guide-box');
         const guideText = document.getElementById('camera-guide-text');
         const canvas = document.getElementById('camera-canvas');
-        const canvasCtx = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+        ctx.clearRect(0,0,canvas.width, canvas.height);
 
         if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
             const landmarks = results.multiFaceLandmarks[0];
-            // Optional: Draw mesh for feedback
-            drawConnectors(canvasCtx, landmarks, FACEMESH_TESSELATION, {color: '#debea9', lineWidth: 1});
+            
+            // --- Mesh Fade-in Logic ---
+            if (App.faceMeshDrawState.startTime === null) {
+                App.faceMeshDrawState.startTime = performance.now();
+            }
+            const elapsed = performance.now() - App.faceMeshDrawState.startTime;
+            const finalOpacity = 0.3; // The final opacity of the mesh
+            const opacity = Math.min(1, elapsed / App.faceMeshDrawState.duration) * finalOpacity;
+            // --- End Fade-in Logic ---
 
-            // Simple check for face centeredness and size
-            const nose = landmarks[1]; // A point around the center of the face
-            if (nose.x > 0.3 && nose.x < 0.7 && nose.y > 0.3 && nose.y < 0.7) {
+            if (window.drawConnectors && window.FACEMESH_TESSELATION) {
+                drawConnectors(ctx, landmarks, window.FACEMESH_TESSELATION, {color: `rgba(222, 190, 169, ${opacity})`, lineWidth: 1});
+            }
+
+            if (isFaceCentered(landmarks)) {
                 guideBox.classList.add('locked');
+                guideText.textContent = 'Perfect, hold still!';
                 if (!App.captureTimeout) {
-                    guideText.textContent = "Hold still...";
-                    App.captureTimeout = setTimeout(takePhoto, 1500); // 1.5 second countdown
+                    // Increased timeout to 2 seconds for a smoother experience
+                    App.captureTimeout = setTimeout(takePhoto, 2000);
                 }
             } else {
                 guideBox.classList.remove('locked');
-                guideText.textContent = "Center your face in the oval";
+                guideText.textContent = 'Center your face in the oval';
                 clearTimeout(App.captureTimeout);
                 App.captureTimeout = null;
             }
         } else {
+            // Reset when face is lost
+            App.faceMeshDrawState.startTime = null; 
             guideBox.classList.remove('locked');
+            guideText.textContent = 'Center your face in the oval';
             clearTimeout(App.captureTimeout);
             App.captureTimeout = null;
         }
     }
 
-    function openCamera() {
-        const modal = document.getElementById('camera-modal');
-        const video = document.getElementById('camera-video');
-        modal.classList.add('active');
-
-        if (!App.faceMesh) {
-            App.faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
-            App.faceMesh.setOptions({
-                maxNumFaces: 1,
-                refineLandmarks: true,
-                minDetectionConfidence: 0.5,
-                minTrackingConfidence: 0.5
-            });
-            App.faceMesh.onResults(onResults);
-        }
-
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-            .then(stream => {
-                App.cameraStream = stream;
-                video.srcObject = stream;
-                const cameraLoop = async () => {
-                    if (video.readyState >= 3) { // Have enough data to play
-                        await App.faceMesh.send({image: video});
-                    }
-                    App.cameraAnimFrame = requestAnimationFrame(cameraLoop);
-                };
-                video.onloadedmetadata = () => cameraLoop();
-            }).catch(err => {
-                console.error("Camera error:", err);
-                alert("Could not access the camera. Please check permissions.");
-                closeCamera();
-            });
-    }
-
-    function closeCamera() {
-        const modal = document.getElementById('camera-modal');
-        modal.classList.remove('active');
-        if (App.cameraStream) {
-            App.cameraStream.getTracks().forEach(track => track.stop());
-        }
-        if (App.cameraAnimFrame) {
-            cancelAnimationFrame(App.cameraAnimFrame);
-        }
-        if (App.captureTimeout) {
-            clearTimeout(App.captureTimeout);
-            App.captureTimeout = null;
-        }
-        document.getElementById('camera-guide-box').classList.remove('locked');
-        document.getElementById('camera-guide-text').textContent = "Center your face in the oval";
+    function isFaceCentered(landmarks) {
+        const nose = landmarks[4];
+        return nose.x > 0.3 && nose.x < 0.7 && nose.y > 0.3 && nose.y < 0.7 && nose.z < -0.03;
     }
 
     function takePhoto() {
         const video = document.getElementById('camera-video');
         const canvas = document.getElementById('photo-canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
-        const targetAspectRatio = 3 / 4;
-
-        // Set canvas to a higher resolution for better quality
-        const captureWidth = video.videoWidth;
-        const captureHeight = video.videoHeight;
-
-        canvas.width = 600; // Fixed width for output image
-        canvas.height = 600 / targetAspectRatio;
-
-        const sourceAspectRatio = captureWidth / captureHeight;
-        let sx, sy, sWidth, sHeight;
-
-        // Crop the video frame to fit the 3:4 aspect ratio
-        if (sourceAspectRatio > targetAspectRatio) { // Video is wider than target
-            sHeight = captureHeight;
-            sWidth = sHeight * targetAspectRatio;
-            sx = (captureWidth - sWidth) / 2;
-            sy = 0;
-        } else { // Video is taller than target
-            sWidth = captureWidth;
-            sHeight = sWidth / targetAspectRatio;
-            sy = (captureHeight - sHeight) / 2;
-            sx = 0;
-        }
-
-        // Flip the image horizontally back to normal
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
-        ctx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const photoDataUrl = canvas.toDataURL('image/jpeg', 0.9);
         
-        App.lastPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-        document.getElementById('selfie-preview-img').src = App.lastPhotoDataUrl;
-        
+        App.lastPhotoDataUrl = photoDataUrl; // Store the photo data
+        document.getElementById('selfie-preview-img').src = photoDataUrl;
+
         closeCamera();
-        goToStep('selfie-confirm');
+        goToStep('selfie-confirm'); // Go to the new confirmation step
     }
 
-    // --- INITIALIZATION ---
-    function init() {
-        // Fix for 100vh on mobile browsers
-        const setVh = () => {
-            let vh = window.innerHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
-        };
-        window.addEventListener('resize', setVh);
-        setVh();
-
-        // Start session
-        startQuizSession();
-
-        // Attach event listeners
-        document.getElementById('back-btn').addEventListener('click', back);
-        document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
-        document.getElementById('selfie-confirm-btn').addEventListener('click', processAndSavePhoto);
-        document.getElementById('selfie-retake-btn').addEventListener('click', openCamera);
-        document.getElementById('skip-photo-btn').addEventListener('click', () => handleAnswer('selfie', 'skipped'));
+    function initOnboarding() {
+        const swiper = document.getElementById('onboarding-swiper');
+        const swiperWrapper = swiper.querySelector('.swiper-wrapper');
+        const slides = swiper.querySelectorAll('.swiper-slide');
+        const dotsContainer = document.getElementById('dots-container');
+        if (!swiperWrapper || !slides.length || !dotsContainer) return;
         
-        // Go to first step (onboarding)
-        goToStep('onboarding');
-        updateProgressBar();
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+        let startX = 0, currentX = 0, isDragging = false;
+
+        dotsContainer.innerHTML = '';
+        slides.forEach((_, i) => {
+            const dot = document.createElement('button');
+            dot.className = 'dot w-2.5 h-2.5 bg-gray-300 rounded-full transition';
+            dot.onclick = () => goToSlide(i);
+            dotsContainer.appendChild(dot);
+        });
+        const dots = dotsContainer.querySelectorAll('.dot');
+        
+        function goToSlide(index, animated = true) {
+            currentSlide = (index + totalSlides) % totalSlides;
+            swiperWrapper.style.transition = animated ? 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' : 'none';
+            swiperWrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+        }
+
+        const startDrag = (e) => {
+            isDragging = true;
+            startX = e.pageX || e.touches[0].pageX;
+            swiperWrapper.style.transition = 'none';
+        }
+        const drag = (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            currentX = e.pageX || e.touches[0].pageX;
+            const diff = currentX - startX;
+            swiperWrapper.style.transform = `translateX(calc(-${currentSlide * 100}% + ${diff}px))`;
+        }
+        const endDrag = (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            const diff = currentX - startX;
+            if (Math.abs(diff) > 50) {
+                goToSlide(currentSlide + (diff < 0 ? 1 : -1));
+            } else {
+                goToSlide(currentSlide);
+            }
+        }
+        
+        swiper.addEventListener('mousedown', startDrag);
+        swiper.addEventListener('mousemove', drag);
+        swiper.addEventListener('mouseup', endDrag);
+        swiper.addEventListener('mouseleave', endDrag);
+        swiper.addEventListener('touchstart', startDrag, { passive: true });
+        swiper.addEventListener('touchmove', drag, { passive: false });
+        swiper.addEventListener('touchend', endDrag);
+
+        goToSlide(0);
     }
     
-    init();
+    function initMenu() {
+        const menuBtn = document.getElementById('burger-menu-btn');
+        const closeBtn = document.getElementById('close-menu-btn');
+        const overlay = document.getElementById('menu-overlay');
+        const menu = document.getElementById('side-menu');
+        const toggleMenu = () => {
+            overlay.classList.toggle('active');
+            menu.classList.toggle('active');
+        };
+        menuBtn.addEventListener('click', toggleMenu);
+        closeBtn.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+    }
+
+    // --- App Initialization ---
+    setVh();
+    window.addEventListener('resize', setVh);
+    goToStep('onboarding');
+    initOnboarding();
+    AnimationManager.add('lottie-onboarding-2', 'arrow.json');
+    initMenu();
+
+    document.getElementById('start-quiz-btn').addEventListener('click', next);
+    document.getElementById('back-btn').addEventListener('click', previous);
+    document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
+    // Listeners for new selfie confirmation buttons
+    document.getElementById('selfie-confirm-btn').addEventListener('click', () => {
+        handleAnswer('selfie', App.lastPhotoDataUrl);
+    });
+    document.getElementById('selfie-retake-btn').addEventListener('click', openCamera);
 });
 </script>
+
 </body>
 </html>
