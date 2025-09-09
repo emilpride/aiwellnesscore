@@ -227,8 +227,8 @@
         <div class="max-w-5xl mx-auto p-3 flex justify-between items-center">
             <a href="index.html"><img src="logo.png" alt="Logo" class="h-10 w-auto"></a>
             <div class="flex items-center gap-3 sm:gap-4">
-                 <div class="items-center gap-2 text-sm font-semibold text-gray-700 hidden sm:flex">
-                    <span>Your offer expires in:</span>
+                 <div class="flex items-center gap-2 text-xs sm:text-sm font-semibold text-gray-700">
+                    <span class="hidden sm:inline">Your offer expires in:</span>
                     <div class="timer-box">
                         <span id="minutes">10</span>:<span id="seconds">00</span>
                     </div>
@@ -433,7 +433,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- CONFIGURATION ---
-            const STRIPE_PUBLISHABLE_KEY = 'YOUR_STRIPE_PUBLISHABLE_KEY'; // IMPORTANT: Replace with your actual key
+            const STRIPE_PUBLISHABLE_KEY = 'pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb';
             const sessionId = new URLSearchParams(window.location.search).get('session_id');
             
             // --- DOM ELEMENTS ---
@@ -479,7 +479,7 @@
                         body: JSON.stringify({ 
                             sessionId: sessionId,
                             plan: selectedPlanKey,
-                            amount: Math.round(planData[selectedPlanKey].price * 100) // Send amount in cents
+                            amount: Math.round(planData[selectedPlanKey].price * 100)
                         })
                     });
                     
@@ -535,8 +535,6 @@
                 setLoading(false);
             }
             
-            // --- UI HELPERS ---
-
             function showMessage(messageText) {
                 paymentMessageContainer.textContent = messageText;
             }
@@ -550,13 +548,10 @@
                 submitBtn.querySelector('#button-text').classList.toggle('hidden', isLoading);
             }
 
-            // --- EVENT LISTENERS ---
             openModalButtons.forEach(btn => btn.addEventListener('click', initializePaymentForm));
             closeModalBtn.addEventListener('click', hideModal);
             paymentForm.addEventListener('submit', handleSubmit);
             
-            // --- INITIALIZATION ---
-            // Timer, plan selection, charts logic...
             const minutesEl = document.getElementById('minutes');
             const secondsEl = document.getElementById('seconds');
             let timeLeft = 9 * 60 + 59;
