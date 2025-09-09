@@ -110,7 +110,6 @@
             border: 2px solid #FFFFFF; box-shadow: 0px 0px 6.9px rgba(0, 0, 0, 0.25);
             border-radius: 50%; left: 50%; transform: translateX(-50%);
             bottom: 0%; 
-            /* ИЗМЕНЕНИЕ: Управляем анимацией через transition */
             transition: bottom 1.5s cubic-bezier(0.22, 1, 0.36, 1); 
             z-index: 1;
         }
@@ -154,7 +153,7 @@
 
     <div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
         <div class="w-16 h-16 border-4 border-gray-300 border-t-[--brand-accent] rounded-full animate-spin"></div>
-        <p class="mt-4 text-lg font-semibold text-gray-700">Preparing your profile...</p>
+        <p id="loading-text" class="mt-4 text-lg font-semibold text-gray-700">Preparing your profile...</p>
     </div>
 
     <div id="profile-content" class="min-h-screen p-4 sm:p-6 lg:p-8 opacity-0 transition-opacity duration-500">
@@ -165,7 +164,6 @@
         </header>
 
         <main class="max-w-5xl mx-auto space-y-8 sm:space-y-12">
-            <!-- Key Metrics -->
             <section class="grid md:grid-cols-3 gap-6">
                 <div class="md:col-span-1 animate-on-scroll">
                     <img id="user-photo" src="https://placehold.co/400x533/f5f2ef/3c3b31?text=Your+Photo" alt="User Photo" class="w-full h-full object-cover rounded-2xl shadow-lg">
@@ -179,7 +177,6 @@
                         <p id="bio-age" class="value bio-age">0</p>
                         <p class="label">Biological Age</p>
                     </div>
-                    <!-- BMI Block - Updated ID for Observer -->
                     <div id="bmi-widget-container" class="sm:col-span-2 content-card p-6 flex flex-col items-center animate-on-scroll delay-2">
                         <p id="bmi-category" class="font-bold text-lg text-green-600">Normal Weight</p>
                         <p id="bmi-description" class="text-sm text-gray-600 mt-1 text-center max-w-xs"></p>
@@ -224,7 +221,6 @@
                 </div>
             </section>
             
-            <!-- Updated ID for Observer -->
             <section id="chart-section" class="content-card p-6 sm:p-8 animate-on-scroll">
                 <div class="grid md:grid-cols-2 gap-8 items-center">
                     <div>
@@ -254,8 +250,7 @@
                 <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">See What Others Have Achieved</h2>
                 <div id="testimonial-slider-container" class="content-card p-6">
                     <div id="testimonial-slider-wrapper">
-                        <!-- Testimonials will be injected here by JS -->
-                    </div>
+                        </div>
                 </div>
                 <div id="slider-dots-container" class="slider-dots"></div>
             </section>
@@ -265,48 +260,47 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- MOCK DATA ---
-            const mockData = {
-                userPhotoUrl: null, gender: 'female', chronoAge: 35,
-                bioAgeResult: { biologicalAge: 39, totalScore: 8, ageCorrection: 4 },
-                bmi: { value: 28.2 },
-                wellnessArchetype: { name: 'The Driven Achiever', description: 'You excel at work and stay active, but high stress and lack of sleep are holding you back from your full potential.' },
-                focusArea: { name: 'Stress Management', description: 'Lowering your stress is the single most effective way to improve your biological age and overall well-being.' },
-                factors: {
-                    positive: [
-                        { text: 'Exercising 3-4 times a week', icon: '🏃', detail: 'Regular exercise boosts cardiovascular health and reduces stress.' },
-                        { text: 'No smoking habit', icon: '🚭', detail: 'Avoiding tobacco is the top factor for longevity.' },
-                        { text: 'Sufficient water intake', icon: '💧', detail: 'Proper hydration supports skin health and energy levels.' },
-                    ],
-                    negative: [
-                        { text: 'Frequent processed food consumption', icon: '🍔', detail: 'Can lead to inflammation and impact gut health.' },
-                        { text: 'High stress levels', icon: '😟', detail: 'Chronic stress accelerates cellular aging.' },
-                        { text: 'Sleeping less than 5 hours', icon: '😴', detail: 'Lack of sleep impairs recovery and cognitive function.' },
-                    ]
-                },
-                testimonials: [
-                    { name: 'Sarah K.', bioAgeChange: 3, review: "I was shocked by my biological age. It was the wake-up call I needed. The 21-day plan was so easy to follow and made a real difference in my energy levels.", rating: 5 },
-                    { name: 'Michael B.', bioAgeChange: null, review: "Finally, a wellness tool that isn't about guilt. Identifying my archetype made me feel understood. The focus on stress was spot-on.", rating: 5 },
-                    { name: 'Jessica M.', bioAgeChange: 4, review: "The photo analysis was fascinating. I had no idea my screen time was showing up as visible eye strain. This service connected the dots for me.", rating: 5 },
-                    { name: 'David L.', bioAgeChange: 2, review: "I've tried other apps, but this one felt the most personalized. The daily tasks are small but powerful. I feel less bloated and more focused.", rating: 4 },
-                ]
-            };
-
-            const sessionId = new URLSearchParams(window.location.search).get('session_id');
-
+            // --- Отзывы остаются статичными, как и было запрошено ---
+            const testimonials = [
+                { name: 'Sarah K.', bioAgeChange: 3, review: "I was shocked by my biological age. It was the wake-up call I needed. The 21-day plan was so easy to follow and made a real difference in my energy levels.", rating: 5 },
+                { name: 'Michael B.', bioAgeChange: null, review: "Finally, a wellness tool that isn't about guilt. Identifying my archetype made me feel understood. The focus on stress was spot-on.", rating: 5 },
+                { name: 'Jessica M.', bioAgeChange: 4, review: "The photo analysis was fascinating. I had no idea my screen time was showing up as visible eye strain. This service connected the dots for me.", rating: 5 },
+                { name: 'David L.', bioAgeChange: 2, review: "I've tried other apps, but this one felt the most personalized. The daily tasks are small but powerful. I feel less bloated and more focused.", rating: 4 },
+            ];
+            
+            // --- ФУНКЦИЯ ДЛЯ ЗАГРУЗКИ РЕАЛЬНЫХ ДАННЫХ ---
             async function fetchData() {
-                return new Promise(resolve => setTimeout(() => resolve(mockData), 1500));
+                const sessionId = new URLSearchParams(window.location.search).get('session_id');
+                if (!sessionId) {
+                    throw new Error("Session ID is missing from the URL. Please complete the quiz first.");
+                }
+
+                const response = await fetch('/.netlify/functions/getProfileData', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: sessionId })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: `Server error: ${response.status}` }));
+                    throw new Error(errorData.error || 'Failed to fetch profile data.');
+                }
+
+                const data = await response.json();
+                data.testimonials = testimonials;
+                return data;
             }
             
             function populateUI(data) {
-                // Эта функция теперь заполняет только статичные данные
-                // Анимации будут запущены наблюдателем (Observer)
-                if (data.userPhotoUrl) { document.getElementById('user-photo').src = data.userPhotoUrl; }
+                if (data.userPhotoUrl) { 
+                    document.getElementById('user-photo').src = data.userPhotoUrl; 
+                }
                 
-                document.getElementById('chrono-age').textContent = data.chronoAge;
-                document.getElementById('bio-age').textContent = data.bioAgeResult.biologicalAge;
+                // Эти значения будут анимированы наблюдателем (Observer)
+                document.getElementById('chrono-age').textContent = '0';
+                document.getElementById('bio-age').textContent = '0';
 
-                const ageDifference = data.bioAgeResult.biologicalAge - data.chronoAge;
+                const ageDifference = (data.bioAgeResult.biologicalAge || 0) - (data.chronoAge || 0);
                 const summaryCard = document.getElementById('age-summary-card');
                 const summaryText = document.getElementById('age-summary-text');
                 if (ageDifference > 0) {
@@ -321,7 +315,6 @@
                     summaryCard.classList.add('bg-blue-50', 'border', 'border-blue-200');
                 }
                 
-                // Предварительно заполняем BMI, но без анимации
                 renderBmiWidget(data.bmi.value, data.gender, false);
 
                 document.getElementById('archetype-name').textContent = data.wellnessArchetype.name;
@@ -338,12 +331,14 @@
 
                 initTestimonialSlider(data.testimonials);
                 
-                document.getElementById('cta-link').href = `payment.html?session_id=${sessionId || ''}`;
+                document.getElementById('cta-link').href = `payment.html?session_id=${new URLSearchParams(window.location.search).get('session_id') || ''}`;
             }
             
             function animateValue(id, start, end, duration) {
                 const obj = document.getElementById(id);
-                if (!obj) return;
+                if (!obj || obj.dataset.animated) return;
+                obj.dataset.animated = 'true';
+
                 let startTimestamp = null;
                 const step = (timestamp) => {
                     if (!startTimestamp) startTimestamp = timestamp;
@@ -362,7 +357,7 @@
                     { max: Infinity, img: '30-above', title: 'Obesity', desc: 'Increased health risk.', color: 'text-red-600' }
                 ];
                 const result = categories.find(c => bmiValue <= c.max);
-                const prefix = gender === 'female' ? 'f' : 'm';
+                const prefix = gender && gender.toLowerCase() === 'male' ? 'm' : 'f';
                 
                 document.getElementById('bmi-image').src = `${prefix}-${result.img}.svg`;
                 document.getElementById('bmi-category').textContent = result.title;
@@ -372,15 +367,13 @@
                 const minBmi = 15, maxBmi = 40;
                 const normalizedBmi = Math.max(0, Math.min(1, (bmiValue - minBmi) / (maxBmi - minBmi)));
                 
-                // ИЗМЕНЕНИЕ: Анимация запускается только по флагу
+                const thumb = document.getElementById('bmi-thumb');
                 if (animate) {
-                    // Небольшая задержка, чтобы CSS-переход успел сработать
                     setTimeout(() => {
-                        document.getElementById('bmi-thumb').style.bottom = `${normalizedBmi * 100}%`;
+                        thumb.style.bottom = `${normalizedBmi * 100}%`;
                     }, 100);
                 } else {
-                    const thumb = document.getElementById('bmi-thumb');
-                    thumb.style.transition = 'none'; // Отключаем анимацию для первоначальной установки
+                    thumb.style.transition = 'none';
                     thumb.style.bottom = `${normalizedBmi * 100}%`;
                 }
             }
@@ -408,7 +401,7 @@
                         },
                         plugins: { legend: { display: false }, tooltip: { enabled: false } },
                         scales: {
-                            y: { beginAtZero: false, suggestedMin: potentialAge - 5, grid: { drawOnChartArea: false, drawBorder: false, }, ticks: { font: { weight: 'bold' } } },
+                            y: { beginAtZero: false, suggestedMin: potentialAge > 5 ? potentialAge - 5 : 0, grid: { drawOnChartArea: false, drawBorder: false, }, ticks: { font: { weight: 'bold' } } },
                             x: { grid: { display: false } }
                         }
                     }
@@ -440,7 +433,7 @@
                 
                 let currentSlide = 0;
                 let slideInterval;
-                let isDragging = false, startPos = 0, currentTranslate = 0, prevTranslate = 0, animationID;
+                let isDragging = false, startPos = 0, currentTranslate = 0, prevTranslate = 0;
 
                 const dots = [];
 
@@ -474,7 +467,15 @@
                     dotsContainer.appendChild(dot);
                     dots.push(dot);
                 });
-
+                
+                let animationID;
+                function animation() {
+                    wrapper.style.transform = `translateX(${currentTranslate}px)`;
+                    if(isDragging) requestAnimationFrame(animation);
+                }
+                function getPositionX(event) {
+                    return event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+                }
                 function touchStart(event) {
                     isDragging = true;
                     startPos = getPositionX(event);
@@ -482,14 +483,12 @@
                     wrapper.style.transition = 'none';
                     clearInterval(slideInterval);
                 }
-
                 function touchMove(event) {
                     if (isDragging) {
                         const currentPosition = getPositionX(event);
                         currentTranslate = prevTranslate + currentPosition - startPos;
                     }
                 }
-
                 function touchEnd() {
                     isDragging = false;
                     cancelAnimationFrame(animationID);
@@ -502,33 +501,22 @@
                     startAutoSlide();
                 }
 
-                function getPositionX(event) {
-                    return event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
-                }
-
-                function animation() {
-                    wrapper.style.transform = `translateX(${currentTranslate}px)`;
-                    if(isDragging) requestAnimationFrame(animation);
-                }
-                
                 container.addEventListener('touchstart', touchStart, {passive: true});
                 container.addEventListener('touchend', touchEnd);
                 container.addEventListener('touchmove', touchMove, {passive: true});
-                
                 container.addEventListener('mousedown', touchStart);
                 container.addEventListener('mouseup', touchEnd);
                 container.addEventListener('mouseleave', touchEnd);
                 container.addEventListener('mousemove', touchMove);
 
                 window.addEventListener('resize', () => goToSlide(currentSlide, false));
-
                 goToSlide(0, false);
                 startAutoSlide();
             }
             
             // --- INITIALIZATION ---
             fetchData().then(data => {
-                populateUI(data); // Заполняем все данные, кроме анимируемых
+                populateUI(data);
                 
                 const loadingOverlay = document.getElementById('loading-overlay');
                 const profileContent = document.getElementById('profile-content');
@@ -538,7 +526,6 @@
                     profileContent.style.opacity = 1;
                 }, 500);
 
-                // ИЗМЕНЕНИЕ: Настраиваем наблюдатель для запуска анимаций
                 let chartRendered = false;
                 let bmiAnimated = false;
 
@@ -547,22 +534,21 @@
                         if (entry.isIntersecting) {
                             entry.target.classList.add('visible');
 
-                            // Анимация виджета BMI
                             if (entry.target.id === 'bmi-widget-container' && !bmiAnimated) {
-                                renderBmiWidget(data.bmi.value, data.gender, true); // Запускаем с анимацией
+                                renderBmiWidget(data.bmi.value, data.gender, true);
                                 bmiAnimated = true;
                             }
 
-                            // Анимация графика
                             if (entry.target.id === 'chart-section' && !chartRendered) {
-                                renderChart(data.bioAgeResult.biologicalAge);
+                                renderChart(data.bioAgeResult.biologicalAge || data.chronoAge);
                                 chartRendered = true;
                             }
-                            // Анимация счетчиков
                             if(entry.target.classList.contains('highlight-stat')) {
                                 const valueEl = entry.target.querySelector('.value');
-                                if(valueEl.id === 'chrono-age') animateValue('chrono-age', 0, data.chronoAge, 1500);
-                                if(valueEl.id === 'bio-age') animateValue('bio-age', 0, data.bioAgeResult.biologicalAge, 1500);
+                                if (valueEl && !valueEl.dataset.animated) {
+                                    if(valueEl.id === 'chrono-age') animateValue('chrono-age', 0, data.chronoAge, 1500);
+                                    if(valueEl.id === 'bio-age') animateValue('bio-age', 0, data.bioAgeResult.biologicalAge, 1500);
+                                }
                             }
                         }
                     });
@@ -571,11 +557,15 @@
                 document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
                 
             }).catch(error => {
-                document.getElementById('loading-overlay').innerHTML = `<p class="text-lg font-semibold text-red-600">Failed to load profile. Please try again.</p>`;
+                console.error("Initialization failed:", error);
+                const loadingText = document.getElementById('loading-text');
+                loadingText.textContent = `Error: ${error.message}`;
+                loadingText.parentElement.querySelector('.animate-spin').style.display = 'none';
+                loadingText.classList.remove('text-gray-700');
+                loadingText.classList.add('text-red-600');
             });
         });
     </script>
 
 </body>
 </html>
-
