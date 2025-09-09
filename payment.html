@@ -106,10 +106,9 @@
         .timer-box {
             background-color: var(--brand-dark-text);
             color: white;
-            padding: 4px 10px;
+            padding: 8px 12px;
             border-radius: 8px;
             font-weight: 700;
-            font-size: 1rem;
             letter-spacing: 1px;
         }
         
@@ -216,16 +215,15 @@
     </div>
     
     <header class="sticky top-0 z-40 bg-white/60 backdrop-blur-xl border-b border-gray-200/50">
-        <div class="max-w-5xl mx-auto p-3 flex justify-between items-center">
-            <a href="index.html"><img src="logo.png" alt="Logo" class="h-10 w-auto"></a>
-            <div class="flex items-center gap-2 sm:gap-4">
-                 <div class="flex items-center gap-2 text-xs sm:text-sm font-semibold text-gray-700">
-                    <span class="hidden sm:inline">Your offer expires in:</span>
-                    <div class="timer-box text-sm sm:text-base">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html"><img src="logo.png" alt="Logo" class="h-10 sm:h-12 w-auto"></a>
+            <div class="flex items-center gap-4">
+                 <div class="text-center">
+                    <div class="timer-box text-lg sm:text-xl font-mono">
                         <span id="minutes">10</span>:<span id="seconds">00</span>
                     </div>
                 </div>
-                <button id="scroll-to-plans-btn" class="cta-button pulsating font-bold py-2 px-4 text-xs sm:text-sm rounded-full">
+                <button id="scroll-to-plans-btn" class="cta-button pulsating font-bold py-3 px-5 text-sm sm:text-base rounded-full">
                     Unlock My Plan
                 </button>
             </div>
@@ -250,7 +248,7 @@
                 </div>
             </section>
             
-            <section id="sales-section" class="flex flex-col justify-center min-h-[calc(100vh-100px)] md:min-h-0">
+            <section id="sales-section" class="flex flex-col justify-center min-h-[calc(100vh-88px)] md:min-h-0">
                 <h2 class="text-2xl font-bold text-center mb-4 sm:mb-6" style="color: var(--brand-dark-text);">Choose Your Plan</h2>
                 <div id="plans-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                     <!-- Plan 1: Basic -->
