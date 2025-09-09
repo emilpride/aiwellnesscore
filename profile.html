@@ -174,6 +174,24 @@
         .pulsating {
             animation: pulsate 2.5s infinite ease-in-out;
         }
+
+        /* Стили для анализа кожи */
+        .skin-metric-label {
+            color: #57534e; /* stone-600 */
+            font-weight: 500;
+        }
+        .progress-bar-bg {
+            background-color: #f5f5f4; /* stone-100 */
+            border-radius: 9999px;
+            height: 8px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .progress-bar-fg {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -191,35 +209,42 @@
         </header>
 
         <main class="max-w-5xl mx-auto space-y-8 sm:space-y-12">
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <section id="photo-and-skin-section" class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div id="user-photo-container" class="md:col-span-1 animate-on-scroll">
                     <div class="max-w-[10rem] mx-auto md:max-w-full">
                         <img id="user-photo" src="https://placehold.co/400x533/f5f2ef/3c3b31?text=Your+Photo" alt="User Photo" class="w-full h-auto object-cover rounded-2xl shadow-lg">
                     </div>
                 </div>
-                <div id="user-stats-container" class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div class="highlight-stat animate-on-scroll delay-1">
-                        <p id="chrono-age" class="value">0</p>
-                        <p class="label">Chronological Age</p>
+                <div id="skin-analysis-container" class="md:col-span-2 content-card p-6 animate-on-scroll delay-1">
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--brand-dark-text);">Skin Analysis</h3>
+                    <ul id="skin-analysis-list" class="space-y-3">
+                    </ul>
+                </div>
+            </section>
+
+            <section id="user-stats-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="highlight-stat animate-on-scroll">
+                    <p id="chrono-age" class="value">0</p>
+                    <p class="label">Chronological Age</p>
+                </div>
+                <div class="highlight-stat animate-on-scroll delay-1">
+                    <p id="bio-age" class="value bio-age">0</p>
+                    <p class="label">Biological Age</p>
+                </div>
+                <div id="bmi-widget-container" class="md:col-span-2 content-card p-6 flex flex-col items-center animate-on-scroll delay-2">
+                    <div class="text-center">
+                        <p id="bmi-value" class="text-3xl font-extrabold" style="color: var(--brand-dark-text);"></p>
+                        <p id="bmi-category" class="font-bold text-lg text-green-600 -mt-1"></p>
                     </div>
-                    <div class="highlight-stat animate-on-scroll delay-2">
-                        <p id="bio-age" class="value bio-age">0</p>
-                        <p class="label">Biological Age</p>
-                    </div>
-                    <div id="bmi-widget-container" class="sm:col-span-2 content-card p-6 flex flex-col items-center animate-on-scroll delay-2">
-                        <div class="text-center">
-                            <p id="bmi-value" class="text-3xl font-extrabold" style="color: var(--brand-dark-text);"></p>
-                            <p id="bmi-category" class="font-bold text-lg text-green-600 -mt-1"></p>
+                    <p id="bmi-description" class="text-sm text-gray-600 mt-2 text-center max-w-xs"></p>
+                    <div class="w-full flex items-center justify-center gap-6 mt-2 flex-grow h-48 sm:h-56">
+                        <div id="bmi-scale-container">
+                            <div id="bmi-scale-gradient-vertical"></div>
+                            <div id="bmi-thumb"></div>
                         </div>
-                        <p id="bmi-description" class="text-sm text-gray-600 mt-1 text-center max-w-xs"></p>
-                        <div class="w-full flex items-center justify-center gap-6 mt-2 flex-grow h-48 sm:h-56">
-                             <div id="bmi-scale-container">
-                                 <div id="bmi-scale-gradient-vertical"></div>
-                                 <div id="bmi-thumb"></div>
-                             </div>
-                             <div id="bmi-image-section">
-                                 <img id="bmi-image" src="" alt="BMI illustration">
-                             </div>
+                        <div id="bmi-image-section">
+                            <img id="bmi-image" src="" alt="BMI illustration">
                         </div>
                     </div>
                 </div>
@@ -392,27 +417,31 @@
             }
             
             function populateUI(data) {
+                // --- Управление видимостью блоков ---
+                const photoAndSkinSection = document.getElementById('photo-and-skin-section');
                 const userPhotoContainer = document.getElementById('user-photo-container');
-                const userStatsContainer = document.getElementById('user-stats-container');
+                const skinAnalysisContainer = document.getElementById('skin-analysis-container');
 
-                // Проверяем, есть ли URL фотографии
                 if (data.userPhotoUrl) {
-                    // Если фото есть, просто устанавливаем его
                     document.getElementById('user-photo').src = data.userPhotoUrl;
+
+                    // Если есть данные анализа кожи, показываем их
+                    if (data.skinStatus) {
+                        populateSkinAnalysis(data.skinStatus);
+                    } else {
+                        // Если фото есть, а данных анализа нет (на всякий случай)
+                        if(skinAnalysisContainer) skinAnalysisContainer.style.display = 'none';
+                        if(userPhotoContainer) {
+                            userPhotoContainer.classList.remove('md:col-span-1');
+                            userPhotoContainer.classList.add('md:col-span-3'); // Фото занимает всю ширину
+                        }
+                    }
                 } else {
-                    // Если фото нет (был нажат "skip")
-                    if (userPhotoContainer) {
-                        // 1. Полностью скрываем контейнер с фото
-                        userPhotoContainer.style.display = 'none';
-                    }
-                    if (userStatsContainer) {
-                        // 2. Расширяем контейнер со статистикой на всю ширину сетки
-                        userStatsContainer.classList.remove('md:col-span-2');
-                        userStatsContainer.classList.add('md:col-span-3');
-                    }
+                    // Если фото пропущено, скрываем всю верхнюю секцию
+                    if (photoAndSkinSection) photoAndSkinSection.style.display = 'none';
                 }
 
-                // Эти значения будут анимированы наблюдателем (Observer)
+                // --- Заполнение остальной страницы (без изменений) ---
                 document.getElementById('chrono-age').textContent = '0';
                 document.getElementById('bio-age').textContent = '0';
 
@@ -425,38 +454,65 @@
                 } else if (ageDifference < 0) {
                     const absDiff = Math.abs(ageDifference);
                     summaryText.innerHTML = `Excellent! You appear to be <span class="text-green-600">${absDiff} ${absDiff === 1 ? 'year' : 'years'} younger</span> than your age.`;
-                     summaryCard.classList.add('bg-green-50', 'border', 'border-green-200');
+                    summaryCard.classList.add('bg-green-50', 'border', 'border-green-200');
                 } else {
                     summaryText.textContent = 'Your biological age matches your chronological age.';
                     summaryCard.classList.add('bg-blue-50', 'border', 'border-blue-200');
                 }
-                
-                renderBmiWidget(data.bmi.value, data.gender, false);
-                document.getElementById('bmi-value').textContent = data.bmi.value > 0 ? data.bmi.value.toFixed(1) : 'N/A';
 
+                document.getElementById('bmi-value').textContent = data.bmi.value > 0 ? data.bmi.value.toFixed(1) : 'N/A';
+                renderBmiWidget(data.bmi.value, data.gender, false);
                 document.getElementById('archetype-name').textContent = data.wellnessArchetype.name;
                 document.getElementById('archetype-desc').textContent = data.wellnessArchetype.description;
                 document.getElementById('focus-area-name').textContent = data.focusArea.name;
                 document.getElementById('focus-area-desc').textContent = data.focusArea.description;
-
-                const populateFactors = (elementId, factors) => {
-                    const list = document.getElementById(elementId);
-                    if (!factors || factors.length === 0) {
-                        if (elementId === 'negative-factors') {
-                            list.innerHTML = `<li class="text-green-700 bg-green-50 p-3 rounded-lg font-semibold">Great! No significant factors were found that negatively affect you.</li>`;
-                        } else {
-                            list.innerHTML = `<li class="text-amber-700 bg-amber-50 p-3 rounded-lg">Unfortunately, no significant habits that positively affect your health were identified.</li>`;
-                        }
-                    } else {
-                        list.innerHTML = factors.map(f => `<li><span class="text-xl mr-3">${f.icon}</span><div><p class="font-semibold">${f.text}</p><p class="text-sm text-gray-600">${f.detail}</p></div></li>`).join('');
-                    }
-                };
                 populateFactors('positive-factors', data.factors.positive);
                 populateFactors('negative-factors', data.factors.negative);
-
                 initTestimonialSlider();
-                
                 document.getElementById('cta-link').href = `payment.html?session_id=${new URLSearchParams(window.location.search).get('session_id') || ''}`;
+            }
+
+            // ✅ НОВАЯ ФУНКЦИЯ
+            function populateSkinAnalysis(skinStatus) {
+                const list = document.getElementById('skin-analysis-list');
+                if (!list) return;
+
+                const metricMap = {
+                    dark_circle: 'Dark Circles',
+                    eye_pouch: 'Eye Bags',
+                    forehead_wrinkle: 'Forehead Wrinkles',
+                    crows_feet: 'Crow\'s Feet',
+                    nasolabial_fold: 'Smile Lines',
+                    acne: 'Acne',
+                    skin_spot: 'Skin Spots',
+                    blackhead: 'Blackheads'
+                };
+
+                let htmlContent = '';
+                for (const key in metricMap) {
+                    if (skinStatus.hasOwnProperty(key)) {
+                        const value = skinStatus[key];
+                        const label = metricMap[key];
+
+                        // Определяем цвет в зависимости от значения (0-30 - хорошо, 31-60 - средне, 61+ - плохо)
+                        let barColorClass = 'bg-green-500';
+                        if (value > 30 && value <= 60) barColorClass = 'bg-yellow-500';
+                        if (value > 60) barColorClass = 'bg-red-500';
+
+                        htmlContent += `
+                            <li>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="skin-metric-label">${label}</span>
+                                    <span class="text-sm font-bold" style="color: var(--brand-dark-text);">${Math.round(value)}%</span>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fg ${barColorClass}" style="width: ${value}%;"></div>
+                                </div>
+                            </li>
+                        `;
+                    }
+                }
+                list.innerHTML = htmlContent;
             }
             
             function animateValue(id, start, end, duration) {
