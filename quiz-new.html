@@ -21,11 +21,23 @@
             --brand-accent: #debea9;
             --brand-dark-text: #3c3b31; 
         }
+        
+        /* --- NEW ANIMATED BACKGROUND --- */
         html, body { 
             overscroll-behavior: none; 
             font-family: 'Inter', sans-serif; 
-            background-color: #f3f4f6;
+            background: linear-gradient(120deg, #f5f5f5, #e9e3dc, #debea9, #e9e3dc, #f5f5f5);
+            background-size: 400% 400%;
+            animation: moveBackground 40s ease infinite;
         }
+
+        @keyframes moveBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        /* --- END NEW BACKGROUND --- */
+
         #quiz-container { 
             display: flex; flex-direction: column; position: relative; 
             width: 100vw; height: 100vh; height: calc(var(--vh, 1vh) * 100); 
@@ -36,7 +48,8 @@
         .quiz-step {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 1rem; background-color: #f3f4f6;
+            padding: 1rem; 
+            background-color: transparent; /* Changed to show animated background */
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             opacity: 1; overflow-y: auto;
         }
@@ -76,7 +89,17 @@
         #onboarding-swiper { cursor: grab; }
         #onboarding-swiper:active { cursor: grabbing; }
         .swiper-wrapper { display: flex; height: 100%; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .swiper-slide { flex-shrink: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 2rem;}
+        
+        /* --- STYLE FOR ONBOARDING SLIDES --- */
+        .swiper-slide { 
+            flex-shrink: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 2rem;
+            background-color: #f3f4f6; /* Keep solid background for readability */
+        }
+        .swiper-wrapper .swiper-slide:first-child {
+            background-color: transparent; /* Allow video to show on first slide */
+        }
+        /* --- END ONBOARDING SLIDES STYLE --- */
+        
         .dot { transition: background-color 0.3s, transform 0.3s; }
         .dot.active { background-color: var(--brand-accent); transform: scale(1.25); }
         
@@ -113,13 +136,12 @@
             background-color: white; padding: 1.5rem 2rem; border-radius: 1.5rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 1.5rem;
         }
-        /* New styles for gradient slider in stress widget */
         .stress-widget #slider-input {
             -webkit-appearance: none;
             appearance: none;
             width: 100%;
-            height: 16px; /* Increased height for better visibility */
-            background: linear-gradient(to right, #4CAF50, #FFEB3B, #FF5722); /* Green to Yellow to Red */
+            height: 16px;
+            background: linear-gradient(to right, #4CAF50, #FFEB3B, #FF5722);
             border-radius: 8px;
             outline: none;
             transition: opacity .2s;
@@ -127,12 +149,12 @@
         .stress-widget #slider-input::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 28px; /* Slightly larger thumb */
+            width: 28px;
             height: 28px;
             background: white;
             cursor: pointer;
             border-radius: 50%;
-            border: 4px solid var(--brand-accent); /* Accent border */
+            border: 4px solid var(--brand-accent);
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
         .stress-widget #slider-input::-moz-range-thumb {
@@ -163,13 +185,12 @@
         #mood-emojis { display: flex; justify-content: space-between; font-size: 2.5rem; margin-bottom: 1rem; padding: 0 0.5rem; }
         #mood-emojis span { transition: transform 0.2s, opacity 0.2s; }
         
-        /* BMI Visualization Styles - Exact match to screenshot */
         #bmi-display-wrapper {
             background-color: white;
             border-radius: 1.5rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             padding: 2rem 1.5rem;
-            max-width: 450px; /* Adjust as needed */
+            max-width: 450px;
             width: 100%;
             position: relative;
         }
@@ -182,8 +203,8 @@
             margin-bottom: 1.5rem;
         }
         #bmi-category {
-            background-color: #debea9; /* Brand Accent */
-            color: #3c3b31; /* Brand Dark Text */
+            background-color: #debea9;
+            color: #3c3b31;
             font-weight: 700;
             padding: 0.25rem 0.75rem;
             border-radius: 0.5rem;
@@ -193,19 +214,19 @@
         #bmi-details {
             display: flex;
             align-items: center;
-            justify-content: center; /* Center horizontally for mobile */
-            gap: 1.5rem; /* Space between scale and image */
+            justify-content: center;
+            gap: 1.5rem;
             margin-top: 1rem;
         }
-        @media (min-width: 768px) { /* On larger screens, align items to start */
+        @media (min-width: 768px) {
             #bmi-details {
                 justify-content: flex-start;
             }
         }
         #bmi-scale-container {
             position: relative;
-            width: 32px; /* Width of the scale */
-            height: 250px; /* Height of the scale, matched to image */
+            width: 32px;
+            height: 250px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -213,32 +234,32 @@
         #bmi-scale-gradient-vertical {
             width: 100%;
             height: 100%;
-            background: linear-gradient(to top, #43B7FF, #33C75A, #FBF447, #FFA64D, #FF7D7E); /* Bottom to Top */
-            border-radius: 100px; /* Fully rounded caps */
+            background: linear-gradient(to top, #43B7FF, #33C75A, #FBF447, #FFA64D, #FF7D7E);
+            border-radius: 100px;
             position: absolute;
         }
         #bmi-thumb {
             position: absolute;
-            width: 40px; /* Larger thumb */
+            width: 40px;
             height: 40px;
             background: linear-gradient(180deg, #F2F2F2 0%, #E8E8E8 100%);
             border: 2px solid #FFFFFF;
             box-shadow: 0px 0px 6.9px rgba(0, 0, 0, 0.25);
             border-radius: 50%;
-            left: 50%; /* Center horizontally */
-            transform: translateX(-50%); /* Adjust for thumb width */
-            bottom: 0%; /* Initial position, will be animated */
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 0%;
             transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1; /* Above the gradient */
+            z-index: 1;
         }
         #bmi-value-display {
             position: absolute;
-            font-size: 3rem; /* Large font size */
+            font-size: 3rem;
             font-weight: 800;
-            color: #FBF447; /* Yellow color from the screenshot */
-            left: calc(100% + 1rem); /* Position next to the scale */
-            bottom: var(--thumb-position, 0%); /* Matches thumb position */
-            transform: translateY(50%); /* Vertically center with thumb */
+            color: #FBF447;
+            left: calc(100% + 1rem);
+            bottom: var(--thumb-position, 0%);
+            transform: translateY(50%);
             transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
             text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
             z-index: 1;
@@ -246,19 +267,18 @@
 
         #bmi-image-section {
             display: flex;
-            align-items: flex-end; /* Align image to the bottom of its container */
-            height: 250px; /* Same height as the scale */
+            align-items: flex-end;
+            height: 250px;
             flex-grow: 1;
             justify-content: center;
         }
         #bmi-image {
-            height: 100%; /* Make image fill container height */
+            height: 100%;
             width: auto;
             object-fit: contain;
             user-select: none;
             pointer-events: none;
         }
-        /* End BMI visualization styles */
         
         .sleep-animation-container {
             background-color: #1c2a4e; border-radius: 50%;
@@ -419,7 +439,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (this.animations.has(id) || !document.getElementById(id)) return;
             const container = document.getElementById(id);
             if(!container) return;
-            // Clear previous animation if any
             container.innerHTML = '';
             try {
                 const anim = lottie.loadAnimation({ container, renderer: 'svg', loop: true, autoplay: true, path });
@@ -531,22 +550,22 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (question.key === 'stress') {
              contentHTML = `<div class="stress-widget">
-                <h2 class="text-2xl font-bold text-gray-900 text-center">${question.text}</h2>
+                 <h2 class="text-2xl font-bold text-gray-900 text-center">${question.text}</h2>
                  <p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>
-                <div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] my-4 text-center"></div>
-                <input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
-                <div class="flex justify-between text-sm text-gray-500 mt-2 px-1">
-                    <span>Relaxed</span>
-                    <span>Stressed</span>
-                </div>
-            </div>`;
+                 <div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] my-4 text-center"></div>
+                 <input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
+                 <div class="flex justify-between text-sm text-gray-500 mt-2 px-1">
+                     <span>Relaxed</span>
+                     <span>Stressed</span>
+                 </div>
+             </div>`;
         } else if (question.type === 'camera_step' || question.type === 'email_step') {
             contentHTML = `<img src="face.jpeg" alt="Face scan illustration" class="w-40 h-40 mx-auto rounded-full object-cover mb-6 shadow-lg">
-                           <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
-                           <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
+                                 <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
+                                 <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
             if (question.type === 'email_step') {
                  contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
-                                <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
+                                    <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
             }
         }
         
@@ -560,7 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }).join('');
             footerWrapper.innerHTML = `<div class="flex justify-center flex-wrap gap-3 max-w-md mx-auto">${optionsHTML}</div>`;
             footerWrapper.querySelectorAll('.answer-option').forEach(btn => {
-                 btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
+                btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
             });
         } else if (question.type === 'slider' && question.key !== 'stress') {
             const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-sm mt-6"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
@@ -586,10 +605,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (question.type === 'email_step') {
              footerWrapper.innerHTML = `<div class="flex gap-2 max-w-sm mx-auto mt-6"><input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-[--brand-accent] focus:border-[--brand-accent]"><button id="email-submit-btn" class="bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-5 rounded-lg hover:opacity-90 transition">Submit</button></div>`;
              footerWrapper.querySelector('#email-submit-btn').addEventListener('click', () => {
-                const email = document.getElementById('email-input').value;
-                if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) handleAnswer('email', email);
-                else alert('Please enter a valid email address.');
-            });
+                 const email = document.getElementById('email-input').value;
+                 if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) handleAnswer('email', email);
+                 else alert('Please enter a valid email address.');
+             });
         } else if (question.type === 'emoji_slider') {
             const emojis = question.options.map(opt => `<span>${opt.text}</span>`).join('');
             const sliderContent = `<div id="mood-slider-container"><div id="mood-emojis">${emojis}</div><input type="range" min="0" max="${question.options.length - 1}" value="1" step="1" id="mood-slider"></div>`;
@@ -787,8 +806,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 App.faceMesh.onResults(onFaceMeshResults);
                 await App.faceMesh.initialize();
             } catch (error) {
-                 alert('Failed to initialize AI model for camera. Please try again.');
-                 closeCamera(); return;
+                alert('Failed to initialize AI model for camera. Please try again.');
+                closeCamera(); return;
             }
         }
 
@@ -838,7 +857,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
             const landmarks = results.multiFaceLandmarks[0];
             if (window.drawConnectors && window.FACEMESH_TESSELATION) {
-                 drawConnectors(ctx, landmarks, window.FACEMESH_TESSELATION, {color: 'rgba(222, 190, 169, 0.3)', lineWidth: 1});
+                drawConnectors(ctx, landmarks, window.FACEMESH_TESSELATION, {color: 'rgba(222, 190, 169, 0.3)', lineWidth: 1});
             }
 
             if (isFaceCentered(landmarks)) {
