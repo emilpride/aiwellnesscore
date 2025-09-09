@@ -880,22 +880,44 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('bmi-continue-btn').onclick = next;
     }
 
-    function startAnalysis() {
+    async function startAnalysis() { // Добавляем async
         goToStep('loading');
         AnimationManager.add('loading-animation', 'loader.json');
         const analysisStepsContainer = document.getElementById('analysis-steps');
         analysisStepsContainer.innerHTML = '';
         const steps = ["Analyzing lifestyle data...", "Calculating metabolic rate...", "Processing facial biomarkers...", "Compiling wellness report..."];
-        steps.forEach((text, i) => {
-            setTimeout(() => {
-                const p = document.createElement('p');
-                p.textContent = `✓ ${text}`;
-                analysisStepsContainer.appendChild(p);
-            }, i * 900);
-        });
-        setTimeout(() => {
+        
+        // Поочередно отображаем шаги анализа
+        for (let i = 0; i < steps.length; i++) {
+            await new Promise(resolve => setTimeout(resolve, 900));
+            const p = document.createElement('p');
+            p.textContent = `✓ ${steps[i]}`;
+            analysisStepsContainer.appendChild(p);
+        }
+
+        try {
+            // --- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ ---
+            // Вызываем серверную функцию для расчета и сохранения данных
+            const response = await fetch('/.netlify/functions/generateProfile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId: App.sessionId })
+            });
+
+            if (!response.ok) {
+                // Если сервер вернул ошибку, показываем ее
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to generate profile.');
+            }
+
+            // После успешного ответа от сервера, перенаправляем на страницу профиля
             window.location.href = `profile.html?session_id=${App.sessionId || ''}`;
-        }, (steps.length * 900) + 500);
+
+        } catch (error) {
+            console.error('Failed to generate profile:', error);
+            // Отображаем ошибку пользователю, если что-то пошло не так
+            analysisStepsContainer.innerHTML = `<p class="text-red-500 font-bold">Error: Could not generate your profile. ${error.message}</p>`;
+        }
     }
     
     async function openCamera() {
@@ -1142,3 +1164,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
