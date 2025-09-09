@@ -288,7 +288,7 @@
         <div class="flex items-center gap-4 max-w-2xl mx-auto">
             <a href="index.html" class="flex-shrink-0"><img src="logo.png" alt="Logo" class="h-8 w-auto"></a>
             <button id="back-btn" class="text-gray-600 hover:text-gray-900 transition hidden p-2 -ml-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg></button>
-            <div id="progress-container" class="flex-grow h-2 bg-gray-200/50 rounded-full overflow-hidden"><div id="progress-bar-inner" class="h-full bg-blue-500 transition-all duration-500 ease-out"></div></div>
+            <div id="progress-container" class="flex-grow h-2 bg-gray-200/50 rounded-full overflow-hidden"><div id="progress-bar-inner" class="h-full transition-all duration-500 ease-out" style="background-image: linear-gradient(to right, var(--brand-accent), var(--brand-dark-text));"></div></div>
             <button id="burger-menu-btn" class="text-gray-600 hover:text-gray-900 transition p-2 -mr-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
         </div>
     </header>
@@ -388,25 +388,26 @@ document.addEventListener('DOMContentLoaded', () => {
         cameraAnimFrame: null,
         captureTimeout: null,
         quizQuestions: [
-            { key: 'userGoal', type: 'options', text: "What’s your main goal?", options: [{text: 'Find out my Biological Age', value:'bio_age'}, {text:'Get a Skin Health Analysis', value: 'skin'}, {text:'Receive a 7-Day Improvement Plan', value:'plan'}, {text:'All of the above!', value: 'all'}] },
-            { key: 'age', type: 'slider', text: "How old are you?", min: 18, max: 90, defaultValue: 30, unit: 'years' },
-            { key: 'gender', type: 'gender_selection', text: "What’s your biological sex?", options: [{value: 'male', img: 'male.png'}, {value: 'female', img: 'female.png'}] },
-            { key: 'height', type: 'slider', text: "What’s your height?", min: 140, max: 220, defaultValue: 175, unit: 'cm' },
-            { key: 'weight', type: 'slider', text: "What’s your weight?", min: 40, max: 150, defaultValue: 77, unit: 'kg' },
+            { key: 'userGoal', type: 'options', text: "What’s your main goal?", subtext: "This helps us tailor the final report to your interests.", options: [{text: 'Find out my Biological Age', value:'bio_age'}, {text:'Get a Skin Health Analysis', value: 'skin'}, {text:'Receive a 7-Day Improvement Plan', value:'plan'}, {text:'All of the above!', value: 'all'}] },
+            { key: 'age', type: 'slider', text: "How old are you?", subtext: "Your age is a key factor in calculating your biological age baseline.", min: 18, max: 90, defaultValue: 30, unit: 'years' },
+            { key: 'gender', type: 'gender_selection', text: "What’s your biological sex?", subtext: "Biological sex influences body composition and metabolic rate.", options: [{value: 'male', img: 'male.png'}, {value: 'female', img: 'female.png'}] },
+            { key: 'height', type: 'slider', text: "What’s your height?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 140, max: 220, defaultValue: 175, unit: 'cm' },
+            { key: 'weight', type: 'slider', text: "What’s your weight?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 40, max: 150, defaultValue: 77, unit: 'kg' },
             { key: 'bmi_display', type: 'animation' },
-            { key: 'sleep', type: 'options', text: "On average, how much do you sleep?", options: [{text:"Less than 5 hours"}, {text:"5–6 hours"}, {text:"7–8 hours"}, {text:"More than 8 hours"}] },
+            { key: 'sleep', type: 'options', text: "On average, how much do you sleep?", subtext: "Quality sleep is crucial for cellular repair and mental clarity.", options: [{text:"Less than 5 hours"}, {text:"5–6 hours"}, {text:"7–8 hours"}, {text:"More than 8 hours"}] },
             { key: 'sleep_visual', type: 'animation' },
-            { key: 'activity', type: 'options', text: "How often do you exercise?", options: [{text:"Rarely / Never"}, {text:"1–2 times a week"}, {text:"3–4 times a week"}, {text:"5+ times a week"}] },
+            { key: 'activity', type: 'options', text: "How often do you exercise?", subtext: "Regular exercise impacts cardiovascular health and longevity.", options: [{text:"Rarely / Never"}, {text:"1–2 times a week"}, {text:"3–4 times a week"}, {text:"5+ times a week"}] },
             { key: 'activity_visual', type: 'animation' },
-            { key: 'nutrition', type: 'options', text: "How many servings of fruits & veggies do you eat daily?", options: ["0–1 serving", "2–3 servings", "4–5 servings", "More than 5 servings"] },
-            { key: 'processed_food', type: 'options', text: "How often do you eat processed or fast food?", options: ["Rarely", "1–2 times a week", "3–4 times a week", "Daily"] },
-            { key: 'hydration', type: 'options', text: "How much water do you drink per day?", options: ["1–3 cups", "4–6 cups", "7–9 cups", "10+ cups"] },
-            { key: 'stress', type: 'slider', text: "How stressed do you usually feel?", min: 1, max: 10, defaultValue: 5, unit: ''},
-            { key: 'mindfulness', type: 'options', text: "How often do you practice mindfulness?", options: ["Never", "Sometimes", "Weekly", "Daily"] },
-            { key: 'mood', type: 'emoji_slider', text: "How would you describe your overall mood?", options: [ { text: '😟', value: 'Often stressed or down' }, { text: '😐', value: 'Changes a lot' }, { text: '🙂', value: 'Mostly content' }, { text: '😊', value: 'Happy & energetic' } ] },
-            { key: 'alcohol', type: 'options', text: "How much alcohol do you drink weekly?", options: ["None", "1–3 drinks", "4–7 drinks", "8+ drinks"] },
-            { key: 'smoking', type: 'options', text: "Do you smoke?", options: ["Never", "Used to, but quit", "Occasionally", "Yes, daily"] },
-            { key: 'screen_time', type: 'options', text: "How much screen time do you have daily (outside of work)?", options: ["Less than 2 hours", "2–4 hours", "4–6 hours", "More than 6 hours"] },
+            { key: 'nutrition', type: 'options', text: "How many servings of fruits & veggies do you eat daily?", subtext: "A diet rich in nutrients is vital for your overall well-being.", options: ["0–1 serving", "2–3 servings", "4–5 servings", "More than 5 servings"] },
+            { key: 'processed_food', type: 'options', text: "How often do you eat processed or fast food?", subtext: "High consumption can lead to inflammation and other health issues.", options: ["Rarely", "1–2 times a week", "3–4 times a week", "Daily"] },
+            { key: 'hydration', type: 'options', text: "How much water do you drink per day?", subtext: "Proper hydration is essential for every bodily function.", options: ["1–3 cups", "4–6 cups", "7–9 cups", "10+ cups"] },
+            { key: 'hydration_visual', type: 'animation' },
+            { key: 'stress', type: 'slider', text: "How stressed do you usually feel?", subtext: "Chronic stress can significantly accelerate the aging process.", min: 1, max: 10, defaultValue: 5, unit: ''},
+            { key: 'mindfulness', type: 'options', text: "How often do you practice mindfulness?", subtext: "Mindfulness practices can reduce stress and improve focus.", options: ["Never", "Sometimes", "Weekly", "Daily"] },
+            { key: 'mood', type: 'emoji_slider', text: "How would you describe your overall mood?", subtext: "Your mental state is deeply connected to your physical health.", options: [ { text: '😟', value: 'Often stressed or down' }, { text: '😐', value: 'Changes a lot' }, { text: '🙂', value: 'Mostly content' }, { text: '😊', value: 'Happy & energetic' } ] },
+            { key: 'alcohol', type: 'options', text: "How much alcohol do you drink weekly?", subtext: "Alcohol consumption can affect sleep, hydration, and cellular health.", options: ["None", "1–3 drinks", "4–7 drinks", "8+ drinks"] },
+            { key: 'smoking', type: 'options', text: "Do you smoke?", subtext: "Smoking is a major factor in premature aging and disease.", options: ["Never", "Used to, but quit", "Occasionally", "Yes, daily"] },
+            { key: 'screen_time', type: 'options', text: "How much screen time do you have daily (outside of work)?", subtext: "Excessive screen time can impact sleep and mental well-being.", options: ["Less than 2 hours", "2–4 hours", "4–6 hours", "More than 6 hours"] },
             { key: 'selfie', type: 'camera_step', text: 'AI Photo Analysis 📸', subtext: '(Optional – helps us analyze skin health & fine lines)'},
             { key: 'email', type: 'email_step', text: "Enter your email 📩", subtext: "to get your personalized report summary. We respect your privacy." }
         ],
@@ -418,6 +419,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (this.animations.has(id) || !document.getElementById(id)) return;
             const container = document.getElementById(id);
             if(!container) return;
+            // Clear previous animation if any
+            container.innerHTML = '';
             try {
                 const anim = lottie.loadAnimation({ container, renderer: 'svg', loop: true, autoplay: true, path });
                 this.animations.set(id, anim);
@@ -480,10 +483,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function previous() {
         if (App.currentQuestionIndex < 0) return;
-        // Adjust currentQuestionIndex to skip animation steps when going back
+        
         if (App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') {
-             App.currentQuestionIndex--; // Skip the current animation step
-             // If previous step was also an animation, skip it too
+             App.currentQuestionIndex--;
              if (App.currentQuestionIndex >= 0 && App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') {
                  App.currentQuestionIndex--;
              }
@@ -502,14 +504,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function updateProgressBar() {
-        const totalSteps = App.quizQuestions.length;
-        // Count only non-animation steps for progress bar
-        const nonAnimationQuestions = App.quizQuestions.filter(q => q.type !== 'animation');
-        const currentNonAnimationIndex = nonAnimationQuestions.findIndex(q => q.key === App.quizQuestions[App.currentQuestionIndex]?.key);
+        const totalNonAnimationCount = App.quizQuestions.filter(q => q.type !== 'animation').length;
+        if (totalNonAnimationCount === 0) return;
+
+        const passedQuestions = App.quizQuestions.slice(0, App.currentQuestionIndex + 1);
+        const passedNonAnimationCount = passedQuestions.filter(q => q.type !== 'animation').length;
         
-        const progress = (currentNonAnimationIndex >= 0) ? ((currentNonAnimationIndex + 1) / nonAnimationQuestions.length) * 100 : 0;
+        const progress = (passedNonAnimationCount / totalNonAnimationCount) * 100;
+
         document.getElementById('progress-bar-inner').style.width = `${Math.min(100, progress)}%`;
-        
         document.getElementById('back-btn').classList.toggle('hidden', App.currentQuestionIndex <= 0);
     }
 
@@ -521,11 +524,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const footerWrapper = document.getElementById('footer-actions');
         footerWrapper.innerHTML = '';
         
-        let contentHTML = ``;
+        let contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>`;
+        if (question.subtext && question.type !== 'camera_step' && question.type !== 'email_step') {
+            contentHTML += `<p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>`;
+        }
         
         if (question.key === 'stress') {
              contentHTML = `<div class="stress-widget">
                 <h2 class="text-2xl font-bold text-gray-900 text-center">${question.text}</h2>
+                 <p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>
                 <div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] my-4 text-center"></div>
                 <input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
                 <div class="flex justify-between text-sm text-gray-500 mt-2 px-1">
@@ -533,12 +540,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span>Stressed</span>
                 </div>
             </div>`;
-        } else if (question.type === 'camera_step') {
+        } else if (question.type === 'camera_step' || question.type === 'email_step') {
             contentHTML = `<img src="face.jpeg" alt="Face scan illustration" class="w-40 h-40 mx-auto rounded-full object-cover mb-6 shadow-lg">
                            <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
                            <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
-        } else {
-             contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>`;
+            if (question.type === 'email_step') {
+                 contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
+                                <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
+            }
         }
         
         wrapper.innerHTML = `<div class="question-content w-full question-content-enter">${contentHTML}</div>`;
@@ -554,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
                  btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
             });
         } else if (question.type === 'slider' && question.key !== 'stress') {
-            const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-inner mt-6"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
+            const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-sm mt-6"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
             wrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', sliderContent);
         }
 
@@ -644,6 +653,8 @@ document.addEventListener('DOMContentLoaded', () => {
             animationHTML = `<div class="w-full max-w-sm mx-auto"><div class="relative mx-auto my-3 w-48 h-48 sleep-animation-container flex items-center justify-center"><svg class="w-full h-full absolute inset-0" viewBox="0 0 120 120"><circle class="sleep-ring-bg" stroke-width="10" fill="transparent" cx="60" cy="60" r="52" /><circle id="sleep-ring-fg-anim" class="sleep-ring-fg" stroke-width="10" fill="transparent" cx="60" cy="60" r="52" style="stroke-dasharray: 327; stroke-dashoffset: 327;"/></svg><div class="text-5xl">🌙</div></div></div>`;
         } else if (key === 'activity_visual') {
             animationHTML = `<div class="w-full max-w-sm mx-auto bg-white p-6 rounded-2xl shadow-sm"><div class="font-semibold text-gray-600 text-center mb-4">Your Active Week</div><div class="activity-week flex justify-around gap-2" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div></div>`;
+        } else if (key === 'hydration_visual') {
+            animationHTML = `<div class="w-full max-w-sm mx-auto"><div id="water-animation" class="w-48 h-48 mx-auto"></div></div>`;
         }
         
         wrapper.innerHTML = `<div class="question-content w-full question-content-enter">${animationHTML}</div>`;
@@ -671,7 +682,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let days = 0;
             const answer = App.userAnswers.activity || "";
             if (answer.includes("5+")) {
-                days = 7; // Changed to 7 for all days if 5+ times a week
+                days = 7; 
             } else if (answer.includes("3–4")) {
                 days = 4;
             } else if (answer.includes("1–2")) {
@@ -687,6 +698,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => { dayElements[i]?.classList.add('active'); }, i * 200);
                 }
             }
+        } else if (key === 'hydration_visual') {
+            AnimationManager.add('water-animation', 'https://assets10.lottiefiles.com/packages/lf20_t2b2n2.json');
         }
     }
     
@@ -712,23 +725,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('bmi-category').textContent = result.title;
         document.getElementById('bmi-description').textContent = result.desc;
 
-        const minBmi = 15, maxBmi = 40; // Define min/max BMI for the scale visually
+        const minBmi = 15, maxBmi = 40; 
         const normalizedBmi = Math.max(0, Math.min(1, (bmi - minBmi) / (maxBmi - minBmi)));
-        const thumbBottomPosition = normalizedBmi * 100; // In percentage
+        const thumbBottomPosition = normalizedBmi * 100;
         
         const bmiThumb = document.getElementById('bmi-thumb');
         const bmiValueDisplay = document.getElementById('bmi-value-display');
         
-        // Update custom CSS property for value display position
         bmiValueDisplay.style.setProperty('--thumb-position', `${thumbBottomPosition}%`);
-        
-        // Animate thumb position
         bmiThumb.style.bottom = `${thumbBottomPosition}%`;
 
-        // Animate BMI value count-up
         let currentBmi = 0;
         const startTimestamp = performance.now();
-        const duration = 1500; // 1.5 seconds for animation
+        const duration = 1500;
 
         const animateBmiValue = (timestamp) => {
             const elapsed = timestamp - startTimestamp;
