@@ -193,7 +193,7 @@
         <main class="max-w-5xl mx-auto space-y-8 sm:space-y-12">
             <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="md:col-span-1 animate-on-scroll">
-                    <div class="max-w-xs mx-auto md:max-w-full">
+                    <div class="max-w-[10rem] mx-auto md:max-w-full">
                         <img id="user-photo" src="https://placehold.co/400x533/f5f2ef/3c3b31?text=Your+Photo" alt="User Photo" class="w-full h-auto object-cover rounded-2xl shadow-lg">
                     </div>
                 </div>
@@ -473,17 +473,31 @@
                 document.getElementById('bmi-category').className = `font-bold text-lg -mt-1 ${result.color}`;
                 document.getElementById('bmi-description').textContent = result.desc;
                 
-                const minBmi = 15, maxBmi = 40;
-                const normalizedBmi = Math.max(0, Math.min(1, (bmiValue - minBmi) / (maxBmi - minBmi)));
-                
                 const thumb = document.getElementById('bmi-thumb');
+                let targetPercentage;
+
+                // Пропорционально определяем положение на шкале
+                if (bmiValue < 18.5) { // Underweight
+                    targetPercentage = (bmiValue / 18.5) * 20; // 0-20% шкалы
+                } else if (bmiValue >= 18.5 && bmiValue < 25) { // Normal Weight
+                    targetPercentage = 20 + ((bmiValue - 18.5) / (25 - 18.5)) * 40; // 20-60% шкалы
+                } else if (bmiValue >= 25 && bmiValue < 30) { // Overweight
+                    targetPercentage = 60 + ((bmiValue - 25) / (30 - 25)) * 20; // 60-80% шкалы
+                } else { // Obesity
+                    // Распределяем значения от 30 до 40 по оставшимся 20% шкалы
+                    targetPercentage = 80 + ((bmiValue - 30) / (40 - 30)) * 20; 
+                }
+
+                // Ограничиваем процент от 0 до 100
+                targetPercentage = Math.max(0, Math.min(100, targetPercentage));
+                
                 if (animate) {
                     setTimeout(() => {
-                        thumb.style.bottom = `${normalizedBmi * 100}%`;
+                        thumb.style.bottom = `${targetPercentage}%`;
                     }, 100);
                 } else {
                     thumb.style.transition = 'none';
-                    thumb.style.bottom = `${normalizedBmi * 100}%`;
+                    thumb.style.bottom = `${targetPercentage}%`;
                 }
             }
             
@@ -517,7 +531,6 @@
                 });
             }
 
-            // НОВАЯ, УПРОЩЕННАЯ ФУНКЦИЯ ДЛЯ СЛАЙДЕРА
             function initTestimonialSlider() {
                 const wrapper = document.getElementById('testimonial-slider-wrapper');
                 const dotsContainer = document.getElementById('slider-dots-container');
@@ -525,7 +538,7 @@
 
                 const slides = wrapper.querySelectorAll('.testimonial-slide');
                 const slideCount = slides.length;
-                dotsContainer.innerHTML = ''; // Очищаем точки
+                dotsContainer.innerHTML = ''; 
 
                 // Создаем точки
                 for (let i = 0; i < slideCount; i++) {
@@ -536,6 +549,7 @@
                             left: wrapper.offsetWidth * i,
                             behavior: 'smooth'
                         });
+                        resetAutoScroll(); // Сбрасываем таймер при ручном переключении
                     });
                     dotsContainer.appendChild(dot);
                 }
@@ -550,12 +564,38 @@
                     });
                 };
 
+                // --- КОД ДЛЯ АВТОПРОКРУТКИ ---
+                let autoScrollInterval;
+                let currentSlide = 0;
+
+                const startAutoScroll = () => {
+                    autoScrollInterval = setInterval(() => {
+                        currentSlide = (Math.round(wrapper.scrollLeft / wrapper.offsetWidth) + 1) % slideCount;
+                        wrapper.scrollTo({
+                            left: wrapper.offsetWidth * currentSlide,
+                            behavior: 'smooth'
+                        });
+                    }, 2000); // Каждые 2 секунды
+                };
+
+                const resetAutoScroll = () => {
+                    clearInterval(autoScrollInterval);
+                    startAutoScroll();
+                };
+                // --- КОНЕЦ КОДА ---
+
                 // Слушаем скролл в слайдере для обновления точек
                 wrapper.addEventListener('scroll', updateDots, { passive: true });
+                
+                // Сбрасываем таймер, если пользователь начинает скроллить вручную
+                wrapper.addEventListener('touchstart', () => clearInterval(autoScrollInterval), { passive: true });
+                wrapper.addEventListener('touchend', () => resetAutoScroll(), { passive: true });
 
                 // Инициализируем
                 updateDots();
+                startAutoScroll(); // Запускаем автопрокрутку при инициализации
             }
+
             
             // --- INITIALIZATION ---
             fetchData().then(data => {
