@@ -133,7 +133,10 @@
         .gender-option:hover:not(:disabled) { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.07); }
         .gender-option.selected { transform: translateY(-5px) scale(1.02); border-color: var(--brand-accent); box-shadow: 0 0 20px rgba(222, 190, 169, 0.8); }
         .gender-option .gender-image-container { 
-            overflow: hidden; border-radius: 1rem; margin-bottom: 1rem; aspect-ratio: 1/1;
+            overflow: hidden; 
+            border-radius: 9999px; /* Changed to make it circular */
+            margin-bottom: 1rem; 
+            aspect-ratio: 1/1;
         }
         .gender-option .gender-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
         .gender-option:hover:not(:disabled) .gender-image { transform: scale(1.05); }
@@ -378,6 +381,18 @@
             <h2 class="text-3xl font-bold text-gray-800 mt-4 text-center">Analyzing Your Unique Profile...</h2>
             <div id="analysis-steps" class="mt-6 text-gray-600 space-y-2 w-64 text-left"></div>
         </section>
+
+        <!-- NEW: Selfie Confirmation Step -->
+        <section id="step-selfie-confirm" class="quiz-step prev">
+            <div class="text-center max-w-sm mx-auto">
+                <h2 class="text-3xl font-bold text-gray-900">Looks good?</h2>
+                <img id="selfie-preview-img" src="" alt="Your selfie" class="w-full max-w-xs aspect-[3/4] object-cover rounded-2xl my-6 mx-auto shadow-lg border-2 border-white">
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button id="selfie-retake-btn" class="w-full bg-white text-gray-800 font-bold py-3 px-6 rounded-full text-lg hover:bg-gray-100 transition border border-gray-300">Retake</button>
+                    <button id="selfie-confirm-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-6 rounded-full text-lg hover:opacity-90 transition">Confirm Photo</button>
+                </div>
+            </div>
+        </section>
     </main>
     
     <footer id="quiz-footer" class="w-full z-10">
@@ -424,6 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
         faceMesh: null,
         cameraAnimFrame: null,
         captureTimeout: null,
+        lastPhotoDataUrl: null, // To hold photo data for confirmation
         faceMeshDrawState: { startTime: null, duration: 500 }, // Added for mesh fade-in
         quizQuestions: [
             { key: 'userGoal', type: 'options', text: "What’s your main goal?", subtext: "This helps us tailor the final report to your interests.", options: [{text: 'Find out my Biological Age', value:'bio_age'}, {text:'Get a Skin Health Analysis', value: 'skin'}, {text:'Receive a 7-Day Improvement Plan', value:'plan'}, {text:'All of the above!', value: 'all'}] },
@@ -570,8 +586,9 @@ document.addEventListener('DOMContentLoaded', () => {
              contentHTML = `<div class="stress-widget">
                  <h2 class="text-2xl font-bold text-gray-900 text-center">${question.text}</h2>
                  <p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>
-                 <div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] my-4 text-center"></div>
-                 <input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
+                 <div class="my-6">
+                    <input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
+                 </div>
                  <div class="flex justify-between text-sm text-gray-500 mt-2 px-1">
                      <span>Relaxed</span>
                      <span>Stressed</span>
@@ -830,7 +847,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            App.cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 1280 } } });
+            // Use aspectRatio to avoid zoom issues on mobile
+            App.cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', aspectRatio: { ideal: 9/16 } } });
             video.srcObject = App.cameraStream;
             video.addEventListener('loadeddata', cameraLoop);
         } catch (err) {
@@ -926,8 +944,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.scale(-1, 1);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const photoDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        
+        App.lastPhotoDataUrl = photoDataUrl; // Store the photo data
+        document.getElementById('selfie-preview-img').src = photoDataUrl;
+
         closeCamera();
-        handleAnswer('selfie', photoDataUrl);
+        goToStep('selfie-confirm'); // Go to the new confirmation step
     }
 
     function initOnboarding() {
@@ -1016,10 +1038,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('start-quiz-btn').addEventListener('click', next);
     document.getElementById('back-btn').addEventListener('click', previous);
     document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
+    // Listeners for new selfie confirmation buttons
+    document.getElementById('selfie-confirm-btn').addEventListener('click', () => {
+        handleAnswer('selfie', App.lastPhotoDataUrl);
+    });
+    document.getElementById('selfie-retake-btn').addEventListener('click', openCamera);
 });
 </script>
 
 </body>
 </html>
-
 
