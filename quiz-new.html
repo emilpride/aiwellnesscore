@@ -553,11 +553,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // --- КОНЕЦ НОВОЙ ФУНКЦИИ ---
 
-    function handleAnswer(questionKey, answer) {
+    // --- НАЧАЛО ИСПРАВЛЕНИЯ ---
+
+    // НОВАЯ ФУНКЦИЯ для отправки ответа на сервер
+    async function saveAnswerToServer(questionKey, answer) {
+        if (!App.sessionId) {
+            console.error("Cannot save answer, session ID is missing.");
+            return;
+        }
+        try {
+            const response = await fetch('/.netlify/functions/quiz', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'saveAnswer',
+                    sessionId: App.sessionId,
+                    questionId: questionKey,
+                    answer: answer
+                })
+            });
+            if (!response.ok) {
+                console.error('Failed to save answer for question:', questionKey);
+            } else {
+                console.log(`Answer for "${questionKey}" saved successfully.`);
+            }
+        } catch (error) {
+            console.error('Error saving answer:', error);
+        }
+    }
+
+    // ИЗМЕНЕННАЯ ФУНКЦИЯ handleAnswer
+    async function handleAnswer(questionKey, answer) {
         App.userAnswers[questionKey] = answer;
+        
+        // Отправляем ответ на сервер и ждем завершения
+        await saveAnswerToServer(questionKey, answer);
+        
+        // Переходим к следующему вопросу только после сохранения
         setTimeout(next, 100);
     }
-    
+
+    // ИЗМЕНЕННАЯ ФУНКЦИЯ handleOptionClick
+    async function handleOptionClick(event, key, value) {
+        const clickedButton = event.currentTarget;
+        const parent = clickedButton.parentElement;
+        parent.querySelectorAll('button').forEach(btn => btn.disabled = true);
+        clickedButton.classList.add('selected');
+        
+        // Используем await, чтобы дождаться завершения handleAnswer
+        await handleAnswer(key, value);
+    }// --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+
     function goToStep(stepKey) {
         const prevStepEl = document.querySelector('.quiz-step.active');
         if (prevStepEl) prevStepEl.classList.add('prev');
@@ -736,14 +782,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    function handleOptionClick(event, key, value) {
-        const clickedButton = event.currentTarget;
-        const parent = clickedButton.parentElement;
-        parent.querySelectorAll('button').forEach(btn => btn.disabled = true);
-        clickedButton.classList.add('selected');
-        setTimeout(() => handleAnswer(key, value), 400);
-    }
-
     function updateSliderDisplay(question, value) {
         const valueDisplay = document.getElementById('slider-value-display');
         if (!valueDisplay) return;
