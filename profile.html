@@ -91,19 +91,42 @@
 
         #loading-overlay { transition: opacity 0.5s ease-out; }
         
+        /* BMI Widget Styles - Matched with quiz-new.html */
+        #bmi-scale-container {
+            position: relative;
+            width: 32px;
+            height: 100%;
+        }
+        #bmi-scale-gradient-vertical {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, #43B7FF, #33C75A, #FBF447, #FFA64D, #FF7D7E);
+            border-radius: 100px;
+            position: absolute;
+        }
         #bmi-thumb {
             position: absolute; width: 40px; height: 40px;
             background: linear-gradient(180deg, #F2F2F2 0%, #E8E8E8 100%);
             border: 2px solid #FFFFFF; box-shadow: 0px 0px 6.9px rgba(0, 0, 0, 0.25);
             border-radius: 50%; left: 50%; transform: translateX(-50%);
-            bottom: 0%; transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1;
+            bottom: 0%; 
+            /* ИЗМЕНЕНИЕ: Управляем анимацией через transition */
+            transition: bottom 1.5s cubic-bezier(0.22, 1, 0.36, 1); 
+            z-index: 1;
+        }
+        #bmi-image-section {
+            display: flex;
+            align-items: flex-end;
+            height: 100%;
+            flex-grow: 1;
+            justify-content: center;
         }
         #bmi-image {
             height: 100%; width: auto; object-fit: contain;
             user-select: none; pointer-events: none;
         }
 
-        /* NEW: Scroll Animations */
+        /* Scroll Animations */
         .animate-on-scroll {
             opacity: 0;
             transform: translateY(40px);
@@ -116,9 +139,10 @@
         .animate-on-scroll.delay-1 { transition-delay: 150ms; }
         .animate-on-scroll.delay-2 { transition-delay: 300ms; }
 
-        /* NEW: Testimonial Slider */
-        #testimonial-slider-container { overflow: hidden; position: relative; }
-        #testimonial-slider-wrapper { display: flex; transition: transform 0.5s ease-in-out; }
+        /* Testimonial Slider */
+        #testimonial-slider-container { overflow: hidden; position: relative; cursor: grab; }
+        #testimonial-slider-container:active { cursor: grabbing; }
+        #testimonial-slider-wrapper { display: flex; }
         .testimonial-slide { flex: 0 0 100%; width: 100%; box-sizing: border-box; }
         .star-rating svg { color: #f59e0b; }
         .slider-dots { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1rem; }
@@ -155,15 +179,16 @@
                         <p id="bio-age" class="value bio-age">0</p>
                         <p class="label">Biological Age</p>
                     </div>
-                    <div class="sm:col-span-2 content-card p-6 flex flex-col items-center animate-on-scroll delay-2">
+                    <!-- BMI Block - Updated ID for Observer -->
+                    <div id="bmi-widget-container" class="sm:col-span-2 content-card p-6 flex flex-col items-center animate-on-scroll delay-2">
                         <p id="bmi-category" class="font-bold text-lg text-green-600">Normal Weight</p>
                         <p id="bmi-description" class="text-sm text-gray-600 mt-1 text-center max-w-xs"></p>
-                        <div class="w-full flex items-center justify-center gap-6 mt-4 flex-grow">
-                             <div class="relative w-8 h-48 sm:h-56">
-                                 <div class="w-full h-full bg-gradient-to-t from-blue-300 via-green-300 to-red-400 rounded-full"></div>
+                        <div class="w-full flex items-center justify-center gap-6 mt-4 flex-grow h-48 sm:h-56">
+                             <div id="bmi-scale-container">
+                                 <div id="bmi-scale-gradient-vertical"></div>
                                  <div id="bmi-thumb"></div>
                              </div>
-                             <div class="h-48 sm:h-56 flex items-end">
+                             <div id="bmi-image-section">
                                 <img id="bmi-image" src="" alt="BMI illustration">
                              </div>
                         </div>
@@ -198,8 +223,9 @@
                     <ul id="positive-factors" class="mt-4 space-y-3 factor-list"></ul>
                 </div>
             </section>
-
-            <section class="content-card p-6 sm:p-8 animate-on-scroll">
+            
+            <!-- Updated ID for Observer -->
+            <section id="chart-section" class="content-card p-6 sm:p-8 animate-on-scroll">
                 <div class="grid md:grid-cols-2 gap-8 items-center">
                     <div>
                         <h2 class="text-2xl sm:text-3xl font-extrabold">Lower Your Biological Age With Our Plan</h2>
@@ -273,10 +299,12 @@
             }
             
             function populateUI(data) {
+                // Эта функция теперь заполняет только статичные данные
+                // Анимации будут запущены наблюдателем (Observer)
                 if (data.userPhotoUrl) { document.getElementById('user-photo').src = data.userPhotoUrl; }
                 
-                animateValue('chrono-age', 0, data.chronoAge, 1500);
-                animateValue('bio-age', 0, data.bioAgeResult.biologicalAge, 1500);
+                document.getElementById('chrono-age').textContent = data.chronoAge;
+                document.getElementById('bio-age').textContent = data.bioAgeResult.biologicalAge;
 
                 const ageDifference = data.bioAgeResult.biologicalAge - data.chronoAge;
                 const summaryCard = document.getElementById('age-summary-card');
@@ -292,8 +320,9 @@
                     summaryText.textContent = 'Your biological age matches your chronological age.';
                     summaryCard.classList.add('bg-blue-50', 'border', 'border-blue-200');
                 }
-
-                renderBmiWidget(data.bmi.value, data.gender);
+                
+                // Предварительно заполняем BMI, но без анимации
+                renderBmiWidget(data.bmi.value, data.gender, false);
 
                 document.getElementById('archetype-name').textContent = data.wellnessArchetype.name;
                 document.getElementById('archetype-desc').textContent = data.wellnessArchetype.description;
@@ -307,7 +336,6 @@
                 populateFactors('positive-factors', data.factors.positive);
                 populateFactors('negative-factors', data.factors.negative);
 
-                renderChart(data.bioAgeResult.biologicalAge);
                 initTestimonialSlider(data.testimonials);
                 
                 document.getElementById('cta-link').href = `payment.html?session_id=${sessionId || ''}`;
@@ -326,7 +354,7 @@
                 window.requestAnimationFrame(step);
             }
 
-            function renderBmiWidget(bmiValue, gender) {
+            function renderBmiWidget(bmiValue, gender, animate = true) {
                 const categories = [
                     { max: 18.4, img: '16-18.4', title: 'Underweight', desc: 'Below a healthy weight range.', color: 'text-blue-600' },
                     { max: 24.9, img: '18.5-24.9', title: 'Normal Weight', desc: 'Ideal weight range.', color: 'text-green-600' },
@@ -343,11 +371,23 @@
                 
                 const minBmi = 15, maxBmi = 40;
                 const normalizedBmi = Math.max(0, Math.min(1, (bmiValue - minBmi) / (maxBmi - minBmi)));
-                document.getElementById('bmi-thumb').style.bottom = `${normalizedBmi * 100}%`;
+                
+                // ИЗМЕНЕНИЕ: Анимация запускается только по флагу
+                if (animate) {
+                    // Небольшая задержка, чтобы CSS-переход успел сработать
+                    setTimeout(() => {
+                        document.getElementById('bmi-thumb').style.bottom = `${normalizedBmi * 100}%`;
+                    }, 100);
+                } else {
+                    const thumb = document.getElementById('bmi-thumb');
+                    thumb.style.transition = 'none'; // Отключаем анимацию для первоначальной установки
+                    thumb.style.bottom = `${normalizedBmi * 100}%`;
+                }
             }
             
             function renderChart(biologicalAge) {
                 const ctx = document.getElementById('ageChart').getContext('2d');
+                if (!ctx) return;
                 const potentialAge = Math.round(biologicalAge * 0.85);
                 new Chart(ctx, {
                     type: 'bar',
@@ -362,6 +402,10 @@
                     },
                     options: {
                         responsive: true, maintainAspectRatio: false,
+                        animation: {
+                            duration: 1500,
+                            easing: 'easeOutQuart'
+                        },
                         plugins: { legend: { display: false }, tooltip: { enabled: false } },
                         scales: {
                             y: { beginAtZero: false, suggestedMin: potentialAge - 5, grid: { drawOnChartArea: false, drawBorder: false, }, ticks: { font: { weight: 'bold' } } },
@@ -372,9 +416,10 @@
             }
 
             function initTestimonialSlider(testimonials) {
+                const container = document.getElementById('testimonial-slider-container');
                 const wrapper = document.getElementById('testimonial-slider-wrapper');
                 const dotsContainer = document.getElementById('slider-dots-container');
-                if (!wrapper || !dotsContainer) return;
+                if (!wrapper || !dotsContainer || !container) return;
 
                 wrapper.innerHTML = testimonials.map(t => {
                     const stars = Array(5).fill(0).map((_, i) => `
@@ -395,11 +440,28 @@
                 
                 let currentSlide = 0;
                 let slideInterval;
-                
-                const goToSlide = (index) => {
+                let isDragging = false, startPos = 0, currentTranslate = 0, prevTranslate = 0, animationID;
+
+                const dots = [];
+
+                const goToSlide = (index, animated = true) => {
+                    if (index < 0) index = testimonials.length - 1;
+                    if (index >= testimonials.length) index = 0;
                     currentSlide = index;
-                    wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+                    
+                    wrapper.style.transition = animated ? 'transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)' : 'none';
+                    setSliderPosition();
                     dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
+                };
+
+                const setSliderPosition = () => {
+                    prevTranslate = -currentSlide * container.offsetWidth;
+                    wrapper.style.transform = `translateX(${prevTranslate}px)`;
+                }
+                
+                const startAutoSlide = () => {
+                    clearInterval(slideInterval);
+                    slideInterval = setInterval(() => goToSlide(currentSlide + 1), 5000);
                 };
 
                 testimonials.forEach((_, i) => {
@@ -407,32 +469,67 @@
                     dot.className = 'slider-dot';
                     dot.onclick = () => {
                         goToSlide(i);
-                        clearInterval(slideInterval);
-                        slideInterval = setInterval(() => goToSlide((currentSlide + 1) % testimonials.length), 5000);
+                        startAutoSlide();
                     };
                     dotsContainer.appendChild(dot);
+                    dots.push(dot);
                 });
 
-                const dots = dotsContainer.querySelectorAll('.slider-dot');
-                goToSlide(0);
-                slideInterval = setInterval(() => goToSlide((currentSlide + 1) % testimonials.length), 5000);
+                function touchStart(event) {
+                    isDragging = true;
+                    startPos = getPositionX(event);
+                    animationID = requestAnimationFrame(animation);
+                    wrapper.style.transition = 'none';
+                    clearInterval(slideInterval);
+                }
+
+                function touchMove(event) {
+                    if (isDragging) {
+                        const currentPosition = getPositionX(event);
+                        currentTranslate = prevTranslate + currentPosition - startPos;
+                    }
+                }
+
+                function touchEnd() {
+                    isDragging = false;
+                    cancelAnimationFrame(animationID);
+                    const movedBy = currentTranslate - prevTranslate;
+
+                    if (movedBy < -100 && currentSlide < testimonials.length - 1) currentSlide++;
+                    if (movedBy > 100 && currentSlide > 0) currentSlide--;
+                    
+                    goToSlide(currentSlide);
+                    startAutoSlide();
+                }
+
+                function getPositionX(event) {
+                    return event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+                }
+
+                function animation() {
+                    wrapper.style.transform = `translateX(${currentTranslate}px)`;
+                    if(isDragging) requestAnimationFrame(animation);
+                }
+                
+                container.addEventListener('touchstart', touchStart, {passive: true});
+                container.addEventListener('touchend', touchEnd);
+                container.addEventListener('touchmove', touchMove, {passive: true});
+                
+                container.addEventListener('mousedown', touchStart);
+                container.addEventListener('mouseup', touchEnd);
+                container.addEventListener('mouseleave', touchEnd);
+                container.addEventListener('mousemove', touchMove);
+
+                window.addEventListener('resize', () => goToSlide(currentSlide, false));
+
+                goToSlide(0, false);
+                startAutoSlide();
             }
             
-            // --- SCROLL ANIMATION OBSERVER ---
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, { threshold: 0.2 });
-
-            document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
-
-
             // --- INITIALIZATION ---
             fetchData().then(data => {
-                populateUI(data);
+                populateUI(data); // Заполняем все данные, кроме анимируемых
+                
                 const loadingOverlay = document.getElementById('loading-overlay');
                 const profileContent = document.getElementById('profile-content');
                 loadingOverlay.style.opacity = 0;
@@ -440,6 +537,39 @@
                     loadingOverlay.style.display = 'none';
                     profileContent.style.opacity = 1;
                 }, 500);
+
+                // ИЗМЕНЕНИЕ: Настраиваем наблюдатель для запуска анимаций
+                let chartRendered = false;
+                let bmiAnimated = false;
+
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+
+                            // Анимация виджета BMI
+                            if (entry.target.id === 'bmi-widget-container' && !bmiAnimated) {
+                                renderBmiWidget(data.bmi.value, data.gender, true); // Запускаем с анимацией
+                                bmiAnimated = true;
+                            }
+
+                            // Анимация графика
+                            if (entry.target.id === 'chart-section' && !chartRendered) {
+                                renderChart(data.bioAgeResult.biologicalAge);
+                                chartRendered = true;
+                            }
+                            // Анимация счетчиков
+                            if(entry.target.classList.contains('highlight-stat')) {
+                                const valueEl = entry.target.querySelector('.value');
+                                if(valueEl.id === 'chrono-age') animateValue('chrono-age', 0, data.chronoAge, 1500);
+                                if(valueEl.id === 'bio-age') animateValue('bio-age', 0, data.bioAgeResult.biologicalAge, 1500);
+                            }
+                        }
+                    });
+                }, { threshold: 0.2 });
+
+                document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+                
             }).catch(error => {
                 document.getElementById('loading-overlay').innerHTML = `<p class="text-lg font-semibold text-red-600">Failed to load profile. Please try again.</p>`;
             });
