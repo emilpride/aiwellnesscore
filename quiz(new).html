@@ -111,7 +111,7 @@
         </section>
 
         <section id="step-1" class="quiz-step prev">
-            <div class="question-content w-full max-w-2xl text-center"><h2 class="text-3xl font-bold text-gray-900">To personalize your plan, which do you identify with?</h2></div>
+            <div class="question-content w-full max-w-2xl text-center"><h2 class="text-3xl font-bold text-gray-900">To personalize your plan, which do you identify with?</h2><p class="text-gray-600 mt-2 text-lg">This helps us tailor recommendations to your specific biological needs.</p></div>
         </section>
 
         <section id="step-2" class="quiz-step prev">
@@ -247,22 +247,25 @@ const App = {
     camera: { stream: null },
     onboarding: { slideIndex: -1, slides: null, dots: null, timer: null, touchStartX: 0 },
     quizQuestions: [
-        { key: 'userGoal', type: 'options', text: "What's your primary wellness goal?", options: ['Find out my biological age', 'Get a skin condition analysis', 'Get a 7-day improvement plan', 'All of the above!'] },
-        { key: 'age', type: 'slider', text: "What's your current age?", min: 18, max: 90, defaultValue: 30, unit: 'years' },
-        { key: 'height', type: 'slider', text: "What is your height?", min: 140, max: 220, defaultValue: 175, unit: 'cm' },
-        { key: 'weight', type: 'slider', text: "And your current weight?", min: 40, max: 150, defaultValue: 70, unit: 'kg' },
+        { key: 'userGoal', type: 'options', text: "What's your primary wellness goal?", subtext: "This helps us understand what's most important to you right now.", options: ['Find out my biological age', 'Get a skin condition analysis', 'Get a 7-day improvement plan', 'All of the above!'] },
+        { key: 'age', type: 'slider', text: "What's your current age?", subtext: "Your age is a key factor for calculating your biological age and baseline metabolism.", min: 18, max: 90, defaultValue: 30, unit: 'years' },
+        { key: 'height', type: 'slider', text: "What is your height?", subtext: "We use this along with your weight to calculate your Body Mass Index (BMI).", min: 140, max: 220, defaultValue: 175, unit: 'cm' },
+        { key: 'weight', type: 'slider', text: "And your current weight?", subtext: "This is essential for your BMI and for setting realistic wellness goals.", min: 40, max: 150, defaultValue: 70, unit: 'kg' },
         { key: 'bmi_calculation', type: 'animation' },
-        { key: 'sleep', type: 'options', text: "😴 How many hours of quality sleep do you get on average?", options: ["Less than 5 hours", "5-6 hours", "7-8 hours", "More than 8 hours"] },
+        { key: 'sleep', type: 'options', text: "😴 How many hours of quality sleep do you get on average?", subtext: "Sleep is crucial for recovery, mental clarity, and maintaining a healthy weight.", options: ["Less than 5 hours", "5-6 hours", "7-8 hours", "More than 8 hours"] },
         { key: 'sleep_visual', type: 'animation' },
-        { key: 'activity', type: 'options', text: "🏃‍♀️ How often do you engage in moderate physical activity per week?", options: ["Rarely", "1-2 times", "3-4 times", "5+ times"] },
+        { key: 'activity', type: 'options', text: "🏃‍♀️ How often do you engage in moderate physical activity per week?", subtext: "Your activity level helps us tailor the intensity of your personalized plan.", options: ["Rarely", "1-2 times", "3-4 times", "5+ times"] },
         { key: 'activity_visual', type: 'animation' },
-        { key: 'stress', type: 'slider', text: "🧠 On a scale of 1-10, how would you rate your typical stress level?", min: 1, max: 10, defaultValue: 5, unit: 'stress' },
+        { key: 'stress', type: 'slider', text: "🧠 On a scale of 1-10, how would you rate your typical stress level?", subtext: "Chronic stress can impact everything from sleep quality to skin health.", min: 1, max: 10, defaultValue: 5, unit: 'stress' },
         { key: 'stress_visual', type: 'animation' },
-        { key: 'screen_time', type: 'options', text: "📱 Outside of work, how much time do you spend on screens daily?", options: ["Less than 2 hours", "2-4 hours", "4-6 hours", "More than 6 hours"] },
+        { key: 'screen_time', type: 'options', text: "📱 Outside of work, how much time do you spend on screens daily?", subtext: "Excessive screen time can affect your sleep, posture, and mental well-being.", options: ["Less than 2 hours", "2-4 hours", "4-6 hours", "More than 6 hours"] },
+        { key: 'water', type: 'options', text: "💧 How much water do you drink daily on average?", subtext: "Hydration is key for skin health, energy levels, and overall wellness.", options: ["Less than 2 glasses", "2-4 glasses", "5-7 glasses", "8+ glasses"]},
+        { key: 'water_visual', type: 'animation' },
         { key: 'selfie', type: 'camera_step', text: 'Final Step: AI Photo Analysis', subtext: 'Our AI analyzes your face for non-medical indicators of stress and fatigue. Your photo is deleted instantly after analysis.'},
         { key: 'wellness_profile', type: 'wellness_profile_page'},
         { key: 'email', type: 'email_step', text: "Where should we send your report summary?", subtext: "We respect your privacy. No spam, ever." }
-    ]
+    ],
+    questionIndices: []
 };
 
 const AnimationManager = {
@@ -374,16 +377,21 @@ function goToStep(stepIndex) {
 
 function updateProgressBar() {
     let progress = 0;
-    const totalQuestions = App.quizQuestions.filter(q => q.type.endsWith('_step') || q.type === 'options' || q.type === 'slider').length;
-    const answeredQuestions = Object.keys(App.userAnswers).length - (App.userAnswers.gender ? 1 : 0);
-    
+    const totalQuestionSteps = App.questionIndices.length;
+    if (totalQuestionSteps === 0) return;
+
+    // Count how many "real" questions have been passed based on the current index
+    const answeredQuestionCount = App.questionIndices.filter(i => i < App.currentQuestionIndex).length;
+
     if (App.currentStep === 2) {
-        progress = totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0;
+        progress = (answeredQuestionCount / totalQuestionSteps) * 100;
     } else if (App.currentStep > 2) {
         progress = 100;
     }
+    
     document.getElementById('progress-bar-inner').style.width = `${progress}%`;
 }
+
 
 function initOnboarding() {
     App.onboarding.slides = document.querySelectorAll('.swiper-slide');
@@ -456,21 +464,23 @@ function renderQuestion(index) {
     const footerWrapper = document.getElementById('footer-actions');
     
     document.getElementById('back-btn').style.visibility = 'visible';
-    questionWrapper.innerHTML = `<div class="question-content"><h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2></div>`;
+    let subtextHTML = '';
+    if (question.subtext) {
+        subtextHTML = `<p class="text-gray-600 mt-2 text-lg text-center max-w-xl mx-auto">${question.subtext}</p>`;
+    }
+    questionWrapper.innerHTML = `<div class="question-content"><h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>${subtextHTML}</div>`;
     
     let footerHTML = '';
     if (question.type === 'options') {
         const optionsHTML = question.options.map(opt => `<button class="answer-option w-full bg-white p-4 rounded-xl border-2 border-gray-200 text-lg font-semibold text-gray-700" data-value="${opt}">${opt}</button>`).join('');
         footerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto">${optionsHTML}</div>`;
     } else if (question.type === 'slider') {
-        const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-inner"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" value="${question.defaultValue}" step="${question.step}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
+        const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-inner mt-6"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" value="${question.defaultValue}" step="${question.step || 1}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
         questionWrapper.insertAdjacentHTML('beforeend', sliderContent);
         footerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;
     } else if (question.type === 'email_step') {
-        questionWrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', `<p class="text-gray-600 mt-2 text-center">${question.subtext}</p>`);
         footerHTML = `<div class="flex gap-2 max-w-sm mx-auto"><input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border-gray-300 rounded-lg shadow-sm focus:ring-[--brand-accent] focus:border-[--brand-accent]"><button id="email-submit-btn" class="bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-5 rounded-lg hover:opacity-90 transition">Submit</button></div>`;
     } else if (question.type === 'camera_step') {
-        questionWrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', `<p class="text-gray-600 mt-2 text-center">${question.subtext}</p>`);
         footerHTML = `<div class="max-w-sm mx-auto space-y-3"><button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button></div>`;
     }
     
@@ -528,6 +538,7 @@ function renderAnimation(key) {
     else if (key === 'sleep_visual') animationHTML = `<div class="widget-wrapper"><div class="widget-label">Sleep Recharge</div><div class="sleep-battery mt-2"><div id="sleep-battery-level-anim" class="sleep-battery-level"></div></div></div>`;
     else if (key === 'activity_visual') animationHTML = `<div class="widget-wrapper"><div class="widget-label">Your Active Week</div><div class="activity-week" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div></div>`;
     else if (key === 'stress_visual') animationHTML = `<div class="widget-wrapper"><div class="widget-label">Reported Stress Level</div><div class="stress-bar-track"><div id="stress-bar-fill-anim" class="stress-bar-fill"></div></div><div id="stress-value-anim" class="stress-value">0/10</div></div>`;
+    else if (key === 'water_visual') animationHTML = `<div class="w-full max-w-md mx-auto text-center"><h3 class="text-2xl font-semibold text-gray-800 mb-4">Analyzing hydration impact...</h3><div id="water-anim-container" class="w-48 h-48 mx-auto"></div></div>`;
     
     wrapper.innerHTML = `<div class="question-content">${animationHTML}</div>`;
     
@@ -579,6 +590,8 @@ function playAnimation(key) {
         const textEl = document.getElementById('stress-value-anim');
         if(fillEl) fillEl.style.width = `${percent}%`;
         if(textEl) { textEl.textContent = `${level}/10`; textEl.style.color = color; }
+    } else if (key === 'water_visual') {
+        AnimationManager.add('water-anim-container', 'water.json');
     }
 }
 
@@ -734,6 +747,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setVh();
     window.addEventListener('resize', setVh);
     
+    // Pre-calculate the indices of "real" questions for the progress bar
+    App.questionIndices = App.quizQuestions
+        .map((q, i) => (q.type.endsWith('_step') || q.type === 'options' || q.type === 'slider') ? i : -1)
+        .filter(i => i !== -1);
+
     AnimationManager.add('lottie-onboarding-1', 'assistent.json');
     AnimationManager.add('lottie-onboarding-2', 'arrow.json');
     
