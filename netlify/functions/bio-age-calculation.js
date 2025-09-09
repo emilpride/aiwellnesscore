@@ -186,3 +186,8 @@ function calculateBioAge(chronoAge, userAnswers, faceAnalysisResult) {
   };
   // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 }
+// Этот код должен быть в самом конце файла
+module.exports = {
+  calculateBioAge,
+  bioAgeScoring
+};
