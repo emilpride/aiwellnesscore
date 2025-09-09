@@ -1,11 +1,11 @@
-// File: /bio-age-calculation.js
+// /netlify/functions/bio-age-calculation.js
 
 /**
  * @description Contains the scoring system for the biological age calculation.
  * Positive scores "add age", while negative scores "reduce age".
  */
 const bioAgeScoring = {
-  // Questionnaire Data
+  // ... (весь ваш объект bioAgeScoring без изменений)
   sleep: {
     '7-8 hours': 0,
     '5-6 hours': 1,
@@ -82,8 +82,6 @@ const bioAgeScoring = {
     'Sometimes': 0,
     'Never': 1
   },
-
-  // Photo Analysis (keys correspond to Face++ API)
   photoAnalysis: {
     eye_pouch: 2,
     dark_circle: 2,
@@ -94,7 +92,7 @@ const bioAgeScoring = {
     nasolabial_fold: 2,
     blackhead: 1,
     acne: 1,
-    skin_spot: 2 // Pigment spots
+    skin_spot: 2
   }
 };
 
@@ -107,42 +105,30 @@ const bioAgeScoring = {
  */
 function calculateBioAge(chronoAge, userAnswers, faceAnalysisResult) {
   let totalScore = 0;
-
-  // *** ВОТ ЛОГИКА ДЛЯ BMI ***
-  // 1. Calculate BMI from height and weight
+  // ... (вся ваша логика внутри функции без изменений)
   const heightM = parseFloat(userAnswers.height) / 100;
   const weightKg = parseFloat(userAnswers.weight);
   if (heightM > 0 && weightKg > 0) {
     const bmi = weightKg / (heightM * heightM);
     if (bmi < 18.5 || (bmi >= 25 && bmi < 30)) {
-      totalScore += 1; // Underweight/Overweight -> +1 point
+      totalScore += 1;
     } else if (bmi >= 30) {
-      totalScore += 2; // Obese -> +2 points
+      totalScore += 2;
     }
-    // For normal range (18.5-24.9), no points are added (0).
   }
-
-  // 2. Tally scores from questionnaire answers
   for (const key in userAnswers) {
     if (bioAgeScoring[key] && bioAgeScoring[key][userAnswers[key]]) {
       totalScore += bioAgeScoring[key][userAnswers[key]];
     }
   }
-
-  // *** ВОТ ЛОГИКА ДЛЯ СТРЕССА ***
-  // 2.1. Special handling for the stress slider
   const stressLevel = parseInt(userAnswers.stress, 10);
   if (stressLevel >= 1 && stressLevel <= 3) {
-    totalScore -= 1; // Range 1-3 -> -1 point
+    totalScore -= 1;
   } else if (stressLevel >= 7 && stressLevel <= 8) {
-    totalScore += 1; // Range 7-8 -> +1 point
+    totalScore += 1;
   } else if (stressLevel >= 9 && stressLevel <= 10) {
-    totalScore += 2; // Range 9-10 -> +2 points
+    totalScore += 2;
   }
-  // For range 4-6, no points are added (0).
-
-
-  // 3. Tally scores from photo analysis
   if (faceAnalysisResult && faceAnalysisResult.faces && faceAnalysisResult.faces.length > 0) {
     const skinStatus = faceAnalysisResult.faces[0].attributes.skinstatus;
     const thresholds = {
@@ -150,35 +136,36 @@ function calculateBioAge(chronoAge, userAnswers, faceAnalysisResult) {
       forehead_wrinkle: 20, glabella_wrinkle: 20, nasolabial_fold: 20,
       blackhead: 10, acne: 10, skin_spot: 10
     };
-
     for (const key in bioAgeScoring.photoAnalysis) {
       if (skinStatus[key] && skinStatus[key] > thresholds[key]) {
         totalScore += bioAgeScoring.photoAnalysis[key];
       }
     }
   }
-
-  // 4. Calculate age correction based on the total score
   let ageCorrection = 0;
   if (totalScore <= -5) {
-    ageCorrection = -7; // Represents "younger by 5-10 years"
+    ageCorrection = -7;
   } else if (totalScore >= -4 && totalScore <= -1) {
-    ageCorrection = -3; // Represents "younger by 2-4 years"
+    ageCorrection = -3;
   } else if (totalScore >= 0 && totalScore <= 3) {
-    ageCorrection = 0; // Corresponds to age
+    ageCorrection = 0;
   } else if (totalScore >= 4 && totalScore <= 7) {
-    ageCorrection = 3; // Represents "older by 2-4 years"
+    ageCorrection = 3;
   } else if (totalScore >= 8 && totalScore <= 12) {
-    ageCorrection = 6; // Represents "older by 5-7 years"
+    ageCorrection = 6;
   } else if (totalScore >= 13) {
-    ageCorrection = 10; // Represents "older by 10+ years"
+    ageCorrection = 10;
   }
-
   const biologicalAge = chronoAge + ageCorrection;
-
   return {
     biologicalAge: biologicalAge,
     totalScore: totalScore,
     ageCorrection: ageCorrection
   };
 }
+
+// ✅ Вот единственное, что нужно было добавить в самый конец файла
+module.exports = {
+  calculateBioAge,
+  bioAgeScoring
+};
