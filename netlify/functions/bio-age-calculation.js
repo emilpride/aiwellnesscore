@@ -103,24 +103,30 @@ const bioAgeScoring = {
  * @param {object} [faceAnalysisResult] - The result object from the Face++ API.
  * @returns {{biologicalAge: number, totalScore: number, ageCorrection: number}} - An object with the results.
  */
+// /netlify/functions/bio-age-calculation.js
+
 function calculateBioAge(chronoAge, userAnswers, faceAnalysisResult) {
   let totalScore = 0;
-  // ... (вся ваша логика внутри функции без изменений)
+  let bmiValue = 0; // --- ДОБАВЛЕНО: переменная для хранения ИМТ
+
   const heightM = parseFloat(userAnswers.height) / 100;
   const weightKg = parseFloat(userAnswers.weight);
   if (heightM > 0 && weightKg > 0) {
     const bmi = weightKg / (heightM * heightM);
+    bmiValue = parseFloat(bmi.toFixed(1)); // --- ДОБАВЛЕНО: сохраняем ИМТ
     if (bmi < 18.5 || (bmi >= 25 && bmi < 30)) {
       totalScore += 1;
     } else if (bmi >= 30) {
       totalScore += 2;
     }
   }
+
   for (const key in userAnswers) {
     if (bioAgeScoring[key] && bioAgeScoring[key][userAnswers[key]]) {
       totalScore += bioAgeScoring[key][userAnswers[key]];
     }
   }
+
   const stressLevel = parseInt(userAnswers.stress, 10);
   if (stressLevel >= 1 && stressLevel <= 3) {
     totalScore -= 1;
@@ -129,6 +135,7 @@ function calculateBioAge(chronoAge, userAnswers, faceAnalysisResult) {
   } else if (stressLevel >= 9 && stressLevel <= 10) {
     totalScore += 2;
   }
+
   if (faceAnalysisResult && faceAnalysisResult.faces && faceAnalysisResult.faces.length > 0) {
     const skinStatus = faceAnalysisResult.faces[0].attributes.skinstatus;
     const thresholds = {
@@ -142,6 +149,7 @@ function calculateBioAge(chronoAge, userAnswers, faceAnalysisResult) {
       }
     }
   }
+
   let ageCorrection = 0;
   if (totalScore <= -5) {
     ageCorrection = -7;
@@ -156,16 +164,25 @@ function calculateBioAge(chronoAge, userAnswers, faceAnalysisResult) {
   } else if (totalScore >= 13) {
     ageCorrection = 10;
   }
+
   const biologicalAge = chronoAge + ageCorrection;
+  
+  // --- НАЧАЛО ИСПРАВЛЕНИЯ ---
+  let summaryText = '';
+  if (ageCorrection > 0) {
+    summaryText = `Your biological age is ${ageCorrection} years higher than your chronological age. This suggests some lifestyle factors may be accelerating your aging.`;
+  } else if (ageCorrection < 0) {
+    summaryText = `Congratulations! Your biological age is ${-ageCorrection} years lower than your chronological age. Your healthy habits are paying off.`;
+  } else {
+    summaryText = 'Your biological age matches your chronological age. You have a solid foundation for wellness.';
+  }
+
   return {
     biologicalAge: biologicalAge,
     totalScore: totalScore,
-    ageCorrection: ageCorrection
+    ageCorrection: ageCorrection,
+    bmiValue: bmiValue, // --- ДОБАВЛЕНО: возвращаем ИМТ
+    summary: summaryText // --- ДОБАВЛЕНО: возвращаем текстовое заключение
   };
+  // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 }
-
-// ✅ Вот единственное, что нужно было добавить в самый конец файла
-module.exports = {
-  calculateBioAge,
-  bioAgeScoring
-};
