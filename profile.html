@@ -326,7 +326,7 @@
                                 </div>
                             </div>
                         </div>
-            
+                    
                         <div class="testimonial-slide">
                             <div class="content-card h-full p-6 flex flex-col justify-between">
                                 <div>
@@ -375,27 +375,34 @@
         document.addEventListener('DOMContentLoaded', () => {
             const loadingOverlay = document.getElementById('loading-overlay');
             const profileContent = document.getElementById('profile-content');
-            const urlParams = new URLSearchParams(window.location.search);
-            const sessionId = urlParams.get('sessionId');
-
-            if (!sessionId) {
-                loadingOverlay.innerHTML = `<p class="text-lg text-red-600 font-semibold">Error: Session ID not found.</p>`;
-                return;
-            }
-
+            
             const API_ENDPOINT = '/.netlify/functions/getProfileData';
 
             async function fetchProfileData() {
                 try {
+                    // Убеждаемся, что sessionId из URL получен правильно
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const sessionId = urlParams.get('session_id'); // ИЗМЕНЕНИЕ: ключ 'session_id' вместо 'sessionId'
+
+                    if (!sessionId) {
+                        throw new Error('Session ID not found in URL. Please go back and complete the quiz.');
+                    }
+                    
+                    // Выводим в консоль браузера ID, с которым работаем
+                    console.log("Attempting to fetch profile for session ID:", sessionId);
+
                     const response = await fetch(API_ENDPOINT, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ sessionId: sessionId })
+                        body: JSON.stringify({ sessionId: sessionId }) // Убеждаемся, что отправляем правильный ID
                     });
-                    
+
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        // Если сервер вернул ошибку, пытаемся прочитать ее
+                        const errorData = await response.json().catch(() => ({ error: 'Server returned an invalid error format.' }));
+                        throw new Error(errorData.error || 'Network response was not ok');
                     }
+                    
                     const data = await response.json();
                     
                     if (data.error) {
@@ -406,7 +413,7 @@
 
                 } catch (error) {
                     console.error('Failed to fetch profile data:', error);
-                    loadingOverlay.innerHTML = `<p class="text-lg text-red-600 font-semibold">Failed to load profile. Please try again later.</p>`;
+                    loadingOverlay.innerHTML = `<div class="text-center p-4"><p class="text-lg text-red-600 font-semibold">Failed to load profile.</p><p class="text-gray-600 mt-2">${error.message}</p></div>`;
                 }
             }
 
@@ -488,12 +495,14 @@
                         const li = document.createElement('li');
                         li.classList.add('animate-on-scroll');
                         li.innerHTML = `
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="skin-metric-label">${metrics[key].label}</span>
-                                <span class="font-bold">${score}%</span>
-                            </div>
-                            <div class="progress-bar-bg">
-                                <div class="progress-bar-fg ${metrics[key].color}" style="width: ${score}%;"></div>
+                            <div class="w-full">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="skin-metric-label">${metrics[key].label}</span>
+                                    <span class="font-bold">${score}%</span>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fg ${metrics[key].color}" style="width: ${score}%;"></div>
+                                </div>
                             </div>
                         `;
                         listElement.appendChild(li);
@@ -514,16 +523,28 @@
                 let categoryColor = '';
                 let imageUrl = '';
 
-                if (gender === 'male') {
-                    if (bmiValue < 18.5) { category = 'Underweight'; description = 'Your BMI is below the healthy range. Consider a plan to gain weight safely.'; categoryColor = 'text-blue-500'; imageUrl = `https://placehold.co/120x150/f9f7f5/3c3b31?text=Thin+Male`; }
-                    else if (bmiValue < 25) { category = 'Healthy Weight'; description = 'Congratulations! Your BMI is within the healthy range. Keep up the good work.'; categoryColor = 'text-green-600'; imageUrl = `https://placehold.co/120x150/f9f7f5/3c3b31?text=Healthy+Male`; }
-                    else if (bmiValue < 30) { category = 'Overweight'; description = 'Your BMI suggests you are overweight. A healthy diet and exercise can help.'; categoryColor = 'text-yellow-500'; imageUrl = `https://placehold.co/120x150/f9f7f5/3c3b31?text=Overweight+Male`; }
-                    else { category = 'Obese'; description = 'Your BMI is in the obese range. This can impact your health. Consider consulting a professional.'; categoryColor = 'text-red-500'; imageUrl = `https://placehold.co/120x150/f9f7f5/3c3b31?text=Obese+Male`; }
-                } else { // female
-                    if (bmiValue < 18.5) { category = 'Underweight'; description = 'Your BMI is below the healthy range. Consider a plan to gain weight safely.'; categoryColor = 'text-blue-500'; imageUrl = `https://placehold.co/120x150/f9f7f5/3c3b31?text=Thin+Female`; }
-                    else if (bmiValue < 25) { category = 'Healthy Weight'; description = 'Congratulations! Your BMI is within the healthy range. Keep up the good work.'; categoryColor = 'text-green-600'; imageUrl = `https://placehold.co/120x150/f9f7f5/3c3b31?text=Healthy+Female`; }
-                    else if (bmiValue < 30) { category = 'Overweight'; description = 'Your BMI suggests you are overweight. A healthy diet and exercise can help.'; categoryColor = 'text-yellow-500'; imageUrl = `https://placehold.co/120x150/f9f7f5/3c3b31?text=Overweight+Female`; }
-                    else { category = 'Obese'; description = 'Your BMI is in the obese range. This can impact your health. Consider consulting a professional.'; categoryColor = 'text-red-500'; imageUrl = `https://placehold.co/120x150/f9f7f5/3c3b31?text=Obese+Female`; }
+                const prefix = gender === 'female' ? 'f' : 'm';
+
+                if (bmiValue < 18.5) { 
+                    category = 'Underweight'; 
+                    description = 'Your BMI is below the healthy range. Consider a plan to gain weight safely.'; 
+                    categoryColor = 'text-blue-500'; 
+                    imageUrl = `${prefix}-16-18.4.svg`; 
+                } else if (bmiValue < 25) { 
+                    category = 'Healthy Weight'; 
+                    description = 'Congratulations! Your BMI is within the healthy range. Keep up the good work.'; 
+                    categoryColor = 'text-green-600'; 
+                    imageUrl = `${prefix}-18.5-24.9.svg`; 
+                } else if (bmiValue < 30) { 
+                    category = 'Overweight'; 
+                    description = 'Your BMI suggests you are overweight. A healthy diet and exercise can help.'; 
+                    categoryColor = 'text-yellow-500'; 
+                    imageUrl = `${prefix}-25.0-29.9.svg`; 
+                } else { 
+                    category = 'Obese'; 
+                    description = 'Your BMI is in the obese range. This can impact your health. Consider consulting a professional.'; 
+                    categoryColor = 'text-red-500'; 
+                    imageUrl = `${prefix}-30-above.svg`; 
                 }
                 
                 bmiValueEl.textContent = `BMI: ${bmiValue}`;
@@ -653,4 +674,3 @@
     </script>
 </body>
 </html>
-
