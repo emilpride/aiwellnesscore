@@ -931,6 +931,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
+            // !!! ДОБАВЛЕН ЭТОТ ВЫЗОВ !!!
             const response = await fetch('/.netlify/functions/generateProfile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -941,7 +942,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Failed to generate profile.');
             }
+            // --- Конец добавленного блока ---
 
+            // Перенаправление только после успешной генерации профиля
             window.location.href = `profile.html?session_id=${App.sessionId || ''}`;
 
         } catch (error) {
