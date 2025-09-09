@@ -192,12 +192,12 @@
 
         <main class="max-w-5xl mx-auto space-y-8 sm:space-y-12">
             <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="md:col-span-1 animate-on-scroll">
+                <div id="user-photo-container" class="md:col-span-1 animate-on-scroll">
                     <div class="max-w-[10rem] mx-auto md:max-w-full">
                         <img id="user-photo" src="https://placehold.co/400x533/f5f2ef/3c3b31?text=Your+Photo" alt="User Photo" class="w-full h-auto object-cover rounded-2xl shadow-lg">
                     </div>
                 </div>
-                <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div id="user-stats-container" class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div class="highlight-stat animate-on-scroll delay-1">
                         <p id="chrono-age" class="value">0</p>
                         <p class="label">Chronological Age</p>
@@ -392,10 +392,26 @@
             }
             
             function populateUI(data) {
-                if (data.userPhotoUrl) { 
-                    document.getElementById('user-photo').src = data.userPhotoUrl; 
+                const userPhotoContainer = document.getElementById('user-photo-container');
+                const userStatsContainer = document.getElementById('user-stats-container');
+
+                // Проверяем, есть ли URL фотографии
+                if (data.userPhotoUrl) {
+                    // Если фото есть, просто устанавливаем его
+                    document.getElementById('user-photo').src = data.userPhotoUrl;
+                } else {
+                    // Если фото нет (был нажат "skip")
+                    if (userPhotoContainer) {
+                        // 1. Полностью скрываем контейнер с фото
+                        userPhotoContainer.style.display = 'none';
+                    }
+                    if (userStatsContainer) {
+                        // 2. Расширяем контейнер со статистикой на всю ширину сетки
+                        userStatsContainer.classList.remove('md:col-span-2');
+                        userStatsContainer.classList.add('md:col-span-3');
+                    }
                 }
-                
+
                 // Эти значения будут анимированы наблюдателем (Observer)
                 document.getElementById('chrono-age').textContent = '0';
                 document.getElementById('bio-age').textContent = '0';
@@ -566,11 +582,10 @@
 
                 // --- КОД ДЛЯ АВТОПРОКРУТКИ ---
                 let autoScrollInterval;
-                let currentSlide = 0;
-
+                
                 const startAutoScroll = () => {
                     autoScrollInterval = setInterval(() => {
-                        currentSlide = (Math.round(wrapper.scrollLeft / wrapper.offsetWidth) + 1) % slideCount;
+                        let currentSlide = (Math.round(wrapper.scrollLeft / wrapper.offsetWidth) + 1) % slideCount;
                         wrapper.scrollTo({
                             left: wrapper.offsetWidth * currentSlide,
                             behavior: 'smooth'
@@ -595,7 +610,6 @@
                 updateDots();
                 startAutoScroll(); // Запускаем автопрокрутку при инициализации
             }
-
             
             // --- INITIALIZATION ---
             fetchData().then(data => {
