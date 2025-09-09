@@ -382,12 +382,14 @@
             <div id="analysis-steps" class="mt-6 text-gray-600 space-y-2 w-64 text-left"></div>
         </section>
 
+        <!-- NEW: Selfie Confirmation Step -->
         <section id="step-selfie-confirm" class="quiz-step prev">
             <div class="text-center max-w-sm mx-auto">
                 <h2 class="text-3xl font-bold text-gray-900">Looks good?</h2>
                 <img id="selfie-preview-img" src="" alt="Your selfie" class="w-full max-w-xs aspect-[3/4] object-cover rounded-2xl my-6 mx-auto shadow-lg border-2 border-white">
                 <div class="flex flex-col sm:flex-row gap-3">
                     <button id="selfie-retake-btn" class="w-full bg-white text-gray-800 font-bold py-3 px-6 rounded-full text-lg hover:bg-gray-100 transition border border-gray-300">Retake</button>
+                    <!-- MODIFIED BUTTON FOR LOADING STATE -->
                     <button id="selfie-confirm-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-6 rounded-full text-lg hover:opacity-90 transition flex items-center justify-center disabled:opacity-75">
                         <span class="btn-text">Confirm Photo</span>
                         <span class="spinner hidden">
@@ -1095,13 +1097,29 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.addEventListener('click', toggleMenu);
     }
 
-    // Function to start the quiz session and generate a unique ID
+    // --- НАЧАЛО ИСПРАВЛЕННОГО БЛОКА ---
     async function startQuizSession() {
-        // In a real app, this might involve a server call. Here we'll generate it client-side.
-        // This creates a reasonably unique ID for the session.
-        App.sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-        console.log('Quiz session started with ID:', App.sessionId);
+        try {
+            const response = await fetch('/.netlify/functions/quiz', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'startSession' })
+            });
+            if (!response.ok) {
+                // Если сервер вернул ошибку, мы узнаем об этом
+                throw new Error(`Could not start session. Status: ${response.status}`);
+            }
+            const data = await response.json();
+            App.sessionId = data.sessionId;
+            console.log('Session successfully started:', App.sessionId);
+        } catch (error) {
+            console.error('CRITICAL: Failed to start session:', error);
+            // Показываем пользователю критическую ошибку, так как без сессии ничего не будет работать
+            document.body.innerHTML = `<div class="w-full h-screen flex items-center justify-center text-center p-4"><div><h1 class="text-2xl font-bold text-red-600">Initialization Error</h1><p class="text-gray-700 mt-2">Could not start a new session. Please refresh the page to try again.</p></div></div>`;
+        }
     }
+    // --- КОНЕЦ ИСПРАВЛЕННОГО БЛОКА ---
+
 
     // --- App Initialization ---
     setVh();
