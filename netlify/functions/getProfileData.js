@@ -99,6 +99,10 @@ exports.handler = async (event) => {
     const answers = sessionData.answers || {};
     const preliminaryResult = sessionData.preliminaryResult || {};
 
+    // Извлекаем результат анализа от Face++
+    const faceAnalysis = sessionData.faceAnalysis || null;
+    const skinStatus = faceAnalysis?.faces?.[0]?.attributes?.skinstatus || null;
+    
     // --- ИЗМЕНЕННАЯ ЛОГИКА ---
 
     // 1. Получаем "сырые" факторы
@@ -140,6 +144,7 @@ exports.handler = async (event) => {
         wellnessArchetype,
         focusArea,
         factors: formattedFactors, // Используем отформатированные факторы
+        skinStatus: skinStatus, // ✅ ДОБАВЛЕННАЯ СТРОКА
     };
 
     // Рассчитываем BMI, если он не был сохранен отдельно
@@ -163,3 +168,4 @@ exports.handler = async (event) => {
     };
   }
 };
+
