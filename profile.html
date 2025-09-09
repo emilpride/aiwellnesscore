@@ -138,11 +138,23 @@
         .animate-on-scroll.delay-1 { transition-delay: 150ms; }
         .animate-on-scroll.delay-2 { transition-delay: 300ms; }
 
-        /* Testimonial Slider */
-        #testimonial-slider-container { overflow: hidden; position: relative; cursor: grab; }
-        #testimonial-slider-container:active { cursor: grabbing; }
-        #testimonial-slider-wrapper { display: flex; }
-        .testimonial-slide { flex: 0 0 100%; width: 100%; box-sizing: border-box; }
+        /* --- НОВЫЕ СТИЛИ ДЛЯ СЛАЙДЕРА ОТЗЫВОВ --- */
+        #testimonial-slider-wrapper {
+            /* Убираем стандартный скроллбар */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* IE and Edge */
+        }
+        #testimonial-slider-wrapper::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, and Opera */
+        }
+        .testimonial-slide {
+            flex: 0 0 100%; /* Каждый слайд занимает 100% ширины */
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0 8px; /* Небольшой отступ по бокам */
+            scroll-snap-align: center; /* Выравниваем слайд по центру */
+        }
+        
         .star-rating svg { color: #f59e0b; }
         .slider-dots { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1rem; }
         .slider-dot { width: 0.5rem; height: 0.5rem; background-color: #d1d5db; border-radius: 9999px; cursor: pointer; transition: background-color 0.3s; }
@@ -179,9 +191,11 @@
         </header>
 
         <main class="max-w-5xl mx-auto space-y-8 sm:space-y-12">
-            <section class="grid md:grid-cols-3 gap-6">
-                <div class="md:col-span-1 animate-on-scroll w-full max-w-xs mx-auto md:max-w-none">
-                    <img id="user-photo" src="https://placehold.co/400x533/f5f2ef/3c3b31?text=Your+Photo" alt="User Photo" class="w-full h-full object-cover rounded-2xl shadow-lg">
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-1 animate-on-scroll">
+                    <div class="max-w-xs mx-auto md:max-w-full">
+                        <img id="user-photo" src="https://placehold.co/400x533/f5f2ef/3c3b31?text=Your+Photo" alt="User Photo" class="w-full h-auto object-cover rounded-2xl shadow-lg">
+                    </div>
                 </div>
                 <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div class="highlight-stat animate-on-scroll delay-1">
@@ -266,25 +280,94 @@
             
             <section class="animate-on-scroll">
                 <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">See What Others Have Achieved</h2>
-                <div id="testimonial-slider-container" class="content-card p-6">
-                    <div id="testimonial-slider-wrapper">
+            
+                <div id="testimonial-slider-container" class="relative">
+                    <div id="testimonial-slider-wrapper" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4">
+                        <div class="testimonial-slide">
+                            <div class="content-card h-full p-6 flex flex-col justify-between">
+                                <div>
+                                    <div class="star-rating flex items-center mb-2">
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                    </div>
+                                    <p class="text-gray-700 italic">"I was shocked by my biological age. It was the wake-up call I needed. The 21-day plan was so easy to follow and made a real difference in my energy levels."</p>
+                                </div>
+                                <div class="mt-4 text-right">
+                                    <p class="font-bold">- Sarah K.</p>
+                                    <p class="text-sm text-gray-500">Lowered bio-age by 3 years</p>
+                                </div>
+                            </div>
                         </div>
+            
+                        <div class="testimonial-slide">
+                            <div class="content-card h-full p-6 flex flex-col justify-between">
+                                <div>
+                                    <div class="star-rating flex items-center mb-2">
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                    </div>
+                                    <p class="text-gray-700 italic">"Finally, a wellness tool that isn't about guilt. Identifying my archetype made me feel understood. The focus on stress was spot-on."</p>
+                                </div>
+                                <div class="mt-4 text-right">
+                                    <p class="font-bold">- Michael B.</p>
+                                    <p class="text-sm text-gray-500">Feels more energetic</p>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <div class="testimonial-slide">
+                            <div class="content-card h-full p-6 flex flex-col justify-between">
+                                <div>
+                                    <div class="star-rating flex items-center mb-2">
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                    </div>
+                                    <p class="text-gray-700 italic">"The photo analysis was fascinating. I had no idea my screen time was showing up as visible eye strain. This service connected the dots for me."</p>
+                                </div>
+                                <div class="mt-4 text-right">
+                                    <p class="font-bold">- Jessica M.</p>
+                                    <p class="text-sm text-gray-500">Lowered bio-age by 4 years</p>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <div class="testimonial-slide">
+                            <div class="content-card h-full p-6 flex flex-col justify-between">
+                                <div>
+                                    <div class="star-rating flex items-center mb-2">
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        <svg class="w-5 h-5 text-gray-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                    </div>
+                                    <p class="text-gray-700 italic">"I've tried other apps, but this one felt the most personalized. The daily tasks are small but powerful. I feel less bloated and more focused."</p>
+                                </div>
+                                <div class="mt-4 text-right">
+                                    <p class="font-bold">- David L.</p>
+                                    <p class="text-sm text-gray-500">Lowered bio-age by 2 years</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            
                 <div id="slider-dots-container" class="slider-dots"></div>
             </section>
-
         </main>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Отзывы остаются статичными, как и было запрошено ---
-            const testimonials = [
-                { name: 'Sarah K.', bioAgeChange: 3, review: "I was shocked by my biological age. It was the wake-up call I needed. The 21-day plan was so easy to follow and made a real difference in my energy levels.", rating: 5 },
-                { name: 'Michael B.', bioAgeChange: null, review: "Finally, a wellness tool that isn't about guilt. Identifying my archetype made me feel understood. The focus on stress was spot-on.", rating: 5 },
-                { name: 'Jessica M.', bioAgeChange: 4, review: "The photo analysis was fascinating. I had no idea my screen time was showing up as visible eye strain. This service connected the dots for me.", rating: 5 },
-                { name: 'David L.', bioAgeChange: 2, review: "I've tried other apps, but this one felt the most personalized. The daily tasks are small but powerful. I feel less bloated and more focused.", rating: 4 },
-            ];
             
             // --- ФУНКЦИЯ ДЛЯ ЗАГРУЗКИ РЕАЛЬНЫХ ДАННЫХ ---
             async function fetchData() {
@@ -305,7 +388,6 @@
                 }
 
                 const data = await response.json();
-                data.testimonials = testimonials;
                 return data;
             }
             
@@ -356,7 +438,7 @@
                 populateFactors('positive-factors', data.factors.positive);
                 populateFactors('negative-factors', data.factors.negative);
 
-                initTestimonialSlider(data.testimonials);
+                initTestimonialSlider();
                 
                 document.getElementById('cta-link').href = `payment.html?session_id=${new URLSearchParams(window.location.search).get('session_id') || ''}`;
             }
@@ -388,7 +470,7 @@
                 
                 document.getElementById('bmi-image').src = `${prefix}-${result.img}.svg`;
                 document.getElementById('bmi-category').textContent = result.title;
-                document.getElementById('bmi-category').className = `font-bold text-lg ${result.color}`;
+                document.getElementById('bmi-category').className = `font-bold text-lg -mt-1 ${result.color}`;
                 document.getElementById('bmi-description').textContent = result.desc;
                 
                 const minBmi = 15, maxBmi = 40;
@@ -435,110 +517,44 @@
                 });
             }
 
-            function initTestimonialSlider(testimonials) {
-                const container = document.getElementById('testimonial-slider-container');
+            // НОВАЯ, УПРОЩЕННАЯ ФУНКЦИЯ ДЛЯ СЛАЙДЕРА
+            function initTestimonialSlider() {
                 const wrapper = document.getElementById('testimonial-slider-wrapper');
                 const dotsContainer = document.getElementById('slider-dots-container');
-                if (!wrapper || !dotsContainer || !container) return;
+                if (!wrapper || !dotsContainer) return;
 
-                wrapper.innerHTML = testimonials.map(t => {
-                    const stars = Array(5).fill(0).map((_, i) => `
-                        <svg class="w-5 h-5 ${i < t.rating ? 'text-yellow-400' : 'text-gray-300'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>`).join('');
-                    const bioAgeText = t.bioAgeChange ? `Lowered bio-age by ${t.bioAgeChange} years` : 'Feels more energetic';
-                    return `
-                        <div class="testimonial-slide p-4">
-                            <div class="flex items-center mb-2">${stars}</div>
-                            <p class="text-gray-700 italic">"${t.review}"</p>
-                            <div class="mt-4 text-right">
-                                <p class="font-bold">- ${t.name}</p>
-                                <p class="text-sm text-gray-500">${bioAgeText}</p>
-                            </div>
-                        </div>`;
-                }).join('');
-                
-                let currentSlide = 0;
-                let slideInterval;
-                let isDragging = false, startPos = 0, currentTranslate = 0, prevTranslate = 0;
+                const slides = wrapper.querySelectorAll('.testimonial-slide');
+                const slideCount = slides.length;
+                dotsContainer.innerHTML = ''; // Очищаем точки
 
-                const dots = [];
-
-                const goToSlide = (index, animated = true) => {
-                    if (index < 0) index = testimonials.length - 1;
-                    if (index >= testimonials.length) index = 0;
-                    currentSlide = index;
-                    
-                    wrapper.style.transition = animated ? 'transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)' : 'none';
-                    setSliderPosition();
-                    dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
-                };
-
-                const setSliderPosition = () => {
-                    prevTranslate = -currentSlide * container.offsetWidth;
-                    wrapper.style.transform = `translateX(${prevTranslate}px)`;
-                }
-                
-                const startAutoSlide = () => {
-                    clearInterval(slideInterval);
-                    slideInterval = setInterval(() => goToSlide(currentSlide + 1), 5000);
-                };
-
-                testimonials.forEach((_, i) => {
+                // Создаем точки
+                for (let i = 0; i < slideCount; i++) {
                     const dot = document.createElement('button');
                     dot.className = 'slider-dot';
-                    dot.onclick = () => {
-                        goToSlide(i);
-                        startAutoSlide();
-                    };
+                    dot.addEventListener('click', () => {
+                        wrapper.scrollTo({
+                            left: wrapper.offsetWidth * i,
+                            behavior: 'smooth'
+                        });
+                    });
                     dotsContainer.appendChild(dot);
-                    dots.push(dot);
-                });
-                
-                let animationID;
-                function animation() {
-                    wrapper.style.transform = `translateX(${currentTranslate}px)`;
-                    if(isDragging) requestAnimationFrame(animation);
-                }
-                function getPositionX(event) {
-                    return event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
-                }
-                function touchStart(event) {
-                    isDragging = true;
-                    startPos = getPositionX(event);
-                    animationID = requestAnimationFrame(animation);
-                    wrapper.style.transition = 'none';
-                    clearInterval(slideInterval);
-                }
-                function touchMove(event) {
-                    if (isDragging) {
-                        const currentPosition = getPositionX(event);
-                        currentTranslate = prevTranslate + currentPosition - startPos;
-                    }
-                }
-                function touchEnd() {
-                    isDragging = false;
-                    cancelAnimationFrame(animationID);
-                    const movedBy = currentTranslate - prevTranslate;
-
-                    if (movedBy < -100 && currentSlide < testimonials.length - 1) currentSlide++;
-                    if (movedBy > 100 && currentSlide > 0) currentSlide--;
-                    
-                    goToSlide(currentSlide);
-                    startAutoSlide();
                 }
 
-                container.addEventListener('touchstart', touchStart, {passive: true});
-                container.addEventListener('touchend', touchEnd);
-                container.addEventListener('touchmove', touchMove, {passive: true});
-                container.addEventListener('mousedown', touchStart);
-                container.addEventListener('mouseup', touchEnd);
-                container.addEventListener('mouseleave', touchEnd);
-                container.addEventListener('mousemove', touchMove);
+                const dots = dotsContainer.querySelectorAll('.slider-dot');
 
-                window.addEventListener('resize', () => goToSlide(currentSlide, false));
-                goToSlide(0, false);
-                startAutoSlide();
+                // Функция для обновления активной точки
+                const updateDots = () => {
+                    const currentIndex = Math.round(wrapper.scrollLeft / wrapper.offsetWidth);
+                    dots.forEach((dot, index) => {
+                        dot.classList.toggle('active', index === currentIndex);
+                    });
+                };
+
+                // Слушаем скролл в слайдере для обновления точек
+                wrapper.addEventListener('scroll', updateDots, { passive: true });
+
+                // Инициализируем
+                updateDots();
             }
             
             // --- INITIALIZATION ---
