@@ -382,14 +382,21 @@
             <div id="analysis-steps" class="mt-6 text-gray-600 space-y-2 w-64 text-left"></div>
         </section>
 
-        <!-- NEW: Selfie Confirmation Step -->
         <section id="step-selfie-confirm" class="quiz-step prev">
             <div class="text-center max-w-sm mx-auto">
                 <h2 class="text-3xl font-bold text-gray-900">Looks good?</h2>
                 <img id="selfie-preview-img" src="" alt="Your selfie" class="w-full max-w-xs aspect-[3/4] object-cover rounded-2xl my-6 mx-auto shadow-lg border-2 border-white">
                 <div class="flex flex-col sm:flex-row gap-3">
                     <button id="selfie-retake-btn" class="w-full bg-white text-gray-800 font-bold py-3 px-6 rounded-full text-lg hover:bg-gray-100 transition border border-gray-300">Retake</button>
-                    <button id="selfie-confirm-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-6 rounded-full text-lg hover:opacity-90 transition">Confirm Photo</button>
+                    <button id="selfie-confirm-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-6 rounded-full text-lg hover:opacity-90 transition flex items-center justify-center disabled:opacity-75">
+                        <span class="btn-text">Confirm Photo</span>
+                        <span class="spinner hidden">
+                            <svg class="animate-spin h-5 w-5 text-[--brand-dark-text]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                    </button>
                 </div>
             </div>
         </section>
@@ -435,6 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentStep: 'onboarding',
         currentQuestionIndex: -1,
         userAnswers: {},
+        sessionId: null, // To hold the user's session ID
         cameraStream: null,
         faceMesh: null,
         cameraAnimFrame: null,
@@ -483,6 +491,71 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
 
+    // --- НАЧАЛО НОВОЙ ФУНКЦИИ ---
+    async function processAndSavePhoto() {
+        const confirmBtn = document.getElementById('selfie-confirm-btn');
+        const btnText = confirmBtn.querySelector('.btn-text');
+        const spinner = confirmBtn.querySelector('.spinner');
+        
+        if (!App.lastPhotoDataUrl || !App.sessionId) {
+            alert('An error occurred. Missing photo data or session ID.');
+            return;
+        }
+
+        confirmBtn.disabled = true;
+        btnText.classList.add('hidden');
+        spinner.classList.remove('hidden');
+
+        try {
+            // 1. Отправляем фото на анализ в Face++ через нашу функцию
+            console.log('Sending photo for analysis...');
+            const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ photoDataUrl: App.lastPhotoDataUrl })
+            });
+
+            if (!analyzeResponse.ok) {
+                const errorData = await analyzeResponse.json();
+                throw new Error(`Face analysis failed: ${errorData.error || 'Unknown error'}`);
+            }
+            const analysisData = await analyzeResponse.json();
+            console.log('Analysis successful.');
+
+            // 2. Сохраняем результат анализа в Firestore
+            console.log('Saving analysis data to Firestore...');
+            const saveResponse = await fetch('/.netlify/functions/quiz', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'saveAnalysisData',
+                    sessionId: App.sessionId,
+                    analysisData: analysisData
+                })
+            });
+            
+            if (!saveResponse.ok) throw new Error('Failed to save analysis data.');
+            console.log('Data saved successfully.');
+
+            // 3. Если все успешно, продолжаем опрос
+            handleAnswer('selfie', App.lastPhotoDataUrl);
+
+        } catch (error) {
+            console.error('Error during photo processing:', error);
+            alert(`An error occurred: ${error.message}. Please try again.`);
+            // Возвращаем кнопку в исходное состояние
+            confirmBtn.disabled = false;
+            btnText.classList.remove('hidden');
+            spinner.classList.add('hidden');
+        }
+    }
+    // --- КОНЕЦ НОВОЙ ФУНКЦИИ ---
+
+    function handleAnswer(questionKey, answer) {
+        App.userAnswers[questionKey] = answer;
+        setTimeout(next, 100);
+    }
+    
     function goToStep(stepKey) {
         const prevStepEl = document.querySelector('.quiz-step.active');
         if (prevStepEl) prevStepEl.classList.add('prev');
@@ -509,11 +582,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         document.getElementById('quiz-footer').style.display = (stepKey === 'quiz' || stepKey === 'bmi') ? 'block' : 'none';
-    }
-
-    function handleAnswer(questionKey, answer) {
-        App.userAnswers[questionKey] = answer;
-        setTimeout(next, 100);
     }
     
     function next() {
@@ -587,7 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
                  <h2 class="text-2xl font-bold text-gray-900 text-center">${question.text}</h2>
                  <p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>
                  <div class="my-6">
-                    <input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
+                     <input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
                  </div>
                  <div class="flex justify-between text-sm text-gray-500 mt-2 px-1">
                      <span>Relaxed</span>
@@ -596,11 +664,11 @@ document.addEventListener('DOMContentLoaded', () => {
              </div>`;
         } else if (question.type === 'camera_step' || question.type === 'email_step') {
             contentHTML = `<img src="face.jpeg" alt="Face scan illustration" class="w-40 h-40 mx-auto rounded-full object-cover mb-6 shadow-lg">
-                                 <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
-                                 <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
+                                     <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
+                                     <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
             if (question.type === 'email_step') {
                  contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
-                                    <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
+                                       <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
             }
         }
         
@@ -1027,9 +1095,18 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.addEventListener('click', toggleMenu);
     }
 
+    // Function to start the quiz session and generate a unique ID
+    async function startQuizSession() {
+        // In a real app, this might involve a server call. Here we'll generate it client-side.
+        // This creates a reasonably unique ID for the session.
+        App.sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        console.log('Quiz session started with ID:', App.sessionId);
+    }
+
     // --- App Initialization ---
     setVh();
     window.addEventListener('resize', setVh);
+    startQuizSession();
     goToStep('onboarding');
     initOnboarding();
     AnimationManager.add('lottie-onboarding-2', 'arrow.json');
@@ -1038,10 +1115,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('start-quiz-btn').addEventListener('click', next);
     document.getElementById('back-btn').addEventListener('click', previous);
     document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
+    
     // Listeners for new selfie confirmation buttons
-    document.getElementById('selfie-confirm-btn').addEventListener('click', () => {
-        handleAnswer('selfie', App.lastPhotoDataUrl);
-    });
+    document.getElementById('selfie-confirm-btn').addEventListener('click', processAndSavePhoto);
     document.getElementById('selfie-retake-btn').addEventListener('click', openCamera);
 });
 </script>
