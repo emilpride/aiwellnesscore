@@ -105,7 +105,7 @@
 
             <div id="content-sessions" class="tab-content mt-6">
                 <div class="flex flex-col sm:flex-row gap-4 items-center">
-                    <input type="text" id="search-input" placeholder="Search by IP or Country..." class="w-full sm:w-1/3 form-input rounded-md p-2 text-white">
+                    <input type="text" id="search-input" placeholder="Search by IP, Email or Country..." class="w-full sm:w-1/3 form-input rounded-md p-2 text-white">
                     <select id="status-filter" class="w-full sm:w-auto form-input rounded-md p-2 text-white">
                         <option value="">All Payment Statuses</option>
                         <option value="succeeded">Succeeded</option>
@@ -210,7 +210,7 @@
                 } catch (error) {
                     console.error("Fetch Error:", error.message);
                     loginError.textContent = error.message;
-                    if (adminPassword) { // If already logged in, show an alert
+                    if (adminPassword) {
                         alert("Error fetching data: " + error.message);
                     }
                 } finally {
@@ -415,25 +415,26 @@
                     return sourceMatch && startDateMatch && endDateMatch;
                 });
                 
-                // ОБНОВЛЕНО: Новая, более точная логика воронки
+                // --- НАЧАЛО ИЗМЕНЕНИЙ: Полностью переписанная логика воронки ---
                 const funnelSteps = [
                     { name: '1. Session Started', condition: s => true },
                     { name: '2. Quiz Started (Answered Goal)', condition: s => s.answers && s.answers.hasOwnProperty('userGoal') },
-                    { name: '3. Core Quiz Completed (Lifestyle)', condition: s => s.answers && s.answers.hasOwnProperty('screen_time') },
-                    { name: '4. Reached Profile Page (Pre-analysis done)', condition: s => s.hasOwnProperty('preliminaryResult') },
-                    { name: '5. Reached Payment Page', condition: s => s.hasOwnProperty('planType') },
-                    { name: '6. Payment Completed', condition: s => s.paymentStatus === 'succeeded' }
+                    { name: '3. Quiz Completed (Answered Email)', condition: s => s.answers && s.answers.hasOwnProperty('email') },
+                    { name: '4. Profile Page Viewed', condition: s => s.hasOwnProperty('preliminaryResult') },
+                    { name: '5. Payment Page Viewed', condition: s => s.hasOwnProperty('planType') },
+                    { name: '6. Purchase Completed', condition: s => s.paymentStatus === 'succeeded' }
                 ];
-
+                // --- КОНЕЦ ИЗМЕНЕНИЙ ---
 
                 let results = [];
-                let previousStepCount = filteredSessions.length;
                 const initialCount = filteredSessions.length;
 
                 if (initialCount === 0) {
                      document.getElementById('funnel-results-container').innerHTML = '<p class="text-center text-gray-400 mt-4">No sessions found for the selected filters.</p>';
                      return;
                 }
+                
+                let previousStepCount = initialCount;
 
                 funnelSteps.forEach(step => {
                     const stepSessions = filteredSessions.filter(step.condition);
@@ -446,6 +447,7 @@
                         convFromTotal: initialCount > 0 ? ((count / initialCount) * 100).toFixed(1) : '0.0'
                     });
                     
+                    // Для следующего шага, "предыдущим" будет текущий шаг
                     previousStepCount = count;
                 });
                 renderFunnelResults(results);
@@ -491,3 +493,4 @@
     </script>
 </body>
 </html>
+
