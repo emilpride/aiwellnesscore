@@ -2,6 +2,8 @@
 
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const Logger = require('./utils/logger');
+const RateLimiter = require('./utils/rateLimiter');
 
 if (!getApps().length) {
   try {
@@ -17,16 +19,53 @@ if (!getApps().length) {
 const db = getFirestore();
 
 exports.handler = async (event, context) => {
+  // Получаем IP адрес
+  const ip = event.headers['x-nf-client-connection-ip'] || 
+             event.headers['x-forwarded-for'] || 
+             'unknown';
+  
+  // Инициализируем логгер
+  const logger = new Logger('quiz', null);
+  
   if (event.httpMethod !== 'POST') {
+    logger.warn('Invalid HTTP method', { method: event.httpMethod });
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   try {
     const data = JSON.parse(event.body);
     const { action } = data;
+    
+    // Обновляем логгер с sessionId если есть
+    if (data.sessionId) {
+      logger.sessionId = data.sessionId;
+    }
+    
+    // Проверяем rate limit
+    const rateLimitResult = await RateLimiter.checkLimit(ip, action);
+    if (!rateLimitResult.allowed) {
+      logger.warn('Rate limit exceeded', { 
+        ip, 
+        action,
+        retryAfter: rateLimitResult.retryAfter 
+      });
+      return {
+        statusCode: 429,
+        headers: {
+          'Retry-After': Math.ceil(rateLimitResult.retryAfter / 1000).toString(),
+          'X-RateLimit-Remaining': '0'
+        },
+        body: JSON.stringify({ 
+          error: 'Too many requests. Please try again later.',
+          retryAfter: rateLimitResult.retryAfter
+        })
+      };
+    }
+
+    logger.info(`Processing action: ${action}`, { ip });
 
     if (action === 'startSession') {
-      const ipAddress = event.headers['x-nf-client-connection-ip'] || 'unknown';
+      const ipAddress = ip;
       let countryCode = 'unknown';
       const geoHeader = event.headers['x-nf-geo'];
       if (geoHeader) {
@@ -34,7 +73,7 @@ exports.handler = async (event, context) => {
           const geoData = JSON.parse(Buffer.from(geoHeader, 'base64').toString('utf8'));
           countryCode = geoData.country?.code || 'unknown';
         } catch (e) {
-          console.error('Could not parse x-nf-geo header:', e);
+          logger.error('Could not parse geo header', e);
         }
       }
 
@@ -42,7 +81,7 @@ exports.handler = async (event, context) => {
       const deviceType = data.deviceType || 'unknown';
       
       const newSessionRef = db.collection('sessions').doc();
-      await newSessionRef.set({
+      const sessionData = {
         sessionId: newSessionRef.id,
         ipAddress: ipAddress,
         countryCode: countryCode,
@@ -50,55 +89,112 @@ exports.handler = async (event, context) => {
         deviceType: deviceType,
         paymentStatus: 'pending',
         createdAt: new Date().toISOString(),
+        correlationId: logger.correlationId,
         answers: {}
+      };
+      
+      await newSessionRef.set(sessionData);
+      
+      logger.info('Session created successfully', { 
+        sessionId: newSessionRef.id,
+        countryCode,
+        deviceType 
       });
+      logger.metric('session_created', 1);
 
       return {
         statusCode: 200,
+        headers: {
+          'X-RateLimit-Remaining': rateLimitResult.remaining.toString()
+        },
         body: JSON.stringify({ sessionId: newSessionRef.id }),
       };
 
     } else if (action === 'saveAnswer') {
       const { sessionId, questionId, answer } = data;
       if (!sessionId || !questionId || answer === undefined) {
-          return { statusCode: 400, body: 'Missing required fields' };
+        logger.warn('Missing required fields for saveAnswer', { sessionId, questionId });
+        return { statusCode: 400, body: 'Missing required fields' };
       }
+      
       const sessionRef = db.collection('sessions').doc(sessionId);
+      
+      // Проверяем существование сессии
+      const sessionDoc = await sessionRef.get();
+      if (!sessionDoc.exists) {
+        logger.error('Session not found', { sessionId });
+        return { 
+          statusCode: 404, 
+          body: JSON.stringify({ error: 'Session not found' }) 
+        };
+      }
+      
       await sessionRef.update({
         [`answers.${questionId}`]: answer,
         updatedAt: new Date().toISOString(),
-        dropOffPoint: `question_${questionId}`
+        dropOffPoint: `question_${questionId}`,
+        lastCorrelationId: logger.correlationId
       });
+      
+      logger.info('Answer saved', { sessionId, questionId });
 
       return {
         statusCode: 200,
+        headers: {
+          'X-RateLimit-Remaining': rateLimitResult.remaining.toString()
+        },
         body: JSON.stringify({ message: 'Answer saved' }),
       };
 
-    // --- НОВЫЙ БЛОК ДЛЯ СОХРАНЕНИЯ РЕЗУЛЬТАТОВ АНАЛИЗА ---
     } else if (action === 'saveAnalysisData') {
       const { sessionId, analysisData } = data;
       if (!sessionId || !analysisData) {
+        logger.warn('Missing required fields for saveAnalysisData');
         return { statusCode: 400, body: 'Missing required fields for saving analysis' };
       }
+      
       const sessionRef = db.collection('sessions').doc(sessionId);
+      
+      // Проверяем существование сессии
+      const sessionDoc = await sessionRef.get();
+      if (!sessionDoc.exists) {
+        logger.error('Session not found for analysis data', { sessionId });
+        return { 
+          statusCode: 404, 
+          body: JSON.stringify({ error: 'Session not found' }) 
+        };
+      }
+      
       await sessionRef.update({
-        faceAnalysis: analysisData, // <--- Сохраняем результат в поле 'faceAnalysis'
+        faceAnalysis: analysisData,
+        faceAnalysisCorrelationId: logger.correlationId,
         updatedAt: new Date().toISOString()
       });
+      
+      logger.info('Analysis data saved', { 
+        sessionId,
+        hasFaces: analysisData.faces?.length > 0 
+      });
+      
       return {
         statusCode: 200,
         body: JSON.stringify({ message: 'Analysis data saved successfully' })
       };
-    // --- КОНЕЦ НОВОГО БЛОКА ---
 
     } else if (action === 'endQuiz') {
       const { sessionId } = data;
       if (!sessionId) return { statusCode: 400, body: 'Missing sessionId' };
+      
       const sessionRef = db.collection('sessions').doc(sessionId);
+      const startTime = Date.now();
+      
       await sessionRef.update({
         quizEndedAt: new Date().toISOString()
       });
+      
+      const duration = Date.now() - startTime;
+      logger.metric('quiz_completion_time', duration, 'ms');
+      logger.info('Quiz completed', { sessionId });
       
       return {
         statusCode: 200,
@@ -111,10 +207,13 @@ exports.handler = async (event, context) => {
             return { statusCode: 400, body: 'Session ID and error object are required' };
         }
         
+        logger.error('Client-side error logged', error);
+        
         const sessionRef = db.collection('sessions').doc(sessionId);
         const errorEntry = {
             ...error,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            correlationId: logger.correlationId
         };
 
         await sessionRef.update({
@@ -127,13 +226,17 @@ exports.handler = async (event, context) => {
         };
     }
 
+    logger.warn('Invalid action', { action });
     return { statusCode: 400, body: 'Invalid action' };
 
   } catch (error) {
-    console.error('Error in quiz.js handler:', error);
+    logger.error('Handler error', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Internal Server Error' }),
+      body: JSON.stringify({ 
+        error: 'Internal Server Error',
+        correlationId: logger.correlationId 
+      }),
     };
   }
 };
