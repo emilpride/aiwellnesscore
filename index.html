@@ -58,7 +58,6 @@
             font-family: 'Inter', sans-serif; 
             background: linear-gradient(120deg, #fdfcfb, #f9f7f5, #f5f2ef, #f9f7f5, #fdfcfb);
             background-size: 400% 400%;
-            /* NEW: Faster background animation */
             animation: moveBackground 25s ease infinite;
             scroll-behavior: smooth;
         }
@@ -76,11 +75,9 @@
             border: 1px solid rgba(0, 0, 0, 0.05);
             border-radius: 1.5rem;
             box-shadow: 0 10px 30px rgba(0,0,0,0.07);
-            /* NEW: Added transition for hover effect */
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        /* NEW: Added hover effect for all cards */
         .content-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
@@ -137,9 +134,8 @@
             transform: translateY(-50%) rotate(45deg);
         }
         
-        /* Styles for Demo Chart */
         .score-ring-bg {
-            stroke: #f5f5f4; /* stone-100 */
+            stroke: #f5f5f4;
         }
         .score-ring-fg {
             stroke: var(--brand-accent);
@@ -149,7 +145,6 @@
             transition: stroke-dashoffset 2s cubic-bezier(0.22, 1, 0.36, 1);
         }
         
-        /* NEW: Animated gradient for headline */
         .animated-gradient-text {
             background: linear-gradient(90deg, var(--brand-accent), #b38e77, var(--brand-accent));
             -webkit-background-clip: text;
@@ -161,7 +156,6 @@
             to { background-position: 200% center; }
         }
 
-        /* NEW: Animation for icons */
         .animate-on-scroll.visible .icon-container {
             animation: icon-pop 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) 0.2s forwards;
             transform: scale(0);
@@ -172,7 +166,6 @@
             100% { transform: scale(1); }
         }
 
-        /* NEW: Smooth animation for FAQ accordion */
         details .faq-content {
             display: grid;
             grid-template-rows: 0fr;
@@ -381,10 +374,22 @@
             <p>&copy; 2025 AI WELLNESSCORE. All Rights Reserved.</p>
         </div>
     </footer>
+    
+    <!-- NEW: Cookie Consent Banner -->
+    <div id="cookie-consent-banner" class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm p-4 z-50 hidden transition-opacity duration-300 border-t">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-sm text-gray-600 text-center sm:text-left">
+                 We use cookies to enhance your browsing experience and analyze our traffic. By clicking "Accept", you consent to our <a href="privacy.html" class="underline hover:text-[--brand-dark-text]">use of cookies</a>.
+            </p>
+            <button id="accept-cookies-btn" class="cta-button px-5 py-2 text-sm font-semibold rounded-lg hover:opacity-90 transition-colors whitespace-nowrap">
+                Accept
+            </button>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            let potentialChartsRendered = false; // Flag for new charts
+            let potentialChartsRendered = false;
 
             // --- Intersection Observer for fade-in animations ---
             const observer = new IntersectionObserver((entries) => {
@@ -392,7 +397,6 @@
                     if (entry.isIntersecting) {
                         entry.target.classList.add('visible');
                         
-                        // --- Demo Donut Chart Animation Trigger ---
                         if (entry.target.id === 'demo-report-section') {
                             const scoreText = entry.target.querySelector('#score-text');
                             const scoreRing = entry.target.querySelector('#score-ring');
@@ -422,7 +426,6 @@
                             }
                         }
                         
-                        // --- Potential Bar Charts Animation Trigger ---
                         if (entry.target.id === 'potential-charts-section' && !potentialChartsRendered) {
                             renderPotentialCharts();
                             potentialChartsRendered = true;
@@ -448,24 +451,19 @@
                     easing: 'easeOutQuart'
                 };
 
-                // Bio-Age Bar Chart
                 new Chart(ageCtx, {
                     type: 'bar',
                     data: {
                         labels: ['Chronological Age', 'Potential Bio-Age'],
                         datasets: [{
-                            label: 'Age',
-                            data: [35, 32],
+                            label: 'Age', data: [35, 32],
                             backgroundColor: ['rgba(60, 59, 49, 0.2)', 'rgba(222, 190, 169, 0.8)'],
                             borderColor: ['rgba(60, 59, 49, 1)', 'rgba(222, 190, 169, 1)'],
-                            borderWidth: 2,
-                            borderRadius: 8,
+                            borderWidth: 2, borderRadius: 8,
                         }]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: animationOptions,
+                        responsive: true, maintainAspectRatio: false, animation: animationOptions,
                         plugins: { legend: { display: false } },
                         scales: {
                             y: { beginAtZero: false, min: 30, grid: { drawOnChartArea: false, drawBorder: false }, ticks: { font: { weight: 'bold' } } },
@@ -474,25 +472,19 @@
                     }
                 });
 
-                // Lifespan Bar Chart (Horizontal)
                 new Chart(lifespanCtx, {
                     type: 'bar',
                     data: {
                         labels: ['Standard Forecast', 'Potential Lifespan'],
                         datasets: [{
-                            label: 'Years',
-                            data: [82, 87],
+                            label: 'Years', data: [82, 87],
                             backgroundColor: ['rgba(156, 163, 175, 0.4)', 'rgba(52, 211, 153, 0.6)'],
                             borderColor: ['rgba(107, 114, 128, 1)', 'rgba(5, 150, 105, 1)'],
-                            borderWidth: 2,
-                            borderRadius: 8,
+                            borderWidth: 2, borderRadius: 8,
                         }]
                     },
                     options: {
-                        indexAxis: 'y', // Makes the bar chart horizontal
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: animationOptions,
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false, animation: animationOptions,
                         plugins: { legend: { display: false } },
                         scales: {
                             x: { beginAtZero: false, min: 80, grid: { drawOnChartArea: false, drawBorder: false }, ticks: { font: { weight: 'bold' } } },
@@ -501,6 +493,42 @@
                     }
                 });
             }
+
+            // --- NEW: Cookie Consent Logic ---
+            const consentBanner = document.getElementById('cookie-consent-banner');
+            const acceptBtn = document.getElementById('accept-cookies-btn');
+
+            const setCookie = (name, value, days) => {
+                let expires = "";
+                if (days) {
+                    const date = new Date();
+                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                    expires = "; expires=" + date.toUTCString();
+                }
+                document.cookie = name + "=" + (value || "") + expires + "; path=/";
+            }
+
+            const getCookie = (name) => {
+                const nameEQ = name + "=";
+                const ca = document.cookie.split(';');
+                for (let i = 0; i < ca.length; i++) {
+                    let c = ca[i];
+                    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+                }
+                return null;
+            }
+
+            if (!getCookie('cookies_accepted')) {
+                consentBanner.classList.remove('hidden');
+                setTimeout(() => consentBanner.style.opacity = '1', 100);
+            }
+
+            acceptBtn.addEventListener('click', () => {
+                setCookie('cookies_accepted', 'true', 365);
+                consentBanner.style.opacity = '0';
+                setTimeout(() => consentBanner.classList.add('hidden'), 300);
+            });
         });
     </script>
 </body>
