@@ -10,12 +10,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
+    <!-- Убираем эти строки (НЕ загружаем библиотеки сразу):
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core/dist/tf-core.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter/dist/tf-converter.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl/dist/tf-backend-webgl.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-
+    -->
+    
     <style>
         :root { 
             --brand-accent: #debea9;
@@ -476,7 +478,62 @@ document.addEventListener('DOMContentLoaded', () => {
             { key: 'email', type: 'email_step', text: "Enter your email 📩", subtext: "to get your personalized report summary. We respect your privacy." }
         ],
     };
-
+const LibraryLoader = {
+        faceMeshLoaded: false,
+        loadingPromise: null,
+        
+        async loadFaceMeshLibraries() {
+            if (this.faceMeshLoaded) return true;
+            if (this.loadingPromise) return this.loadingPromise;
+            
+            this.loadingPromise = new Promise(async (resolve, reject) => {
+                try {
+                    const loadingDiv = document.createElement('div');
+                    loadingDiv.id = 'face-mesh-loading';
+                    loadingDiv.className = 'fixed top-4 right-4 bg-white rounded-lg shadow-lg p-4 z-50';
+                    loadingDiv.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="animate-spin h-5 w-5 border-2 border-gray-300 border-t-[--brand-accent] rounded-full"></div>
+                            <span class="text-sm text-gray-600">Loading camera AI...</span>
+                        </div>
+                    `;
+                    document.body.appendChild(loadingDiv);
+                    
+                    const scripts = [
+                        'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js',
+                        'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core/dist/tf-core.js',
+                        'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter/dist/tf-converter.js',
+                        'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl/dist/tf-backend-webgl.js',
+                        'https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js'
+                    ];
+                    
+                    for (const src of scripts) {
+                        await this.loadScript(src);
+                    }
+                    
+                    this.faceMeshLoaded = true;
+                    document.getElementById('face-mesh-loading')?.remove();
+                    resolve(true);
+                } catch (error) {
+                    document.getElementById('face-mesh-loading')?.remove();
+                    reject(error);
+                }
+            });
+            
+            return this.loadingPromise;
+        },
+        
+        loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.crossOrigin = 'anonymous';
+                script.onload = resolve;
+                script.onerror = () => reject(new Error(`Failed to load ${src}`));
+                document.head.appendChild(script);
+            });
+        }
+    };
     const AnimationManager = {
         animations: new Map(),
         add(id, path) {
@@ -1005,10 +1062,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     async function openCamera() {
-        const cameraModal = document.getElementById('camera-modal');
-        const video = document.getElementById('camera-video');
-        
-        cameraModal.classList.add('active');
+    // Сначала загружаем библиотеки
+    try {
+        await LibraryLoader.loadFaceMeshLibraries();
+    } catch (error) {
+        alert('Failed to load camera AI libraries. Please check your internet connection and try again.');
+        return;
+    }
+    
+    const cameraModal = document.getElementById('camera-modal');
+    const video = document.getElementById('camera-video');
+    
+    cameraModal.classList.add('active');
         
         if (!App.faceMesh) {
             try {
