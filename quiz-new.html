@@ -494,62 +494,113 @@ document.addEventListener('DOMContentLoaded', () => {
     const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
 
     async function processAndSavePhoto() {
-        const confirmBtn = document.getElementById('selfie-confirm-btn');
-        const btnText = confirmBtn.querySelector('.btn-text');
-        const spinner = confirmBtn.querySelector('.spinner');
-        
-        if (!App.lastPhotoDataUrl || !App.sessionId) {
-            alert('An error occurred. Missing photo data or session ID.');
-            return;
-        }
-
-        confirmBtn.disabled = true;
-        btnText.classList.add('hidden');
-        spinner.classList.remove('hidden');
-
-        try {
-            // 1. Отправляем фото на анализ в Face++ через нашу функцию
-            console.log('Sending photo for analysis...');
-            const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ photoDataUrl: App.lastPhotoDataUrl })
-            });
-
-            if (!analyzeResponse.ok) {
-                const errorData = await analyzeResponse.json();
-                throw new Error(`Face analysis failed: ${errorData.error || 'Unknown error'}`);
-            }
-            const analysisData = await analyzeResponse.json();
-            console.log('Analysis successful.');
-
-            // 2. Сохраняем результат анализа в Firestore
-            console.log('Saving analysis data to Firestore...');
-            const saveResponse = await fetch('/.netlify/functions/quiz', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'saveAnalysisData',
-                    sessionId: App.sessionId,
-                    analysisData: analysisData
-                })
-            });
-            
-            if (!saveResponse.ok) throw new Error('Failed to save analysis data.');
-            console.log('Data saved successfully.');
-
-            // 3. Если все успешно, продолжаем опрос
-            handleAnswer('selfie', App.lastPhotoDataUrl);
-
-        } catch (error) {
-            console.error('Error during photo processing:', error);
-            alert(`An error occurred: ${error.message}. Please try again.`);
-            // Возвращаем кнопку в исходное состояние
-            confirmBtn.disabled = false;
-            btnText.classList.remove('hidden');
-            spinner.classList.add('hidden');
-        }
+    const confirmBtn = document.getElementById('selfie-confirm-btn');
+    const btnText = confirmBtn.querySelector('.btn-text');
+    const spinner = confirmBtn.querySelector('.spinner');
+    
+    if (!App.lastPhotoDataUrl || !App.sessionId) {
+        alert('An error occurred. Missing photo data or session ID.');
+        return;
     }
+
+    confirmBtn.disabled = true;
+    btnText.classList.add('hidden');
+    spinner.classList.remove('hidden');
+
+    try {
+        // 1. Отправляем фото на анализ
+        console.log('Sending photo for analysis...');
+        const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ photoDataUrl: App.lastPhotoDataUrl })
+        });
+
+        const responseData = await analyzeResponse.json();
+        
+        if (!analyzeResponse.ok) {
+            // Проверяем, настроен ли сервис анализа
+            if (responseData.error && responseData.error.includes('not configured')) {
+                console.warn('Face analysis service not configured, skipping...');
+                // Сохраняем фото без анализа
+                await saveAnswerToServer('selfie', App.lastPhotoDataUrl);
+                await saveAnswerToServer('faceAnalysisSkipped', 'service_not_configured');
+                handleAnswer('selfie', App.lastPhotoDataUrl);
+                return;
+            }
+            throw new Error(`Face analysis failed: ${responseData.error || 'Unknown error'}`);
+        }
+
+        // 2. Проверяем, что в ответе есть данные о лицах
+        if (!responseData.faces || responseData.faces.length === 0) {
+            const retry = confirm('No face detected in the photo. Would you like to retake it?');
+            if (retry) {
+                document.getElementById('selfie-retake-btn').click();
+                return;
+            } else {
+                // Продолжаем без анализа
+                await saveAnswerToServer('selfie', App.lastPhotoDataUrl);
+                await saveAnswerToServer('faceAnalysisSkipped', 'no_face_detected');
+                handleAnswer('selfie', App.lastPhotoDataUrl);
+                return;
+            }
+        }
+
+        // 3. Сохраняем результат анализа
+        console.log('Saving analysis data...');
+        const saveResponse = await fetch('/.netlify/functions/quiz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'saveAnalysisData',
+                sessionId: App.sessionId,
+                analysisData: responseData
+            })
+        });
+        
+        if (!saveResponse.ok) {
+            throw new Error('Failed to save analysis data.');
+        }
+        
+        console.log('Data saved successfully.');
+        handleAnswer('selfie', App.lastPhotoDataUrl);
+
+    } catch (error) {
+        console.error('Error during photo processing:', error);
+        
+        // Предлагаем пользователю выбор
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+        modal.innerHTML = `
+            <div class="bg-white rounded-lg p-6 max-w-md w-full">
+                <h2 class="text-xl font-bold text-yellow-600 mb-2">Photo Analysis Issue</h2>
+                <p class="text-gray-700 mb-4">We couldn't analyze your photo, but you can still continue.</p>
+                <p class="text-sm text-gray-600 mb-4">Error: ${error.message}</p>
+                <div class="flex gap-3">
+                    <button onclick="
+                        document.getElementById('selfie-retake-btn').click();
+                        this.closest('.fixed').remove();
+                    " class="flex-1 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                        Retake Photo
+                    </button>
+                    <button onclick="
+                        App.handleAnswer('selfie', 'skipped');
+                        this.closest('.fixed').remove();
+                    " class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">
+                        Skip Photo
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+    } finally {
+        // Возвращаем кнопку в исходное состояние
+        confirmBtn.disabled = false;
+        btnText.classList.remove('hidden');
+        spinner.classList.add('hidden');
+    }
+}
 
     // НОВАЯ ФУНКЦИЯ для отправки ответа на сервер
     async function saveAnswerToServer(questionKey, answer) {
