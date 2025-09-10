@@ -59,16 +59,36 @@ exports.handler = async (event) => {
         });
         console.log(`Successfully updated payment status for session: ${sessionId}`);
 
-        // --- НОВЫЙ ВАЖНЫЙ БЛОК ---
-        // 1. Запускаем генерацию отчета в фоновом режиме.
-        // Мы не ждем ответа (не используем await), чтобы сразу вернуть Stripe статус 200.
-        console.log(`[${sessionId}] Triggering hybrid report generation...`);
-        fetch(`${process.env.URL}/.netlify/functions/generate-report-hybrid`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ sessionId: sessionId })
-        }).catch(err => console.error(`[${sessionId}] Error triggering report generation:`, err));
-        // --- КОНЕЦ НОВОГО БЛОКА ---
+        // --- ИСПРАВЛЕННЫЙ БЛОК ---
+// Запускаем генерацию отчета и ждем подтверждения запуска
+console.log(`[${sessionId}] Triggering hybrid report generation...`);
+try {
+    const reportResponse = await fetch(`${process.env.URL}/.netlify/functions/generate-report-hybrid`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ sessionId: sessionId })
+    });
+    
+    if (!reportResponse.ok) {
+        console.error(`[${sessionId}] Report generation request failed with status: ${reportResponse.status}`);
+        // Сохраняем информацию об ошибке в базу данных
+        await sessionRef.update({
+            reportGenerationError: `Failed to start report generation at ${new Date().toISOString()}`,
+            needsManualReportGeneration: true
+        });
+    } else {
+        console.log(`[${sessionId}] Report generation started successfully`);
+    }
+} catch (err) {
+    console.error(`[${sessionId}] Critical error triggering report generation:`, err);
+    // Критическая ошибка - обязательно сохраняем для ручной обработки
+    await sessionRef.update({
+        reportGenerationError: err.message,
+        needsManualReportGeneration: true,
+        errorTimestamp: new Date().toISOString()
+    });
+}
+// --- КОНЕЦ ИСПРАВЛЕННОГО БЛОКА ---
 
         const doc = await sessionRef.get();
         if (doc.exists) {
