@@ -52,6 +52,55 @@ exports.handler = async (event) => {
         return { statusCode: 400, body: JSON.stringify({ error: 'Invalid age provided' }) };
     }
 
+    // Расширенная валидация всех критических полей
+const requiredFields = ['age', 'gender', 'height', 'weight', 'sleep', 'activity'];
+const missingFields = [];
+
+for (const field of requiredFields) {
+    if (!userAnswers[field]) {
+        missingFields.push(field);
+    }
+}
+
+if (missingFields.length > 0) {
+    console.error(`[${sessionId}] Missing required fields: ${missingFields.join(', ')}`);
+    return {
+        statusCode: 400,
+        body: JSON.stringify({ 
+            error: 'Incomplete data', 
+            missingFields: missingFields 
+        })
+    };
+}
+
+// Валидация диапазонов значений
+const height = parseFloat(userAnswers.height);
+const weight = parseFloat(userAnswers.weight);
+
+if (isNaN(height) || height < 100 || height > 250) {
+    console.error(`[${sessionId}] Invalid height: ${userAnswers.height}`);
+    return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Invalid height value' })
+    };
+}
+
+if (isNaN(weight) || weight < 30 || weight > 300) {
+    console.error(`[${sessionId}] Invalid weight: ${userAnswers.weight}`);
+    return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Invalid weight value' })
+    };
+}
+
+if (!['male', 'female'].includes(userAnswers.gender)) {
+    console.error(`[${sessionId}] Invalid gender: ${userAnswers.gender}`);
+    return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Invalid gender value' })
+    };
+}
+
     const bioAgeResult = calculateBioAge(chronoAge, userAnswers, faceAnalysis);
     console.log(`[${sessionId}] --- 3. BioAge calculated successfully:`, JSON.stringify(bioAgeResult));
 
