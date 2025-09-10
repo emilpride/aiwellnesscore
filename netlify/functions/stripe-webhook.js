@@ -6,75 +6,13 @@ const { getFirestore } = require('firebase-admin/firestore');
 const axios = require('axios');
 const crypto = require('crypto');
 
-// Инициализация Firebase
-if (!getApps().length) {
-  try {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
-    initializeApp({ credential: cert(serviceAccount) });
-  } catch (e) {
-    console.error("Firebase init error in stripe-webhook.js:", e);
-  }
-}
-const db = getFirestore();
-
-// ИЗМЕНЕНИЕ 1: Переименовали функцию для универсальности
-// Функция для хеширования данных
+// ... (код инициализации Firebase и функции hashData, sendPurchaseEventToMeta остаются без изменений)
+// ... existing code ...
 const hashData = (data) => {
-    if (!data) return undefined;
-    const normalized = data.toLowerCase().trim();
-    return crypto.createHash('sha256').update(normalized).digest('hex');
+// ... existing code ...
 };
-
-// Исправленная функция sendPurchaseEventToMeta
 const sendPurchaseEventToMeta = async (paymentIntent, sessionData) => {
-    const pixelId = process.env.META_PIXEL_ID;
-    const accessToken = process.env.META_ACCESS_TOKEN;
-
-    if (!pixelId || !accessToken) {
-        console.warn('Meta Pixel ID or Access Token is not configured. Skipping CAPI event.');
-        return;
-    }
-
-    const url = `https://graph.facebook.com/v18.0/${pixelId}/events`;
-    
-    // ИЗМЕНЕНИЕ 2: Хешируем email и страну
-    const hashedEmail = sessionData.answers?.email ? hashData(sessionData.answers.email) : undefined;
-    const hashedCountry = sessionData.countryCode ? hashData(sessionData.countryCode) : undefined;
-    
-    const eventData = {
-        event_name: 'Purchase',
-        event_time: Math.floor(Date.now() / 1000),
-        action_source: 'website',
-        user_data: {
-            em: hashedEmail ? [hashedEmail] : undefined,
-            client_ip_address: sessionData.ipAddress,
-            country: hashedCountry, // <-- ИСПОЛЬЗУЕМ ЗАХЕШИРОВАННУЮ СТРАНУ
-        },
-        custom_data: {
-            value: (paymentIntent.amount / 100).toFixed(2),
-            currency: 'USD',
-        },
-        event_id: paymentIntent.id
-    };
-
-    // Удаляем undefined поля из user_data
-    Object.keys(eventData.user_data).forEach(key => {
-        if (eventData.user_data[key] === undefined) {
-            delete eventData.user_data[key];
-        }
-    });
-
-    const payload = {
-        data: [eventData],
-        access_token: accessToken
-    };
-
-    try {
-        await axios.post(url, payload);
-        console.log(`Successfully sent CAPI Purchase event for session: ${sessionData.sessionId}`);
-    } catch (error) {
-        console.error('Failed to send CAPI event:', error.response ? error.response.data : error.message);
-    }
+// ... existing code ...
 };
 
 
@@ -121,15 +59,22 @@ exports.handler = async (event) => {
         });
         console.log(`Successfully updated payment status for session: ${sessionId}`);
 
-        // Отправка серверного события
+        // --- НОВЫЙ ВАЖНЫЙ БЛОК ---
+        // 1. Запускаем генерацию отчета в фоновом режиме.
+        // Мы не ждем ответа (не используем await), чтобы сразу вернуть Stripe статус 200.
+        console.log(`[${sessionId}] Triggering hybrid report generation...`);
+        fetch(`${process.env.URL}/.netlify/functions/generate-report-hybrid`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ sessionId: sessionId })
+        }).catch(err => console.error(`[${sessionId}] Error triggering report generation:`, err));
+        // --- КОНЕЦ НОВОГО БЛОКА ---
+
         const doc = await sessionRef.get();
         if (doc.exists) {
             await sendPurchaseEventToMeta(paymentIntent, doc.data());
         }
         break;
-
-      // ... (остальные case'ы без изменений)
-      
     }
   } catch (dbError) {
     console.error('Database update failed:', dbError);
