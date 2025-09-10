@@ -50,9 +50,7 @@
             <div class="flex justify-between items-center">
                 <h1 class="text-3xl font-bold text-white">AI WellnessCore Dashboard</h1>
                 <button id="refresh-data-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50">
-                    <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 20v-5h-5M20 4h-5v5M4 20h5v-5M2 12a10 10 0 1120 0 10 10 0 01-20 0z" />
-                    </svg>
+                    <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
                     Refresh
                 </button>
             </div>
@@ -211,7 +209,10 @@
                     renderAll();
                 } catch (error) {
                     console.error("Fetch Error:", error.message);
-                    alert("Error fetching data: " + error.message);
+                    loginError.textContent = error.message;
+                    if (adminPassword) { // If already logged in, show an alert
+                        alert("Error fetching data: " + error.message);
+                    }
                 } finally {
                     refreshBtn.disabled = false;
                     refreshIcon.classList.remove('animate-spin');
@@ -219,7 +220,7 @@
             }
 
             loginForm.addEventListener('submit', async (e) => { e.preventDefault(); await fetchAndRenderData(passwordInput.value); });
-            refreshBtn.addEventListener('click', () => { fetchAndRenderData(adminPassword); });
+            refreshBtn.addEventListener('click', () => { if (adminPassword) fetchAndRenderData(adminPassword); });
 
             function setupUI() {
                 const searchInput = document.getElementById('search-input');
@@ -231,8 +232,13 @@
 
                 tabs.forEach(tab => {
                     tab.addEventListener('click', () => {
-                        tabs.forEach(t => t.classList.remove('active', 'text-purple-400', 'border-purple-400'));
+                        tabs.forEach(t => { 
+                            t.classList.remove('active', 'text-purple-400', 'border-purple-400');
+                            t.classList.add('text-gray-400', 'border-transparent', 'hover:text-gray-200', 'hover:border-gray-500');
+                        });
                         tab.classList.add('active', 'text-purple-400', 'border-purple-400');
+                        tab.classList.remove('text-gray-400', 'border-transparent', 'hover:text-gray-200', 'hover:border-gray-500');
+
                         tabContents.forEach(content => content.classList.remove('active'));
                         document.getElementById(tab.id.replace('tab-', 'content-')).classList.add('active');
                     });
@@ -303,7 +309,7 @@
                 const statusValue = document.getElementById('status-filter').value;
 
                 let filteredData = data.filter(session => {
-                    const searchMatch = session.ipAddress.toLowerCase().includes(searchTerm) || session.country.toLowerCase().includes(searchTerm);
+                    const searchMatch = session.ipAddress.toLowerCase().includes(searchTerm) || session.country.toLowerCase().includes(searchTerm) || (session.email && session.email.toLowerCase().includes(searchTerm));
                     const statusMatch = statusValue ? session.paymentStatus === statusValue : true;
                     return searchMatch && statusMatch;
                 });
@@ -398,35 +404,36 @@
             function calculateAndRenderFunnel() {
                 const checkedCheckboxes = document.querySelectorAll('.funnel-source-checkbox:checked');
                 const selectedSources = [...checkedCheckboxes].map(cb => cb.value);
-                const startDate = document.getElementById('funnel-start-date').value;
-                const endDate = document.getElementById('funnel-end-date').value;
+                const startDateInput = document.getElementById('funnel-start-date').value;
+                const endDateInput = document.getElementById('funnel-end-date').value;
 
-                let filteredSessions = allSessionsData.filter(session => {
+                const filteredSessions = allSessionsData.filter(session => {
                     const sessionDate = new Date(session.createdAt);
                     const sourceMatch = selectedSources.length === 0 || selectedSources.includes(session.trafficSource);
-                    const startDateMatch = !startDate || sessionDate >= new Date(startDate);
-                    const endDateMatch = !endDate || sessionDate <= new Date(endDate + 'T23:59:59');
+                    const startDateMatch = !startDateInput || sessionDate >= new Date(startDateInput);
+                    const endDateMatch = !endDateInput || sessionDate <= new Date(endDateInput + 'T23:59:59');
                     return sourceMatch && startDateMatch && endDateMatch;
                 });
-
+                
+                // ОБНОВЛЕНО: Новая, более точная логика воронки
                 const funnelSteps = [
-                    { name: 'Quiz Started', condition: session => true },
-                    { name: '1. Answered Goal', condition: session => session.answers.hasOwnProperty('userGoal') }, // Обновлено
-                    { name: '2. Answered Age & Gender', condition: session => session.answers.hasOwnProperty('age') && session.answers.hasOwnProperty('gender') },
-                    { name: '3. Answered Body Stats', condition: session => session.answers.hasOwnProperty('weight') && session.answers.hasOwnProperty('height') },
-                    { name: '4. Answered Lifestyle (Start)', condition: session => session.answers.hasOwnProperty('sleep') },
-                    { name: '5. Answered Lifestyle (Middle)', condition: session => session.answers.hasOwnProperty('stress') },
-                    { name: '6. Answered Lifestyle (End)', condition: session => session.answers.hasOwnProperty('screen_time') },
-                    { name: '7. Took Photo', condition: session => session.answers.hasOwnProperty('selfie') && session.answers.selfie !== 'skipped' }, // Уточнено
-                    { name: '8. Answered Email', condition: session => session.answers.hasOwnProperty('email') },
-                    { name: '9. Quiz Completed (All questions)', condition: session => session.progressPercent === 100 },
-                    { name: '10. Reached Payment', condition: session => session.paymentStatus !== 'pending' || (session.errors && session.errors.some(e => e.message.includes('Payment'))) },
-                    { name: '11. Purchased', condition: session => session.paymentStatus === 'succeeded' }
+                    { name: '1. Session Started', condition: s => true },
+                    { name: '2. Quiz Started (Answered Goal)', condition: s => s.answers && s.answers.hasOwnProperty('userGoal') },
+                    { name: '3. Core Quiz Completed (Lifestyle)', condition: s => s.answers && s.answers.hasOwnProperty('screen_time') },
+                    { name: '4. Reached Profile Page (Pre-analysis done)', condition: s => s.hasOwnProperty('preliminaryResult') },
+                    { name: '5. Reached Payment Page', condition: s => s.hasOwnProperty('planType') },
+                    { name: '6. Payment Completed', condition: s => s.paymentStatus === 'succeeded' }
                 ];
+
 
                 let results = [];
                 let previousStepCount = filteredSessions.length;
                 const initialCount = filteredSessions.length;
+
+                if (initialCount === 0) {
+                     document.getElementById('funnel-results-container').innerHTML = '<p class="text-center text-gray-400 mt-4">No sessions found for the selected filters.</p>';
+                     return;
+                }
 
                 funnelSteps.forEach(step => {
                     const stepSessions = filteredSessions.filter(step.condition);
@@ -446,11 +453,6 @@
 
             function renderFunnelResults(results) {
                 const container = document.getElementById('funnel-results-container');
-                if (results[0].count === 0) {
-                    container.innerHTML = '<p class="text-center text-gray-400 mt-4">No sessions found for the selected filters.</p>';
-                    return;
-                }
-
                 const maxCount = results[0].count;
                 const tableRows = results.map(step => `
                     <tr class="border-b border-gray-700">
@@ -469,7 +471,7 @@
                 `).join('');
 
                 container.innerHTML = `
-                    <div class="overflow-x-auto rounded-lg border border-gray-700">
+                    <div class="overflow-x-auto rounded-lg border border-gray-700 mt-6">
                         <table class="min-w-full funnel-table">
                             <thead>
                                 <tr>
