@@ -1148,34 +1148,101 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function startQuizSession() {
-        const startBtn = document.getElementById('start-quiz-btn');
+    const startBtn = document.getElementById('start-quiz-btn');
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    // Функция для попытки создания сессии
+    const attemptSessionCreation = async () => {
         try {
+            // Добавляем информацию об устройстве и источнике трафика
+            const deviceType = /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
+            const urlParams = new URLSearchParams(window.location.search);
+            const trafficSource = urlParams.get('utm_source') || urlParams.get('ref') || 'direct';
+            
             const response = await fetch('/.netlify/functions/quiz', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'startSession' })
+                body: JSON.stringify({ 
+                    action: 'startSession',
+                    deviceType: deviceType,
+                    source: trafficSource
+                })
             });
+            
             if (!response.ok) {
                 throw new Error(`Could not start session. Status: ${response.status}`);
             }
+            
             const data = await response.json();
+            if (!data.sessionId) {
+                throw new Error('Session ID not received from server');
+            }
+            
             App.sessionId = data.sessionId;
             console.log('Session successfully started:', App.sessionId);
-
-            // !!! РАЗБЛОКИРУЕМ КНОПКУ ЗДЕСЬ !!!
+            
+            // Сохраняем sessionId в sessionStorage как резервную копию
+            sessionStorage.setItem('quiz_session_id', App.sessionId);
+            
+            // Разблокируем кнопку только после успешного создания сессии
             if(startBtn) {
                 startBtn.disabled = false;
+                startBtn.textContent = "Let's start";
             }
-
+            
+            return true;
+            
         } catch (error) {
-            console.error('CRITICAL: Failed to start session:', error);
-            if(startBtn) {
-                startBtn.textContent = 'Error: Refresh Page';
+            console.error(`Session creation attempt ${retryCount + 1} failed:`, error);
+            retryCount++;
+            
+            if (retryCount < maxRetries) {
+                // Ждем перед повторной попыткой (экспоненциальная задержка)
+                await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
+                return attemptSessionCreation();
+            } else {
+                throw error;
             }
-            // ... остальной код обработки ошибки
-            document.body.innerHTML = `<div class="w-full h-screen flex items-center justify-center text-center p-4"><div><h1 class="text-2xl font-bold text-red-600">Initialization Error</h1><p class="text-gray-700 mt-2">Could not start a new session. Please refresh the page to try again.</p></div></div>`;
         }
+    };
+    
+    // Запускаем создание сессии
+    try {
+        await attemptSessionCreation();
+    } catch (error) {
+        console.error('CRITICAL: Failed to start session after all retries:', error);
+        
+        if(startBtn) {
+            startBtn.textContent = 'Connection Error - Refresh Page';
+            startBtn.classList.add('bg-red-500');
+        }
+        
+        // Показываем понятное сообщение об ошибке пользователю
+        const errorModal = document.createElement('div');
+        errorModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+        errorModal.innerHTML = `
+            <div class="bg-white rounded-lg p-6 max-w-md w-full">
+                <h2 class="text-xl font-bold text-red-600 mb-2">Connection Error</h2>
+                <p class="text-gray-700 mb-4">We couldn't connect to our servers. This might be due to:</p>
+                <ul class="list-disc list-inside text-gray-600 mb-4">
+                    <li>Poor internet connection</li>
+                    <li>Browser blocking cookies</li>
+                    <li>Ad blocker interference</li>
+                </ul>
+                <div class="flex gap-3">
+                    <button onclick="location.reload()" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                        Try Again
+                    </button>
+                    <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">
+                        Close
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(errorModal);
     }
+}
 
 
     // --- App Initialization ---
