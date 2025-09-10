@@ -10,12 +10,11 @@ if (!getApps().length) {
 }
 const db = getFirestore();
 
+// ОБНОВЛЕНО: Полностью синхронизированный список вопросов с quiz-new.html
 const ALL_QUESTION_KEYS = [
-    'userGoal', 'name', 'start_consent', 'age', 'gender', 'height', 'weight',
-    'sleep', 'activity', 'nutrition', 'processed_food', 'hydration', 'stress',
-    'mindfulness', 'mood', 'alcohol', 'smoking', 'screen_time',
-    'selfie',
-    'email'
+    'userGoal', 'age', 'gender', 'height', 'weight', 'sleep', 'activity', 
+    'nutrition', 'processed_food', 'hydration', 'stress', 'mindfulness', 
+    'mood', 'alcohol', 'smoking', 'screen_time', 'selfie', 'email'
 ];
 const TOTAL_QUESTIONS = ALL_QUESTION_KEYS.length;
 
@@ -47,10 +46,7 @@ exports.handler = async (event) => {
         messagesData = messagesSnapshot.docs.map(doc => {
             const data = doc.data();
             return {
-                id: doc.id,
-                name: data.name,
-                email: data.email,
-                subject: data.subject,
+                id: doc.id, name: data.name, email: data.email, subject: data.subject,
                 message: data.message,
                 receivedAt: new Date(data.createdAt).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })
             };
@@ -58,14 +54,7 @@ exports.handler = async (event) => {
     }
 
     if (sessionsSnapshot.empty) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          sessions: [],
-          statistics: {},
-          messages: messagesData
-        })
-      };
+      return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: {}, messages: messagesData }) };
     }
 
     let totalRevenue = 0;
@@ -80,10 +69,10 @@ exports.handler = async (event) => {
       
       const answeredKeys = Object.keys(answers).filter(key => ALL_QUESTION_KEYS.includes(key));
       const answeredCount = answeredKeys.length;
-      const progressPercent = Math.round((answeredCount / TOTAL_QUESTIONS) * 100);
+      const progressPercent = TOTAL_QUESTIONS > 0 ? Math.round((answeredCount / TOTAL_QUESTIONS) * 100) : 0;
       const progress = `${answeredCount} of ${TOTAL_QUESTIONS} (${progressPercent}%)`;
 
-      if (answers.hasOwnProperty('screen_time')) {
+      if (answers.hasOwnProperty('email')) {
         completedQuizzes++;
       }
 
@@ -132,7 +121,8 @@ exports.handler = async (event) => {
         paymentMethod: data.paymentStatus === 'succeeded' ? 'Card/Wallet' : 'N/A',
         errors: data.errors || [],
         answers: answers,
-        resultLink: `result.html?session_id=${data.sessionId}`
+        // Ссылка на новый гибридный отчет
+        resultLink: `result-hybrid.html?session_id=${doc.id}`
       };
     });
 
