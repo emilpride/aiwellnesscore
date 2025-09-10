@@ -59,9 +59,9 @@ exports.handler = async (event) => {
         });
         console.log(`Successfully updated payment status for session: ${sessionId}`);
 
-        // --- ИСПРАВЛЕННЫЙ БЛОК ---
-// Запускаем генерацию отчета и ждем подтверждения запуска
-console.log(`[${sessionId}] Triggering hybrid report generation...`);
+      // --- ИСПРАВЛЕННЫЙ БЛОК ---
+// Запускаем генерацию отчета и ждем результат
+console.log(`[${sessionId}] Starting hybrid report generation...`);
 try {
     const reportResponse = await fetch(`${process.env.URL}/.netlify/functions/generate-report-hybrid`, {
         method: 'POST',
@@ -70,18 +70,34 @@ try {
     });
     
     if (!reportResponse.ok) {
-        console.error(`[${sessionId}] Report generation request failed with status: ${reportResponse.status}`);
-        // Сохраняем информацию об ошибке в базу данных
+        const errorText = await reportResponse.text();
+        console.error(`[${sessionId}] Report generation failed with status ${reportResponse.status}:`, errorText);
+        
+        // Сохраняем информацию об ошибке
         await sessionRef.update({
-            reportGenerationError: `Failed to start report generation at ${new Date().toISOString()}`,
-            needsManualReportGeneration: true
+            reportGenerationError: `HTTP ${reportResponse.status}: ${errorText}`,
+            needsManualReportGeneration: true,
+            reportGenerationAttemptedAt: new Date().toISOString()
         });
     } else {
-        console.log(`[${sessionId}] Report generation started successfully`);
+        const result = await reportResponse.json();
+        console.log(`[${sessionId}] Report generation completed successfully`);
+        
+        // Дополнительно проверяем, что отчет действительно сохранен
+        const checkDoc = await sessionRef.get();
+        const checkData = checkDoc.data();
+        if (!checkData.reportData) {
+            console.error(`[${sessionId}] Report data not found after generation!`);
+            await sessionRef.update({
+                reportGenerationError: 'Report data missing after generation',
+                needsManualReportGeneration: true
+            });
+        } else {
+            console.log(`[${sessionId}] Report data confirmed in database`);
+        }
     }
 } catch (err) {
-    console.error(`[${sessionId}] Critical error triggering report generation:`, err);
-    // Критическая ошибка - обязательно сохраняем для ручной обработки
+    console.error(`[${sessionId}] Critical error during report generation:`, err);
     await sessionRef.update({
         reportGenerationError: err.message,
         needsManualReportGeneration: true,
