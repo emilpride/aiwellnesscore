@@ -29,6 +29,13 @@ exports.handler = async (event) => {
     }
 
     const sessionData = doc.data();
+    // ДОБАВИТЬ ЭТИ СТРОКИ ДЛЯ ОТЛАДКИ:
+console.log(`[${sessionId}] Session data status:`, {
+    hasReportData: !!sessionData.reportData,
+    hasReportError: !!sessionData.reportError,
+    reportStatus: sessionData.reportStatus,
+    paymentStatus: sessionData.paymentStatus
+});
 
     // 1. Проверяем готовый отчет
     if (sessionData.reportData) {
