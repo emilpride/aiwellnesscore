@@ -240,22 +240,68 @@ exports.handler = async (event) => {
             break;
     }
 
-    const reportData = {
-      userName: answers.name || "there",
-      chronoAge: chronoAge,
-      wellnessAge: bioAgeResult.biologicalAge,
-      ageReductionPrediction: ageReductionPrediction,
-      increasingFactors: factors.increasing,
-      decreasingFactors: factors.decreasing,
-      metrics: metrics, // Передаем все рассчитанные метрики
-      insights: insights, // Передаем все инсайты
-      skinAnalysis: {
-         dark_circle: faceAnalysis?.faces?.[0]?.attributes?.skinstatus?.dark_circle > 30 ? 1 : 0,
-         conclusion: "Your skin is in good condition, but reducing stress could improve under-eye brightness."
-      },
-      archetype: archetype,
-      sevenDayPlan: plan,
-    };
+    // ДОБАВИТЬ ПЕРЕД reportData эти переменные:
+const standardLifespan = 82;
+
+// Формируем текстовое объяснение разницы в возрасте
+let ageExplanation = '';
+if (bioAgeResult.ageCorrection > 0) {
+    ageExplanation = `Your biological age is ${bioAgeResult.ageCorrection} years higher than your chronological age. This indicates that certain lifestyle factors are accelerating your aging process. The good news is that our personalized plan can help you reverse this trend.`;
+} else if (bioAgeResult.ageCorrection < 0) {
+    ageExplanation = `Excellent! Your biological age is ${Math.abs(bioAgeResult.ageCorrection)} years younger than your chronological age. Your healthy habits are paying off, and our plan will help you maintain and improve these results.`;
+} else {
+    ageExplanation = `Your biological age matches your chronological age. This means you're aging at a normal rate, but there's still room for improvement to potentially reverse your biological clock.`;
+}
+
+// Формируем заключение по коже
+let skinConclusion = "Skin analysis was not performed.";
+if (faceAnalysis && faceAnalysis.faces && faceAnalysis.faces.length > 0) {
+    const skinStatus = faceAnalysis.faces[0].attributes.skinstatus;
+    let skinIssues = [];
+    
+    if (skinStatus.dark_circle > 30) skinIssues.push("dark circles");
+    if (skinStatus.eye_pouch > 30) skinIssues.push("eye puffiness");
+    if (skinStatus.forehead_wrinkle > 20) skinIssues.push("forehead lines");
+    if (skinStatus.acne > 10) skinIssues.push("acne");
+    
+    if (skinIssues.length > 0) {
+        skinConclusion = `Your skin analysis reveals some areas for improvement, including ${skinIssues.join(", ")}. These indicators often correlate with stress, sleep quality, and hydration levels.`;
+    } else {
+        skinConclusion = "Your skin is in excellent condition! Continue with your current skincare routine and healthy habits.";
+    }
+}
+
+// Получаем URL фото пользователя
+const userPhotoUrl = answers.selfie && answers.selfie !== 'skipped' ? answers.selfie : null;
+
+// ТЕПЕРЬ САМ reportData:
+const reportData = {
+  userName: answers.name || "Valued User",
+  chronoAge: chronoAge,
+  wellnessAge: bioAgeResult.biologicalAge,
+  ageCorrection: bioAgeResult.ageCorrection,
+  ageExplanation: ageExplanation, // НОВОЕ ПОЛЕ
+  ageReductionPrediction: ageReductionPrediction,
+  increasingFactors: factors.increasing,
+  decreasingFactors: factors.decreasing,
+  metrics: metrics,
+  insights: insights,
+  skinAnalysis: {
+    dark_circle: faceAnalysis?.faces?.[0]?.attributes?.skinstatus?.dark_circle || 0,
+    eye_pouch: faceAnalysis?.faces?.[0]?.attributes?.skinstatus?.eye_pouch || 0,
+    forehead_wrinkle: faceAnalysis?.faces?.[0]?.attributes?.skinstatus?.forehead_wrinkle || 0,
+    acne: faceAnalysis?.faces?.[0]?.attributes?.skinstatus?.acne || 0,
+    skin_spot: faceAnalysis?.faces?.[0]?.attributes?.skinstatus?.skin_spot || 0
+  },
+  skinConclusion: skinConclusion, // НОВОЕ ПОЛЕ
+  userPhotoUrl: userPhotoUrl, // НОВОЕ ПОЛЕ
+  archetype: archetype,
+  sevenDayPlan: plan,
+  potential: { // НОВОЕ ПОЛЕ
+    age: bioAgeResult.biologicalAge - (planType === 'premium' ? 3 : planType === 'advanced' ? 2 : 1),
+    lifespan: standardLifespan + (planType === 'premium' ? 5 : planType === 'advanced' ? 4 : 2)
+  }
+};
 
     await sessionRef.update({ 
         reportData: reportData, 
