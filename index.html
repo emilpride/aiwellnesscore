@@ -395,7 +395,9 @@
                             if (scoreText && scoreRing && !scoreText.dataset.animated) {
                                 scoreText.dataset.animated = 'true';
                                 const finalScore = 82;
-                                const circumference = scoreRing.r.baseVal.value * 2 * Math.PI;
+                                
+                                const radius = 15.9155;
+                                const circumference = radius * 2 * Math.PI;
                                 
                                 scoreRing.style.strokeDasharray = `${circumference} ${circumference}`;
                                 scoreRing.style.strokeDashoffset = circumference;
@@ -405,7 +407,6 @@
                                    scoreRing.style.strokeDashoffset = offset;
                                 }, 100);
 
-                                // ИЗМЕНЕНИЕ ЗДЕСЬ: Начальное значение 50 и скорость 25мс
                                 let currentScore = 50;
                                 const interval = setInterval(() => {
                                     if (currentScore >= finalScore) {
@@ -487,7 +488,7 @@
                 });
             }
 
-            // --- NEW: Cookie Consent Logic ---
+            // --- Cookie Consent Logic ---
             const consentBanner = document.getElementById('cookie-consent-banner');
             const acceptBtn = document.getElementById('accept-cookies-btn');
 
