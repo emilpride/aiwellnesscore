@@ -185,7 +185,7 @@
 
     <div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex-col items-center justify-center">
         <div class="w-16 h-16 border-4 border-gray-300 border-t-[--brand-accent] rounded-full animate-spin"></div>
-        <p class="mt-4 text-lg font-semibold text-gray-700">Loading secure payment...</p>
+        <p class="mt-4 text-lg font-semibold text-gray-700">Loading your data...</p>
     </div>
     
     <div id="payment-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
@@ -450,11 +450,15 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- CONFIGURATION ---
+            // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
+            let selectedPlanKey = 'advanced';
+            let stripe, elements;
+            let currentBioAge, standardLifespan, planData;
+            let bioAgeChartInstance, lifespanChartInstance;
+            let chartsRendered = false;
             const STRIPE_PUBLISHABLE_KEY = 'pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb';
-            const sessionId = new URLSearchParams(window.location.search).get('session_id');
-            
-            // --- DOM ELEMENTS ---
+
+            // --- DOM-ЭЛЕМЕНТЫ ---
             const salesSection = document.getElementById('sales-section');
             const scrollToPlansBtn = document.getElementById('scroll-to-plans-btn');
             const paymentModal = document.getElementById('payment-modal');
@@ -468,19 +472,68 @@
             const planToggles = document.getElementById('plan-toggles');
             const modalRegularPrice = document.getElementById('modal-regular-price');
             const modalTotalPrice = document.getElementById('modal-total-price');
-            
-            // --- APP STATE ---
-            let selectedPlanKey = 'advanced';
-            let stripe, elements;
 
-            // --- DATA ---
-            const planData = {
-                basic: { price: 9.99, regularPrice: 19.99, potentialBioAge: 34, potentialLifespan: 84 },
-                advanced: { price: 13.99, regularPrice: 29.99, potentialBioAge: 33, potentialLifespan: 86 },
-                premium: { price: 19.99, regularPrice: 49.99, potentialBioAge: 32, potentialLifespan: 87 }
-            };
+            // --- ФУНКЦИИ ---
 
-            // --- FUNCTIONS ---
+            // 1. Функция для загрузки данных с сервера
+            async function fetchPreliminaryData() {
+                const sessionId = new URLSearchParams(window.location.search).get('session_id');
+                if (!sessionId) {
+                    throw new Error("Session ID not found in URL.");
+                }
+                const response = await fetch('/.netlify/functions/getProfileData', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId })
+                });
+                if (!response.ok) {
+                    throw new Error("Failed to fetch profile data from server.");
+                }
+                return await response.json();
+            }
+
+            // 2. Главная функция инициализации страницы
+            async function initializePage() {
+                const loadingOverlay = document.getElementById('loading-overlay');
+                loadingOverlay.classList.add('active');
+
+                try {
+                    const data = await fetchPreliminaryData();
+                    
+                    // Устанавливаем глобальные переменные на основе реальных данных
+                    currentBioAge = data.bioAgeResult.biologicalAge;
+                    standardLifespan = 82; // Это значение можно сделать динамическим, если потребуется
+
+                    // Создаем динамический объект с планами на основе реального возраста
+                    planData = {
+                        basic: { price: 9.99, regularPrice: 19.99, potentialBioAge: currentBioAge - 1, potentialLifespan: standardLifespan + 2 },
+                        advanced: { price: 13.99, regularPrice: 29.99, potentialBioAge: currentBioAge - 2, potentialLifespan: standardLifespan + 4 },
+                        premium: { price: 19.99, regularPrice: 49.99, potentialBioAge: currentBioAge - 3, potentialLifespan: standardLifespan + 5 }
+                    };
+
+                    // Обновляем текстовые поля на странице
+                    document.getElementById('current-bio-age').textContent = currentBioAge;
+                    document.getElementById('potential-bio-age').textContent = planData.premium.potentialBioAge;
+                    
+                } catch (error) {
+                    console.error("Initialization failed:", error);
+                    // Если загрузка не удалась, используем данные по умолчанию
+                    currentBioAge = 35;
+                    standardLifespan = 82;
+                    planData = {
+                        basic: { price: 9.99, regularPrice: 19.99, potentialBioAge: 34, potentialLifespan: 84 },
+                        advanced: { price: 13.99, regularPrice: 29.99, potentialBioAge: 33, potentialLifespan: 86 },
+                        premium: { price: 19.99, regularPrice: 49.99, potentialBioAge: 32, potentialLifespan: 87 }
+                    };
+                    document.getElementById('current-bio-age').textContent = currentBioAge;
+                    document.getElementById('potential-bio-age').textContent = currentBioAge - 3;
+                } finally {
+                    // Устанавливаем все обработчики событий и инициализируем графики
+                    setupEventListeners();
+                    initCharts();
+                    loadingOverlay.classList.remove('active');
+                }
+            }
             
             function showModal() {
                 paymentModal.classList.remove('opacity-0', 'pointer-events-none');
@@ -494,7 +547,8 @@
             
             async function initializePaymentForm() {
                 document.getElementById('loading-overlay').classList.add('active');
-                
+                const sessionId = new URLSearchParams(window.location.search).get('session_id');
+
                 const selectedPlan = planData[selectedPlanKey];
                 modalRegularPrice.textContent = `$${selectedPlan.regularPrice.toFixed(2)}`;
                 modalTotalPrice.textContent = `$${selectedPlan.price.toFixed(2)}`;
@@ -514,9 +568,7 @@
                     if (!clientSecret) throw new Error('Failed to get client secret.');
 
                     stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-                    
                     const appearance = { theme: 'stripe' };
-                    
                     elements = stripe.elements({ appearance, clientSecret });
                     const paymentElement = elements.create("payment", { layout: "tabs" });
                     paymentElement.mount(paymentElementContainer);
@@ -534,6 +586,7 @@
             async function handleSubmit(e) {
                 e.preventDefault();
                 setLoading(true);
+                const sessionId = new URLSearchParams(window.location.search).get('session_id');
 
                 const { error } = await stripe.confirmPayment({
                     elements,
@@ -547,7 +600,6 @@
                 } else {
                     showMessage("An unexpected error occurred.");
                 }
-
                 setLoading(false);
             }
             
@@ -563,56 +615,56 @@
                 submitBtn.querySelector('#spinner').classList.toggle('hidden', !isLoading);
                 submitBtn.querySelector('#button-text').classList.toggle('hidden', isLoading);
             }
-            
-            // --- EVENT LISTENERS ---
-            if (scrollToPlansBtn) {
-                 scrollToPlansBtn.addEventListener('click', () => {
-                     salesSection.scrollIntoView({ behavior: 'smooth' });
-                 });
-            }
-            openModalButtons.forEach(btn => btn.addEventListener('click', initializePaymentForm));
-            closeModalBtn.addEventListener('click', hideModal);
-            if(paymentForm) paymentForm.addEventListener('submit', handleSubmit);
-            
-            // --- INITIALIZATION ---
-            // Timer, plan selection, charts logic...
-            const minutesEl = document.getElementById('minutes');
-            const secondsEl = document.getElementById('seconds');
-            let timeLeft = 9 * 60 + 59;
-            if (minutesEl && secondsEl) {
-                const timerInterval = setInterval(() => {
-                    if (timeLeft < 0) { clearInterval(timerInterval); return; }
-                    const minutes = Math.floor(timeLeft / 60);
-                    const seconds = timeLeft % 60;
-                    minutesEl.textContent = String(minutes).padStart(2, '0');
-                    secondsEl.textContent = String(seconds).padStart(2, '0');
-                    timeLeft--;
-                }, 1000);
-            }
 
-            const currentBioAge = 35;
-            const standardLifespan = 82;
-            document.getElementById('current-bio-age').textContent = currentBioAge;
-            document.getElementById('potential-bio-age').textContent = planData.premium.potentialBioAge;
-            let bioAgeChartInstance, lifespanChartInstance;
-            let chartsRendered = false;
+            function setupEventListeners() {
+                if (scrollToPlansBtn) {
+                     scrollToPlansBtn.addEventListener('click', () => {
+                        salesSection.scrollIntoView({ behavior: 'smooth' });
+                     });
+                }
+                openModalButtons.forEach(btn => btn.addEventListener('click', initializePaymentForm));
+                closeModalBtn.addEventListener('click', hideModal);
+                if(paymentForm) paymentForm.addEventListener('submit', handleSubmit);
+                
+                const minutesEl = document.getElementById('minutes');
+                const secondsEl = document.getElementById('seconds');
+                let timeLeft = 9 * 60 + 59;
+                if (minutesEl && secondsEl) {
+                    const timerInterval = setInterval(() => {
+                        if (timeLeft < 0) { clearInterval(timerInterval); return; }
+                        const minutes = Math.floor(timeLeft / 60);
+                        const seconds = timeLeft % 60;
+                        minutesEl.textContent = String(minutes).padStart(2, '0');
+                        secondsEl.textContent = String(seconds).padStart(2, '0');
+                        timeLeft--;
+                    }, 1000);
+                }
+                
+                if (plansContainer) {
+                    const initialRadio = plansContainer.querySelector('input[type="radio"][value="advanced"]');
+                    if(initialRadio) initialRadio.checked = true;
+                    plansContainer.addEventListener('change', (e) => {
+                        if(e.target.name === 'plan') updateUIForPlan(e.target.value);
+                    });
+                }
+                if (planToggles) {
+                    planToggles.addEventListener('click', (e) => {
+                        const button = e.target.closest('.plan-toggle-btn');
+                        if(button && button.dataset.plan) updateUIForPlan(button.dataset.plan);
+                    });
+                }
+            }
 
             function updateUIForPlan(planKey) {
                 if (!planData[planKey]) return;
                 selectedPlanKey = planKey;
-
-                // Update radio button state
                 if (plansContainer) {
                     const radioToSelect = plansContainer.querySelector(`input[type="radio"][value="${planKey}"]`);
                     if (radioToSelect) radioToSelect.checked = true;
                 }
-
-                // Update toggle buttons at the bottom
                 if (planToggles) {
                     planToggles.querySelectorAll('.plan-toggle-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.plan === planKey));
                 }
-                
-                // Update charts if they are rendered
                 if (chartsRendered) {
                     const data = planData[planKey];
                     bioAgeChartInstance.data.datasets[0].data[1] = data.potentialBioAge;
@@ -622,62 +674,42 @@
                 }
             }
 
-            // Listen for changes in the pricing radio buttons
-            if (plansContainer) {
-                 const initialSelectedPlan = plansContainer.querySelector('input[name="plan"]:checked');
-                 if (initialSelectedPlan) {
-                     selectedPlanKey = initialSelectedPlan.value;
-                 }
-                 plansContainer.addEventListener('change', (e) => {
-                     if(e.target.name === 'plan') {
-                         updateUIForPlan(e.target.value);
-                     }
-                 });
+            function initCharts() {
+                const chartObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting && !chartsRendered) {
+                            const bioAgeCtx = document.getElementById('bioAgeChart')?.getContext('2d');
+                            const lifespanCtx = document.getElementById('lifespanChart')?.getContext('2d');
+                            if (!bioAgeCtx || !lifespanCtx) return;
+                            
+                            const initialPlan = planData[selectedPlanKey];
+                            const animationOptions = {
+                                duration: 1200, easing: 'easeInOutCubic',
+                                delay: (context) => {
+                                    let delay = 0;
+                                    if (context.type === 'data' && context.mode === 'dataset') { delay = context.dataIndex * 200 + context.datasetIndex * 100; }
+                                    return delay;
+                                },
+                            };
+                            bioAgeChartInstance = new Chart(bioAgeCtx, {
+                                type: 'bar', data: { labels: ['Now', 'With Our Plan'], datasets: [{ label: 'Biological Age', data: [currentBioAge, initialPlan.potentialBioAge], backgroundColor: ['rgba(60, 59, 49, 0.2)', 'rgba(222, 190, 169, 0.8)'], borderColor: ['rgba(60, 59, 49, 1)', 'rgba(222, 190, 169, 1)'], borderWidth: 2, borderRadius: 8, }] },
+                                options: { responsive: true, maintainAspectRatio: false, animation: animationOptions, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { y: { beginAtZero: false, min: Math.min(currentBioAge, ...Object.values(planData).map(p => p.potentialBioAge)) - 2, grid: { drawOnChartArea: false, drawBorder: false }, ticks: { font: { weight: 'bold' } } }, x: { grid: { display: false } } } }
+                            });
+                            lifespanChartInstance = new Chart(lifespanCtx, {
+                                type: 'bar', data: { labels: ['Standard Forecast', 'With Our Plan'], datasets: [{ label: 'Life Expectancy', data: [standardLifespan, initialPlan.potentialLifespan], backgroundColor: ['rgba(156, 163, 175, 0.4)', 'rgba(52, 211, 153, 0.6)'], borderColor: ['rgba(107, 114, 128, 1)', 'rgba(5, 150, 105, 1)'], borderWidth: 2, borderRadius: 8, }] },
+                                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', animation: animationOptions, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { beginAtZero: false, min: Math.min(standardLifespan, ...Object.values(planData).map(p => p.potentialLifespan)) - 5, grid: { drawOnChartArea: false, drawBorder: false }, ticks: { font: { weight: 'bold' } } }, y: { grid: { display: false }, ticks: { font: { size: 14 } } } } }
+                            });
+                            chartsRendered = true;
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.5 });
+                const chartsSection = document.getElementById('charts-section');
+                if (chartsSection) chartObserver.observe(chartsSection);
             }
             
-            // Listen for clicks on chart toggle buttons
-            if (planToggles) {
-                planToggles.addEventListener('click', (e) => {
-                    const button = e.target.closest('.plan-toggle-btn');
-                    if(button && button.dataset.plan) updateUIForPlan(button.dataset.plan);
-                });
-            }
+            initializePage();
 
-            const initCharts = () => {
-                const bioAgeCtx = document.getElementById('bioAgeChart')?.getContext('2d');
-                const lifespanCtx = document.getElementById('lifespanChart')?.getContext('2d');
-                if (!bioAgeCtx || !lifespanCtx) return;
-                const initialPlan = planData[selectedPlanKey];
-                const animationOptions = {
-                    duration: 1200, easing: 'easeInOutCubic',
-                    delay: (context) => {
-                        let delay = 0;
-                        if (context.type === 'data' && context.mode === 'dataset') { delay = context.dataIndex * 200 + context.datasetIndex * 100; }
-                        return delay;
-                    },
-                };
-                bioAgeChartInstance = new Chart(bioAgeCtx, {
-                    type: 'bar', data: { labels: ['Now', 'With Our Plan'], datasets: [{ label: 'Biological Age', data: [currentBioAge, initialPlan.potentialBioAge], backgroundColor: ['rgba(60, 59, 49, 0.2)', 'rgba(222, 190, 169, 0.8)'], borderColor: ['rgba(60, 59, 49, 1)', 'rgba(222, 190, 169, 1)'], borderWidth: 2, borderRadius: 8, }] },
-                    options: { responsive: true, maintainAspectRatio: false, animation: animationOptions, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { y: { min: Math.min(currentBioAge, ...Object.values(planData).map(p => p.potentialBioAge)) - 2, grid: { drawOnChartArea: false, drawBorder: false }, ticks: { font: { weight: 'bold' } } }, x: { grid: { display: false } } } }
-                });
-                lifespanChartInstance = new Chart(lifespanCtx, {
-                    type: 'bar', data: { labels: ['Standard Forecast', 'With Our Plan'], datasets: [{ label: 'Life Expectancy', data: [standardLifespan, initialPlan.potentialLifespan], backgroundColor: ['rgba(156, 163, 175, 0.4)', 'rgba(52, 211, 153, 0.6)'], borderColor: ['rgba(107, 114, 128, 1)', 'rgba(5, 150, 105, 1)'], borderWidth: 2, borderRadius: 8, }] },
-                    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', animation: animationOptions, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { min: Math.min(standardLifespan, ...Object.values(planData).map(p => p.potentialLifespan)) - 5, grid: { drawOnChartArea: false, drawBorder: false }, ticks: { font: { weight: 'bold' } } }, y: { grid: { display: false }, ticks: { font: { size: 14 } } } } }
-                });
-                chartsRendered = true;
-            };
-            const chartObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting && !chartsRendered) {
-                        initCharts();
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.5 });
-            const chartsSection = document.getElementById('charts-section');
-            if (chartsSection) chartObserver.observe(chartsSection);
-
-            // Lottie Animation for Arrow
             try {
                 lottie.loadAnimation({
                     container: document.getElementById('arrow-animation'),
