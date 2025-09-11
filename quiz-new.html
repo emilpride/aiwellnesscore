@@ -1115,7 +1115,7 @@ async function openCamera() {
         
     if (!App.faceMesh) {
         try {
-            App.faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@medipe/face_mesh/${file}`});
+            App.faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
             App.faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
             App.faceMesh.onResults(onFaceMeshResults);
             await App.faceMesh.initialize();
