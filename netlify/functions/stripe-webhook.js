@@ -3,22 +3,23 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
-const axios = require('axios');
-const crypto = require('crypto');
 
-// ... (код инициализации Firebase и функции hashData, sendPurchaseEventToMeta остаются без изменений)
-// ... existing code ...
-const hashData = (data) => {
-// ... existing code ...
-};
-const sendPurchaseEventToMeta = async (paymentIntent, sessionData) => {
-// ... existing code ...
-};
+// ... (остальной код инициализации Firebase и вспомогательных функций)
 
+if (!getApps().length) {
+  try {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
+    initializeApp({ credential: cert(serviceAccount) });
+  } catch (e) { console.error("Firebase init error in stripe-webhook.js:", e); }
+}
+const db = getFirestore();
+
+// ... (вспомогательные функции hashData и sendPurchaseEventToMeta)
 
 exports.handler = async (event) => {
   const sig = event.headers['stripe-signature'];
   if (!sig) {
+    console.error('Webhook Error: No stripe-signature header.');
     return { statusCode: 400, body: 'No signature' };
   }
 
@@ -30,23 +31,25 @@ exports.handler = async (event) => {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
+    // --- УЛУЧШЕННОЕ ЛОГИРОВАНИЕ ---
     console.error(`Webhook signature verification failed:`, err.message);
+    console.error('Make sure STRIPE_WEBHOOK_SECRET environment variable is set correctly in Netlify.');
+    // --- КОНЕЦ УЛУЧШЕНИЯ ---
     return { statusCode: 400, body: `Webhook Error: ${err.message}` };
   }
 
   const paymentIntent = stripeEvent.data.object;
   const sessionId = paymentIntent.metadata?.sessionId;
   if (!sessionId) {
-    console.warn('No sessionId in payment metadata');
-    return { statusCode: 200, body: JSON.stringify({ received: true }) };
+    console.warn('No sessionId in payment metadata. Ignoring webhook.');
+    return { statusCode: 200, body: JSON.stringify({ received: true, message: 'No session ID' }) };
   }
 
   const sessionRef = db.collection('sessions').doc(sessionId);
 
   try {
-    switch (stripeEvent.type) {
-      case 'payment_intent.succeeded':
-        console.log('Payment succeeded for amount:', paymentIntent.amount);
+    if (stripeEvent.type === 'payment_intent.succeeded') {
+        console.log(`[${sessionId}] Payment succeeded. Amount:`, paymentIntent.amount);
         
         const paymentAmount = (paymentIntent.amount / 100).toFixed(2);
         
@@ -55,36 +58,28 @@ exports.handler = async (event) => {
           paymentAmountUSD: paymentAmount,
           stripePaymentIntentId: paymentIntent.id,
           paymentMethod: paymentIntent.payment_method_types[0] || 'card',
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
+          // --- ВАЖНОЕ ИЗМЕНЕНИЕ ---
+          reportStatus: 'queued', // Сразу ставим статус "в очереди"
+          reportGenerationAttemptedAt: new Date().toISOString()
         });
-        console.log(`Successfully updated payment status for session: ${sessionId}`);
 
-      // --- НОВЫЙ АСИНХРОННЫЙ БЛОК ---
-// Просто помечаем сессию как готовую к генерации отчета.
-// Сама генерация будет запущена фоновым процессом.
-console.log(`[${sessionId}] Queuing report for generation.`);
-await sessionRef.update({
-  reportStatus: 'queued', // Устанавливаем статус "в очереди"
-  reportGenerationAttemptedAt: new Date().toISOString()
-});
+        // --- УЛУЧШЕННОЕ ЛОГИРОВАНИЕ ---
+        console.log(`[${sessionId}] Successfully updated payment status to 'succeeded' and report status to 'queued'.`);
 
-// Асинхронно "вызываем" функцию генерации, не ожидая ответа.
-// Это гарантирует, что webhook завершится мгновенно.
-fetch(`${process.env.URL}/.netlify/functions/generate-report-hybrid`, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ sessionId: sessionId })
-});
-// --- КОНЕЦ НОВОГО БЛОКА ---
-
-        const doc = await sessionRef.get();
-        if (doc.exists) {
-            await sendPurchaseEventToMeta(paymentIntent, doc.data());
-        }
-        break;
+        // Асинхронно "вызываем" функцию генерации, не ожидая ответа.
+        fetch(`${process.env.URL}/.netlify/functions/generate-report-hybrid`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ sessionId: sessionId })
+        });
+        
+        console.log(`[${sessionId}] Triggered generate-report-hybrid function.`);
     }
   } catch (dbError) {
-    console.error('Database update failed:', dbError);
+    console.error(`[${sessionId}] Database update failed after webhook received:`, dbError);
+    // Даже если база упала, возвращаем Stripe 200, чтобы он не слал повторы.
+    // Проблему будем решать через логи.
   }
 
   return {
