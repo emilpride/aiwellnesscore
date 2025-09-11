@@ -304,15 +304,16 @@
         #camera-modal.active { opacity: 1; pointer-events: all; }
         /* Финальный код */
 /* Правильный код */
-#camera-container { 
-    position: relative; 
-    width: 90%; 
-    max-width: 400px; 
-    /* aspect-ratio будет задан через JS */
+/* Финальный, единственно верный вариант */
+#camera-container {
+    position: relative;
+    height: 75vh; /* 75% от ВЫСОТЫ ЭКРАНА */
+    max-width: 90%; /* Ограничение по ширине, чтобы не вылезал за края */
+    /* Ширина будет рассчитана АВТОМАТИЧЕСКИ через JS, чтобы сохранить пропорции */
     overflow: hidden;
-    border-radius: 1.5rem; 
-    background: #111; 
-    border: 1px solid rgba(255,255,255,0.2); 
+    border-radius: 1.5rem;
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.2);
 }
         /* Стало */
 #camera-video, #camera-canvas {
