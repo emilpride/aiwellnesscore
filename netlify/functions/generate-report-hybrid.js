@@ -129,37 +129,42 @@ function calculateMetrics(answers, bioAgeResult) {
 }
 
 // УЛУЧШЕНО: Функция для подбора инсайтов
+// /netlify/functions/generate-report-hybrid.js
+
 function generateInsights(answers, metrics) {
     const insights = {};
     const lib = reportLibrary.insights;
 
-    // Stress & Sleep Insight
-    if (metrics.stress.value < 50 && metrics.sleep.value < 70) {
-        insights.stressSleep = lib.stress_sleep.high_stress_bad_sleep;
-    } else if (metrics.stress.value > 70 && metrics.sleep.value > 70) {
+    // Stress & Sleep Insight (УЛУЧШЕННАЯ ЛОГИКА)
+    if (metrics.stress.value > 70 && metrics.sleep.value > 70) {
         insights.stressSleep = lib.stress_sleep.good_stress_good_sleep;
     } else if (metrics.stress.value < 50 && metrics.sleep.value > 70) {
         insights.stressSleep = lib.stress_sleep.high_stress_good_sleep;
-    } else {
+    } else if (metrics.stress.value > 70 && metrics.sleep.value < 70) {
         insights.stressSleep = lib.stress_sleep.low_stress_bad_sleep;
+    } else if (metrics.stress.value < 50 && metrics.sleep.value < 70) {
+        insights.stressSleep = lib.stress_sleep.high_stress_bad_sleep;
+    } else {
+        // Вариант по умолчанию для всех средних значений
+        insights.stressSleep = "Your stress and sleep levels are in a moderate range. Focusing on consistency in both areas, like a regular sleep schedule and short daily walks, can provide significant wellness benefits.";
     }
 
     // Nutrition & Hydration Insight
     if (metrics.nutrition.value > 80 && metrics.hydration.value < 70) {
         insights.nutritionHydration = lib.nutrition_hydration.good_nutrition_bad_hydration;
     } else if (metrics.nutrition.value < 60 && metrics.hydration.value < 60) {
-        insights.nutritionHydration = lib.nutrition_hydration.poor_nutrition_poor_hydration;
+        insights.nutritionHydration = lib.nutrition_hydration.poor_nutrition_poor_hydration; [cite: 197]
     } else {
-        insights.nutritionHydration = "You have a solid foundation in nutrition and hydration. Continue to focus on whole foods and consistent water intake to maintain your results.";
+        insights.nutritionHydration = "You have a solid foundation in nutrition and hydration. Continue to focus on whole foods and consistent water intake to maintain your results."; [cite: 198]
     }
 
     // Activity Insight
     if (metrics.activity.value > 80 && metrics.sleep.value < 70) {
-        insights.activity = lib.activity.high_activity_poor_sleep;
+        insights.activity = lib.activity.high_activity_poor_sleep; [cite: 199]
     } else if (metrics.activity.value < 50 && metrics.stress.value < 50) {
-        insights.activity = lib.activity.low_activity_high_stress;
+        insights.activity = lib.activity.low_activity_high_stress; [cite: 200]
     } else {
-         insights.activity = "Your activity level is a good starting point. Aim for consistency, and remember that even short walks can have a significant positive impact on your well-being.";
+         insights.activity = "Your activity level is a good starting point. Aim for consistency, and remember that even short walks can have a significant positive impact on your well-being."; [cite: 201]
     }
     
     return insights;
