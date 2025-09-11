@@ -107,15 +107,12 @@
         #payment-modal-content {
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
         }
-        #payment-element {
-            padding: 1.25rem;
-            border: 1px solid #e5e7eb;
-            background-color: white;
-            border-radius: 12px;
-        }
+        /* Скрываем Express Checkout кнопки (Apple Pay/Google Pay) из Payment Element, 
+           так как мы хотим отобразить их отдельно и выше */
         #payment-element .StripeElement--express-checkout {
-            display: none;
+            display: none !important;
         }
+
         #sales-section {
             scroll-margin-top: 80px; /* Offset for sticky header */
         }
@@ -179,6 +176,12 @@
         details[open] summary:after {
             transform: translateY(-50%) rotate(45deg);
         }
+
+        /* Кастомизация для кнопок Apple Pay / Google Pay */
+        #payment-request-button > div {
+             height: 48px; /* Задаем высоту для кнопок */
+             min-width: 100%; /* Убедимся, что кнопки занимают всю ширину */
+        }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -189,36 +192,55 @@
     </div>
     
     <div id="payment-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-        <div id="payment-modal-content" class="w-full max-w-md bg-white rounded-2xl shadow-xl transform scale-95 opacity-0">
-            <div class="p-6 border-b border-gray-200">
-                <div class="flex justify-between items-center">
-                      <h2 class="text-xl font-bold text-gray-800">Complete your checkout</h2>
-                      <button id="close-modal-btn" class="text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
-                </div>
-            </div>
-            <div class="p-6">
-                 <div class="flex justify-between items-center text-gray-600 mb-4">
-                      <span>Regular price:</span>
-                      <span id="modal-regular-price">$0.00</span>
-                 </div>
-                 <div class="flex justify-between items-center text-gray-900 font-bold text-lg mb-6">
-                      <span>Total today:</span>
-                      <span id="modal-total-price">$0.00</span>
-                 </div>
+        <div id="payment-modal-content" class="w-full max-w-4xl bg-white rounded-2xl shadow-xl transform scale-95 opacity-0">
+            <div class="p-6 md:p-8 relative">
+                <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-3xl leading-none">&times;</button>
+                <h2 class="text-3xl font-extrabold text-center mb-6" style="color: var(--brand-dark-text);">Complete your checkout</h2>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="p-4 md:p-6 bg-gray-50 rounded-xl">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Your Order Summary</h3>
+                        <div class="flex justify-between items-center text-gray-600 mb-2">
+                            <span>Regular 4-week price:</span>
+                            <span id="modal-regular-price">$38.95</span> </div>
+                        <div class="flex justify-between items-center text-gray-900 font-bold text-xl py-2 border-t border-gray-200 mt-4">
+                            <span>Total today:</span>
+                            <span id="modal-total-price">$38.95</span> </div>
+                    </div>
 
-                 <form id="payment-form">
-                      <div id="payment-element" class="mb-6">
-                           </div>
-                      <button id="submit-payment-btn" class="cta-button w-full font-bold py-3 px-4 rounded-xl text-lg flex items-center justify-center">
-                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
-                           <span id="button-text">Continue</span>
-                           <svg id="spinner" class="animate-spin h-5 w-5 text-white hidden ml-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                           </svg>
-                      </button>
-                      <div id="payment-message" class="text-center text-red-500 text-sm mt-4"></div>
-                 </form>
+                    <div class="p-4 md:p-6 bg-white rounded-xl">
+                        <form id="payment-form">
+                            <div id="payment-request-button" class="mb-4">
+                                </div>
+
+                            <div class="flex items-center my-4">
+                                <hr class="flex-grow border-gray-300">
+                                <span class="px-3 text-gray-500 text-sm">or pay with a card</span>
+                                <hr class="flex-grow border-gray-300">
+                            </div>
+                            
+                            <div class="flex justify-center items-center gap-2 mb-6">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" class="h-6 opacity-80">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg" alt="Mastercard" class="h-6 opacity-80">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/American_Express_logo_%282018%29.svg" alt="American Express" class="h-6 opacity-80">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/4/40/Discover_Card_logo.svg" alt="Discover" class="h-6 opacity-80">
+                            </div>
+
+                            <div id="payment-element" class="mb-6">
+                                </div>
+                            
+                            <button id="submit-payment-btn" class="cta-button w-full font-bold py-3 px-4 rounded-xl text-lg flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
+                                <span id="button-text">Continue</span>
+                                <svg id="spinner" class="animate-spin h-5 w-5 text-white hidden ml-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </button>
+                            <div id="payment-message" class="text-center text-red-500 text-sm mt-4"></div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -452,7 +474,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
             let selectedPlanKey = 'advanced';
-            let stripe, elements;
+            let stripe, elements, paymentRequest; // Добавил paymentRequest
             let currentBioAge, standardLifespan, planData;
             let bioAgeChartInstance, lifespanChartInstance;
             let chartsRendered = false;
@@ -471,6 +493,8 @@
             const planToggles = document.getElementById('plan-toggles');
             const modalRegularPrice = document.getElementById('modal-regular-price');
             const modalTotalPrice = document.getElementById('modal-total-price');
+            // Новые элементы для Payment Request Buttons
+            const paymentRequestButtonContainer = document.getElementById('payment-request-button');
 
             // --- ФУНКЦИИ ---
 
@@ -555,11 +579,10 @@
                 }
 
                 const selectedPlan = planData[selectedPlanKey];
-                document.getElementById('modal-regular-price').textContent = `$${selectedPlan.regularPrice.toFixed(2)}`;
-                document.getElementById('modal-total-price').textContent = `$${selectedPlan.price.toFixed(2)}`;
+                modalRegularPrice.textContent = `$${selectedPlan.regularPrice.toFixed(2)}`;
+                modalTotalPrice.textContent = `$${selectedPlan.price.toFixed(2)}`;
 
                 try {
-                    // --- ВОТ КЛЮЧЕВОЙ БЛОК ---
                     // 1. Запрашиваем публичный ключ с сервера
                     const keyResponse = await fetch('/.netlify/functions/get-stripe-key');
                     if (!keyResponse.ok) {
@@ -569,10 +592,112 @@
                     if (!publishableKey) {
                         throw new Error('Stripe publishable key is empty.');
                     }
-                    // --- КОНЕЦ КЛЮЧЕВОГО БЛОКА ---
+                    
+                    // 2. Инициализируем Stripe с полученным ключом
+                    stripe = Stripe(publishableKey);
 
-                    // 2. Создаем Payment Intent
-                    const paymentResponse = await fetch('/.netlify/functions/payment', {
+                    // 3. Определяем внешний вид Payment Element
+                    const appearance = {
+                      theme: 'stripe',
+                      variables: {
+                        colorPrimary: 'var(--brand-dark-text)',      // Цвет кнопок, активных полей
+                        colorBackground: '#ffffff',                   // Фон элемента
+                        colorText: '#30313d',                         // Основной цвет текста
+                        colorDanger: '#df1b41',                       // Цвет текста ошибок
+                        fontFamily: 'Inter, sans-serif',              // Ваш шрифт
+                        spacingUnit: '4px',                           // Базовая единица отступов
+                        borderRadius: '12px',                         // Скругление углов
+                        colorTextPlaceholder: '#9ca3af',             // Цвет плейсхолдера
+                        colorTextSecondary: '#4b5563',                // Второстепенный текст
+                        colorIcon: '#6b7280',                         // Цвет иконок
+                        colorBorder: '#d1d5db',                       // Цвет границ
+                        colorDivider: '#e5e7eb',                      // Цвет разделителей
+                      },
+                      rules: {
+                          '.Input': {
+                              boxShadow: 'none',
+                          },
+                          '.Input:focus': {
+                              boxShadow: '0 0 0 2px var(--brand-accent)',
+                          },
+                          '.Error': {
+                            color: 'var(--colorDanger)',
+                          },
+                          '.Label': {
+                            fontWeight: '600',
+                          },
+                      }
+                    };
+
+                    elements = stripe.elements({ clientSecret: null, appearance }); // clientSecret будет для Payment Request
+
+                    // 4. Инициализируем Payment Request API для Apple/Google Pay
+                    paymentRequest = stripe.paymentRequest({
+                        country: 'US', // Ваша страна
+                        currency: 'usd', // Ваша валюта
+                        total: {
+                            label: 'Total Today',
+                            amount: Math.round(selectedPlan.price * 100), // Сумма в центах
+                        },
+                        requestPayerName: true,
+                        requestPayerEmail: true,
+                    });
+
+                    // 5. Создаем элемент Payment Request Button
+                    const prButton = elements.create('paymentRequestButton', {
+                        paymentRequest: paymentRequest,
+                        style: {
+                            paymentRequestButton: {
+                                type: 'buy', // 'buy' (по умолчанию), 'donate', 'book', 'checkout'
+                                theme: 'dark', // 'dark', 'light', 'light-outline'
+                                height: '48px',
+                            },
+                        },
+                    });
+
+                    // 6. Проверяем доступность Payment Request
+                    paymentRequest.canMakePayment().then(function(result) {
+                        if (result) {
+                            prButton.mount(paymentRequestButtonContainer);
+                            // Если кнопки отображаются, возможно, нам не нужны кнопки экспресс-оплаты в Payment Element
+                            // CSS-правило #payment-element .StripeElement--express-checkout { display: none !important; }
+                            // уже делает это, но здесь можно добавить логику, если нужно полностью скрыть что-то другое.
+                        } else {
+                            paymentRequestButtonContainer.style.display = 'none'; // Скрыть контейнер, если Pay не доступен
+                        }
+                    });
+
+                    // 7. Обработка события Payment Request
+                    paymentRequest.on('paymentmethod', async function(ev) {
+                        setLoading(true);
+                        const {paymentIntent, error: confirmError} = await stripe.confirmCardPayment(
+                            ev.clientSecret, { payment_method: ev.paymentMethod.id }, { handleActions: false }
+                        );
+
+                        if (confirmError) {
+                            showMessage(confirmError.message);
+                            ev.complete('fail');
+                            setLoading(false);
+                            return;
+                        }
+                        ev.complete('success');
+
+                        if (paymentIntent.status === "requires_action") {
+                            stripe.confirmCardPayment(ev.clientSecret).then(function(result) {
+                                if (result.error) {
+                                    showMessage(result.error.message);
+                                    setLoading(false);
+                                } else {
+                                    window.location.href = `${window.location.origin}/result.html?session_id=${sessionId}&payment=success`;
+                                }
+                            });
+                        } else {
+                            window.location.href = `${window.location.origin}/result.html?session_id=${sessionId}&payment=success`;
+                        }
+                    });
+
+                    // 8. Создаем Payment Intent для обычной карты
+                    const cardPaymentResponse = await fetch('/.netlify/functions/payment', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
@@ -582,19 +707,18 @@
                         })
                     });
 
-                    if (!paymentResponse.ok) {
-                         const errorData = await paymentResponse.json();
-                         throw new Error(errorData.error || 'Failed to create payment intent.');
+                    if (!cardPaymentResponse.ok) {
+                         const errorData = await cardPaymentResponse.json();
+                         throw new Error(errorData.error || 'Failed to create payment intent for card.');
                     }
+                    const { clientSecret: cardClientSecret } = await cardPaymentResponse.json();
+                    if (!cardClientSecret) throw new Error('Failed to get client secret for card.');
 
-                    const { clientSecret } = await paymentResponse.json();
-                    if (!clientSecret) throw new Error('Failed to get client secret.');
+                    // Обновляем clientSecret для elements, чтобы он мог работать с обычной картой
+                    elements = stripe.elements({ clientSecret: cardClientSecret, appearance }); 
 
-                    // 3. Инициализируем Stripe с полученным ключом
-                    stripe = Stripe(publishableKey);
-                    elements = stripe.elements({ clientSecret, appearance: { theme: 'stripe' } });
                     const paymentElement = elements.create("payment", { layout: "tabs" });
-                    document.getElementById('payment-element').innerHTML = '';
+                    paymentElementContainer.innerHTML = ''; // Очистка, если ранее был какой-то контент
                     paymentElement.mount("#payment-element");
 
                     showModal();
