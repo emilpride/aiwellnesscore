@@ -305,15 +305,18 @@
         /* Финальный код */
 /* Правильный код */
 /* Финальный, единственно верный вариант */
+/* Финальный, упрощенный CSS */
 #camera-container {
     position: relative;
-    height: 75vh; /* 75% от ВЫСОТЫ ЭКРАНА */
-    max-width: 90%; /* Ограничение по ширине, чтобы не вылезал за края */
-    /* Ширина будет рассчитана АВТОМАТИЧЕСКИ через JS, чтобы сохранить пропорции */
+    /* Убраны все размеры - JS будет управлять этим */
     overflow: hidden;
     border-radius: 1.5rem;
     background: #111;
     border: 1px solid rgba(255,255,255,0.2);
+    /* Добавляем flex для центровки на всякий случай */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
         /* Стало */
 #camera-video, #camera-canvas {
@@ -1093,65 +1096,93 @@ const LibraryLoader = {
             }
         }
     
-    async function openCamera() {
-    // Сначала загружаем библиотеки
+    // ЗАМЕНИТЕ ВСЮ ФУНКЦИЮ openCamera НА ЭТОТ КОД
+
+async function openCamera() {
     try {
         await LibraryLoader.loadFaceMeshLibraries();
     } catch (error) {
         alert('Failed to load camera AI libraries. Please check your internet connection and try again.');
         return;
     }
-    
+
     const cameraModal = document.getElementById('camera-modal');
+    const cameraContainer = document.getElementById('camera-container');
     const video = document.getElementById('camera-video');
+    const canvas = document.getElementById('camera-canvas');
     
     cameraModal.classList.add('active');
         
-        if (!App.faceMesh) {
-            try {
-                App.faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
-                App.faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
-                App.faceMesh.onResults(onFaceMeshResults);
-                await App.faceMesh.initialize();
-            } catch (error) {
-                alert('Failed to initialize AI model for camera. Please try again.');
-                closeCamera(); return;
-            }
-        }
-
-        // Новый, исправленный код
+    if (!App.faceMesh) {
         try {
-            // Мы просим браузер дать нам видео с портретными пропорциями
-            const videoConstraints = {
-                video: {
-                    facingMode: 'user',
-                    // Просим идеальное соотношение сторон 3:4
-                    aspectRatio: { ideal: 3 / 4 },
-                    height: { ideal: 1080 }
-                }
-            };
-            
-            App.cameraStream = await navigator.mediaDevices.getUserMedia(videoConstraints);
-            video.srcObject = App.cameraStream;
-            
-            // Этот обработчик теперь будет работать с уже правильным видеопотоком
-            video.addEventListener('loadeddata', () => {
-                const videoAspectRatio = video.videoWidth / video.videoHeight;
-                const cameraContainer = document.getElementById('camera-container');
-                cameraContainer.style.aspectRatio = videoAspectRatio;
-                cameraLoop();
-            });
-
-        } catch (err) {
-            console.error("Camera Error:", err);
-            let message = "Camera access was denied. Please allow camera access in your browser settings to continue.";
-            if (window.location.protocol !== 'https:') {
-                message += "\n\nNOTE: Camera access requires a secure connection (https://) or a local server (localhost).";
-            }
-            alert(message);
-            closeCamera();
+            App.faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@medipe/face_mesh/${file}`});
+            App.faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+            App.faceMesh.onResults(onFaceMeshResults);
+            await App.faceMesh.initialize();
+        } catch (error) {
+            alert('Failed to initialize AI model for camera. Please try again.');
+            closeCamera(); return;
         }
     }
+
+    try {
+        const videoConstraints = {
+            video: {
+                facingMode: 'user',
+                aspectRatio: { ideal: 3 / 4 },
+                height: { ideal: 1080 }
+            }
+        };
+        
+        App.cameraStream = await navigator.mediaDevices.getUserMedia(videoConstraints);
+        video.srcObject = App.cameraStream;
+        
+        video.addEventListener('loadeddata', () => {
+            // --- НОВАЯ ЛОГИКА РАСЧЕТА РАЗМЕРОВ ---
+            const videoRatio = video.videoWidth / video.videoHeight;
+            
+            // Максимально доступное пространство (90% от модального окна)
+            const maxWidth = cameraModal.clientWidth * 0.9;
+            const maxHeight = cameraModal.clientHeight * 0.9;
+            
+            let finalWidth, finalHeight;
+
+            // Расчет финальных размеров с сохранением пропорций
+            if ((maxWidth / maxHeight) > videoRatio) {
+                // Если доступное пространство шире, чем видео -> высота является лимитом
+                finalHeight = maxHeight;
+                finalWidth = finalHeight * videoRatio;
+            } else {
+                // Если доступное пространство выше, чем видео -> ширина является лимитом
+                finalWidth = maxWidth;
+                finalHeight = finalWidth / videoRatio;
+            }
+
+            // Применяем ОДИНАКОВЫЕ размеры ко всем трем элементам
+            cameraContainer.style.width = `${finalWidth}px`;
+            cameraContainer.style.height = `${finalHeight}px`;
+
+            video.style.width = `${finalWidth}px`;
+            video.style.height = `${finalHeight}px`;
+
+            canvas.style.width = `${finalWidth}px`;
+            canvas.style.height = `${finalHeight}px`;
+            
+            // --- КОНЕЦ НОВОЙ ЛОГИКИ ---
+
+            cameraLoop();
+        });
+
+    } catch (err) {
+        console.error("Camera Error:", err);
+        let message = "Camera access was denied. Please allow camera access in your browser settings to continue.";
+        if (window.location.protocol !== 'https:') {
+            message += "\n\nNOTE: Camera access requires a secure connection (https://) or a local server (localhost).";
+        }
+        alert(message);
+        closeCamera();
+    }
+}
 
     function closeCamera() {
         const cameraModal = document.getElementById('camera-modal');
