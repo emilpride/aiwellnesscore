@@ -465,6 +465,7 @@
             // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
             let selectedPlanKey = 'advanced';
             let stripe, elements;
+            let clientSecretForConfirmation;
             let currentBioAge, standardLifespan, planData;
             let bioAgeChartInstance, lifespanChartInstance;
             let chartsRendered = false;
@@ -573,6 +574,7 @@
                     });
                     const { clientSecret } = await paymentResponse.json();
                     if (!clientSecret) throw new Error('Failed to get client secret.');
+                    clientSecretForConfirmation = clientSecret;
 
                     elements = stripe.elements({ clientSecret });
                     
@@ -637,7 +639,9 @@
                 const cardElement = elements.getElement('card');
 
                 const { error } = await stripe.confirmCardPayment(
-                    elements.clientSecret, { payment_method: { card: cardElement } }
+                    clientSecretForConfirmation, { // <--- ИЗМЕНИТЕ ЭТУ СТРОКУ
+                        payment_method: { card: cardElement } 
+                    }
                 );
 
                 if (error) {
