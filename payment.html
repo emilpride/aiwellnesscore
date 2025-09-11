@@ -198,26 +198,26 @@
             </div>
             <div class="p-6">
                  <div class="flex justify-between items-center text-gray-600 mb-4">
-                     <span>Regular price:</span>
-                     <span id="modal-regular-price">$0.00</span>
+                      <span>Regular price:</span>
+                      <span id="modal-regular-price">$0.00</span>
                  </div>
                  <div class="flex justify-between items-center text-gray-900 font-bold text-lg mb-6">
-                     <span>Total today:</span>
-                     <span id="modal-total-price">$0.00</span>
+                      <span>Total today:</span>
+                      <span id="modal-total-price">$0.00</span>
                  </div>
 
                  <form id="payment-form">
-                     <div id="payment-element" class="mb-6">
-                         </div>
-                     <button id="submit-payment-btn" class="cta-button w-full font-bold py-3 px-4 rounded-xl text-lg flex items-center justify-center">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
-                         <span id="button-text">Continue</span>
-                         <svg id="spinner" class="animate-spin h-5 w-5 text-white hidden ml-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                         </svg>
-                     </button>
-                     <div id="payment-message" class="text-center text-red-500 text-sm mt-4"></div>
+                      <div id="payment-element" class="mb-6">
+                           </div>
+                      <button id="submit-payment-btn" class="cta-button w-full font-bold py-3 px-4 rounded-xl text-lg flex items-center justify-center">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
+                           <span id="button-text">Continue</span>
+                           <svg id="spinner" class="animate-spin h-5 w-5 text-white hidden ml-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                           </svg>
+                      </button>
+                      <div id="payment-message" class="text-center text-red-500 text-sm mt-4"></div>
                  </form>
             </div>
         </div>
@@ -228,12 +228,12 @@
             <a href="index.html"><img src="logo.png" alt="Logo" class="h-10 sm:h-12 w-auto"></a>
             <div class="flex items-center gap-4">
                  <div class="text-center">
-                     <div class="timer-box text-lg sm:text-xl font-mono">
-                         <span id="minutes">10</span>:<span id="seconds">00</span>
-                     </div>
+                      <div class="timer-box text-lg sm:text-xl font-mono">
+                           <span id="minutes">10</span>:<span id="seconds">00</span>
+                      </div>
                  </div>
                  <button id="scroll-to-plans-btn" class="cta-button pulsating font-bold py-3 px-5 text-sm sm:text-base rounded-full">
-                     Unlock My Plan
+                      Unlock My Plan
                  </button>
             </div>
         </div>
@@ -309,13 +309,13 @@
                         <label>
                             <input type="radio" name="plan" value="premium" class="sr-only">
                             <div class="plan-option p-4 flex justify-between items-center">
-                                 <div class="flex items-center">
-                                     <div class="custom-radio"><div class="inner-circle"></div></div>
-                                     <div>
-                                         <h3 class="font-bold text-gray-800">21-Day Plan</h3>
-                                         <p class="text-sm text-green-700 font-semibold">to lower bio-age by 3 years</p>
-                                     </div>
-                                 </div>
+                               <div class="flex items-center">
+                                    <div class="custom-radio"><div class="inner-circle"></div></div>
+                                    <div>
+                                       <h3 class="font-bold text-gray-800">21-Day Plan</h3>
+                                       <p class="text-sm text-green-700 font-semibold">to lower bio-age by 3 years</p>
+                                    </div>
+                               </div>
                                 <div class="text-right">
                                      <div class="flex justify-end items-baseline">
                                         <p class="font-bold text-lg text-gray-900">$0.95</p>
@@ -456,7 +456,6 @@
             let currentBioAge, standardLifespan, planData;
             let bioAgeChartInstance, lifespanChartInstance;
             let chartsRendered = false;
-            const STRIPE_PUBLISHABLE_KEY = 'pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb';
 
             // --- DOM-ЭЛЕМЕНТЫ ---
             const salesSection = document.getElementById('sales-section');
@@ -549,35 +548,60 @@
                 document.getElementById('loading-overlay').classList.add('active');
                 const sessionId = new URLSearchParams(window.location.search).get('session_id');
 
+                if (!sessionId) {
+                    alert("CRITICAL ERROR: Session ID is missing.");
+                    document.getElementById('loading-overlay').classList.remove('active');
+                    return;
+                }
+
                 const selectedPlan = planData[selectedPlanKey];
-                modalRegularPrice.textContent = `$${selectedPlan.regularPrice.toFixed(2)}`;
-                modalTotalPrice.textContent = `$${selectedPlan.price.toFixed(2)}`;
+                document.getElementById('modal-regular-price').textContent = `$${selectedPlan.regularPrice.toFixed(2)}`;
+                document.getElementById('modal-total-price').textContent = `$${selectedPlan.price.toFixed(2)}`;
 
                 try {
-                    const response = await fetch('/.netlify/functions/payment', {
+                    // --- ВОТ КЛЮЧЕВОЙ БЛОК ---
+                    // 1. Запрашиваем публичный ключ с сервера
+                    const keyResponse = await fetch('/.netlify/functions/get-stripe-key');
+                    if (!keyResponse.ok) {
+                        throw new Error('Could not fetch Stripe configuration from server. Check if the function is deployed.');
+                    }
+                    const { publishableKey } = await keyResponse.json();
+                    if (!publishableKey) {
+                        throw new Error('Stripe publishable key is empty.');
+                    }
+                    // --- КОНЕЦ КЛЮЧЕВОГО БЛОКА ---
+
+                    // 2. Создаем Payment Intent
+                    const paymentResponse = await fetch('/.netlify/functions/payment', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
-                            sessionId: sessionId,
-                            plan: selectedPlanKey,
-                            amount: Math.round(selectedPlan.price * 100)
+                            sessionId: sessionId, 
+                            plan: selectedPlanKey, 
+                            amount: Math.round(selectedPlan.price * 100) 
                         })
                     });
-                    
-                    const { clientSecret } = await response.json();
+
+                    if (!paymentResponse.ok) {
+                         const errorData = await paymentResponse.json();
+                         throw new Error(errorData.error || 'Failed to create payment intent.');
+                    }
+
+                    const { clientSecret } = await paymentResponse.json();
                     if (!clientSecret) throw new Error('Failed to get client secret.');
 
-                    stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-                    const appearance = { theme: 'stripe' };
-                    elements = stripe.elements({ appearance, clientSecret });
+                    // 3. Инициализируем Stripe с полученным ключом
+                    stripe = Stripe(publishableKey);
+                    elements = stripe.elements({ clientSecret, appearance: { theme: 'stripe' } });
                     const paymentElement = elements.create("payment", { layout: "tabs" });
-                    paymentElement.mount(paymentElementContainer);
+                    document.getElementById('payment-element').innerHTML = '';
+                    paymentElement.mount("#payment-element");
 
                     showModal();
 
                 } catch (error) {
-                    console.error('Initialization Error:', error);
-                    alert('Could not initialize payment. Please try again.');
+                    console.error('Payment Initialization Error:', error);
+                    alert(`Could not initialize payment. Please try again.\n\nError: ${error.message}`);
                 } finally {
                     document.getElementById('loading-overlay').classList.remove('active');
                 }
@@ -619,7 +643,7 @@
             function setupEventListeners() {
                 if (scrollToPlansBtn) {
                      scrollToPlansBtn.addEventListener('click', () => {
-                        salesSection.scrollIntoView({ behavior: 'smooth' });
+                         salesSection.scrollIntoView({ behavior: 'smooth' });
                      });
                 }
                 openModalButtons.forEach(btn => btn.addEventListener('click', initializePaymentForm));
