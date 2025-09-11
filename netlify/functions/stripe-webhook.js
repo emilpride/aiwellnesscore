@@ -59,52 +59,23 @@ exports.handler = async (event) => {
         });
         console.log(`Successfully updated payment status for session: ${sessionId}`);
 
-      // --- ИСПРАВЛЕННЫЙ БЛОК ---
-// Запускаем генерацию отчета и ждем результат
-console.log(`[${sessionId}] Starting hybrid report generation...`);
-try {
-    const reportResponse = await fetch(`${process.env.URL}/.netlify/functions/generate-report-hybrid`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ sessionId: sessionId })
-    });
-    
-    if (!reportResponse.ok) {
-        const errorText = await reportResponse.text();
-        console.error(`[${sessionId}] Report generation failed with status ${reportResponse.status}:`, errorText);
-        
-        // Сохраняем информацию об ошибке
-        await sessionRef.update({
-            reportGenerationError: `HTTP ${reportResponse.status}: ${errorText}`,
-            needsManualReportGeneration: true,
-            reportGenerationAttemptedAt: new Date().toISOString()
-        });
-    } else {
-        const result = await reportResponse.json();
-        console.log(`[${sessionId}] Report generation completed successfully`);
-        
-        // Дополнительно проверяем, что отчет действительно сохранен
-        const checkDoc = await sessionRef.get();
-        const checkData = checkDoc.data();
-        if (!checkData.reportData) {
-            console.error(`[${sessionId}] Report data not found after generation!`);
-            await sessionRef.update({
-                reportGenerationError: 'Report data missing after generation',
-                needsManualReportGeneration: true
-            });
-        } else {
-            console.log(`[${sessionId}] Report data confirmed in database`);
-        }
-    }
-} catch (err) {
-    console.error(`[${sessionId}] Critical error during report generation:`, err);
-    await sessionRef.update({
-        reportGenerationError: err.message,
-        needsManualReportGeneration: true,
-        errorTimestamp: new Date().toISOString()
-    });
-}
-// --- КОНЕЦ ИСПРАВЛЕННОГО БЛОКА ---
+      // --- НОВЫЙ АСИНХРОННЫЙ БЛОК ---
+// Просто помечаем сессию как готовую к генерации отчета.
+// Сама генерация будет запущена фоновым процессом.
+console.log(`[${sessionId}] Queuing report for generation.`);
+await sessionRef.update({
+  reportStatus: 'queued', // Устанавливаем статус "в очереди"
+  reportGenerationAttemptedAt: new Date().toISOString()
+});
+
+// Асинхронно "вызываем" функцию генерации, не ожидая ответа.
+// Это гарантирует, что webhook завершится мгновенно.
+fetch(`${process.env.URL}/.netlify/functions/generate-report-hybrid`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ sessionId: sessionId })
+});
+// --- КОНЕЦ НОВОГО БЛОКА ---
 
         const doc = await sessionRef.get();
         if (doc.exists) {
