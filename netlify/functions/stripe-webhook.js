@@ -67,14 +67,32 @@ exports.handler = async (event) => {
         });
 
         console.log(`[${sessionId}] Successfully updated payment status and set report status to 'queued'.`);
-      // V-- ДОБАВЬТЕ ЭТОТ КОД ДЛЯ ПРЯМОГО ЗАПУСКА ГЕНЕРАЦИИ --V
-        console.log(`[${sessionId}] Triggering report generation immediately.`);
-        // Асинхронный вызов, не ждем его завершения здесь
-        fetch(`${process.env.URL}/.netlify/functions/generate-report-hybrid`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ sessionId: sessionId })
-        });
+     // Новый, надежный код
+try {
+    console.log(`[${sessionId}] Attempting to invoke generate-report-hybrid function at URL: ${process.env.URL}`);
+    
+    const response = await fetch(`${process.env.URL}/.netlify/functions/generate-report-hybrid`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ sessionId: sessionId }),
+        timeout: 9000 // Добавляем таймаут чуть меньше 10 секунд
+    });
+
+    if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Invocation failed! Status: ${response.status}, Body: ${errorBody}`);
+    }
+
+    console.log(`[${sessionId}] Successfully invoked generate-report-hybrid. Status: ${response.status}`);
+
+} catch (invocationError) {
+    console.error(`[${sessionId}] CRITICAL: Error invoking generate-report-hybrid from webhook:`, invocationError);
+    // Запишем ошибку в базу, чтобы фронтенд мог ее показать
+    await sessionRef.update({
+        reportStatus: 'error',
+        reportError: 'Failed to trigger report generation from webhook.'
+    });
+}
         // ^-- КОНЕЦ ДОБАВЛЕННОГО КОДА --^
     }
   } catch (dbError) {
