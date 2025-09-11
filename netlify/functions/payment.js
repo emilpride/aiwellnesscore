@@ -37,7 +37,8 @@ exports.handler = async (event) => {
       automatic_payment_methods: { enabled: true },
       metadata: { sessionId: sessionId }
     });
-    
+        console.log('Stripe Payment Intent Object:', JSON.stringify(paymentIntent, null, 2));
+
     return {
       statusCode: 200,
       body: JSON.stringify({ clientSecret: paymentIntent.client_secret }),
@@ -47,3 +48,4 @@ exports.handler = async (event) => {
       return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
   }
 };
+
