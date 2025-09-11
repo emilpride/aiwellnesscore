@@ -1394,7 +1394,7 @@ async function openCamera() {
             
             App.sessionId = data.sessionId;
             console.log('Session successfully started:', App.sessionId);
-            
+            if (typeof fbq === 'function') { fbq('track', 'ViewContent'); }
             // Сохраняем sessionId в sessionStorage как резервную копию
             sessionStorage.setItem('quiz_session_id', App.sessionId);
             
