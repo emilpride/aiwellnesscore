@@ -601,16 +601,41 @@
         
         console.log("Using fallback values due to error");
     } finally {
-        loadingOverlay.classList.remove('active');
-        setupEventListeners();
-        initCharts();
+        console.log("Entering finally block...");
+        
+        try {
+            console.log("Hiding loading overlay...");
+            loadingOverlay.classList.remove('active');
+            console.log("Loading overlay hidden");
+        } catch (e) {
+            console.error("Error hiding overlay:", e);
+        }
+        
+        try {
+            console.log("Setting up event listeners...");
+            setupEventListeners();
+            console.log("Event listeners setup complete");
+        } catch (e) {
+            console.error("Error in setupEventListeners:", e);
+        }
+        
+        try {
+            console.log("Initializing charts...");
+            initCharts();
+            console.log("Charts initialized");
+        } catch (e) {
+            console.error("Error in initCharts:", e);
+        }
+        
+        console.log("Finally block complete");
     }
-}
+} // <-- Здесь заканчивается функция initializePage
 
-        function showModal() {
-            paymentModal.classList.remove('opacity-0', 'pointer-events-none');
-            paymentModalContent.classList.remove('scale-95', 'opacity-0');
-        }
+// А функция showModal должна быть ОТДЕЛЬНОЙ функцией:
+function showModal() {
+    paymentModal.classList.remove('opacity-0', 'pointer-events-none');
+    paymentModalContent.classList.remove('scale-95', 'opacity-0');
+}
         
         function hideModal() {
             paymentModal.classList.add('opacity-0', 'pointer-events-none');
