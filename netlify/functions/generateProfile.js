@@ -28,7 +28,6 @@ exports.handler = async (event) => {
       console.error("Session ID is missing in the request body.");
       return { statusCode: 400, body: JSON.stringify({ error: 'Session ID is required' }) };
     }
-    console.log(`[${sessionId}] --- 1. Starting profile generation.`);
 
     const sessionRef = db.collection('sessions').doc(sessionId);
     const doc = await sessionRef.get();
@@ -37,49 +36,16 @@ exports.handler = async (event) => {
       console.error(`[${sessionId}] --- ERROR: Document not found in Firestore.`);
       return { statusCode: 404, body: JSON.stringify({ error: 'Session not found' }) };
     }
-    
+
     const sessionData = doc.data();
-    
-    // --- ЭТО КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ ---
-    // Гарантируем, что userAnswers - это объект, даже если в базе его еще нет
+
+    // КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Гарантируем, что userAnswers - это объект.
     const userAnswers = sessionData.answers || {};
-    // --- КОНЕЦ КЛЮЧЕВОГО ИСПРАВЛЕНИЯ ---
-    
+
     const faceAnalysis = sessionData.faceAnalysis;
-    
-    // Используем значения по умолчанию прямо при получении данных
-    const chronoAge = parseInt(userAnswers.age, 10) || 30; // По умолчанию 30 лет
+    const chronoAge = parseInt(userAnswers.age, 10) || 30; // Используем значение по умолчанию 30
 
-    // Передаем в функцию расчета userAnswers, который теперь точно является объектом
     const bioAgeResult = calculateBioAge(chronoAge, userAnswers, faceAnalysis);
-    
-    console.log(`[${sessionId}] --- 3. BioAge calculated successfully:`, JSON.stringify(bioAgeResult));
 
-    try {
-      console.log(`[${sessionId}] --- 4. Attempting to save preliminaryResult to Firestore...`);
-      await sessionRef.update({
-        preliminaryResult: bioAgeResult
-      });
-      console.log(`[${sessionId}] --- 5. SUCCESS! Preliminary result saved to Firestore.`);
-    } catch (dbError) {
-      console.error(`[${sessionId}] --- FATAL ERROR: Could not update document in Firestore.`, dbError);
-      return { 
-        statusCode: 500, 
-        body: JSON.stringify({ error: 'Failed to save result to database.', details: dbError.message }) 
-      };
-    }
-    
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ status: 'complete', data: bioAgeResult }),
-    };
-
-  } catch (error) {
-    const sessionIdFromEvent = event.body ? JSON.parse(event.body)?.sessionId : 'unknown';
-    console.error(`[${sessionIdFromEvent || 'unknown'}] --- FATAL HANDLER ERROR:`, error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Internal Server Error', details: error.message })
-    };
-  }
-};
+    await sessionRef.update({
+      preliminaryResult
