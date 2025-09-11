@@ -550,10 +550,15 @@
                 };
                 document.getElementById('current-bio-age').textContent = currentBioAge;
                 document.getElementById('potential-bio-age').textContent = currentBioAge - 3;
+            // /payment.html
+
             } finally {
+                // --- ИЗМЕНЕНИЕ ---
+                // Сначала убираем загрузчик, потом делаем всё остальное
+                loadingOverlay.classList.remove('active');
                 setupEventListeners();
                 initCharts();
-                loadingOverlay.classList.remove('active');
+                // --- КОНЕЦ ИЗМЕНЕНИЯ ---
             }
         }
 
