@@ -497,16 +497,32 @@
 
         // --- ФУНКЦИИ ---
 
+        // /payment.html
+
         async function fetchPreliminaryData() {
+            // --- НАЧАЛО ИЗМЕНЕНИЙ ---
+            const cachedData = sessionStorage.getItem('preliminaryProfileData');
+            if (cachedData) {
+                console.log("Loading profile data from session cache.");
+                // Если данные есть в хранилище, возвращаем их немедленно
+                return Promise.resolve(JSON.parse(cachedData));
+            }
+            console.log("Cache miss. Fetching profile data from server.");
+            // --- КОНЕЦ ИЗМЕНЕНИЙ ---
+
             const sessionId = new URLSearchParams(window.location.search).get('session_id');
-            if (!sessionId) { throw new Error("Session ID not found in URL."); }
+            if (!sessionId) { throw new Error("Session ID not found in URL."); }
             const response = await fetch('/.netlify/functions/getProfileData', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sessionId })
             });
-            if (!response.ok) { throw new Error("Failed to fetch profile data from server."); }
-            return await response.json();
+            if (!response.ok) { throw new Error("Failed to fetch profile data from server."); }
+            
+            const data = await response.json();
+            // Если пришлось загружать с сервера, сохраним их в хранилище на будущее
+            sessionStorage.setItem('preliminaryProfileData', JSON.stringify(data));
+            return data;
         }
 
         async function initializePage() {
