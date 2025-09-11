@@ -67,6 +67,15 @@ exports.handler = async (event) => {
         });
 
         console.log(`[${sessionId}] Successfully updated payment status and set report status to 'queued'.`);
+      // V-- ДОБАВЬТЕ ЭТОТ КОД ДЛЯ ПРЯМОГО ЗАПУСКА ГЕНЕРАЦИИ --V
+        console.log(`[${sessionId}] Triggering report generation immediately.`);
+        // Асинхронный вызов, не ждем его завершения здесь
+        fetch(`${process.env.URL}/.netlify/functions/generate-report-hybrid`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ sessionId: sessionId })
+        });
+        // ^-- КОНЕЦ ДОБАВЛЕННОГО КОДА --^
     }
   } catch (dbError) {
     console.error(`[${sessionId}] Database update failed after webhook received:`, dbError);
