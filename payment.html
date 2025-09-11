@@ -610,7 +610,14 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                     });
                     const { clientSecret } = await paymentResponse.json();
                     if (!clientSecret) throw new Error('Failed to get client secret.');
-                    clientSecretForConfirmation = clientSecret;
+                    if (typeof fbq === 'function') { 
+    fbq('track', 'InitiateCheckout', {
+        value: selectedPlan.price.toFixed(2),
+        currency: 'USD'
+    }); 
+}
+
+clientSecretForConfirmation = clientSecret;
 
                     elements = stripe.elements({ clientSecret });
                     
