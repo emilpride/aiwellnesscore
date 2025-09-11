@@ -39,30 +39,30 @@ console.log(`[${sessionId}] Session data status:`, {
 
     // 1. Проверяем готовый отчет
     if (sessionData.reportData) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ status: 'complete', data: sessionData.reportData }),
-      };
-    } 
-    // 2. Проверяем, не записала ли фоновая функция ошибку
-    else if (sessionData.reportError) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ status: 'error', message: sessionData.reportError }),
-      };
-    } 
-    // 3. Если ничего нет, продолжаем ждать
-    else {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ status: 'pending' }),
-      };
-    }
-  } catch (error) {
-    console.error('Error in checkResult function:', error);
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ status: 'complete', data: sessionData.reportData }),
+  };
+} 
+// 2. Проверяем, не записала ли фоновая функция ошибку
+else if (sessionData.reportError) {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ status: 'error', message: sessionData.reportError }),
+  };
+} 
+// 3. Проверяем промежуточные статусы
+else if (sessionData.reportStatus === 'processing' || sessionData.reportStatus === 'queued') {
     return {
-      statusCode: 500,
-      body: JSON.stringify({ status: 'error', message: 'Internal Server Error' }),
+        statusCode: 200,
+        body: JSON.stringify({ status: sessionData.reportStatus }), // Возвращаем текущий статус
     };
-  }
+}
+// 4. Если ничего нет, продолжаем ждать (старый статус "pending")
+else {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ status: 'pending' }),
+  };
+}
 };
