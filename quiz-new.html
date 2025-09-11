@@ -302,7 +302,17 @@
 
         #camera-modal { position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #camera-modal.active { opacity: 1; pointer-events: all; }
-        #camera-container { position: relative; width: 90%; max-width: 400px; overflow: hidden; border-radius: 1.5rem; background: #111; border: 1px solid rgba(255,255,255,0.2); }
+        /* Финальный код */
+#camera-container { 
+    position: relative; 
+    height: 70%; /* <-- Задаем высоту вместо ширины */
+    max-height: 600px; /* <-- Ограничиваем максимальную высоту */
+    /* aspect-ratio будет задан через JS, что автоматически определит ширину */
+    overflow: hidden;
+    border-radius: 1.5rem; 
+    background: #111; 
+    border: 1px solid rgba(255,255,255,0.2); 
+}
         /* Стало */
 #camera-video, #camera-canvas {
     position: absolute;
