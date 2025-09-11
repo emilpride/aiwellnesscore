@@ -685,6 +685,8 @@
             
             // --- INITIALIZATION ---
             fetchData().then(data => {
+                                sessionStorage.setItem('preliminaryProfileData', JSON.stringify(data));
+
                 populateUI(data);
                 
                 const loadingOverlay = document.getElementById('loading-overlay');
