@@ -4,6 +4,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const axios = require('axios');
+const crypto = require('crypto');
 
 // ... (остальной код инициализации Firebase)
 
@@ -15,25 +16,32 @@ if (!getApps().length) {
 }
 const db = getFirestore();
 
+// This helper function sends the Purchase event to the Meta Conversions API
 async function sendPurchaseToMeta(eventData) {
-    // Использует ваши существующие переменные META_PIXEL_ID и META_ACCESS_TOKEN
-    const { pixelId, accessToken, amount, currency, clientIpAddress, clientUserAgent } = eventData;
+    const { pixelId, accessToken, amount, currency, clientIpAddress, clientUserAgent, email } = eventData;
     if (!pixelId || !accessToken) {
-        console.warn('ID Пикселя Meta или Токен Доступа отсутствуют. Пропускаем событие CAPI.');
+        console.warn('Meta Pixel ID or Access Token is missing. Skipping CAPI event.');
         return;
     }
 
     const url = `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${accessToken}`;
     
+    const userData = {
+        client_ip_address: clientIpAddress,
+        client_user_agent: clientUserAgent,
+    };
+
+    // If email is available, hash it and add to user_data for better matching
+    if (email) {
+        userData.em = crypto.createHash('sha256').update(email.toLowerCase()).digest('hex');
+    }
+
     const payload = {
         data: [ {
             event_name: 'Purchase',
             event_time: Math.floor(Date.now() / 1000),
             event_source_url: process.env.URL,
-            user_data: {
-                client_ip_address: clientIpAddress,
-                client_user_agent: clientUserAgent,
-            },
+            user_data: userData, // Use the updated user_data object
             custom_data: {
                 value: amount,
                 currency: currency,
@@ -43,12 +51,11 @@ async function sendPurchaseToMeta(eventData) {
 
     try {
         await axios.post(url, payload);
-        console.log('Событие Purchase успешно отправлено в Meta CAPI.');
+        console.log('Successfully sent Purchase event to Meta CAPI.');
     } catch (error) {
-        console.error('Не удалось отправить событие в Meta CAPI:', error.response ? error.response.data : error.message);
+        console.error('Failed to send event to Meta CAPI:', error.response ? error.response.data : error.message);
     }
 }
-
 // /netlify/functions/stripe-webhook.js
 
 exports.handler = async (event) => {
@@ -112,7 +119,8 @@ exports.handler = async (event) => {
         amount: paymentAmount,
         currency: 'USD',
         clientIpAddress: sessionData.ipAddress,
-        clientUserAgent: event.headers['user-agent']
+        clientUserAgent: event.headers['user-agent'],
+        email: sessionData.answers?.email
       });
 
       // 3.4. Запускаем генерацию отчета
