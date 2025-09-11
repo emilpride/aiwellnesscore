@@ -1023,43 +1023,52 @@ const LibraryLoader = {
         document.getElementById('bmi-continue-btn').onclick = next;
     }
 
-    async function startAnalysis() {
-        goToStep('loading');
-        AnimationManager.add('loading-animation', 'loader.json');
-        const analysisStepsContainer = document.getElementById('analysis-steps');
-        analysisStepsContainer.innerHTML = '';
-        const steps = ["Analyzing lifestyle data...", "Calculating metabolic rate...", "Processing facial biomarkers...", "Compiling wellness report..."];
-        for (let i = 0; i < steps.length; i++) {
-            await new Promise(resolve => setTimeout(resolve, 900));
-            const p = document.createElement('p');
-            p.textContent = `✓ ${steps[i]}`;
-            analysisStepsContainer.appendChild(p);
-        }
+    // /quiz-new.html
 
-        try {
-            // --- НАЧАЛО ИСПРАВЛЕНИЯ ---
-            // Этот блок кода был пропущен. Он вызывает сервер для генерации
-            // предварительных результатов перед перенаправлением.
-            const response = await fetch('/.netlify/functions/generateProfile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId: App.sessionId })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to generate profile.');
+        async function startAnalysis() {
+            goToStep('loading');
+            AnimationManager.add('loading-animation', 'loader.json');
+            const analysisStepsContainer = document.getElementById('analysis-steps');
+            analysisStepsContainer.innerHTML = '';
+            const steps = ["Analyzing lifestyle data...", "Calculating metabolic rate...", "Processing facial biomarkers...", "Compiling wellness report..."];
+            
+            // Эта часть с анимацией текста остается без изменений
+            for (let i = 0; i < steps.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, 900));
+                const p = document.createElement('p');
+                p.textContent = `✓ ${steps[i]}`;
+                analysisStepsContainer.appendChild(p);
             }
-            // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 
-            // Теперь, когда данные сгенерированы, перенаправление сработает корректно
-            window.location.href = `profile.html?session_id=${App.sessionId || ''}`;
+            try {
+                const response = await fetch('/.netlify/functions/generateProfile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: App.sessionId })
+                });
 
-        } catch (error) {
-            console.error('Failed to generate profile:', error);
-            analysisStepsContainer.innerHTML = `<p class="text-red-500 font-bold">Error: Could not generate your profile. ${error.message}</p>`;
+                // --- ВОТ ГЛАВНОЕ ИЗМЕНЕНИЕ ---
+                // Проверяем, успешен ли ответ сервера (статус 200-299)
+                if (!response.ok) {
+                    // Пытаемся прочитать текст ошибки от сервера
+                    const errorData = await response.json().catch(() => {
+                        // Если сервер вернул не JSON, а просто текст, будет резервное сообщение
+                        return { error: 'The server responded with an unexpected error.' };
+                    });
+                    // Создаем ошибку с текстом от сервера, чтобы прервать выполнение
+                    throw new Error(errorData.error || `Server error: ${response.status}`);
+                }
+                
+                // Этот код выполнится только если response.ok === true
+                console.log('Profile generated successfully, redirecting...');
+                window.location.href = `profile.html?session_id=${App.sessionId || ''}`;
+
+            } catch (error) {
+                // Теперь этот блок будет ловить нашу новую, более понятную ошибку
+                console.error('Failed to generate profile:', error);
+                analysisStepsContainer.innerHTML = `<p class="text-red-600 font-bold text-lg">An error occurred while creating your profile.</p><p class="text-gray-600 mt-2">${error.message}</p><p class="mt-4"><a href="#" onclick="location.reload()" class="text-blue-600 font-semibold underline">Please click here to try again.</a></p>`;
+            }
         }
-    }
     
     async function openCamera() {
     // Сначала загружаем библиотеки
