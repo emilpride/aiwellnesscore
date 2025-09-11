@@ -4,7 +4,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 
-// ... (остальной код инициализации Firebase и вспомогательных функций)
+// ... (остальной код инициализации Firebase)
 
 if (!getApps().length) {
   try {
@@ -14,9 +14,14 @@ if (!getApps().length) {
 }
 const db = getFirestore();
 
-// ... (вспомогательные функции hashData и sendPurchaseEventToMeta)
+// ... (вспомогательные функции)
 
 exports.handler = async (event) => {
+  // --- ДИАГНОСТИЧЕСКИЙ ЛОГ ---
+  // Этот лог поможет нам понять, вызывается ли функция вообще.
+  console.log('--- STRIPE WEBHOOK FUNCTION WAS TRIGGERED ---');
+  // --- КОНЕЦ ЛОГА ---
+
   const sig = event.headers['stripe-signature'];
   if (!sig) {
     console.error('Webhook Error: No stripe-signature header.');
@@ -57,13 +62,11 @@ exports.handler = async (event) => {
           stripePaymentIntentId: paymentIntent.id,
           paymentMethod: paymentIntent.payment_method_types[0] || 'card',
           updatedAt: new Date().toISOString(),
-          // Webhook теперь ТОЛЬКО ставит задачу в очередь.
           reportStatus: 'queued',
           reportGenerationAttemptedAt: new Date().toISOString()
         });
 
-        console.log(`[${sessionId}] Successfully updated payment status to 'succeeded' and report status to 'queued'.`);
-        // Запуск генерации отчета удален. Этим займется report-processor.js.
+        console.log(`[${sessionId}] Successfully updated payment status and set report status to 'queued'.`);
     }
   } catch (dbError) {
     console.error(`[${sessionId}] Database update failed after webhook received:`, dbError);
