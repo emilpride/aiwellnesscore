@@ -204,7 +204,11 @@ exports.handler = async (event) => {
   }
   
   const sessionRef = db.collection('sessions').doc(sessionId);
-    
+// --- НАЧАЛО ИЗМЕНЕНИЯ ---
+// Обновляем статус, чтобы клиент знал, что генерация началась
+await sessionRef.update({ reportStatus: 'processing' });
+// --- КОНЕЦ ИЗМЕНЕНИЯ ---
+
   try {
     console.log(`[${sessionId}] Starting HYBRID report generation`);
     const doc = await sessionRef.get();
