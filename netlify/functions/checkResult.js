@@ -1,4 +1,4 @@
-// /netlify/functions/checkResult.js - УЛУЧШЕННАЯ ВЕРСИЯ
+// /netlify/functions/checkResult.js - ИСПРАВЛЕННАЯ ВЕРСИЯ
 
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
@@ -29,40 +29,47 @@ exports.handler = async (event) => {
     }
 
     const sessionData = doc.data();
-    // ДОБАВИТЬ ЭТИ СТРОКИ ДЛЯ ОТЛАДКИ:
-console.log(`[${sessionId}] Session data status:`, {
-    hasReportData: !!sessionData.reportData,
-    hasReportError: !!sessionData.reportError,
-    reportStatus: sessionData.reportStatus,
-    paymentStatus: sessionData.paymentStatus
-});
+    // Строки для отладки
+    console.log(`[${sessionId}] Session data status:`, {
+        hasReportData: !!sessionData.reportData,
+        hasReportError: !!sessionData.reportError,
+        reportStatus: sessionData.reportStatus,
+        paymentStatus: sessionData.paymentStatus
+    });
 
     // 1. Проверяем готовый отчет
     if (sessionData.reportData) {
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ status: 'complete', data: sessionData.reportData }),
-  };
-} 
-// 2. Проверяем, не записала ли фоновая функция ошибку
-else if (sessionData.reportError) {
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ status: 'error', message: sessionData.reportError }),
-  };
-} 
-// 3. Проверяем промежуточные статусы
-else if (sessionData.reportStatus === 'processing' || sessionData.reportStatus === 'queued') {
-    return {
+      return {
         statusCode: 200,
-        body: JSON.stringify({ status: sessionData.reportStatus }), // Возвращаем текущий статус
+        body: JSON.stringify({ status: 'complete', data: sessionData.reportData }),
+      };
+    }
+    // 2. Проверяем, не записала ли фоновая функция ошибку
+    else if (sessionData.reportError) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ status: 'error', message: sessionData.reportError }),
+      };
+    }
+    // 3. Проверяем промежуточные статусы
+    else if (sessionData.reportStatus === 'processing' || sessionData.reportStatus === 'queued') {
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ status: sessionData.reportStatus }), // Возвращаем текущий статус
+        };
+    }
+    // 4. Если ничего нет, продолжаем ждать (старый статус "pending")
+    else {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ status: 'pending' }),
+      };
+    }
+  } catch (error) { // <-- ДОБАВЛЕННЫЙ БЛОК CATCH
+    console.error('Error in checkResult function:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ status: 'error', message: 'Internal Server Error' }),
     };
-}
-// 4. Если ничего нет, продолжаем ждать (старый статус "pending")
-else {
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ status: 'pending' }),
-  };
-}
+  }
 };
