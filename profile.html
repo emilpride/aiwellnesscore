@@ -393,6 +393,26 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // V-- ДОБАВЬТЕ ЭТОТ КОД В НАЧАЛО СКРИПТА --V
+            (async () => {
+                const sessionId = new URLSearchParams(window.location.search).get('session_id');
+                if (sessionId) {
+                    try {
+                        await fetch('/.netlify/functions/quiz', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: 'trackEvent',
+                                sessionId: sessionId,
+                                eventName: 'profilePageViewed'
+                            })
+                        });
+                    } catch (e) {
+                        console.error('Failed to track profile page view:', e);
+                    }
+                }
+            })();
+            // ^-- КОНЕЦ ДОБАВЛЕНИЯ --^
             
             // --- ФУНКЦИЯ ДЛЯ ЗАГРУЗКИ РЕАЛЬНЫХ ДАННЫХ ---
             async function fetchData() {
