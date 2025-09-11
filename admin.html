@@ -401,12 +401,13 @@
                 });
             }
 
+            // ЗАМЕНИТЕ ВСЮ ФУНКЦИЮ НА ЭТОТ КОД
+            // ЗАМЕНИТЕ ВСЮ ФУНКЦИЮ НА ЭТОТ КОД
             function calculateAndRenderFunnel() {
                 const checkedCheckboxes = document.querySelectorAll('.funnel-source-checkbox:checked');
                 const selectedSources = [...checkedCheckboxes].map(cb => cb.value);
                 const startDateInput = document.getElementById('funnel-start-date').value;
                 const endDateInput = document.getElementById('funnel-end-date').value;
-
                 const filteredSessions = allSessionsData.filter(session => {
                     const sessionDate = new Date(session.createdAt);
                     const sourceMatch = selectedSources.length === 0 || selectedSources.includes(session.trafficSource);
@@ -414,16 +415,35 @@
                     const endDateMatch = !endDateInput || sessionDate <= new Date(endDateInput + 'T23:59:59');
                     return sourceMatch && startDateMatch && endDateMatch;
                 });
-                
-                // --- НАЧАЛО ИЗМЕНЕНИЙ: Полностью переписанная логика воронки ---
+
+                // --- НАЧАЛО ИЗМЕНЕНИЙ: Максимально детализированная воронка ---
+                // /admin.html -> calculateAndRenderFunnel()
+
+                // --- НАЧАЛО ИЗМЕНЕНИЙ: Используем новые, надежные флаги ---
                 const funnelSteps = [
                     { name: '1. Session Started', condition: s => true },
-                    { name: '2. Quiz Started (Answered Goal)', condition: s => s.answers && s.answers.hasOwnProperty('userGoal') },
-                    { name: '3. Quiz Completed (Answered Email)', condition: s => s.answers && s.answers.hasOwnProperty('email') },
-                    { name: '4. Profile Page Viewed', condition: s => s.hasOwnProperty('preliminaryResult') },
-                    { name: '5. Payment Page Viewed', condition: s => s.hasOwnProperty('planType') },
-                    { name: '6. Purchase Completed', condition: s => s.paymentStatus === 'succeeded' }
+                    { name: '2. Goal', condition: s => s.answers && s.answers.hasOwnProperty('userGoal') },
+                    { name: '3. Age', condition: s => s.answers && s.answers.hasOwnProperty('age') },
+                    { name: '4. Sex (Gender)', condition: s => s.answers && s.answers.hasOwnProperty('gender') },
+                    { name: '5. Height', condition: s => s.answers && s.answers.hasOwnProperty('height') },
+                    { name: '6. Weight', condition: s => s.answers && s.answers.hasOwnProperty('weight') },
+                    { name: '7. Sleep', condition: s => s.answers && s.answers.hasOwnProperty('sleep') },
+                    { name: '8. Activity', condition: s => s.answers && s.answers.hasOwnProperty('activity') },
+                    { name: '9. Nutrition', condition: s => s.answers && s.answers.hasOwnProperty('nutrition') },
+                    { name: '10. Processed Food', condition: s => s.answers && s.answers.hasOwnProperty('processed_food') },
+                    { name: '11. Hydration', condition: s => s.answers && s.answers.hasOwnProperty('hydration') },
+                    { name: '12. Mindfulness', condition: s => s.answers && s.answers.hasOwnProperty('mindfulness') },
+                    { name: '13. Mood', condition: s => s.answers && s.answers.hasOwnProperty('mood') },
+                    { name: '14. Alcohol', condition: s => s.answers && s.answers.hasOwnProperty('alcohol') },
+                    { name: '15. Smoking', condition: s => s.answers && s.answers.hasOwnProperty('smoking') },
+                    { name: '16. Screen Time', condition: s => s.answers && s.answers.hasOwnProperty('screen_time') },
+                    { name: '17. Photo (Selfie)', condition: s => s.answers && s.answers.hasOwnProperty('selfie') },
+                    { name: '18. Email', condition: s => s.answers && s.answers.hasOwnProperty('email') },
+                    { name: '19. Profile Page Viewed', condition: s => s.events && s.events.hasOwnProperty('profilePageViewed') },
+                    { name: '20. Payment Page Viewed', condition: s => s.events && s.events.hasOwnProperty('paymentPageViewed') },
+                    { name: '21. Purchase Completed', condition: s => s.paymentStatus === 'succeeded' }
                 ];
+                // --- КОНЕЦ ИЗМЕНЕНИЙ ---
                 // --- КОНЕЦ ИЗМЕНЕНИЙ ---
 
                 let results = [];
@@ -435,7 +455,6 @@
                 }
                 
                 let previousStepCount = initialCount;
-
                 funnelSteps.forEach(step => {
                     const stepSessions = filteredSessions.filter(step.condition);
                     const count = stepSessions.length;
@@ -447,7 +466,6 @@
                         convFromTotal: initialCount > 0 ? ((count / initialCount) * 100).toFixed(1) : '0.0'
                     });
                     
-                    // Для следующего шага, "предыдущим" будет текущий шаг
                     previousStepCount = count;
                 });
                 renderFunnelResults(results);
