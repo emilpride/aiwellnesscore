@@ -31,10 +31,8 @@ exports.handler = async (event) => {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
-    // --- УЛУЧШЕННОЕ ЛОГИРОВАНИЕ ---
     console.error(`Webhook signature verification failed:`, err.message);
     console.error('Make sure STRIPE_WEBHOOK_SECRET environment variable is set correctly in Netlify.');
-    // --- КОНЕЦ УЛУЧШЕНИЯ ---
     return { statusCode: 400, body: `Webhook Error: ${err.message}` };
   }
 
@@ -59,27 +57,16 @@ exports.handler = async (event) => {
           stripePaymentIntentId: paymentIntent.id,
           paymentMethod: paymentIntent.payment_method_types[0] || 'card',
           updatedAt: new Date().toISOString(),
-          // --- ВАЖНОЕ ИЗМЕНЕНИЕ ---
-          reportStatus: 'queued', // Сразу ставим статус "в очереди"
+          // Webhook теперь ТОЛЬКО ставит задачу в очередь.
+          reportStatus: 'queued',
           reportGenerationAttemptedAt: new Date().toISOString()
         });
 
-        // --- УЛУЧШЕННОЕ ЛОГИРОВАНИЕ ---
         console.log(`[${sessionId}] Successfully updated payment status to 'succeeded' and report status to 'queued'.`);
-
-        // Асинхронно "вызываем" функцию генерации, не ожидая ответа.
-        fetch(`${process.env.URL}/.netlify/functions/generate-report-hybrid`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ sessionId: sessionId })
-        });
-        
-        console.log(`[${sessionId}] Triggered generate-report-hybrid function.`);
+        // Запуск генерации отчета удален. Этим займется report-processor.js.
     }
   } catch (dbError) {
     console.error(`[${sessionId}] Database update failed after webhook received:`, dbError);
-    // Даже если база упала, возвращаем Stripe 200, чтобы он не слал повторы.
-    // Проблему будем решать через логи.
   }
 
   return {
@@ -87,3 +74,4 @@ exports.handler = async (event) => {
     body: JSON.stringify({ received: true }),
   };
 };
+
