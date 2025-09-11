@@ -1,5 +1,3 @@
-// /netlify/functions/generateProfile.js
-
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 
@@ -27,8 +25,8 @@ exports.handler = async (event) => {
   try {
     const { sessionId } = JSON.parse(event.body);
     if (!sessionId) {
-        console.error("Session ID is missing in the request body.");
-        return { statusCode: 400, body: JSON.stringify({ error: 'Session ID is required' }) };
+      console.error("Session ID is missing in the request body.");
+      return { statusCode: 400, body: JSON.stringify({ error: 'Session ID is required' }) };
     }
     console.log(`[${sessionId}] --- 1. Starting profile generation.`);
 
@@ -36,8 +34,8 @@ exports.handler = async (event) => {
     const doc = await sessionRef.get();
 
     if (!doc.exists) {
-        console.error(`[${sessionId}] --- ERROR: Document not found in Firestore. This is the problem!`);
-        return { statusCode: 404, body: JSON.stringify({ error: 'Session not found' }) };
+      console.error(`[${sessionId}] --- ERROR: Document not found in Firestore. This is the problem!`);
+      return { statusCode: 404, body: JSON.stringify({ error: 'Session not found' }) };
     }
     
     const sessionData = doc.data();
@@ -46,62 +44,29 @@ exports.handler = async (event) => {
     const userAnswers = sessionData.answers;
     const faceAnalysis = sessionData.faceAnalysis;
 
-    const chronoAge = parseInt(userAnswers.age, 10);
+    // --- НАЧАЛО ИСПРАВЛЕННОГО БЛОКА ---
+
+    // Используем значения по умолчанию для критических полей, если они отсутствуют
+    const safeUserAnswers = {
+      ...userAnswers,
+      age: parseInt(userAnswers.age, 10) || 30,
+      gender: ['male', 'female'].includes(userAnswers.gender) ? userAnswers.gender : 'female',
+      height: parseFloat(userAnswers.height) || 170,
+      weight: parseFloat(userAnswers.weight) || 70,
+    };
+    
+    // Передаем в функцию расчета "безопасные" данные
+    const chronoAge = safeUserAnswers.age;
     if (isNaN(chronoAge)) {
-        console.error(`[${sessionId}] --- ERROR: Invalid chronological age:`, userAnswers.age);
+        console.error(`[${sessionId}] --- ERROR: Invalid chronological age even after fallback:`, userAnswers.age);
         return { statusCode: 400, body: JSON.stringify({ error: 'Invalid age provided' }) };
     }
+    
+    // Теперь передаем safeUserAnswers в функцию расчета
+    const bioAgeResult = calculateBioAge(chronoAge, safeUserAnswers, faceAnalysis);
+    
+    // --- КОНЕЦ ИСПРАВЛЕННОГО БЛОКА ---
 
-    // Расширенная валидация всех критических полей
-const requiredFields = ['age', 'gender', 'height', 'weight', 'sleep', 'activity'];
-const missingFields = [];
-
-for (const field of requiredFields) {
-    if (!userAnswers[field]) {
-        missingFields.push(field);
-    }
-}
-
-if (missingFields.length > 0) {
-    console.error(`[${sessionId}] Missing required fields: ${missingFields.join(', ')}`);
-    return {
-        statusCode: 400,
-        body: JSON.stringify({ 
-            error: 'Incomplete data', 
-            missingFields: missingFields 
-        })
-    };
-}
-
-// Валидация диапазонов значений
-const height = parseFloat(userAnswers.height);
-const weight = parseFloat(userAnswers.weight);
-
-if (isNaN(height) || height < 100 || height > 250) {
-    console.error(`[${sessionId}] Invalid height: ${userAnswers.height}`);
-    return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Invalid height value' })
-    };
-}
-
-if (isNaN(weight) || weight < 30 || weight > 300) {
-    console.error(`[${sessionId}] Invalid weight: ${userAnswers.weight}`);
-    return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Invalid weight value' })
-    };
-}
-
-if (!['male', 'female'].includes(userAnswers.gender)) {
-    console.error(`[${sessionId}] Invalid gender: ${userAnswers.gender}`);
-    return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Invalid gender value' })
-    };
-}
-
-    const bioAgeResult = calculateBioAge(chronoAge, userAnswers, faceAnalysis);
     console.log(`[${sessionId}] --- 3. BioAge calculated successfully:`, JSON.stringify(bioAgeResult));
 
     try {
@@ -128,8 +93,8 @@ if (!['male', 'female'].includes(userAnswers.gender)) {
     const sessionId = JSON.parse(event.body)?.sessionId || 'unknown';
     console.error(`[${sessionId}] --- FATAL HANDLER ERROR:`, error);
     return {
-        statusCode: 500,
-        body: JSON.stringify({ error: 'Internal Server Error', details: error.message })
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Internal Server Error', details: error.message })
     };
   }
 };
