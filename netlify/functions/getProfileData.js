@@ -98,6 +98,15 @@ exports.handler = async (event) => {
     const sessionData = doc.data();
     const answers = sessionData.answers || {};
     const preliminaryResult = sessionData.preliminaryResult || {};
+    // --- НАЧАЛО ИЗМЕНЕНИЯ: Проверка наличия данных ---
+if (!sessionData.preliminaryResult || Object.keys(sessionData.preliminaryResult).length === 0) {
+    console.error(`[${sessionId}] Critical Error: Preliminary result not found. The 'generateProfile' function might have failed.`);
+    return {
+        statusCode: 404,
+        body: JSON.stringify({ error: 'Preliminary profile data not found. Please try completing the quiz again.' })
+    };
+}
+// --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
     // Извлекаем результат анализа от Face++
     const faceAnalysis = sessionData.faceAnalysis || null;
