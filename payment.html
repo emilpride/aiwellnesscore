@@ -1,860 +1,216 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI WellnessCore - Your Rejuvenation Plan</title>
-    <script src="https://js.stripe.com/v3/"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <style>
-
-        /* Добавьте это в ваш тег <style> */
-#payment-status .icon-success svg {
-    color: #22c55e; /* Ярко-зеленый */
-}
-
-#payment-status .icon-error svg {
-    color: #ef4444; /* Ярко-красный */
-}
-        :root { 
-            --brand-accent: #debea9;
-            --brand-dark-text: #3c3b31; 
-        }
-        
-        html, body { 
-            overscroll-behavior: none; 
-            font-family: 'Inter', sans-serif; 
-            background: linear-gradient(120deg, #fdfcfb, #f9f7f5, #f5f2ef, #f9f7f5, #fdfcfb);
-            background-size: 400% 400%;
-            animation: moveBackground 40s ease infinite;
-            scroll-behavior: smooth;
-        }
-
-        @keyframes moveBackground {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .content-card {
-            background-color: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.07);
-        }
-
-        .cta-button {
-            background-color: var(--brand-dark-text);
-            color: white;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 15px rgba(60, 59, 49, 0.2);
-            white-space: nowrap;
-        }
-        .cta-button:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(60, 59, 49, 0.3);
-        }
-        .cta-button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-        
-        @keyframes pulsate {
-            0%, 100% { transform: scale(1); box-shadow: 0 8px 25px rgba(60, 59, 49, 0.3); }
-            50% { transform: scale(1.03); box-shadow: 0 12px 35px rgba(60, 59, 49, 0.4); }
-        }
-        .pulsating {
-            animation: pulsate 2.5s infinite ease-in-out;
-        }
-
-        #loading-overlay { display: none; }
-        #loading-overlay.active { display: flex; }
-
-        .timer-box {
-            background-color: var(--brand-dark-text);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-        
-        .plan-toggle-group {
-            background-color: rgba(0,0,0,0.04);
-            border-radius: 9999px;
-            padding: 4px;
-            display: inline-flex;
-        }
-        .plan-toggle-btn {
-            padding: 8px 20px;
-            border-radius: 9999px;
-            font-weight: 600;
-            color: #57534e; /* stone-600 */
-            cursor: pointer;
-            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-            border: none;
-            background-color: transparent;
-        }
-        .plan-toggle-btn.active {
-            background-color: white;
-            color: var(--brand-dark-text);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        }
-
-        /* Payment Modal Styles */
-        #payment-modal {
-            transition: opacity 0.3s ease-in-out;
-        }
-        #payment-modal-content {
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-        }
-        #payment-element {
-            padding: 1.25rem;
-            border: 1px solid #e5e7eb;
-            background-color: white;
-            border-radius: 12px;
-        }
-        #payment-element .StripeElement--express-checkout {
-            display: none;
-        }
-        #sales-section {
-            scroll-margin-top: 80px; /* Offset for sticky header */
-        }
-        
-        /* New Compact Plan Styles */
-        .plan-option {
-            border: 2px solid #E5E7EB;
-            border-radius: 1rem;
-            transition: border-color 0.2s ease, background-color 0.2s ease;
-            cursor: pointer;
-        }
-        
-        .custom-radio {
-            width: 1.25rem;
-            height: 1.25rem;
-            border: 2px solid #D1D5DB;
-            border-radius: 50%;
-            margin-right: 1rem;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: border-color 0.2s ease;
-        }
-        .custom-radio .inner-circle {
-            width: 0.75rem;
-            height: 0.75rem;
-            background-color: transparent;
-            border-radius: 50%;
-            transition: background-color 0.2s ease;
-        }
-
-        input[type="radio"]:checked + .plan-option {
-             border-color: var(--brand-dark-text);
-             background-color: #FFF;
-        }
-        input[type="radio"]:checked + .plan-option .custom-radio {
-            border-color: var(--brand-dark-text);
-        }
-        input[type="radio"]:checked + .plan-option .custom-radio .inner-circle {
-            background-color: var(--brand-dark-text);
-        }
-
-        details summary::-webkit-details-marker { display: none; }
-        details summary {
-            position: relative;
-            padding-right: 2rem;
-            cursor: pointer;
-            list-style: none;
-        }
-        details summary:after {
-            content: '+';
-            position: absolute;
-            right: 0.25rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.5rem;
-            font-weight: 300;
-            transition: transform 0.3s ease-in-out;
-        }
-        details[open] summary:after {
-            transform: translateY(-50%) rotate(45deg);
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI WellnessCore - Checkout</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --brand-accent: #debea9; --brand-dark-text: #3c3b31; }
+        html, body { font-family: 'Inter', sans-serif; background-color: #f8f7f4; }
+        .cta-button { background-color: var(--brand-dark-text); color: white; transition: opacity 0.2s; }
+        .cta-button:hover:not(:disabled) { opacity: 0.9; }
+        .cta-button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .plan-option { border: 2px solid #E5E7EB; border-radius: 1rem; transition: border-color 0.2s; cursor: pointer; }
+        .custom-radio { width: 1.25rem; height: 1.25rem; border: 2px solid #D1D5DB; border-radius: 50%; margin-right: 1rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .custom-radio .inner-circle { width: 0.75rem; height: 0.75rem; background-color: transparent; border-radius: 50%; transition: background-color 0.2s; }
+        input[type="radio"]:checked + .plan-option { border-color: var(--brand-dark-text); }
+        input[type="radio"]:checked + .plan-option .custom-radio { border-color: var(--brand-dark-text); }
+        input[type="radio"]:checked + .plan-option .custom-radio .inner-circle { background-color: var(--brand-dark-text); }
+    </style>
 </head>
 <body class="antialiased text-gray-800">
 
-    <div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex-col items-center justify-center">
-        <div class="w-16 h-16 border-4 border-gray-300 border-t-[--brand-accent] rounded-full animate-spin"></div>
-        <p class="mt-4 text-lg font-semibold text-gray-700">Loading your data...</p>
-    </div>
-    
-    <div id="payment-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-        <div id="payment-modal-content" class="w-full max-w-md bg-white rounded-2xl shadow-xl transform scale-95 opacity-0">
-            <div class="p-6 border-b border-gray-200">
-                <div class="flex justify-between items-center">
-                      <h2 class="text-xl font-bold text-gray-800">Complete your checkout</h2>
-                      <button id="close-modal-btn" class="text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
-                </div>
-            </div>
-            <div class="p-6">
-                 <div class="flex justify-between items-center text-gray-600 mb-4">
-                     <span>Regular price:</span>
-                     <span id="modal-regular-price">$0.00</span>
-                 </div>
-                 <div class="flex justify-between items-center text-gray-900 font-bold text-lg mb-6">
-                     <span>Total today:</span>
-                     <span id="modal-total-price">$0.00</span>
-                 </div>
-
-                 <form id="payment-form">
-                     <div id="express-checkout-element" class="mb-4">
-    </div>
-<div class="relative mb-4">
-    <div class="absolute inset-0 flex items-center">
-        <div class="w-full border-t border-gray-300"></div>
-    </div>
-    <div class="relative flex justify-center text-sm">
-        <span class="px-2 bg-white text-gray-500">OR</span>
-    </div>
-</div>
-                     <div id="payment-element" class="mb-6">
-                         </div>
-                     <button id="submit-payment-btn" class="cta-button w-full font-bold py-3 px-4 rounded-xl text-lg flex items-center justify-center">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
-                         <span id="button-text">Continue</span>
-                         <svg id="spinner" class="animate-spin h-5 w-5 text-white hidden ml-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                         </svg>
-                     </button>
-                     <div id="payment-message" class="text-center text-red-500 text-sm mt-4"></div>
-                 </form>
-                <div id="payment-status" class="hidden text-center py-8 px-4">
-    <div id="status-icon" class="w-16 h-16 mx-auto mb-4">
-        </div>
-    <p id="status-message" class="text-lg font-semibold text-gray-800"></p>
-</div>
-            </div>
-        </div>
-    </div>
-    
-    <header class="sticky top-0 z-40 bg-white/60 backdrop-blur-xl border-b border-gray-200/50">
-        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="index.html"><img src="logo.png" alt="Logo" class="h-10 sm:h-12 w-auto"></a>
-            <div class="flex items-center gap-4">
-                 <div class="text-center">
-                     <div class="timer-box text-lg sm:text-xl font-mono">
-                         <span id="minutes">10</span>:<span id="seconds">00</span>
-                     </div>
-                 </div>
-                 <button id="scroll-to-plans-btn" class="cta-button pulsating font-bold py-3 px-5 text-sm sm:text-base rounded-full">
-                     Unlock My Plan
-                 </button>
-            </div>
-        </div>
-    </header>
-
-    <div class="min-h-screen p-4 sm:p-6 lg:p-8 pt-0">
-        <main class="max-w-5xl mx-auto space-y-12 md:space-y-16 pt-8">
-            <section class="text-center">
-                <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight" style="color: var(--brand-dark-text);">Your personalized plan is ready!</h1>
-                <p class="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">You're one step away from starting your journey to rejuvenation and better wellness.</p>
-                <div class="mt-8 bg-white/70 backdrop-blur-md inline-flex items-center gap-4 sm:gap-8 p-4 rounded-full shadow-lg border border-gray-200">
-                    <div class="text-center">
-                        <p class="text-sm text-gray-500">Current Bio-Age</p>
-                        <p id="current-bio-age" class="text-3xl sm:text-4xl font-black" style="color: var(--brand-dark-text);">35</p>
-                    </div>
-                    <div id="arrow-animation" class="w-12 h-12 sm:w-16 sm:h-16"></div>
-                    <div class="text-center">
-                        <p class="text-sm font-semibold text-green-700">Potential in 21 Days</p>
-                        <p id="potential-bio-age" class="text-3xl sm:text-4xl font-black text-green-600">32</p>
-                    </div>
-                </div>
-            </section>
-            
-            <section id="sales-section" class="flex flex-col justify-center min-h-[calc(100vh-88px)] md:min-h-0">
-                <div class="max-w-md mx-auto w-full">
-                    <h2 class="text-2xl font-bold text-center mb-4 sm:mb-6" style="color: var(--brand-dark-text);">Choose Your Plan</h2>
-                    <div id="plans-container" class="space-y-3">
-                        <label>
-    <input type="radio" name="plan" value="basic" class="sr-only">
-    <div class="plan-option p-4 flex justify-between items-center">
-        <div class="flex items-center">
-            <div class="custom-radio"><div class="inner-circle"></div></div>
-            <div> <h3 class="font-bold text-gray-800">7-Day Plan</h3>
-                <p class="text-xs text-green-700 font-semibold">to lower bio-age by 1 year</p>
+    <div id="payment-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50" style="display: none;">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-xl">
+            <div class="p-6 border-b">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-gray-800">Complete your checkout</h2>
+                    <button id="close-modal-btn" class="text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
             </div>
-        </div>
-        <div class="text-right">
-            <div class="flex justify-end items-baseline">
-                <p class="font-bold text-lg text-gray-900">$1.42</p>
-                <p class="text-sm text-gray-600 ml-1">per day</p>
+            <div class="p-6">
+                <p class="flex justify-between items-center text-gray-900 font-bold text-lg mb-6">
+                    <span>Total today:</span>
+                    <span id="modal-total-price">$0.00</span>
+                </p>
+                <form id="payment-form">
+                    <div id="payment-element" class="mb-6"></div>
+                    <button id="submit-payment-btn" class="cta-button w-full font-bold py-3 px-4 rounded-xl text-lg flex items-center justify-center">
+                        <span id="button-text">Continue</span>
+                        <svg id="spinner" class="animate-spin h-5 w-5 text-white hidden ml-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </button>
+                    <div id="payment-message" class="text-center text-red-500 text-sm mt-4"></div>
+                </form>
             </div>
-            <p class="text-xs text-gray-500">
-                <span class="line-through">$19.99</span> Total: $9.99
-            </p>
         </div>
     </div>
-</label>
-                        <div class="relative">
-                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[--brand-dark-text] text-white text-xs font-bold px-3 py-1 rounded-full z-10">MOST POPULAR</div>
-                            <label>
-    <input type="radio" name="plan" value="advanced" class="sr-only" checked>
-    <div class="plan-option p-4 flex justify-between items-center">
-        <div class="flex items-center">
-            <div class="custom-radio"><div class="inner-circle"></div></div>
-            <div> <h3 class="font-bold text-gray-800">14-Day Plan</h3>
-                <p class="text-sm text-green-700 font-semibold">to lower bio-age by 2 years</p>
-            </div>
+
+    <header class="sticky top-0 z-40 bg-white/60 backdrop-blur-xl border-b border-gray-200/50">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html"><img src="logo.png" alt="Logo" class="h-10 sm:h-12 w-auto"></a>
+            <button id="cta-header-btn" class="cta-button font-bold py-3 px-5 text-sm sm:text-base rounded-full">Unlock My Plan</button>
         </div>
-        <div class="text-right">
-            <div class="flex justify-end items-baseline">
-                <p class="font-bold text-lg text-gray-900">$0.99</p>
-                <p class="text-sm text-gray-600 ml-1">per day</p>
-            </div>
-            <p class="text-xs text-gray-500">
-                <span class="line-through">$29.99</span> Total: $13.99
-            </p>
-        </div>
+    </header>
+
+    <div class="min-h-screen p-4 sm:p-6 lg:p-8">
+        <main class="max-w-md mx-auto pt-8">
+            <section id="sales-section">
+                <h2 class="text-2xl font-bold text-center mb-6" style="color: var(--brand-dark-text);">Choose Your Plan</h2>
+                <div id="plans-container" class="space-y-3">
+                    <label>
+                        <input type="radio" name="plan" value="basic" class="sr-only">
+                        <div class="plan-option p-4 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="custom-radio"><div class="inner-circle"></div></div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">7-Day Plan</h3>
+                                    <p class="text-xs text-green-700 font-semibold">to lower bio-age by 1 year</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-500"><span class="line-through">$19.99</span> Total: $9.99</p>
+                            </div>
+                        </div>
+                    </label>
+                    <label>
+                        <input type="radio" name="plan" value="advanced" class="sr-only" checked>
+                        <div class="plan-option p-4 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="custom-radio"><div class="inner-circle"></div></div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">14-Day Plan</h3>
+                                    <p class="text-sm text-green-700 font-semibold">to lower bio-age by 2 years</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-500"><span class="line-through">$29.99</span> Total: $13.99</p>
+                            </div>
+                        </div>
+                    </label>
+                    <label>
+                        <input type="radio" name="plan" value="premium" class="sr-only">
+                        <div class="plan-option p-4 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="custom-radio"><div class="inner-circle"></div></div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">21-Day Plan</h3>
+                                    <p class="text-sm text-green-700 font-semibold">to lower bio-age by 3 years</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-500"><span class="line-through">$49.99</span> Total: $19.99</p>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+                <div class="mt-6 text-center">
+                    <button id="cta-main-btn" class="cta-button w-full font-bold py-3 px-8 rounded-xl text-lg mb-4">Unlock My Plan</button>
+                    <p class="text-xs text-gray-500">This is a one-time payment for lifetime access.</p>
+                </div>
+            </section>
+        </main>
     </div>
-</label>
-                        </div>
-                        <label>
-    <input type="radio" name="plan" value="premium" class="sr-only">
-    <div class="plan-option p-4 flex justify-between items-center">
-        <div class="flex items-center">
-            <div class="custom-radio"><div class="inner-circle"></div></div>
-            <div> <h3 class="font-bold text-gray-800">21-Day Plan</h3>
-                <p class="text-sm text-green-700 font-semibold">to lower bio-age by 3 years</p>
-            </div>
-        </div>
-        <div class="text-right">
-            <div class="flex justify-end items-baseline">
-                <p class="font-bold text-lg text-gray-900">$0.95</p>
-                <p class="text-sm text-gray-600 ml-1">per day</p>
-            </div>
-            <p class="text-xs text-gray-500">
-                <span class="line-through">$49.99</span> Total: $19.99
-            </p>
-        </div>
-    </div>
-</label>
-                    </div>
 
-                    <div class="mt-6 text-center flex flex-col items-center">
-                         <button id="cta-button-desktop" class="cta-button pulsating w-full font-bold py-3 px-8 rounded-xl text-lg mb-4 open-payment-modal">
-                             Unlock My Plan
-                         </button>
-                         <p class="text-xs text-gray-500 mb-4 max-w-md mx-auto">This is a one-time payment. You will get lifetime access to your personal report and plan.</p>
-                        <div class="flex justify-center items-center gap-4">
-                            <img src="stripe.svg" alt="Stripe" class="h-8 opacity-50">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg" alt="Mastercard" class="h-8 opacity-50">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" class="h-8 opacity-50">
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <section class="content-card p-8 grid md:grid-cols-2 gap-8 items-center">
-                <div>
-                    <h3 class="text-2xl font-bold mb-4" style="color: var(--brand-dark-text);">What Your Plan Will Impact</h3>
-                    <p class="text-gray-600 mb-6">Your personal plan is focused on key areas that directly influence your biological age and overall well-being.</p>
-                     <ul class="space-y-3">
-                         <li class="flex items-start"><span class="text-xl mr-3">✅</span><div><h4 class="font-semibold">Detailed Skin Health Report</h4><p class="text-sm text-gray-600">Analysis of hydration, wrinkles, and other factors.</p></div></li>
-                         <li class="flex items-start"><span class="text-xl mr-3">📅</span><div><h4 class="font-semibold">Step-by-Step Daily Plan</h4><p class="text-sm text-gray-600">Simple tasks targeting your key area for improvement.</p></div></li>
-                         <li class="flex items-start"><span class="text-xl mr-3">🧘</span><div><h4 class="font-semibold">Personalized Recommendations</h4><p class="text-sm text-gray-600">Advice on nutrition, stress management, and physical activity.</p></div></li>
-                     </ul>
-                </div>
-                <div class="space-y-4">
-                    <div>
-                        <div class="flex justify-between items-center mb-1"><span class="font-semibold text-sm text-gray-700">Stress Reduction</span><span class="font-bold text-sm text-green-600">+25%</span></div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-500 h-2.5 rounded-full" style="width: 75%"></div></div>
-                    </div>
-                     <div>
-                        <div class="flex justify-between items-center mb-1"><span class="font-semibold text-sm text-gray-700">Sleep Quality</span><span class="font-bold text-sm text-green-600">+18%</span></div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-500 h-2.5 rounded-full" style="width: 68%"></div></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-1"><span class="font-semibold text-sm text-gray-700">Energy Levels</span><span class="font-bold text-sm text-green-600">+22%</span></div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-500 h-2.5 rounded-full" style="width: 82%"></div></div>
-                    </div>
-                </div>
-            </section>
-            
-            <!-- 
-<section id="charts-section">
-    <div class="text-center mb-6">
-        <div id="plan-toggles" class="plan-toggle-group">
-            <button class="plan-toggle-btn" data-plan="basic">7 Days</button>
-            <button class="plan-toggle-btn active" data-plan="advanced">14 Days</button>
-            <button class="plan-toggle-btn" data-plan="premium">21 Days</button>
-        </div>
-    </div>
-    <div class="grid md:grid-cols-2 gap-8">
-        <div class="content-card p-6 sm:p-8">
-            <h3 class="text-xl font-bold text-center mb-4" style="color: var(--brand-dark-text);">Bio-Age Transformation</h3>
-            <div class="h-56 sm:h-64"><canvas id="bioAgeChart"></canvas></div>
-        </div>
-         <div class="content-card p-6 sm:p-8">
-            <h3 class="text-xl font-bold text-center mb-4" style="color: var(--brand-dark-text);">Life Expectancy Forecast</h3>
-            <div class="h-56 sm:h-64"><canvas id="lifespanChart"></canvas></div>
-        </div>
-    </div>
-</section>
--->
-                <h3 class="text-2xl font-bold text-center mb-6" style="color: var(--brand-dark-text);">Results That Inspire Us</h3>
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div class="content-card p-6">
-                        <div class="flex items-center mb-2">
-                            <img src="https://placehold.co/40x40/EADDD7/3C3B31?text=S" alt="Avatar" class="w-10 h-10 rounded-full mr-3">
-                            <div><p class="font-bold">Sarah K.</p><p class="text-xs text-gray-500">Lowered bio-age by 3 years</p></div>
-                        </div>
-                        <p class="text-sm text-gray-700 italic">"I was shocked by my biological age. It was the wake-up call I needed. The plan was easy to follow, and I felt a difference in my energy levels within a week!"</p>
-                    </div>
-                    <div class="content-card p-6">
-                        <div class="flex items-center mb-2">
-                            <img src="https://placehold.co/40x40/EADDD7/3C3B31?text=M" alt="Avatar" class="w-10 h-10 rounded-full mr-3">
-                            <div><p class="font-bold">Michael P.</p><p class="text-xs text-gray-500">Improved sleep quality</p></div>
-                        </div>
-                        <p class="text-sm text-gray-700 italic">"Finally, a wellness tool that isn't about guilt. The skin analysis was fascinating. I had no idea my screen time was showing up on my face."</p>
-                    </div>
-                    <div class="content-card p-6">
-                        <div class="flex items-center mb-2">
-                            <img src="https://placehold.co/40x40/EADDD7/3C3B31?text=E" alt="Avatar" class="w-10 h-10 rounded-full mr-3">
-                            <div><p class="font-bold">Emily W.</p><p class="text-xs text-gray-500">Increased energy levels</p></div>
-                        </div>
-                        <p class="text-sm text-gray-700 italic">"The 'Creative Owl' archetype resonated so much! The plan helped me fix my daily routine without radical changes. I feel more alert and productive."</p>
-                    </div>
-                </div>
-            </section>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let selectedPlanKey = 'advanced';
+        let stripe, elements, clientSecret;
 
-            <section class="grid md:grid-cols-2 gap-8 items-center">
-                <div class="content-card p-8 text-center">
-                    <div class="mx-auto h-20 w-20 text-gray-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-full w-full" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.286zm0 13.036h.008v.008h-.008v-.008z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-2xl font-bold mt-4" style="color: var(--brand-dark-text);">30-Day Money-Back Guarantee</h3>
-                    <p class="text-gray-600 mt-2">We're confident in our plan. If you follow the recommendations but don't see noticeable results in your well-being, we'll refund your money. No questions asked.</p>
-                </div>
-                <div class="content-card p-8">
-                     <h3 class="text-2xl font-bold mb-4 text-center md:text-left" style="color: var(--brand-dark-text);">Frequently Asked Questions</h3>
-                     <div class="space-y-4">
-                         <details class="border-b border-gray-200 pb-2">
-          _B_L_O_C_K_              <summary class="font-semibold text-gray-800">Is this medical advice?</summary>
-                             <p class="text-gray-600 mt-2 text-sm">No. AI WELLNESSCORE is an educational tool. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a physician for any health concerns.</p>
-                         </details>
-                         <details class="border-b border-gray-200 pb-2">
-                             <summary class="font-semibold text-gray-800">How do I access my plan?</summary>
-                             <p class="text-gray-600 mt-2 text-sm">Immediately after payment, you will be redirected to your full personal report page. You will also receive a link to it via email for permanent access.</p>
-                         </details>
-                         <details>
-                             <summary class="font-semibold text-gray-800">Is this a one-time payment or a subscription?</summary>
-                             <p class="text-gray-600 mt-2 text-sm">This is a one-time payment. You pay once and get lifetime access to your generated report and plan. There are no hidden fees or automatic renewals.</p>
-                         </details>
-                     </div>
-                </div>
-            </section>
+        const planData = {
+            basic: { price: 9.99, amount: 999 },
+            advanced: { price: 13.99, amount: 1399 },
+            premium: { price: 19.99, amount: 1999 }
+        };
 
-        </main>
-    </div>
-    
-   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
-        let selectedPlanKey = 'advanced';
-        let stripe, elements, clientSecret;
-        let currentBioAge, standardLifespan, planData;
-        let bioAgeChartInstance, lifespanChartInstance;
-        let chartsRendered = false;
+        const paymentModal = document.getElementById('payment-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const paymentForm = document.getElementById('payment-form');
 
-        const ICON_SUCCESS_SVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
-        const ICON_ERROR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.007H12v-.007z" /></svg>`;
+        function showModal() { paymentModal.style.display = 'flex'; }
+        function hideModal() { paymentModal.style.display = 'none'; }
 
-        // --- DOM-ЭЛЕМЕНТЫ ---
-        const salesSection = document.getElementById('sales-section');
-        const scrollToPlansBtn = document.getElementById('scroll-to-plans-btn');
-        const paymentModal = document.getElementById('payment-modal');
-        const paymentModalContent = document.getElementById('payment-modal-content');
-        const closeModalBtn = document.getElementById('close-modal-btn');
-        const paymentForm = document.getElementById('payment-form');
-        const paymentElementContainer = document.getElementById('payment-element');
-        const openModalButtons = document.querySelectorAll('.open-payment-modal');
+        async function initializePaymentForm() {
+            showModal();
+            document.getElementById('modal-total-price').textContent = `$${planData[selectedPlanKey].price.toFixed(2)}`;
+            
+            const sessionId = new URLSearchParams(window.location.search).get('session_id');
+            if (!sessionId) {
+                alert("CRITICAL ERROR: Session ID is missing.");
+                hideModal();
+                return;
+            }
 
-        // --- ФУНКЦИИ ---
+            try {
+                const keyResponse = await fetch('/.netlify/functions/get-stripe-key');
+                const { publishableKey } = await keyResponse.json();
+                if (!publishableKey) throw new Error('Stripe key not found.');
 
-        // /payment.html
+                const paymentResponse = await fetch('/.netlify/functions/payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        sessionId: sessionId, 
+                        plan: selectedPlanKey, 
+                        amount: planData[selectedPlanKey].amount 
+                    })
+                });
+                
+                const data = await paymentResponse.json();
+                if (!data.clientSecret) throw new Error('Client secret not received.');
+                clientSecret = data.clientSecret;
+                
+                stripe = Stripe(publishableKey);
+                elements = stripe.elements({ clientSecret });
+                const paymentElement = elements.create("payment");
+                paymentElement.mount("#payment-element");
 
-        async function fetchPreliminaryData() {
-    const cachedData = sessionStorage.getItem('preliminaryProfileData');
-    if (cachedData) {
-        console.log("Loading profile data from session cache.");
-        try {
-            const parsedData = JSON.parse(cachedData);
-            console.log("Cache data loaded successfully:", parsedData);
-            return parsedData;
-        } catch (error) {
-            console.error("Failed to parse cached data:", error);
-            sessionStorage.removeItem('preliminaryProfileData');
+            } catch (error) {
+                console.error('Payment Initialization Error:', error);
+                alert('Could not initialize payment. Please try again.');
+                hideModal();
+            }
         }
-    }
-    
-    console.log("Cache miss. Fetching profile data from server.");
-    
-    const sessionId = new URLSearchParams(window.location.search).get('session_id');
-    if (!sessionId) { 
-        throw new Error("Session ID not found in URL."); 
-    }
-    
-    try {
-        const response = await fetch('/.netlify/functions/getProfileData', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId })
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            setLoading(true);
+
+            const { error } = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    return_url: `${window.location.origin}/result.html?session_id=${new URLSearchParams(window.location.search).get('session_id')}&payment=success`,
+                },
+            });
+
+            if (error) {
+                document.getElementById('payment-message').textContent = error.message;
+                setLoading(false);
+            }
+        }
+
+        function setLoading(isLoading) {
+            const submitBtn = document.getElementById('submit-payment-btn');
+            submitBtn.disabled = isLoading;
+            submitBtn.querySelector('#spinner').classList.toggle('hidden', !isLoading);
+            submitBtn.querySelector('#button-text').classList.toggle('hidden', isLoading);
+        }
+
+        document.querySelectorAll('input[name="plan"]').forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                selectedPlanKey = event.target.value;
+            });
         });
         
-        if (!response.ok) { 
-            throw new Error("Failed to fetch profile data from server."); 
-        }
-        
-        const data = await response.json();
-        console.log("Data fetched from server:", data);
-        
-        sessionStorage.setItem('preliminaryProfileData', JSON.stringify(data));
-        return data;
-    } catch (error) {
-        console.error("Error fetching data:", error);
-        throw error;
-    }
-}
-
-        async function initializePage() {
-    const loadingOverlay = document.getElementById('loading-overlay');
-    loadingOverlay.classList.add('active');
-    
-    try {
-        console.log("Starting page initialization...");
-        const data = await fetchPreliminaryData();
-        console.log("Data received:", data);
-        
-        if (!data.bioAgeResult || !data.bioAgeResult.biologicalAge) {
-            console.error("Critical data missing in response:", data);
-            throw new Error("Incomplete profile data");
-        }
-        
-        currentBioAge = data.bioAgeResult.biologicalAge;
-        standardLifespan = 82;
-        
-        planData = {
-            basic: { 
-                price: 9.99, 
-                regularPrice: 19.99, 
-                potentialBioAge: currentBioAge - 1, 
-                potentialLifespan: standardLifespan + 2 
-            },
-            advanced: { 
-                price: 13.99, 
-                regularPrice: 29.99, 
-                potentialBioAge: currentBioAge - 2, 
-                potentialLifespan: standardLifespan + 4 
-            },
-            premium: { 
-                price: 19.99, 
-                regularPrice: 49.99, 
-                potentialBioAge: currentBioAge - 3, 
-                potentialLifespan: standardLifespan + 5 
-            }
-        };
-        
-        document.getElementById('current-bio-age').textContent = currentBioAge;
-        document.getElementById('potential-bio-age').textContent = planData.premium.potentialBioAge;
-        
-        console.log("Initialization successful");
-        
-    } catch (error) {
-        console.error("Initialization failed:", error);
-        
-        currentBioAge = 35;
-        standardLifespan = 82;
-        planData = {
-            basic: { price: 9.99, regularPrice: 19.99, potentialBioAge: 34, potentialLifespan: 84 },
-            advanced: { price: 13.99, regularPrice: 29.99, potentialBioAge: 33, potentialLifespan: 86 },
-            premium: { price: 19.99, regularPrice: 49.99, potentialBioAge: 32, potentialLifespan: 87 }
-        };
-        
-        document.getElementById('current-bio-age').textContent = currentBioAge;
-        document.getElementById('potential-bio-age').textContent = currentBioAge - 3;
-        
-        console.log("Using fallback values due to error");
-    } finally {
-        console.log("Entering finally block...");
-        
-        try {
-            console.log("Hiding loading overlay...");
-            loadingOverlay.classList.remove('active');
-            console.log("Loading overlay hidden");
-        } catch (e) {
-            console.error("Error hiding overlay:", e);
-        }
-        
-        try {
-            console.log("Setting up event listeners...");
-            setupEventListeners();
-            console.log("Event listeners setup complete");
-        } catch (e) {
-            console.error("Error in setupEventListeners:", e);
-        }
-        
-        try {
-            console.log("Initializing charts...");
-          //  initCharts(); //
-            console.log("Charts initialized");
-        } catch (e) {
-            console.error("Error in initCharts:", e);
-        }
-        
-        console.log("Finally block complete");
-    }
-} // <-- Здесь заканчивается функция initializePage
-
-// А функция showModal должна быть ОТДЕЛЬНОЙ функцией:
-function showModal() {
-    paymentModal.classList.remove('opacity-0', 'pointer-events-none');
-    paymentModalContent.classList.remove('scale-95', 'opacity-0');
-}
-        
-        function hideModal() {
-            paymentModal.classList.add('opacity-0', 'pointer-events-none');
-            paymentModalContent.classList.add('scale-95', 'opacity-0');
-        }
-
-        async function initializePaymentForm() {
-            document.getElementById('loading-overlay').classList.add('active');
-            const sessionId = new URLSearchParams(window.location.search).get('session_id');
-
-            console.log("Initializing payment for session:", sessionId);
-            if (!sessionId) {
-                alert("CRITICAL ERROR: Session ID is missing. Cannot proceed with payment.");
-                document.getElementById('loading-overlay').classList.remove('active');
-                return;
-            }
-
-            const selectedPlan = planData[selectedPlanKey];
-            document.getElementById('modal-regular-price').textContent = `$${selectedPlan.regularPrice.toFixed(2)}`;
-            document.getElementById('modal-total-price').textContent = `$${selectedPlan.price.toFixed(2)}`;
-            
-            try {
-                const keyResponse = await fetch('/.netlify/functions/get-stripe-key');
-                if (!keyResponse.ok) {
-                    throw new Error('Could not fetch Stripe configuration.');
-                }
-                const { publishableKey } = await keyResponse.json();
-                if (!publishableKey) {
-                    throw new Error('Stripe configuration is invalid.');
-                }
-
-                console.log("Sending request to /payment function with:", { sessionId: sessionId, plan: selectedPlanKey, amount: Math.round(selectedPlan.price * 100) });
-                
-                const response = await fetch('/.netlify/functions/payment', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sessionId: sessionId, plan: selectedPlanKey, amount: Math.round(selectedPlan.price * 100) })
-                });
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Failed to create Payment Intent. Server responded with ${response.status}: ${errorText}`);
-                }
-                const data = await response.json();
-                if (!data.clientSecret) {
-                    throw new Error('Failed to get client secret from server.');
-                }
-                console.log("Received clientSecret successfully.");
-                clientSecret = data.clientSecret;
-                
-                stripe = Stripe(publishableKey);
-                elements = stripe.elements({ clientSecret });
-
-                const expressCheckoutElement = elements.create('expressCheckout');
-                expressCheckoutElement.mount('#express-checkout-element');
-                
-                const cardElement = elements.create("card", {
-                    style: { base: { iconColor: '#666EE8', color: '#31325F', fontWeight: '400', fontFamily: 'Inter, sans-serif', fontSize: '16px', '::placeholder': { color: '#CFD7E0' }}},
-                    hidePostalCode: true
-                });
-                cardElement.mount(paymentElementContainer);
-
-                showModal();
-            } catch (error) {
-                console.error('CRITICAL ERROR during payment initialization:', error);
-                alert(`Could not initialize payment. Please try again. \n\nError details: ${error.message}`);
-            } finally {
-                document.getElementById('loading-overlay').classList.remove('active');
-            }
-        }
-        
-        async function handleSubmit(e) {
-            e.preventDefault();
-            setLoading(true);
-
-            const cardElement = elements.getElement('card');
-            
-            const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-                payment_method: { card: cardElement }
-            });
-
-            handlePaymentResult(error, paymentIntent);
-        }
-        
-        function handlePaymentResult(error, paymentIntent) {
-            setLoading(false);
-            const sessionId = new URLSearchParams(window.location.search).get('session_id');
-
-            if (error) {
-                showStatus('error', error.message);
-                setTimeout(() => {
-                    document.getElementById('payment-form').classList.remove('hidden');
-                    document.getElementById('payment-status').classList.add('hidden');
-                }, 4000);
-            } else if (paymentIntent.status === 'succeeded') {
-                showStatus('success', 'Payment successful! Redirecting...');
-                setTimeout(() => {
-                    window.location.href = `${window.location.origin}/result.html?session_id=${sessionId}&payment=success`;
-                }, 3000);
-            } else {
-                showStatus('error', `Payment failed. Status: ${paymentIntent.status}`);
-            }
-        }
-
-        function showStatus(status, message) {
-            const paymentForm = document.getElementById('payment-form');
-            const statusContainer = document.getElementById('payment-status');
-            const statusIcon = document.getElementById('status-icon');
-            const statusMessage = document.getElementById('status-message');
-            
-            paymentForm.classList.add('hidden');
-            statusContainer.classList.remove('hidden');
-            
-            statusIcon.innerHTML = status === 'success' ? ICON_SUCCESS_SVG : ICON_ERROR_SVG;
-            statusIcon.className = `icon-${status} w-16 h-16 mx-auto mb-4`;
-            statusMessage.textContent = message;
-        }
-
-        function setLoading(isLoading) {
-            const submitBtn = document.getElementById('submit-payment-btn');
-            if (!submitBtn) return;
-            submitBtn.disabled = isLoading;
-            submitBtn.querySelector('#spinner').classList.toggle('hidden', !isLoading);
-            submitBtn.querySelector('#button-text').classList.toggle('hidden', isLoading);
-        }
-
-        function setupEventListeners() {
-            if (scrollToPlansBtn) {
-                scrollToPlansBtn.addEventListener('click', () => {
-                    document.getElementById('sales-section').scrollIntoView({ behavior: 'smooth' });
-                });
-            }
-            document.querySelectorAll('input[name="plan"]').forEach(radio => {
-                radio.addEventListener('change', (event) => {
-                    selectedPlanKey = event.target.value;
-                    updateUIForPlan(selectedPlanKey);
-                });
-            });
-            document.querySelectorAll('.plan-toggle-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    const planKey = button.dataset.plan;
-                    document.querySelector(`input[name="plan"][value="${planKey}"]`).checked = true;
-                    selectedPlanKey = planKey;
-                    updateUIForPlan(planKey);
-                });
-            });
-            openModalButtons.forEach(btn => btn.addEventListener('click', initializePaymentForm));
-            closeModalBtn.addEventListener('click', hideModal);
-            if (paymentForm) paymentForm.addEventListener('submit', handleSubmit);
-        }
-
-        function updateUIForPlan(planKey) {
-            document.querySelectorAll('.plan-toggle-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.plan === planKey);
-            });
-            if (chartsRendered) {
-                const selectedPlanData = planData[planKey];
-                bioAgeChartInstance.data.datasets[0].data[1] = selectedPlanData.potentialBioAge;
-                lifespanChartInstance.data.datasets[0].data[1] = selectedPlanData.potentialLifespan;
-                bioAgeChartInstance.update();
-                lifespanChartInstance.update();
-            }
-        }
-        
-        function initCharts() {
-            const chartOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: false, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
-                    x: { grid: { display: false } }
-                }
-            };
-
-            const selectedPlanData = planData[selectedPlanKey];
-
-            const bioAgeCtx = document.getElementById('bioAgeChart').getContext('2d');
-            bioAgeChartInstance = new Chart(bioAgeCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Current', 'Potential'],
-                    datasets: [{
-                        data: [currentBioAge, selectedPlanData.potentialBioAge],
-                        backgroundColor: ['#a8a29e', '#22c55e'],
-                        borderRadius: 8,
-                        barPercentage: 0.6
-                    }]
-                },
-                options: chartOptions
-            });
-
-            const lifespanCtx = document.getElementById('lifespanChart').getContext('2d');
-            lifespanChartInstance = new Chart(lifespanCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Standard', 'Potential'],
-                    datasets: [{
-                        data: [standardLifespan, selectedPlanData.potentialLifespan],
-                        backgroundColor: ['#a8a29e', '#3b82f6'],
-                        borderRadius: 8,
-                        barPercentage: 0.6
-                    }]
-                },
-                options: chartOptions
-            });
-            chartsRendered = true;
-        }
-        
-        initializePage();
-        try {
-            lottie.loadAnimation({
-                container: document.getElementById('arrow-animation'),
-                renderer: 'svg',
-                loop: true,
-                autoplay: true,
-                path: 'arrow.json'
-            });
-        } catch (e) {
-            console.error("Lottie animation failed to load:", e);
-        }
-    });
-</script>
-
+        document.getElementById('cta-header-btn').addEventListener('click', initializePaymentForm);
+        document.getElementById('cta-main-btn').addEventListener('click', initializePaymentForm);
+        closeModalBtn.addEventListener('click', hideModal);
+        paymentForm.addEventListener('submit', handleSubmit);
+    });
+    </script>
 </body>
 </html>
