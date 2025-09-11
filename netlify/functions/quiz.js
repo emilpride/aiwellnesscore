@@ -227,6 +227,31 @@ exports.handler = async (event, context) => {
     }
 
     logger.warn('Invalid action', { action });
+    // /netlify/functions/quiz.js
+
+// Вставьте этот блок перед строкой "return { statusCode: 400, body: 'Invalid action' };"
+
+      } else if (action === 'trackEvent') {
+        const { sessionId, eventName } = data;
+        if (!sessionId || !eventName) {
+            return { statusCode: 400, body: 'Session ID and event name are required' };
+        }
+        
+        const sessionRef = db.collection('sessions').doc(sessionId);
+        await sessionRef.update({
+            [`events.${eventName}`]: new Date().toISOString()
+        });
+
+        logger.info('Event tracked', { sessionId, eventName });
+        return { 
+            statusCode: 200, 
+            body: JSON.stringify({ message: 'Event tracked' })
+        };
+
+// Конец вставки
+      } 
+ 
+    logger.warn('Invalid action', { action });
     return { statusCode: 400, body: 'Invalid action' };
 
   } catch (error) {
