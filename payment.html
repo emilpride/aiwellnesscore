@@ -528,7 +528,16 @@
         async function initializePage() {
             const loadingOverlay = document.getElementById('loading-overlay');
             loadingOverlay.classList.add('active');
-            try {
+            // --- НАЧАЛО НОВОГО БЛОКА ---
+            const sessionId = new URLSearchParams(window.location.search).get('session_id');
+            if (!sessionId) {
+                loadingOverlay.classList.remove('active'); // Убираем загрузчик
+                alert('Ошибка: ID сессии отсутствует. Пожалуйста, пройдите опрос заново.');
+                window.location.href = 'quiz-new.html'; // Возвращаем на начало
+                return; // Прекращаем выполнение функции
+            }
+            // --- КОНЕЦ НОВОГО БЛОКА ---
+                    try {
                 const data = await fetchPreliminaryData();
                 currentBioAge = data.bioAgeResult.biologicalAge;
                 standardLifespan = 82;
