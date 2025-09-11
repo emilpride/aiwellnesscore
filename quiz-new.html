@@ -303,11 +303,12 @@
         #camera-modal { position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #camera-modal.active { opacity: 1; pointer-events: all; }
         /* Финальный код */
+/* Правильный код */
 #camera-container { 
     position: relative; 
-    height: 70%; /* <-- Задаем высоту вместо ширины */
-    max-height: 600px; /* <-- Ограничиваем максимальную высоту */
-    /* aspect-ratio будет задан через JS, что автоматически определит ширину */
+    width: 90%; 
+    max-width: 400px; 
+    /* aspect-ratio будет задан через JS */
     overflow: hidden;
     border-radius: 1.5rem; 
     background: #111; 
@@ -1117,23 +1118,28 @@ const LibraryLoader = {
             }
         }
 
+        // Новый, исправленный код
         try {
-            App.cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', aspectRatio: { ideal: 9/16 } } });
+            // Мы просим браузер дать нам видео с портретными пропорциями
+            const videoConstraints = {
+                video: {
+                    facingMode: 'user',
+                    // Просим идеальное соотношение сторон 3:4
+                    aspectRatio: { ideal: 3 / 4 }
+                }
+            };
+            
+            App.cameraStream = await navigator.mediaDevices.getUserMedia(videoConstraints);
             video.srcObject = App.cameraStream;
-            // Стало
-video.addEventListener('loadeddata', () => {
-    // Получаем реальные размеры видеопотока
-    const videoAspectRatio = video.videoWidth / video.videoHeight;
+            
+            // Этот обработчик теперь будет работать с уже правильным видеопотоком
+            video.addEventListener('loadeddata', () => {
+                const videoAspectRatio = video.videoWidth / video.videoHeight;
+                const cameraContainer = document.getElementById('camera-container');
+                cameraContainer.style.aspectRatio = videoAspectRatio;
+                cameraLoop();
+            });
 
-    // Находим контейнер
-    const cameraContainer = document.getElementById('camera-container');
-    
-    // Динамически устанавливаем правильные пропорции для контейнера
-    cameraContainer.style.aspectRatio = videoAspectRatio;
-
-    // Запускаем цикл отрисовки сетки
-    cameraLoop();
-});
         } catch (err) {
             console.error("Camera Error:", err);
             let message = "Camera access was denied. Please allow camera access in your browser settings to continue.";
