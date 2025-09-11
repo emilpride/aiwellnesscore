@@ -500,76 +500,112 @@
         // /payment.html
 
         async function fetchPreliminaryData() {
-            // --- НАЧАЛО ИЗМЕНЕНИЙ ---
-            const cachedData = sessionStorage.getItem('preliminaryProfileData');
-            if (cachedData) {
-                console.log("Loading profile data from session cache.");
-                // Если данные есть в хранилище, возвращаем их немедленно
-                return Promise.resolve(JSON.parse(cachedData));
-            }
-            console.log("Cache miss. Fetching profile data from server.");
-            // --- КОНЕЦ ИЗМЕНЕНИЙ ---
-
-            const sessionId = new URLSearchParams(window.location.search).get('session_id');
-            if (!sessionId) { throw new Error("Session ID not found in URL."); }
-            const response = await fetch('/.netlify/functions/getProfileData', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId })
-            });
-            if (!response.ok) { throw new Error("Failed to fetch profile data from server."); }
-            
-            const data = await response.json();
-            // Если пришлось загружать с сервера, сохраним их в хранилище на будущее
-            sessionStorage.setItem('preliminaryProfileData', JSON.stringify(data));
-            return data;
-        }
+    const cachedData = sessionStorage.getItem('preliminaryProfileData');
+    if (cachedData) {
+        console.log("Loading profile data from session cache.");
+        try {
+            const parsedData = JSON.parse(cachedData);
+            console.log("Cache data loaded successfully:", parsedData);
+            return parsedData;
+        } catch (error) {
+            console.error("Failed to parse cached data:", error);
+            sessionStorage.removeItem('preliminaryProfileData');
+        }
+    }
+    
+    console.log("Cache miss. Fetching profile data from server.");
+    
+    const sessionId = new URLSearchParams(window.location.search).get('session_id');
+    if (!sessionId) { 
+        throw new Error("Session ID not found in URL."); 
+    }
+    
+    try {
+        const response = await fetch('/.netlify/functions/getProfileData', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId })
+        });
+        
+        if (!response.ok) { 
+            throw new Error("Failed to fetch profile data from server."); 
+        }
+        
+        const data = await response.json();
+        console.log("Data fetched from server:", data);
+        
+        sessionStorage.setItem('preliminaryProfileData', JSON.stringify(data));
+        return data;
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        throw error;
+    }
+}
 
         async function initializePage() {
-            const loadingOverlay = document.getElementById('loading-overlay');
-            loadingOverlay.classList.add('active');
-            // --- НАЧАЛО НОВОГО БЛОКА ---
-            const sessionId = new URLSearchParams(window.location.search).get('session_id');
-            if (!sessionId) {
-                loadingOverlay.classList.remove('active'); // Убираем загрузчик
-                alert('Ошибка: ID сессии отсутствует. Пожалуйста, пройдите опрос заново.');
-                window.location.href = 'quiz-new.html'; // Возвращаем на начало
-                return; // Прекращаем выполнение функции
+    const loadingOverlay = document.getElementById('loading-overlay');
+    loadingOverlay.classList.add('active');
+    
+    try {
+        console.log("Starting page initialization...");
+        const data = await fetchPreliminaryData();
+        console.log("Data received:", data);
+        
+        if (!data.bioAgeResult || !data.bioAgeResult.biologicalAge) {
+            console.error("Critical data missing in response:", data);
+            throw new Error("Incomplete profile data");
+        }
+        
+        currentBioAge = data.bioAgeResult.biologicalAge;
+        standardLifespan = 82;
+        
+        planData = {
+            basic: { 
+                price: 9.99, 
+                regularPrice: 19.99, 
+                potentialBioAge: currentBioAge - 1, 
+                potentialLifespan: standardLifespan + 2 
+            },
+            advanced: { 
+                price: 13.99, 
+                regularPrice: 29.99, 
+                potentialBioAge: currentBioAge - 2, 
+                potentialLifespan: standardLifespan + 4 
+            },
+            premium: { 
+                price: 19.99, 
+                regularPrice: 49.99, 
+                potentialBioAge: currentBioAge - 3, 
+                potentialLifespan: standardLifespan + 5 
             }
-            // --- КОНЕЦ НОВОГО БЛОКА ---
-                    try {
-                const data = await fetchPreliminaryData();
-                currentBioAge = data.bioAgeResult.biologicalAge;
-                standardLifespan = 82;
-                planData = {
-                    basic: { price: 9.99, regularPrice: 19.99, potentialBioAge: currentBioAge - 1, potentialLifespan: standardLifespan + 2 },
-                    advanced: { price: 13.99, regularPrice: 29.99, potentialBioAge: currentBioAge - 2, potentialLifespan: standardLifespan + 4 },
-                    premium: { price: 19.99, regularPrice: 49.99, potentialBioAge: currentBioAge - 3, potentialLifespan: standardLifespan + 5 }
-                };
-                document.getElementById('current-bio-age').textContent = currentBioAge;
-                document.getElementById('potential-bio-age').textContent = planData.premium.potentialBioAge;
-            } catch (error) {
-                console.error("Initialization failed:", error);
-                currentBioAge = 35;
-                standardLifespan = 82;
-                planData = {
-                    basic: { price: 9.99, regularPrice: 19.99, potentialBioAge: 34, potentialLifespan: 84 },
-                    advanced: { price: 13.99, regularPrice: 29.99, potentialBioAge: 33, potentialLifespan: 86 },
-                    premium: { price: 19.99, regularPrice: 49.99, potentialBioAge: 32, potentialLifespan: 87 }
-                };
-                document.getElementById('current-bio-age').textContent = currentBioAge;
-                document.getElementById('potential-bio-age').textContent = currentBioAge - 3;
-            // /payment.html
-
-            } finally {
-                // --- ИЗМЕНЕНИЕ ---
-                // Сначала убираем загрузчик, потом делаем всё остальное
-                loadingOverlay.classList.remove('active');
-                setupEventListeners();
-                initCharts();
-                // --- КОНЕЦ ИЗМЕНЕНИЯ ---
-            }
-        }
+        };
+        
+        document.getElementById('current-bio-age').textContent = currentBioAge;
+        document.getElementById('potential-bio-age').textContent = planData.premium.potentialBioAge;
+        
+        console.log("Initialization successful");
+        
+    } catch (error) {
+        console.error("Initialization failed:", error);
+        
+        currentBioAge = 35;
+        standardLifespan = 82;
+        planData = {
+            basic: { price: 9.99, regularPrice: 19.99, potentialBioAge: 34, potentialLifespan: 84 },
+            advanced: { price: 13.99, regularPrice: 29.99, potentialBioAge: 33, potentialLifespan: 86 },
+            premium: { price: 19.99, regularPrice: 49.99, potentialBioAge: 32, potentialLifespan: 87 }
+        };
+        
+        document.getElementById('current-bio-age').textContent = currentBioAge;
+        document.getElementById('potential-bio-age').textContent = currentBioAge - 3;
+        
+        console.log("Using fallback values due to error");
+    } finally {
+        loadingOverlay.classList.remove('active');
+        setupEventListeners();
+        initCharts();
+    }
+}
 
         function showModal() {
             paymentModal.classList.remove('opacity-0', 'pointer-events-none');
