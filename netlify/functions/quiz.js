@@ -18,15 +18,17 @@ if (!getApps().length) {
 
 const db = getFirestore();
 
+// /netlify/functions/quiz.js
+
 exports.handler = async (event, context) => {
   // Получаем IP адрес
   const ip = event.headers['x-nf-client-connection-ip'] || 
-             event.headers['x-forwarded-for'] || 
+             event.headers['x-forwarded-for'] ||
              'unknown';
   
   // Инициализируем логгер
   const logger = new Logger('quiz', null);
-  
+
   if (event.httpMethod !== 'POST') {
     logger.warn('Invalid HTTP method', { method: event.httpMethod });
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -90,9 +92,9 @@ exports.handler = async (event, context) => {
         paymentStatus: 'pending',
         createdAt: new Date().toISOString(),
         correlationId: logger.correlationId,
-        answers: {}
+        answers: {},
+        events: {} // Добавляем объект для событий
       };
-      
       await newSessionRef.set(sessionData);
       
       logger.info('Session created successfully', { 
@@ -104,9 +106,7 @@ exports.handler = async (event, context) => {
 
       return {
         statusCode: 200,
-        headers: {
-          'X-RateLimit-Remaining': rateLimitResult.remaining.toString()
-        },
+        headers: { 'X-RateLimit-Remaining': rateLimitResult.remaining.toString() },
         body: JSON.stringify({ sessionId: newSessionRef.id }),
       };
 
@@ -118,15 +118,10 @@ exports.handler = async (event, context) => {
       }
       
       const sessionRef = db.collection('sessions').doc(sessionId);
-      
-      // Проверяем существование сессии
       const sessionDoc = await sessionRef.get();
       if (!sessionDoc.exists) {
         logger.error('Session not found', { sessionId });
-        return { 
-          statusCode: 404, 
-          body: JSON.stringify({ error: 'Session not found' }) 
-        };
+        return { statusCode: 404, body: JSON.stringify({ error: 'Session not found' }) };
       }
       
       await sessionRef.update({
@@ -135,14 +130,11 @@ exports.handler = async (event, context) => {
         dropOffPoint: `question_${questionId}`,
         lastCorrelationId: logger.correlationId
       });
-      
       logger.info('Answer saved', { sessionId, questionId });
 
       return {
         statusCode: 200,
-        headers: {
-          'X-RateLimit-Remaining': rateLimitResult.remaining.toString()
-        },
+        headers: { 'X-RateLimit-Remaining': rateLimitResult.remaining.toString() },
         body: JSON.stringify({ message: 'Answer saved' }),
       };
 
@@ -154,15 +146,10 @@ exports.handler = async (event, context) => {
       }
       
       const sessionRef = db.collection('sessions').doc(sessionId);
-      
-      // Проверяем существование сессии
       const sessionDoc = await sessionRef.get();
       if (!sessionDoc.exists) {
         logger.error('Session not found for analysis data', { sessionId });
-        return { 
-          statusCode: 404, 
-          body: JSON.stringify({ error: 'Session not found' }) 
-        };
+        return { statusCode: 404, body: JSON.stringify({ error: 'Session not found' }) };
       }
       
       await sessionRef.update({
@@ -170,12 +157,7 @@ exports.handler = async (event, context) => {
         faceAnalysisCorrelationId: logger.correlationId,
         updatedAt: new Date().toISOString()
       });
-      
-      logger.info('Analysis data saved', { 
-        sessionId,
-        hasFaces: analysisData.faces?.length > 0 
-      });
-      
+      logger.info('Analysis data saved', { sessionId, hasFaces: analysisData.faces?.length > 0 });
       return {
         statusCode: 200,
         body: JSON.stringify({ message: 'Analysis data saved successfully' })
@@ -186,71 +168,53 @@ exports.handler = async (event, context) => {
       if (!sessionId) return { statusCode: 400, body: 'Missing sessionId' };
       
       const sessionRef = db.collection('sessions').doc(sessionId);
-      const startTime = Date.now();
-      
-      await sessionRef.update({
-        quizEndedAt: new Date().toISOString()
-      });
-      
-      const duration = Date.now() - startTime;
-      logger.metric('quiz_completion_time', duration, 'ms');
+      await sessionRef.update({ quizEndedAt: new Date().toISOString() });
       logger.info('Quiz completed', { sessionId });
-      
       return {
         statusCode: 200,
         body: JSON.stringify({ message: 'Quiz end time recorded' })
       };
 
     } else if (action === 'logError') {
-        const { sessionId, error } = data;
-        if (!sessionId || !error) {
-            return { statusCode: 400, body: 'Session ID and error object are required' };
-        }
-        
-        logger.error('Client-side error logged', error);
-        
-        const sessionRef = db.collection('sessions').doc(sessionId);
-        const errorEntry = {
-            ...error,
-            timestamp: new Date().toISOString(),
-            correlationId: logger.correlationId
-        };
+      const { sessionId, error } = data;
+      if (!sessionId || !error) {
+          return { statusCode: 400, body: 'Session ID and error object are required' };
+      }
+      
+      logger.error('Client-side error logged', error);
+      const sessionRef = db.collection('sessions').doc(sessionId);
+      const errorEntry = {
+          ...error,
+          timestamp: new Date().toISOString(),
+          correlationId: logger.correlationId
+      };
+      await sessionRef.update({
+          errors: FieldValue.arrayUnion(errorEntry)
+      });
+      return {
+          statusCode: 200,
+          body: JSON.stringify({ message: 'Error logged' })
+      };
 
-        await sessionRef.update({
-            errors: FieldValue.arrayUnion(errorEntry)
-        });
+    } else if (action === 'trackEvent') { // <-- ПРАВИЛЬНОЕ МЕСТО ДЛЯ БЛОКА
+      const { sessionId, eventName } = data;
+      if (!sessionId || !eventName) {
+          return { statusCode: 400, body: 'Session ID and event name are required' };
+      }
+      
+      const sessionRef = db.collection('sessions').doc(sessionId);
+      await sessionRef.update({
+          [`events.${eventName}`]: new Date().toISOString()
+      });
 
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'Error logged' })
-        };
+      logger.info('Event tracked', { sessionId, eventName });
+      return { 
+          statusCode: 200, 
+          body: JSON.stringify({ message: 'Event tracked' })
+      };
     }
 
-    logger.warn('Invalid action', { action });
-    // /netlify/functions/quiz.js
-
-// Вставьте этот блок перед строкой "return { statusCode: 400, body: 'Invalid action' };"
-
-      } else if (action === 'trackEvent') {
-        const { sessionId, eventName } = data;
-        if (!sessionId || !eventName) {
-            return { statusCode: 400, body: 'Session ID and event name are required' };
-        }
-        
-        const sessionRef = db.collection('sessions').doc(sessionId);
-        await sessionRef.update({
-            [`events.${eventName}`]: new Date().toISOString()
-        });
-
-        logger.info('Event tracked', { sessionId, eventName });
-        return { 
-            statusCode: 200, 
-            body: JSON.stringify({ message: 'Event tracked' })
-        };
-
-// Конец вставки
-      } 
- 
+    // Если ни одно из условий не сработало
     logger.warn('Invalid action', { action });
     return { statusCode: 400, body: 'Invalid action' };
 
