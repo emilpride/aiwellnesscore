@@ -8,7 +8,7 @@
     <meta name="description" content="Your personalized AI-powered wellness report, including your Wellness Age, detailed metrics, skin analysis, and a 7-day improvement plan.">
     <meta name="robots" content="noindex, nofollow">
 
-    <script src="https://cdn.tailwindcss.com"></script>fetchHybridReportData 
+    <script src="https://cdn.tailwindcss.com"></script> 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
@@ -313,23 +313,11 @@
         const maxAttempts = 40;
         let intervalDelay = 2500;
         let hasTriggeredGeneration = false;
-        
+
         const checkReport = async () => {
             attempts++;
-            
             const loadingText = document.getElementById('loading-text');
-            if (loadingText) {
-                switch (result.status) {
-                        case 'queued':
-                            loadingText.textContent = `Your request is in the queue... (${Math.round((attempts / maxAttempts) * 100)}%)`;
-                            break;
-                        case 'processing':
-                            loadingText.textContent = `Analyzing your data... (${Math.round((attempts / maxAttempts) * 100)}%)`;
-                            break;
-                        case 'pending':
-                loadingText.textContent = `Preparing your report... (${Math.min(Math.round((attempts / maxAttempts) * 100), 95)}%)`;
-            }
-            
+
             try {
                 console.log(`Checking report status... Attempt ${attempts}/${maxAttempts}`);
                 const response = await fetch('/.netlify/functions/checkResult', {
@@ -342,77 +330,67 @@
                     throw new Error(`Server error (${response.status})`);
                 }
                 
-                const result = await response.json();
+                const result = await response.json(); // <-- result теперь определён здесь
                 console.log('Report status:', result.status);
                 
-                // Если отчет готов - возвращаем его
+                // --- ЭТОТ БЛОК ТЕПЕРЬ РАБОТАЕТ ПРАВИЛЬНО ---
+                if (loadingText) {
+                    const percentage = Math.round((attempts / maxAttempts) * 95);
+                    switch (result.status) {
+                        case 'queued':
+                            loadingText.textContent = `Your request is in the queue... (${percentage}%)`;
+                            break;
+                        case 'processing':
+                            loadingText.textContent = `Analyzing your data... (${percentage}%)`;
+                            break;
+                        default: // 'pending' и любые другие статусы
+                            loadingText.textContent = `Preparing your report... (${percentage}%)`;
+                            break;
+                    }
+                }
+                // --- КОНЕЦ БЛОКА ---
+
                 if (result.status === 'complete' && result.data) {
                     console.log('Report data received successfully');
-                    console.log('Data keys:', Object.keys(result.data));
                     resolve(result.data);
                     return;
                 } 
-                // Если ошибка - пробуем запустить генерацию заново
-                else if (result.status === 'error') {
-                    if (!hasTriggeredGeneration && attempts < 5) {
+                
+                if (result.status === 'error') {
+                     if (!hasTriggeredGeneration && attempts < 5) {
                         hasTriggeredGeneration = true;
-                        console.log('Error detected, triggering report generation...');
-                        
-                        const genResponse = await fetch('/.netlify/functions/generate-report-hybrid', {
+                        console.log('Error detected, attempting to re-trigger report generation...');
+                        fetch('/.netlify/functions/generate-report-hybrid', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: {'Content-Type': 'application/json'},
                             body: JSON.stringify({ sessionId: sessionId })
                         });
-                        
-                        if (genResponse.ok) {
-                            console.log('Report generation triggered successfully');
-                            setTimeout(checkReport, 3000);
-                            return;
-                        }
+                        setTimeout(checkReport, 3000); // Даем время на запуск
+                        return;
                     }
-                    
-                    reject(new Error(result.message || 'Report generation failed'));
+                    reject(new Error(result.message || 'Report generation failed.'));
                     return;
                 } 
-                // Если достигли максимума попыток
-                else if (attempts >= maxAttempts) {
-                    if (!hasTriggeredGeneration) {
-                        console.log('Max attempts reached, trying direct generation...');
-                        hasTriggeredGeneration = true;
-                        
-                        const genResponse = await fetch('/.netlify/functions/generate-report-hybrid', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ sessionId: sessionId })
-                        });
-                        
-                        if (genResponse.ok) {
-                            attempts = maxAttempts - 5;
-                            setTimeout(checkReport, 3000);
-                            return;
-                        }
-                    }
-                    
+                
+                if (attempts >= maxAttempts) {
                     reject(new Error("Report generation timed out. Please refresh the page."));
                     return;
                 }
                 
-                // Продолжаем проверку
-                intervalDelay = Math.min(intervalDelay * 1.2, 10000);
+                intervalDelay = Math.min(intervalDelay * 1.1, 8000);
                 setTimeout(checkReport, intervalDelay);
                 
             } catch (error) {
                 console.error('Error checking report:', error);
                 if (attempts < 3) {
-                    setTimeout(checkReport, 1000);
+                    setTimeout(checkReport, 5000); // Более длинная задержка при ошибках сети
                 } else {
                     reject(error);
                 }
             }
         };
-        
-        // Начинаем проверку
-        checkReport();
+
+        checkReport(); // Начинаем проверку
     });
 }
         
