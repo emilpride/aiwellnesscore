@@ -100,24 +100,10 @@
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
 
-        /* Payment Modal Styles */
-        #payment-modal {
-            transition: opacity 0.3s ease-in-out;
-        }
-        #payment-modal-content {
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-        }
-        /* Скрываем Express Checkout кнопки (Apple Pay/Google Pay) из Payment Element, 
-           так как мы хотим отобразить их отдельно и выше */
-        #payment-element .StripeElement--express-checkout {
-            display: none !important;
-        }
-
         #sales-section {
             scroll-margin-top: 80px; /* Offset for sticky header */
         }
         
-        /* New Compact Plan Styles */
         .plan-option {
             border: 2px solid #E5E7EB;
             border-radius: 1rem;
@@ -155,7 +141,7 @@
         input[type="radio"]:checked + .plan-option .custom-radio .inner-circle {
             background-color: var(--brand-dark-text);
         }
-
+        
         details summary::-webkit-details-marker { display: none; }
         details summary {
             position: relative;
@@ -177,10 +163,25 @@
             transform: translateY(-50%) rotate(45deg);
         }
 
-        /* Кастомизация для кнопок Apple Pay / Google Pay */
+        /* Payment Modal Styles */
+        #payment-modal {
+            transition: opacity 0.3s ease-in-out;
+            overflow-y: auto;
+        }
+        #payment-modal-content {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+        #payment-element {
+            padding: 1.25rem;
+            border: 1px solid #d1d5db;
+            background-color: white;
+            border-radius: 12px;
+        }
         #payment-request-button > div {
-             height: 48px; /* Задаем высоту для кнопок */
-             min-width: 100%; /* Убедимся, что кнопки занимают всю ширину */
+             height: 48px;
+             min-width: 100%;
         }
     </style>
 </head>
@@ -198,36 +199,31 @@
                 <h2 class="text-3xl font-extrabold text-center mb-6" style="color: var(--brand-dark-text);">Complete your checkout</h2>
                 
                 <div class="grid md:grid-cols-2 gap-8">
+                    
                     <div class="p-4 md:p-6 bg-gray-50 rounded-xl">
                         <h3 class="text-xl font-bold text-gray-800 mb-4">Your Order Summary</h3>
                         <div class="flex justify-between items-center text-gray-600 mb-2">
-                            <span>Regular 4-week price:</span>
-                            <span id="modal-regular-price">$38.95</span> </div>
+                            <span>Regular price:</span>
+                            <span id="modal-regular-price">$0.00</span> 
+                        </div>
                         <div class="flex justify-between items-center text-gray-900 font-bold text-xl py-2 border-t border-gray-200 mt-4">
                             <span>Total today:</span>
-                            <span id="modal-total-price">$38.95</span> </div>
+                            <span id="modal-total-price">$0.00</span> 
+                        </div>
                     </div>
 
                     <div class="p-4 md:p-6 bg-white rounded-xl">
                         <form id="payment-form">
-                            <div id="payment-request-button" class="mb-4">
-                                </div>
+                            
+                            <div id="payment-request-button" class="mb-4"></div>
 
-                            <div class="flex items-center my-4">
+                            <div id="or-pay-divider" class="flex items-center my-4">
                                 <hr class="flex-grow border-gray-300">
                                 <span class="px-3 text-gray-500 text-sm">or pay with a card</span>
                                 <hr class="flex-grow border-gray-300">
                             </div>
                             
-                            <div class="flex justify-center items-center gap-2 mb-6">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" class="h-6 opacity-80">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg" alt="Mastercard" class="h-6 opacity-80">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/American_Express_logo_%282018%29.svg" alt="American Express" class="h-6 opacity-80">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/4/40/Discover_Card_logo.svg" alt="Discover" class="h-6 opacity-80">
-                            </div>
-
-                            <div id="payment-element" class="mb-6">
-                                </div>
+                            <div id="payment-element" class="mb-6"></div>
                             
                             <button id="submit-payment-btn" class="cta-button w-full font-bold py-3 px-4 rounded-xl text-lg flex items-center justify-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
@@ -294,13 +290,8 @@
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="flex justify-end items-baseline">
-                                        <p class="font-bold text-lg text-gray-900">$1.42</p>
-                                        <p class="text-sm text-gray-600 ml-1">per day</p>
-                                    </div>
-                                    <p class="text-xs text-gray-500">
-                                        <span class="line-through">$19.99</span> Total: $9.99
-                                    </p>
+                                    <p class="font-bold text-lg text-gray-900">$9.99</p>
+                                    <p class="text-xs text-gray-500"><span class="line-through">$19.99</span> Total</p>
                                 </div>
                             </div>
                         </label>
@@ -317,13 +308,8 @@
                                         </div>
                                     </div>
                                     <div class="text-right">
-                                       <div class="flex justify-end items-baseline">
-                                            <p class="font-bold text-lg text-gray-900">$0.99</p>
-                                            <p class="text-sm text-gray-600 ml-1">per day</p>
-                                        </div>
-                                        <p class="text-xs text-gray-500">
-                                            <span class="line-through">$29.99</span> Total: $13.99
-                                        </p>
+                                        <p class="font-bold text-lg text-gray-900">$13.99</p>
+                                        <p class="text-xs text-gray-500"><span class="line-through">$29.99</span> Total</p>
                                     </div>
                                 </div>
                             </label>
@@ -339,13 +325,8 @@
                                     </div>
                                </div>
                                 <div class="text-right">
-                                     <div class="flex justify-end items-baseline">
-                                        <p class="font-bold text-lg text-gray-900">$0.95</p>
-                                        <p class="text-sm text-gray-600 ml-1">per day</p>
-                                    </div>
-                                    <p class="text-xs text-gray-500">
-                                        <span class="line-through">$49.99</span> Total: $19.99
-                                    </p>
+                                    <p class="font-bold text-lg text-gray-900">$19.99</p>
+                                    <p class="text-xs text-gray-500"><span class="line-through">$49.99</span> Total</p>
                                 </div>
                             </div>
                         </label>
@@ -356,11 +337,7 @@
                              Unlock My Plan
                          </button>
                          <p class="text-xs text-gray-500 mb-4 max-w-md mx-auto">This is a one-time payment. You will get lifetime access to your personal report and plan.</p>
-                        <div class="flex justify-center items-center gap-4">
-                            <img src="stripe.svg" alt="Stripe" class="h-8 opacity-50">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg" alt="Mastercard" class="h-8 opacity-50">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" class="h-8 opacity-50">
-                        </div>
+                         <img src="https://images.squarespace-cdn.com/content/v1/60477b969e164f4347c61f8a/1615555542385-29F64025C37C63628C88/Stripe-Payments-Logo-Lockup-05_stripe-blurple.png" alt="Powered by Stripe" class="h-10 opacity-60">
                     </div>
                 </div>
             </section>
@@ -466,7 +443,6 @@
                      </div>
                 </div>
             </section>
-
         </main>
     </div>
     
@@ -474,7 +450,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
             let selectedPlanKey = 'advanced';
-            let stripe, elements, paymentRequest; // Добавил paymentRequest
+            let stripe, elements;
             let currentBioAge, standardLifespan, planData;
             let bioAgeChartInstance, lifespanChartInstance;
             let chartsRendered = false;
@@ -493,16 +469,16 @@
             const planToggles = document.getElementById('plan-toggles');
             const modalRegularPrice = document.getElementById('modal-regular-price');
             const modalTotalPrice = document.getElementById('modal-total-price');
-            // Новые элементы для Payment Request Buttons
             const paymentRequestButtonContainer = document.getElementById('payment-request-button');
+            const orPayDivider = document.getElementById('or-pay-divider');
 
             // --- ФУНКЦИИ ---
 
-            // 1. Функция для загрузки данных с сервера
             async function fetchPreliminaryData() {
                 const sessionId = new URLSearchParams(window.location.search).get('session_id');
                 if (!sessionId) {
-                    throw new Error("Session ID not found in URL.");
+                    console.warn("Session ID not found. Using default data.");
+                    return { bioAgeResult: { biologicalAge: 35 } }; // Return default structure
                 }
                 const response = await fetch('/.netlify/functions/getProfileData', {
                     method: 'POST',
@@ -515,43 +491,25 @@
                 return await response.json();
             }
 
-            // 2. Главная функция инициализации страницы
             async function initializePage() {
                 const loadingOverlay = document.getElementById('loading-overlay');
                 loadingOverlay.classList.add('active');
-
                 try {
                     const data = await fetchPreliminaryData();
-                    
-                    // Устанавливаем глобальные переменные на основе реальных данных
                     currentBioAge = data.bioAgeResult.biologicalAge;
-                    standardLifespan = 82; // Это значение можно сделать динамическим, если потребуется
-
-                    // Создаем динамический объект с планами на основе реального возраста
+                    standardLifespan = 82; 
+                } catch (error) {
+                    console.error("Initialization failed, using default data:", error);
+                    currentBioAge = 35;
+                    standardLifespan = 82;
+                } finally {
                     planData = {
                         basic: { price: 9.99, regularPrice: 19.99, potentialBioAge: currentBioAge - 1, potentialLifespan: standardLifespan + 2 },
                         advanced: { price: 13.99, regularPrice: 29.99, potentialBioAge: currentBioAge - 2, potentialLifespan: standardLifespan + 4 },
                         premium: { price: 19.99, regularPrice: 49.99, potentialBioAge: currentBioAge - 3, potentialLifespan: standardLifespan + 5 }
                     };
-
-                    // Обновляем текстовые поля на странице
-                    document.getElementById('current-bio-age').textContent = currentBioAge;
-                    document.getElementById('potential-bio-age').textContent = planData.premium.potentialBioAge;
-                    
-                } catch (error) {
-                    console.error("Initialization failed:", error);
-                    // Если загрузка не удалась, используем данные по умолчанию
-                    currentBioAge = 35;
-                    standardLifespan = 82;
-                    planData = {
-                        basic: { price: 9.99, regularPrice: 19.99, potentialBioAge: 34, potentialLifespan: 84 },
-                        advanced: { price: 13.99, regularPrice: 29.99, potentialBioAge: 33, potentialLifespan: 86 },
-                        premium: { price: 19.99, regularPrice: 49.99, potentialBioAge: 32, potentialLifespan: 87 }
-                    };
                     document.getElementById('current-bio-age').textContent = currentBioAge;
                     document.getElementById('potential-bio-age').textContent = currentBioAge - 3;
-                } finally {
-                    // Устанавливаем все обработчики событий и инициализируем графики
                     setupEventListeners();
                     initCharts();
                     loadingOverlay.classList.remove('active');
@@ -569,141 +527,112 @@
             }
             
             async function initializePaymentForm() {
-    document.getElementById('loading-overlay').classList.add('active');
-    const sessionId = new URLSearchParams(window.location.search).get('session_id');
+                document.getElementById('loading-overlay').classList.add('active');
+                const sessionId = new URLSearchParams(window.location.search).get('session_id');
 
-    if (!sessionId) {
-        alert("CRITICAL ERROR: Session ID is missing.");
-        document.getElementById('loading-overlay').classList.remove('active');
-        return;
-    }
+                if (!sessionId) {
+                    alert("CRITICAL ERROR: Session ID is missing.");
+                    document.getElementById('loading-overlay').classList.remove('active');
+                    return;
+                }
 
-    const selectedPlan = planData[selectedPlanKey];
-    modalRegularPrice.textContent = `$${selectedPlan.regularPrice.toFixed(2)}`;
-    modalTotalPrice.textContent = `$${selectedPlan.price.toFixed(2)}`;
+                const selectedPlan = planData[selectedPlanKey];
+                modalRegularPrice.textContent = `$${selectedPlan.regularPrice.toFixed(2)}`;
+                modalTotalPrice.textContent = `$${selectedPlan.price.toFixed(2)}`;
 
-    try {
-        // --- ШАГ 1: Получаем публичный ключ ---
-        const keyResponse = await fetch('/.netlify/functions/get-stripe-key');
-        if (!keyResponse.ok) throw new Error('Could not fetch Stripe configuration.');
-        const { publishableKey } = await keyResponse.json();
-        if (!publishableKey) throw new Error('Stripe publishable key is empty.');
-        
-        stripe = Stripe(publishableKey);
+                try {
+                    const keyResponse = await fetch('/.netlify/functions/get-stripe-key');
+                    if (!keyResponse.ok) throw new Error('Could not fetch Stripe configuration.');
+                    const { publishableKey } = await keyResponse.json();
+                    if (!publishableKey) throw new Error('Stripe publishable key is empty.');
+                    
+                    stripe = Stripe(publishableKey, { locale: 'en' });
 
-        // --- ШАГ 2: СНАЧАЛА создаем Payment Intent, чтобы получить clientSecret ---
-        const paymentResponse = await fetch('/.netlify/functions/payment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                sessionId: sessionId, 
-                plan: selectedPlanKey, 
-                amount: Math.round(selectedPlan.price * 100) 
-            })
-        });
-        if (!paymentResponse.ok) {
-             const errorData = await paymentResponse.json();
-             throw new Error(errorData.error || 'Failed to create payment intent.');
-        }
-        const { clientSecret } = await paymentResponse.json();
-        if (!clientSecret) throw new Error('Failed to get client secret.');
+                    const paymentResponse = await fetch('/.netlify/functions/payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            sessionId: sessionId, 
+                            plan: selectedPlanKey, 
+                            amount: Math.round(selectedPlan.price * 100) 
+                        })
+                    });
+                    const { clientSecret } = await paymentResponse.json();
+                    if (!clientSecret) throw new Error('Failed to get client secret.');
 
-        // --- ШАГ 3: ТЕПЕРЬ, имея clientSecret, инициализируем Elements с кастомизацией ---
-        const appearance = {
-            theme: 'stripe',
-            variables: {
-                colorPrimary: 'var(--brand-dark-text)',
-                colorBackground: '#ffffff',
-                colorText: '#30313d',
-                colorDanger: '#df1b41',
-                fontFamily: 'Inter, sans-serif',
-                spacingUnit: '4px',
-                borderRadius: '12px',
-            },
-            rules: {
-                '.Input': { boxShadow: 'none' },
-                '.Input:focus': { boxShadow: '0 0 0 2px var(--brand-accent)' },
+                    elements = stripe.elements({ clientSecret });
+                    
+                    const cardElement = elements.create('card', {
+                        style: {
+                            base: {
+                                iconColor: '#6b7280', color: '#30313d', fontWeight: '500',
+                                fontFamily: 'Inter, sans-serif', fontSize: '16px', fontSmoothing: 'antialiased',
+                                '::placeholder': { color: '#9ca3af' },
+                            },
+                            invalid: { iconColor: '#df1b41', color: '#df1b41' },
+                        },
+                        hidePostalCode: true 
+                    });
+                    paymentElementContainer.innerHTML = '';
+                    cardElement.mount("#payment-element");
+
+                    const paymentRequest = stripe.paymentRequest({
+                        country: 'US', currency: 'usd',
+                        total: {
+                            label: 'Total Today',
+                            amount: Math.round(selectedPlan.price * 100),
+                        },
+                    });
+
+                    const prButton = elements.create('paymentRequestButton', {
+                        paymentRequest: paymentRequest,
+                        style: {
+                            paymentRequestButton: { type: 'buy', theme: 'dark', height: '48px' },
+                        },
+                    });
+
+                    const prResult = await paymentRequest.canMakePayment();
+                    if (prResult) {
+                        paymentRequestButtonContainer.style.display = 'block';
+                        orPayDivider.style.display = 'flex';
+                        prButton.mount(paymentRequestButtonContainer);
+                    } else {
+                        paymentRequestButtonContainer.style.display = 'none';
+                        orPayDivider.style.display = 'none';
+                    }
+                    
+                    paymentRequest.on('paymentmethod', async (ev) => {
+                        ev.complete('success');
+                        window.location.href = `${window.location.origin}/result.html?session_id=${sessionId}&payment=success`;
+                    });
+
+                    showModal();
+
+                } catch (error) {
+                    console.error('Payment Initialization Error:', error);
+                    alert(`Could not initialize payment. Please try again.\n\nError: ${error.message}`);
+                } finally {
+                    document.getElementById('loading-overlay').classList.remove('active');
+                }
             }
-        };
-        elements = stripe.elements({ clientSecret, appearance });
-
-        // --- ШАГ 4: Создаем и настраиваем Payment Request Button (Apple/Google Pay) ---
-        const paymentRequest = stripe.paymentRequest({
-            country: 'US',
-            currency: 'usd',
-            total: {
-                label: 'Total Today',
-                amount: Math.round(selectedPlan.price * 100),
-            },
-            requestPayerName: true,
-            requestPayerEmail: true,
-        });
-
-        const prButton = elements.create('paymentRequestButton', {
-            paymentRequest: paymentRequest,
-            style: {
-                paymentRequestButton: {
-                    type: 'buy',
-                    theme: 'dark',
-                    height: '48px',
-                },
-            },
-        });
-
-        // Проверяем, можно ли показать кнопку
-        const prResult = await paymentRequest.canMakePayment();
-        if (prResult) {
-            prButton.mount(paymentRequestButtonContainer);
-        } else {
-            paymentRequestButtonContainer.style.display = 'none';
-        }
-        
-        // Обрабатываем оплату через Payment Request
-        paymentRequest.on('paymentmethod', async (ev) => {
-    // Сообщаем Stripe, что платеж получен
-    ev.complete('success');
-
-    // Перенаправляем на страницу результата, так как оплата успешна
-    const sessionId = new URLSearchParams(window.location.search).get('session_id');
-    window.location.href = `${window.location.origin}/result.html?session_id=${sessionId}&payment=success`;
-});
-
-        // --- ШАГ 5: Создаем и монтируем основной Payment Element для карт ---
-        const paymentElement = elements.create("payment", { 
-            layout: "tabs"
-        });
-        paymentElementContainer.innerHTML = '';
-        paymentElement.mount("#payment-element");
-
-        showModal();
-
-    } catch (error) {
-        console.error('Payment Initialization Error:', error);
-        alert(`Could not initialize payment. Please try again.\n\nError: ${error.message}`);
-    } finally {
-        document.getElementById('loading-overlay').classList.remove('active');
-    }
-}
 
             async function handleSubmit(e) {
-    e.preventDefault();
-    setLoading(true);
-    const sessionId = new URLSearchParams(window.location.search).get('session_id');
+                e.preventDefault();
+                setLoading(true);
+                const sessionId = new URLSearchParams(window.location.search).get('session_id');
+                const cardElement = elements.getElement('card');
 
-    const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-            return_url: `${window.location.origin}/result.html?session_id=${sessionId}&payment=success`,
-        },
-    });
+                const { error } = await stripe.confirmCardPayment(
+                    elements.clientSecret, { payment_method: { card: cardElement } }
+                );
 
-    if (error.type === "card_error" || error.type === "validation_error") {
-        showMessage(error.message);
-    } else {
-        showMessage("An unexpected error occurred.");
-    }
-    setLoading(false);
-}
+                if (error) {
+                    showMessage(error.message);
+                    setLoading(false);
+                } else {
+                    window.location.href = `${window.location.origin}/result.html?session_id=${sessionId}&payment=success`;
+                }
+            }
             
             function showMessage(messageText) {
                 paymentMessageContainer.textContent = messageText;
@@ -712,7 +641,6 @@
             function setLoading(isLoading) {
                 const submitBtn = document.getElementById('submit-payment-btn');
                 if (!submitBtn) return;
-                
                 submitBtn.disabled = isLoading;
                 submitBtn.querySelector('#spinner').classList.toggle('hidden', !isLoading);
                 submitBtn.querySelector('#button-text').classList.toggle('hidden', isLoading);
@@ -810,6 +738,7 @@
                 if (chartsSection) chartObserver.observe(chartsSection);
             }
             
+            // Запуск
             initializePage();
 
             try {
