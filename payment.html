@@ -290,6 +290,7 @@
                             <div class="plan-option p-4 flex justify-between items-center">
                                 <div class="flex items-center">
                                     <div class="custom-radio"><div class="inner-circle"></div></div>
+              _B_L_O_C_K_</div>
                                     <div>
                                         <h3 class="font-bold text-gray-800">7-Day Plan</h3>
                                         <p class="text-xs text-green-700 font-semibold">to lower bio-age by 1 year</p>
@@ -454,7 +455,7 @@
                      <h3 class="text-2xl font-bold mb-4 text-center md:text-left" style="color: var(--brand-dark-text);">Frequently Asked Questions</h3>
                      <div class="space-y-4">
                          <details class="border-b border-gray-200 pb-2">
-                             <summary class="font-semibold text-gray-800">Is this medical advice?</summary>
+          _B_L_O_C_K_              <summary class="font-semibold text-gray-800">Is this medical advice?</summary>
                              <p class="text-gray-600 mt-2 text-sm">No. AI WELLNESSCORE is an educational tool. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a physician for any health concerns.</p>
                          </details>
                          <details class="border-b border-gray-200 pb-2">
@@ -472,20 +473,19 @@
         </main>
     </div>
     
-    <script>
+   <script>
     document.addEventListener('DOMContentLoaded', () => {
         // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
         let selectedPlanKey = 'advanced';
-        let stripe, elements, clientSecret; // <-- Объявляем clientSecret здесь
+        let stripe, elements, clientSecret;
         let currentBioAge, standardLifespan, planData;
         let bioAgeChartInstance, lifespanChartInstance;
         let chartsRendered = false;
-        const STRIPE_PUBLISHABLE_KEY = 'pk_test_51S1Yg3ASZCQEXfIS9X5MWTmawjudRUpR3oHcwT8LVk4rlMDD1ebqabvubXzYFcDq5NOqNWeL2nfiUrkOcbeMXpWn00p0DvInk9';
 
         const ICON_SUCCESS_SVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
         const ICON_ERROR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.007H12v-.007z" /></svg>`;
 
-        // --- DOM-ЭЛЕМЕНТЫ (остаются без изменений) ---
+        // --- DOM-ЭЛЕМЕНТЫ ---
         const salesSection = document.getElementById('sales-section');
         const scrollToPlansBtn = document.getElementById('scroll-to-plans-btn');
         const paymentModal = document.getElementById('payment-modal');
@@ -497,7 +497,6 @@
 
         // --- ФУНКЦИИ ---
 
-        // (Функции fetchPreliminaryData, initializePage, showModal, hideModal остаются без изменений)
         async function fetchPreliminaryData() {
             const sessionId = new URLSearchParams(window.location.search).get('session_id');
             if (!sessionId) { throw new Error("Session ID not found in URL."); }
@@ -556,32 +555,35 @@
             document.getElementById('loading-overlay').classList.add('active');
             const sessionId = new URLSearchParams(window.location.search).get('session_id');
 
-            // --- НАЧАЛО ИЗМЕНЕНИЯ 1 ---
             console.log("Initializing payment for session:", sessionId);
             if (!sessionId) {
                 alert("CRITICAL ERROR: Session ID is missing. Cannot proceed with payment.");
                 document.getElementById('loading-overlay').classList.remove('active');
                 return;
             }
-            // --- КОНЕЦ ИЗМЕНЕНИЯ 1 ---
 
             const selectedPlan = planData[selectedPlanKey];
             document.getElementById('modal-regular-price').textContent = `$${selectedPlan.regularPrice.toFixed(2)}`;
             document.getElementById('modal-total-price').textContent = `$${selectedPlan.price.toFixed(2)}`;
             
             try {
-                // --- НАЧАЛО ИЗМЕНЕНИЯ 2 ---
-                console.log("Sending request to /payment function with:", { sessionId: sessionId, plan: selectedPlanKey, amount: Math.round(selectedPlan.price * 100) });
-                // --- КОНЕЦ ИЗМЕНЕНИЯ 2 ---
+                const keyResponse = await fetch('/.netlify/functions/get-stripe-key');
+                if (!keyResponse.ok) {
+                    throw new Error('Could not fetch Stripe configuration.');
+                }
+                const { publishableKey } = await keyResponse.json();
+                if (!publishableKey) {
+                    throw new Error('Stripe configuration is invalid.');
+                }
 
+                console.log("Sending request to /payment function with:", { sessionId: sessionId, plan: selectedPlanKey, amount: Math.round(selectedPlan.price * 100) });
+                
                 const response = await fetch('/.netlify/functions/payment', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sessionId: sessionId, plan: selectedPlanKey, amount: Math.round(selectedPlan.price * 100) })
                 });
                 
-                // --- НАЧАЛО ИЗМЕНЕНИЯ 3 ---
-                // Замените существующие проверки на этот блок
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`Failed to create Payment Intent. Server responded with ${response.status}: ${errorText}`);
@@ -592,16 +594,13 @@
                 }
                 console.log("Received clientSecret successfully.");
                 clientSecret = data.clientSecret;
-                // --- КОНЕЦ ИЗМЕНЕНИЯ 3 ---
                 
-                stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+                stripe = Stripe(publishableKey);
                 elements = stripe.elements({ clientSecret });
 
-                // Создаем и монтируем Express Checkout (Apple/Google Pay)
                 const expressCheckoutElement = elements.create('expressCheckout');
                 expressCheckoutElement.mount('#express-checkout-element');
                 
-                // Создаем и монтируем Card Element
                 const cardElement = elements.create("card", {
                     style: { base: { iconColor: '#666EE8', color: '#31325F', fontWeight: '400', fontFamily: 'Inter, sans-serif', fontSize: '16px', '::placeholder': { color: '#CFD7E0' }}},
                     hidePostalCode: true
@@ -610,30 +609,26 @@
 
                 showModal();
             } catch (error) {
-                // --- НАЧАЛО ИЗМЕНЕНИЯ 4 ---
                 console.error('CRITICAL ERROR during payment initialization:', error);
                 alert(`Could not initialize payment. Please try again. \n\nError details: ${error.message}`);
-                // --- КОНЕЦ ИЗМЕНЕНИЯ 4 ---
             } finally {
                 document.getElementById('loading-overlay').classList.remove('active');
             }
         }
         
-        // Исправленная функция handleSubmit
         async function handleSubmit(e) {
             e.preventDefault();
             setLoading(true);
 
             const cardElement = elements.getElement('card');
             
-            const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, { // <-- Используем глобальный clientSecret
+            const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
                 payment_method: { card: cardElement }
             });
 
-            handlePaymentResult(error, paymentIntent); // <-- Выносим обработку в общую функцию
+            handlePaymentResult(error, paymentIntent);
         }
         
-        // Новая функция для обработки результата платежа (и для карты, и для Apple Pay)
         function handlePaymentResult(error, paymentIntent) {
             setLoading(false);
             const sessionId = new URLSearchParams(window.location.search).get('session_id');
@@ -654,7 +649,6 @@
             }
         }
 
-        // Вспомогательная функция для отображения статуса
         function showStatus(status, message) {
             const paymentForm = document.getElementById('payment-form');
             const statusContainer = document.getElementById('payment-status');
@@ -683,14 +677,82 @@
                     document.getElementById('sales-section').scrollIntoView({ behavior: 'smooth' });
                 });
             }
+            document.querySelectorAll('input[name="plan"]').forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    selectedPlanKey = event.target.value;
+                    updateUIForPlan(selectedPlanKey);
+                });
+            });
+            document.querySelectorAll('.plan-toggle-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const planKey = button.dataset.plan;
+                    document.querySelector(`input[name="plan"][value="${planKey}"]`).checked = true;
+                    selectedPlanKey = planKey;
+                    updateUIForPlan(planKey);
+                });
+            });
             openModalButtons.forEach(btn => btn.addEventListener('click', initializePaymentForm));
             closeModalBtn.addEventListener('click', hideModal);
             if (paymentForm) paymentForm.addEventListener('submit', handleSubmit);
         }
 
-        // (Функции updateUIForPlan и initCharts остаются без изменений)
-        function updateUIForPlan(planKey) { /* ... */ }
-        function initCharts() { /* ... */ }
+        function updateUIForPlan(planKey) {
+            document.querySelectorAll('.plan-toggle-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.plan === planKey);
+            });
+            if (chartsRendered) {
+                const selectedPlanData = planData[planKey];
+                bioAgeChartInstance.data.datasets[0].data[1] = selectedPlanData.potentialBioAge;
+                lifespanChartInstance.data.datasets[0].data[1] = selectedPlanData.potentialLifespan;
+                bioAgeChartInstance.update();
+                lifespanChartInstance.update();
+            }
+        }
+        
+        function initCharts() {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: false, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+                    x: { grid: { display: false } }
+                }
+            };
+
+            const selectedPlanData = planData[selectedPlanKey];
+
+            const bioAgeCtx = document.getElementById('bioAgeChart').getContext('2d');
+            bioAgeChartInstance = new Chart(bioAgeCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Current', 'Potential'],
+                    datasets: [{
+                        data: [currentBioAge, selectedPlanData.potentialBioAge],
+                        backgroundColor: ['#a8a29e', '#22c55e'],
+                        borderRadius: 8,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: chartOptions
+            });
+
+            const lifespanCtx = document.getElementById('lifespanChart').getContext('2d');
+            lifespanChartInstance = new Chart(lifespanCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Standard', 'Potential'],
+                    datasets: [{
+                        data: [standardLifespan, selectedPlanData.potentialLifespan],
+                        backgroundColor: ['#a8a29e', '#3b82f6'],
+                        borderRadius: 8,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: chartOptions
+            });
+            chartsRendered = true;
+        }
         
         initializePage();
         try {
