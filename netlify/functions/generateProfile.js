@@ -41,7 +41,7 @@ exports.handler = async (event) => {
     const sessionData = doc.data();
     console.log(`[${sessionId}] --- 2. Document found. Working with this data:`, JSON.stringify(sessionData.answers));
 
-    const userAnswers = sessionData.answers;
+    const userAnswers = sessionData.answers || {};
     const faceAnalysis = sessionData.faceAnalysis;
 
     // --- НАЧАЛО ИСПРАВЛЕННОГО БЛОКА ---
