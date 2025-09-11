@@ -1,3 +1,5 @@
+// /netlify/functions/generateProfile.js
+
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 
@@ -13,8 +15,6 @@ if (!getApps().length) {
 }
 
 const db = getFirestore();
-
-// Импортируем вашу функцию расчета
 const { calculateBioAge } = require('./bio-age-calculation.js');
 
 exports.handler = async (event) => {
@@ -34,39 +34,25 @@ exports.handler = async (event) => {
     const doc = await sessionRef.get();
 
     if (!doc.exists) {
-      console.error(`[${sessionId}] --- ERROR: Document not found in Firestore. This is the problem!`);
+      console.error(`[${sessionId}] --- ERROR: Document not found in Firestore.`);
       return { statusCode: 404, body: JSON.stringify({ error: 'Session not found' }) };
     }
     
     const sessionData = doc.data();
-    console.log(`[${sessionId}] --- 2. Document found. Working with this data:`, JSON.stringify(sessionData.answers));
-
+    
+    // --- ЭТО КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ ---
+    // Гарантируем, что userAnswers - это объект, даже если в базе его еще нет
     const userAnswers = sessionData.answers || {};
+    // --- КОНЕЦ КЛЮЧЕВОГО ИСПРАВЛЕНИЯ ---
+    
     const faceAnalysis = sessionData.faceAnalysis;
-
-    // --- НАЧАЛО ИСПРАВЛЕННОГО БЛОКА ---
-
-    // Используем значения по умолчанию для критических полей, если они отсутствуют
-    const safeUserAnswers = {
-      ...userAnswers,
-      age: parseInt(userAnswers.age, 10) || 30,
-      gender: ['male', 'female'].includes(userAnswers.gender) ? userAnswers.gender : 'female',
-      height: parseFloat(userAnswers.height) || 170,
-      weight: parseFloat(userAnswers.weight) || 70,
-    };
     
-    // Передаем в функцию расчета "безопасные" данные
-    const chronoAge = safeUserAnswers.age;
-    if (isNaN(chronoAge)) {
-        console.error(`[${sessionId}] --- ERROR: Invalid chronological age even after fallback:`, userAnswers.age);
-        return { statusCode: 400, body: JSON.stringify({ error: 'Invalid age provided' }) };
-    }
-    
-    // Теперь передаем safeUserAnswers в функцию расчета
-    const bioAgeResult = calculateBioAge(chronoAge, safeUserAnswers, faceAnalysis);
-    
-    // --- КОНЕЦ ИСПРАВЛЕННОГО БЛОКА ---
+    // Используем значения по умолчанию прямо при получении данных
+    const chronoAge = parseInt(userAnswers.age, 10) || 30; // По умолчанию 30 лет
 
+    // Передаем в функцию расчета userAnswers, который теперь точно является объектом
+    const bioAgeResult = calculateBioAge(chronoAge, userAnswers, faceAnalysis);
+    
     console.log(`[${sessionId}] --- 3. BioAge calculated successfully:`, JSON.stringify(bioAgeResult));
 
     try {
@@ -89,9 +75,8 @@ exports.handler = async (event) => {
     };
 
   } catch (error) {
-    // Этот catch ловит ошибки до основной логики (например, JSON.parse)
-    const sessionId = JSON.parse(event.body)?.sessionId || 'unknown';
-    console.error(`[${sessionId}] --- FATAL HANDLER ERROR:`, error);
+    const sessionIdFromEvent = event.body ? JSON.parse(event.body)?.sessionId : 'unknown';
+    console.error(`[${sessionIdFromEvent || 'unknown'}] --- FATAL HANDLER ERROR:`, error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Internal Server Error', details: error.message })
