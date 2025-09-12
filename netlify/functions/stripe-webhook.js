@@ -55,7 +55,6 @@ async function sendPurchaseToMeta(eventData) {
     }
 }
 
-
 // Основная функция-обработчик
 exports.handler = async (event) => {
   // 1. Проверка подписи вебхука
