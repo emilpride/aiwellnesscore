@@ -1679,7 +1679,18 @@
         scrollToBottom();
 
         // The stripe publishable key is public and safe to expose on the frontend.
-        stripe = Stripe('pk_live_51S1YfdPBAI3bxeVkFNBty0jUIvH37x0U3yZCOMu3Idd8Ei0XmAHP5vqRwbOR1cCNk4G48naTwy40n9enHvOlrYIB00LtAI8Nzb');
+        // ПРАВИЛЬНО: Ключ безопасно загружается с сервера
+try {
+    const keyResponse = await fetch('/.netlify/functions/get-stripe-key');
+    if (!keyResponse.ok) throw new Error('Could not fetch Stripe configuration.');
+    const { publishableKey } = await keyResponse.json();
+    if (!publishableKey) throw new Error('Stripe publishable key is empty.');
+    
+    stripe = Stripe(publishableKey);
+} catch (error) {
+    console.error('Failed to initialize Stripe:', error);
+    // Здесь можно показать сообщение об ошибке пользователю
+}
         try {
             const response = await fetch('/.netlify/functions/payment', {
                 method: 'POST',
