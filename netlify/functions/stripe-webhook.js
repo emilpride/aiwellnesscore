@@ -15,7 +15,7 @@ if (!getApps().length) {
 }
 const db = getFirestore();
 
-// Вспомогательная функция для отправки события в Meta CAPI
+// Helper function to send the Purchase event to the Meta Conversions API
 async function sendPurchaseToMeta(eventData) {
     const { pixelId, accessToken, amount, currency, clientIpAddress, clientUserAgent, email } = eventData;
     if (!pixelId || !accessToken) {
@@ -30,6 +30,7 @@ async function sendPurchaseToMeta(eventData) {
         client_user_agent: clientUserAgent,
     };
 
+    // If email is available, hash it and add to user_data for better matching
     if (email) {
         userData.em = crypto.createHash('sha256').update(email.toLowerCase()).digest('hex');
     }
@@ -55,9 +56,9 @@ async function sendPurchaseToMeta(eventData) {
     }
 }
 
-// Основная функция-обработчик
+// Main handler function
 exports.handler = async (event) => {
-  // 1. Проверка подписи вебхука
+  // 1. Verify the webhook signature
   console.log('--- STRIPE WEBHOOK FUNCTION WAS TRIGGERED ---');
   const sig = event.headers['stripe-signature'];
   if (!sig) {
@@ -77,7 +78,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: `Webhook Error: ${err.message}` };
   }
 
-  // 2. Извлечение данных из вебхука
+  // 2. Extract data from the webhook
   const paymentIntent = stripeEvent.data.object;
   const sessionId = paymentIntent.metadata?.sessionId;
 
@@ -88,7 +89,7 @@ exports.handler = async (event) => {
 
   const sessionRef = db.collection('sessions').doc(sessionId);
 
-  // 3. Обработка события успешной оплаты
+  // 3. Process the successful payment event
   try {
     if (stripeEvent.type === 'payment_intent.succeeded') {
       console.log(`[${sessionId}] Payment succeeded. Amount:`, paymentIntent.amount);
@@ -138,7 +139,7 @@ exports.handler = async (event) => {
     console.error(`[${sessionId}] Database update failed after webhook received:`, dbError);
   }
 
-  // 4. Возвращаем успешный ответ Stripe
+  // 4. Return a successful response to Stripe
   return {
     statusCode: 200,
     body: JSON.stringify({ received: true }),
