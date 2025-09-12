@@ -1,12 +1,11 @@
 // /netlify/functions/stripe-webhook.js
+
 'use strict';
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const axios = require('axios');
 const crypto = require('crypto');
-
-// ... (остальной код инициализации Firebase)
 
 if (!getApps().length) {
   try {
@@ -16,7 +15,7 @@ if (!getApps().length) {
 }
 const db = getFirestore();
 
-// This helper function sends the Purchase event to the Meta Conversions API
+// Вспомогательная функция для отправки события в Meta CAPI
 async function sendPurchaseToMeta(eventData) {
     const { pixelId, accessToken, amount, currency, clientIpAddress, clientUserAgent, email } = eventData;
     if (!pixelId || !accessToken) {
@@ -31,7 +30,6 @@ async function sendPurchaseToMeta(eventData) {
         client_user_agent: clientUserAgent,
     };
 
-    // If email is available, hash it and add to user_data for better matching
     if (email) {
         userData.em = crypto.createHash('sha256').update(email.toLowerCase()).digest('hex');
     }
@@ -41,7 +39,7 @@ async function sendPurchaseToMeta(eventData) {
             event_name: 'Purchase',
             event_time: Math.floor(Date.now() / 1000),
             event_source_url: process.env.URL,
-            user_data: userData, // Use the updated user_data object
+            user_data: userData,
             custom_data: {
                 value: amount,
                 currency: currency,
@@ -56,10 +54,11 @@ async function sendPurchaseToMeta(eventData) {
         console.error('Failed to send event to Meta CAPI:', error.response ? error.response.data : error.message);
     }
 }
-// /netlify/functions/stripe-webhook.js
 
+
+// Основная функция-обработчик
 exports.handler = async (event) => {
-  // --- 1. ПРОВЕРКА ПОДПИСИ ВЕБХУКА ---
+  // 1. Проверка подписи вебхука
   console.log('--- STRIPE WEBHOOK FUNCTION WAS TRIGGERED ---');
   const sig = event.headers['stripe-signature'];
   if (!sig) {
@@ -79,7 +78,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: `Webhook Error: ${err.message}` };
   }
 
-  // --- 2. ИЗВЛЕЧЕНИЕ ДАННЫХ ИЗ ВЕБХУКА ---
+  // 2. Извлечение данных из вебхука
   const paymentIntent = stripeEvent.data.object;
   const sessionId = paymentIntent.metadata?.sessionId;
 
@@ -90,17 +89,15 @@ exports.handler = async (event) => {
 
   const sessionRef = db.collection('sessions').doc(sessionId);
 
-  // --- 3. ОБРАБОТКА СОБЫТИЯ УСПЕШНОЙ ОПЛАТЫ ---
+  // 3. Обработка события успешной оплаты
   try {
     if (stripeEvent.type === 'payment_intent.succeeded') {
       console.log(`[${sessionId}] Payment succeeded. Amount:`, paymentIntent.amount);
       const paymentAmount = (paymentIntent.amount / 100).toFixed(2);
       
-      // 3.1. Получаем данные сессии для CAPI
       const sessionDoc = await sessionRef.get();
       const sessionData = sessionDoc.data() || {};
       
-      // 3.2. Обновляем статус платежа в Firestore
       await sessionRef.update({
         paymentStatus: 'succeeded',
         paymentAmountUSD: paymentAmount,
@@ -112,7 +109,6 @@ exports.handler = async (event) => {
       });
       console.log(`[${sessionId}] Successfully updated payment status in Firestore.`);
 
-      // 3.3. Отправляем событие 'Purchase' в Meta CAPI
       await sendPurchaseToMeta({
         pixelId: process.env.META_PIXEL_ID,
         accessToken: process.env.META_ACCESS_TOKEN,
@@ -123,7 +119,6 @@ exports.handler = async (event) => {
         email: sessionData.answers?.email
       });
 
-      // 3.4. Запускаем генерацию отчета
       try {
         console.log(`[${sessionId}] Attempting to invoke generate-report-hybrid function...`);
         await fetch(`${process.env.URL}/.netlify/functions/generate-report-hybrid`, {
@@ -144,10 +139,9 @@ exports.handler = async (event) => {
     console.error(`[${sessionId}] Database update failed after webhook received:`, dbError);
   }
 
-  // --- 4. ВОЗВРАЩАЕМ УСПЕШНЫЙ ОТВЕТ STRIPE ---
+  // 4. Возвращаем успешный ответ Stripe
   return {
     statusCode: 200,
     body: JSON.stringify({ received: true }),
   };
 };
-
