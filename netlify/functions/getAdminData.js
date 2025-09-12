@@ -25,6 +25,7 @@ const countryCodeToName = {
 };
 
 exports.handler = async (event) => {
+  const { password, startDate, endDate } = JSON.parse(event.body);
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
@@ -36,8 +37,25 @@ exports.handler = async (event) => {
     }
 
     const sessionsRef = db.collection('sessions');
-    const sessionsSnapshot = await sessionsRef.orderBy('createdAt', 'desc').limit(200).get();
+let query = sessionsRef;
 
+// Применяем фильтры по дате, если они есть
+if (startDate) {
+    query = query.where('createdAt', '>=', new Date(startDate).toISOString());
+}
+if (endDate) {
+    // Добавляем время до конца дня, чтобы включить весь выбранный день
+    const endOfDay = new Date(endDate);
+    endOfDay.setHours(23, 59, 59, 999);
+    query = query.where('createdAt', '<=', endOfDay.toISOString());
+}
+
+// Если нет диапазона дат, оставляем лимит в 200 последних сессий
+if (!startDate && !endDate) {
+    query = query.limit(200);
+}
+
+const sessionsSnapshot = await query.orderBy('createdAt', 'desc').get();
     const messagesRef = db.collection('contact_submissions');
     const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').get();
 
@@ -71,6 +89,7 @@ exports.handler = async (event) => {
       const answeredCount = answeredKeys.length;
       const progressPercent = TOTAL_QUESTIONS > 0 ? Math.round((answeredCount / TOTAL_QUESTIONS) * 100) : 0;
       const progress = `${answeredCount} of ${TOTAL_QUESTIONS} (${progressPercent}%)`;
+      const dropOffDisplay = progressPercent === 100 ? 'Completed' : String(data.dropOffPoint || 'N/A').replace('question_', '');
 
       if (answers.hasOwnProperty('email')) {
         completedQuizzes++;
@@ -114,7 +133,7 @@ exports.handler = async (event) => {
         userGoal: answers.userGoal || 'N/A', // <-- ДОБАВЛЕНО НОВОЕ ПОЛЕ
         progress: progress,
         progressPercent: progressPercent,
-        dropOffPoint: String(data.dropOffPoint || 'N/A').replace('question_', ''),
+        dropOffPoint: dropOffDisplay,
         duration: duration,
         paymentStatus: data.paymentStatus || 'pending',
         paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A',
