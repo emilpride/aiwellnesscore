@@ -35,12 +35,12 @@
         @media (max-width: 1024px) {
             .table-custom thead,
             .funnel-table thead {
-                display: none; /* Скрываем заголовки таблиц на мобильных */
+                display: none;
             }
 
             .table-custom tr,
             .funnel-table tr {
-                display: block; /* Каждая строка - отдельный блок */
+                display: block;
                 margin-bottom: 1.5rem;
                 border: 1px solid var(--border-color);
                 border-radius: 0.5rem;
@@ -49,13 +49,14 @@
 
             .table-custom td,
             .funnel-table td {
-                display: block; /* Каждая ячейка на новой строке */
-                text-align: right; /* Выравниваем значение по правому краю */
-                padding-left: 50%; /* Освобождаем место для подписи слева */
-                position: relative;
-                border: none;
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                gap: 1rem;
+                text-align: left;
+                padding: 0.75rem;
                 border-bottom: 1px solid var(--border-color);
             }
+            
             .table-custom tr td:last-child,
             .funnel-table tr td:last-child {
                 border-bottom: none;
@@ -63,12 +64,7 @@
 
             .table-custom td::before,
             .funnel-table td::before {
-                content: attr(data-label); /* Используем data-атрибут как подпись */
-                position: absolute;
-                left: 0.75rem;
-                width: 45%;
-                padding-right: 0.75rem;
-                text-align: left;
+                content: attr(data-label);
                 font-weight: 600;
                 color: var(--text-secondary);
             }
@@ -77,7 +73,7 @@
 </head>
 <body class="antialiased">
 
-    <div id="login-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+    <div id="login-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
         <div class="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-sm">
             <h2 class="text-2xl font-bold text-white mb-6 text-center">Admin Panel Access</h2>
             <form id="login-form">
@@ -90,26 +86,26 @@
 
     <main id="admin-panel" class="hidden p-4 sm:p-6 lg:p-8">
         <div class="max-w-7xl mx-auto">
-            <div class="flex justify-between items-center">
-                <h1 class="text-3xl font-bold text-white">AI WellnessCore Dashboard</h1>
-                <button id="refresh-data-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50">
-                    <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
-                    Refresh
-                </button>
-            </div>
-            <div class="mt-4 flex flex-col sm:flex-row gap-4 items-center">
-                <div class="flex items-center gap-2">
-                    <label for="start-date-stats" class="text-sm font-medium text-gray-400">From:</label>
-                    <input type="date" id="start-date-stats" class="form-input">
-                </div>
-                <div class="flex items-center gap-2">
-                    <label for="end-date-stats" class="text-sm font-medium text-gray-400">To:</label>
-                    <input type="date" id="end-date-stats" class="form-input">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                <h1 class="text-3xl font-bold text-white text-center sm:text-left">AI WellnessCore Dashboard</h1>
+                <div class="flex items-center gap-4">
+                    <div class="flex-grow sm:flex-grow-0 flex items-center gap-2">
+                        <label for="start-date-stats" class="text-sm font-medium text-gray-400">From:</label>
+                        <input type="date" id="start-date-stats" class="form-input w-full">
+                    </div>
+                    <div class="flex-grow sm:flex-grow-0 flex items-center gap-2">
+                        <label for="end-date-stats" class="text-sm font-medium text-gray-400">To:</label>
+                        <input type="date" id="end-date-stats" class="form-input w-full">
+                    </div>
+                    <button id="refresh-data-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50">
+                        <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
+                        <span class="hidden sm:inline">Refresh</span>
+                    </button>
                 </div>
             </div>
             
             <div class="border-b border-gray-700 mt-6">
-                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                <nav class="-mb-px flex flex-wrap space-x-4 sm:space-x-8" aria-label="Tabs">
                     <button id="tab-stats" class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Statistics</button>
                     <button id="tab-sessions" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-400 border-transparent hover:text-gray-200 hover:border-gray-500">Sessions</button>
                     <button id="tab-messages" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-400 border-transparent hover:text-gray-200 hover:border-gray-500">Messages</button>
@@ -289,6 +285,12 @@
                 const tabContents = document.querySelectorAll('.tab-content');
                 const tableBody = document.getElementById('sessions-table-body');
                 const analyzeFunnelBtn = document.getElementById('analyze-funnel-btn');
+                
+                // Add event listeners for date filters to trigger data refresh
+                const startDateInput = document.getElementById('start-date-stats');
+                const endDateInput = document.getElementById('end-date-stats');
+                startDateInput.addEventListener('change', () => { if (adminPassword) fetchAndRenderData(adminPassword); });
+                endDateInput.addEventListener('change', () => { if (adminPassword) fetchAndRenderData(adminPassword); });
 
                 tabs.forEach(tab => {
                     tab.addEventListener('click', () => {
