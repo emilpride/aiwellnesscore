@@ -49,6 +49,16 @@
         <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-center">
                 <h1 class="text-3xl font-bold text-white">AI WellnessCore Dashboard</h1>
+                <div class="mt-4 flex flex-col sm:flex-row gap-4 items-center">
+    <div class="flex items-center gap-2">
+        <label for="start-date-stats" class="text-sm font-medium text-gray-400">From:</label>
+        <input type="date" id="start-date-stats" class="form-input">
+    </div>
+    <div class="flex items-center gap-2">
+        <label for="end-date-stats" class="text-sm font-medium text-gray-400">To:</label>
+        <input type="date" id="end-date-stats" class="form-input">
+    </div>
+</div>
                 <button id="refresh-data-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50">
                     <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
                     Refresh
@@ -187,11 +197,18 @@
                 refreshIcon.classList.add('animate-spin');
 
                 try {
-                    const response = await fetch('/.netlify/functions/getAdminData', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ password: password })
-                    });
+                    const startDate = document.getElementById('start-date-stats').value;
+const endDate = document.getElementById('end-date-stats').value;
+
+const response = await fetch('/.netlify/functions/getAdminData', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        password: password,
+        startDate: startDate || null,
+        endDate: endDate || null
+    })
+});
                     if (response.status === 401) throw new Error('Incorrect password.');
                     if (!response.ok) throw new Error('Could not fetch data from server.');
                     const { sessions, statistics, messages } = await response.json();
@@ -324,7 +341,7 @@
                     const paymentStatusClass = session.paymentStatus === 'succeeded' ? 'bg-green-500 text-green-100' : (session.paymentStatus === 'pending' ? 'bg-yellow-500 text-yellow-100' : 'bg-red-500 text-red-100');
                     tableHTML += `
                         <tr class="main-row">
-                            <td class="px-4 py-3 whitespace-nowrap text-sm">${new Date(session.createdAt).toLocaleString()}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm">${new Date(session.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', hour12: false })}</td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.deviceType}</div><div class="text-gray-400">${session.trafficSource}</div></td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.ipAddress}</div><div class="text-gray-400">${session.country}</div></td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-purple-400">${session.email}</td>
