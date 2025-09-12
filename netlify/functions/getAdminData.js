@@ -121,6 +121,7 @@ exports.handler = async (event) => {
         paymentMethod: data.paymentStatus === 'succeeded' ? 'Card/Wallet' : 'N/A',
         errors: data.errors || [],
         answers: answers,
+        events: data.events || {},
         // Ссылка на новый гибридный отчет
         resultLink: `result-hybrid.html?session_id=${doc.id}`
       };
