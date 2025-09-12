@@ -669,10 +669,40 @@ clientSecretForConfirmation = clientSecret;
                         orPayDivider.style.display = 'none';
                     }
                     
-                    paymentRequest.on('paymentmethod', async (ev) => {
-                        ev.complete('success');
-                        window.location.href = `${window.location.origin}/result.html?session_id=${sessionId}&payment=success`;
-                    });
+                    // ПРАВИЛЬНЫЙ КОД
+paymentRequest.on('paymentmethod', async (ev) => {
+    // 1. Отправляем платеж в Stripe для подтверждения
+    const { paymentIntent, error: confirmError } = await stripe.confirmCardPayment(
+        clientSecretForConfirmation, // Секретный ключ, полученный ранее
+        {
+            payment_method: ev.paymentMethod.id,
+        },
+        {
+            handleActions: false,
+        }
+    );
+
+    if (confirmError) {
+        // Если Stripe вернул ошибку (например, недостаточно средств)
+        showMessage(confirmError.message);
+        // Сообщаем окну Google Pay, что платеж не удался
+        ev.complete('fail');
+    } else {
+        // Если ошибок нет, проверяем статус платежа
+        if (paymentIntent.status === 'succeeded') {
+            // Платеж прошел успешно!
+            console.log("Payment succeeded via Payment Request Button!");
+            // Сообщаем окну Google Pay об успехе
+            ev.complete('success');
+            // И ТОЛЬКО ТЕПЕРЬ перенаправляем на страницу результата
+            window.location.href = `${window.location.origin}/result.html?session_id=${sessionId}&payment=success`;
+        } else {
+            // В других случаях (например, требуется 3D-Secure, но это редкость для GPay)
+            showMessage('Payment processing failed. Please try another card.');
+            ev.complete('fail');
+        }
+    }
+});
 
                     showModal();
 
