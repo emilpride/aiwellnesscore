@@ -209,25 +209,22 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     
     <div id="payment-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
 
-    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl">
+    <div id="payment-modal-content" class="w-full max-w-4xl bg-white rounded-2xl shadow-xl">
         <div class="p-6 md:p-8 relative">
             <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-3xl leading-none">&times;</button>
             <h2 class="text-3xl font-extrabold text-center mb-6" style="color: var(--brand-dark-text);">Complete your checkout</h2>
-            
             <div class="grid md:grid-cols-2 gap-8">
-            
                 <div class="p-4 md:p-6 bg-gray-50 rounded-xl">
                     <h3 class="text-xl font-bold text-gray-800 mb-4">Your Order Summary</h3>
                     <div class="flex justify-between items-center text-gray-600 mb-2">
                         <span>Regular price:</span>
-                        <span id="modal-regular-price">$0.00</span> 
+                        <span id="modal-regular-price">$0.00</span>
                     </div>
                     <div class="flex justify-between items-center text-gray-900 font-bold text-xl py-2 border-t border-gray-200 mt-4">
                         <span>Total today:</span>
-                        <span id="modal-total-price">$0.00</span> 
+                        <span id="modal-total-price">$0.00</span>
                     </div>
                 </div>
-
                 <div class="p-4 md:p-6 bg-white rounded-xl">
                     <div class="text-center mb-6">
     <p class="text-sm text-gray-500 mb-3">We accept all major credit cards:</p>
@@ -238,7 +235,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_(2018).svg" class="h-full object-contain" alt="American Express">
     </div>
 </div>
-
+                    </div>
                     <form id="payment-form">
                         <div id="payment-request-button" class="mb-4"></div>
                         <div id="or-pay-divider" class="flex items-center my-4">
@@ -248,7 +245,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                         </div>
                         <div id="payment-element" class="mb-6"></div>
                         <button id="submit-payment-btn" class="cta-button w-full font-bold py-3 px-4 rounded-xl text-lg flex items-center justify-center" disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
                             <span id="button-text">Continue</span>
                             <svg id="spinner" class="animate-spin h-5 w-5 text-white hidden ml-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
