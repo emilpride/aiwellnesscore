@@ -1332,15 +1332,23 @@ async function openCamera() {
             swiperWrapper.style.transform = `translateX(calc(-${currentSlide * 100}% + ${diff}px))`;
         }
         const endDrag = (e) => {
-            if (!isDragging) return;
-            isDragging = false;
-            const diff = currentX - startX;
-            if (Math.abs(diff) > 50) {
-                goToSlide(currentSlide + (diff < 0 ? 1 : -1));
-            } else {
-                goToSlide(currentSlide);
-            }
-        }
+    if (!isDragging) return;
+    const diff = currentX - startX;
+
+    // Если сдвиг был очень маленьким, считаем это тапом и ничего не делаем
+    if (Math.abs(diff) < 10) {
+        isDragging = false;
+        return; 
+    }
+
+    isDragging = false; // Перемещаем эту строку ниже
+
+    if (Math.abs(diff) > 50) {
+        goToSlide(currentSlide + (diff < 0 ? 1 : -1));
+    } else {
+        goToSlide(currentSlide);
+    }
+}
         
         swiper.addEventListener('mousedown', startDrag);
         swiper.addEventListener('mousemove', drag);
@@ -1475,6 +1483,13 @@ async function openCamera() {
     initMenu();
 
     document.getElementById('start-quiz-btn').addEventListener('click', next);
+    // FIX for Facebook/Mobile Browsers
+document.getElementById('start-quiz-btn').addEventListener('touchend', (event) => {
+    // Предотвращаем дальнейшее "всплытие" события, которое может вызвать свайп
+    event.preventDefault(); 
+    // Вызываем ту же функцию, что и при клике
+    next(); 
+});
     document.getElementById('back-btn').addEventListener('click', previous);
     document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
     
