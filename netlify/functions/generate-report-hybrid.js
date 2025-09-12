@@ -155,7 +155,7 @@ function generateInsights(answers, metrics) {
     } else if (metrics.nutrition.value < 60 && metrics.hydration.value < 60) {
         insights.nutritionHydration = lib.nutrition_hydration.poor_nutrition_poor_hydration;
     } else {
-        insights.nutritionHydration = "You have a solid foundation in nutrition and hydration. Continue to focus on whole foods and consistent water intake to maintain your results."; [cite: 198]
+        insights.nutritionHydration = "You have a solid foundation in nutrition and hydration. Continue to focus on whole foods and consistent water intake to maintain your results.";
     }
 
     // Activity Insight
@@ -164,7 +164,7 @@ function generateInsights(answers, metrics) {
     } else if (metrics.activity.value < 50 && metrics.stress.value < 50) {
         insights.activity = lib.activity.low_activity_high_stress;
     } else {
-         insights.activity = "Your activity level is a good starting point. Aim for consistency, and remember that even short walks can have a significant positive impact on your well-being."; [cite: 201]
+         insights.activity = "Your activity level is a good starting point. Aim for consistency, and remember that even short walks can have a significant positive impact on your well-being.";
     }
     
     return insights;
