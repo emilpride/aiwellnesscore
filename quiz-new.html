@@ -1075,6 +1075,17 @@ const LibraryLoader = {
 
         async function startAnalysis() {
             goToStep('loading');
+            // Сохраняем время окончания квиза
+if (App.sessionId) {
+    fetch('/.netlify/functions/quiz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action: 'endQuiz',
+            sessionId: App.sessionId
+        })
+    }).catch(err => console.error('Failed to save quiz end time:', err));
+}
             AnimationManager.add('loading-animation', 'loader.json');
             const analysisStepsContainer = document.getElementById('analysis-steps');
             analysisStepsContainer.innerHTML = '';
