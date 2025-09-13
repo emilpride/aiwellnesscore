@@ -85,21 +85,21 @@
     </div>
 
     <main id="admin-panel" class="hidden p-4 sm:p-6 lg:p-8">
-        <div class="max-w-7xl mx-auto">
+        <div class="max-w-6xl mx-auto">
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <h1 class="text-3xl font-bold text-white text-center sm:text-left">AI WellnessCore Dashboard</h1>
-                <div class="flex items-center gap-4">
-                    <div class="flex-grow sm:flex-grow-0 flex items-center gap-2">
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+                    <div class="flex-grow flex items-center gap-2 w-full">
                         <label for="start-date-stats" class="text-sm font-medium text-gray-400">From:</label>
                         <input type="date" id="start-date-stats" class="form-input w-full">
                     </div>
-                    <div class="flex-grow sm:flex-grow-0 flex items-center gap-2">
+                    <div class="flex-grow flex items-center gap-2 w-full">
                         <label for="end-date-stats" class="text-sm font-medium text-gray-400">To:</label>
                         <input type="date" id="end-date-stats" class="form-input w-full">
                     </div>
-                    <button id="refresh-data-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50">
+                    <button id="refresh-data-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 w-full sm:w-auto justify-center">
                         <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
-                        <span class="hidden sm:inline">Refresh</span>
+                        <span class="sm:inline">Refresh</span>
                     </button>
                 </div>
             </div>
@@ -162,7 +162,7 @@
                         <option value="failed">Failed</option>
                     </select>
                 </div>
-                <div class="mt-4 overflow-x-auto rounded-lg border border-gray-700">
+                <div class="mt-4 overflow-x-auto rounded-lg">
                     <table class="min-w-full divide-y divide-gray-700 table-custom">
                         <thead class="bg-gray-800">
                             <tr>
@@ -287,7 +287,6 @@
                 const tableBody = document.getElementById('sessions-table-body');
                 const analyzeFunnelBtn = document.getElementById('analyze-funnel-btn');
                 
-                // Add event listeners for date filters to trigger data refresh
                 const startDateInput = document.getElementById('start-date-stats');
                 const endDateInput = document.getElementById('end-date-stats');
                 startDateInput.addEventListener('change', () => { if (adminPassword) fetchAndRenderData(adminPassword); });
