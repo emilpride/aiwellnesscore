@@ -65,7 +65,7 @@ exports.handler = async (event) => {
     let messagesData = messagesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), receivedAt: new Date(doc.data().createdAt).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' }) }));
 
     if (sessionsSnapshot.empty) {
-      return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: { totalSessions: totalSessionsCount }, messages: messagesData }) };
+      return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: { totalSessions: totalSessionsCount, sessionsInPeriod: 0, completedQuizzes: 0 }, messages: messagesData }) };
     }
     
     let totalRevenue = 0, successfulPayments = 0, completedQuizzes = 0, totalErrors = 0;
@@ -140,7 +140,7 @@ exports.handler = async (event) => {
         progressPercent: progressPercent,
         durationMs: durationMs,
         errorCount: data.errors ? data.errors.length : 0,
-        answers: answers, // <-- ВОТ ИСПРАВЛЕНИЕ. ЭТА СТРОКА БЫЛА УДАЛЕНА.
+        answers: answers,
       };
     });
 
@@ -158,6 +158,8 @@ exports.handler = async (event) => {
 
     const statistics = {
         totalSessions: totalSessionsCount,
+        sessionsInPeriod: sessionsSnapshot.size,
+        completedQuizzes: completedQuizzes,
         totalRevenue: totalRevenue.toFixed(2),
         successfulPayments,
         avgCheck: successfulPayments > 0 ? (totalRevenue / successfulPayments).toFixed(2) : "0.00",
