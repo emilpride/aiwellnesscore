@@ -30,6 +30,10 @@ exports.handler = async (event) => {
   }
 
   try {
+    // Получаем общее количество сессий из счетчика
+const statsRef = db.collection('metadata').doc('sessions');
+const statsDoc = await statsRef.get();
+const totalSessionsCount = statsDoc.exists ? statsDoc.data().totalCount : 0;
     // УЛУЧШЕНО: Разбор тела запроса и проверка пароля перенесены внутрь try-catch
     const { password, startDate, endDate } = JSON.parse(event.body);
 
@@ -149,7 +153,7 @@ exports.handler = async (event) => {
     });
 
     const statistics = {
-        totalSessions: sessionsSnapshot.size,
+        totalSessions: totalSessionsCount,
         totalRevenue: totalRevenue.toFixed(2),
         successfulPayments,
         avgCheck: successfulPayments > 0 ? (totalRevenue / successfulPayments).toFixed(2) : "0.00",
