@@ -224,7 +224,7 @@
             const tabs = document.querySelectorAll('.tab-button'), tabContents = document.querySelectorAll('.tab-content');
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
-                    tabs.forEach(t => t.classList.remove('active', 'text-purple-400', 'border-purple-400'));
+                    tabs.forEach(t => { t.classList.remove('active', 'text-purple-400', 'border-purple-400'); t.classList.add('text-gray-400', 'border-transparent'); });
                     tab.classList.add('active', 'text-purple-400', 'border-purple-400');
                     tabContents.forEach(content => content.classList.remove('active'));
                     document.getElementById(tab.id.replace('tab-', 'content-')).classList.add('active');
@@ -306,15 +306,20 @@
         }
 
         function renderTable(data) {
-            const tableBody = document.getElementById('sessions-table-body'), searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const tableBody = document.getElementById('sessions-table-body');
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
             let filteredData = data.filter(s => (s.ipAddress.toLowerCase().includes(searchTerm) || s.country.toLowerCase().includes(searchTerm) || (s.email && s.email.toLowerCase().includes(searchTerm))));
             
-            // СОРТИРОВКА
             const { column, direction } = sortState;
             filteredData.sort((a, b) => {
                 let valA = a[column], valB = b[column];
-                if (column === 'number') { valA = totalSessions - newerSessionsCount - allSessionsData.indexOf(a); valB = totalSessions - newerSessionsCount - allSessionsData.indexOf(b); }
-                else if (typeof valA === 'string') { valA = valA.toLowerCase(); valB = (valB || '').toString().toLowerCase(); }
+                if (column === 'number') { 
+                    valA = statisticsData.totalSessions - statisticsData.newerSessionsCount - allSessionsData.indexOf(a);
+                    valB = statisticsData.totalSessions - statisticsData.newerSessionsCount - allSessionsData.indexOf(b);
+                } else if (typeof valA === 'string') { 
+                    valA = valA.toLowerCase(); valB = (valB || '').toString().toLowerCase(); 
+                }
+                if (valA == null) return 1; if (valB == null) return -1;
                 if (valA < valB) return direction === 'asc' ? -1 : 1;
                 if (valA > valB) return direction === 'asc' ? 1 : -1;
                 return 0;
@@ -322,24 +327,44 @@
 
             if (filteredData.length === 0) { tableBody.innerHTML = `<tr><td colspan="13" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`; return; }
             
-            let tableHTML = '';
-            const totalSessions = statisticsData.totalSessions || data.length, newerSessionsCount = statisticsData.newerSessionsCount || 0;
+            const totalSessions = statisticsData.totalSessions || data.length;
+            const newerSessionsCount = statisticsData.newerSessionsCount || 0;
             
-            filteredData.forEach((session, index) => {
-                const sessionNumber = totalSessions - newerSessionsCount - index;
+            tableBody.innerHTML = filteredData.map(session => {
+                const sessionIndex = allSessionsData.indexOf(session);
+                const sessionNumber = totalSessions - newerSessionsCount - sessionIndex;
                 const paymentStatusClass = session.paymentStatus === 'succeeded' ? 'bg-green-500 text-green-100' : session.paymentStatus === 'pending' ? 'bg-yellow-500 text-yellow-100' : 'bg-red-500 text-red-100';
                 let emailDisplay = `<span class="text-purple-400">${session.email || 'N/A'}</span>`;
                 if ((session.email || '').length > 20) { emailDisplay = `<span class="truncate-email cursor-pointer text-purple-400" data-full-email="${session.email}">${session.email.substring(0, 17)}...</span>`; }
-                tableHTML += `<tr class="main-row"><td data-label="#" data-column="number">${sessionNumber}</td><td data-label="Date" data-column="createdAt">${new Date(session.createdAt).toLocaleString('en-GB',{dateStyle:'short',timeStyle:'short'})}</td><td data-label="Device/Source" data-column="deviceType"><div>${session.deviceType}</div><div>${session.trafficSource}</div></td><td data-label="IP/Country" data-column="ipAddress"><div>${session.ipAddress}</div><div>${session.country}</div></td><td data-label="Email" data-column="email">${emailDisplay}</td><td data-label="User" data-column="user"><div>${session.gender}</div><div>Age: ${session.age}</div></td><td data-label="User Goal" data-column="userGoal">${session.userGoal}</td><td data-label="Progress" data-column="progressPercent">${session.progress}</td><td data-label="Duration" data-column="durationMs">${session.duration}</td><td data-label="Drop-off Point" data-column="dropOffPoint">${session.dropOffPoint}</td><td data-label="Payment" data-column="paymentStatus"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">${session.paymentStatus}</span><div>${session.paymentAmount}</div></td><td data-label="Errors" data-column="errorCount">${session.errorCount > 0 ? `<button data-session-id="${session.id}" data-error-count="${session.errorCount}" class="toggle-errors-btn bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600">Show (${session.errorCount})</button>` : '—'}</td><td data-label="Link" data-column="link">${session.resultLink && session.paymentStatus === 'succeeded' ? `<a href="/${session.resultLink}" target="_blank" class="text-purple-400 hover:text-purple-300">View</a>` : '<span class="text-gray-500 text-lg">❌</span>'}</td></tr>`;
-                if (session.errors && session.errors.length > 0) { tableHTML += `<tr id="errors-${session.id}" class="hidden"><td colspan="13" class="p-3 bg-gray-800" data-label="Error Details">${session.errors.map(err => `<div class="border-b border-gray-700 py-2 last:border-b-0"><p class="text-red-400 font-semibold">${err.message||'Unknown Error'}</p><p class="text-gray-400 text-xs font-mono break-all">${err.details||'No details'}</p><p class="text-gray-500 text-xs mt-1">${new Date(err.timestamp).toLocaleString()}</p></div>`).join('')}</td></tr>`; }
-            });
-            tableBody.innerHTML = tableHTML.replace(/<td/g, '<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300"');
+                
+                let rowHtml = `<tr class="main-row">
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="#" data-column="number">${sessionNumber}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="Date" data-column="createdAt">${new Date(session.createdAt).toLocaleString('en-GB',{dateStyle:'short',timeStyle:'short'})}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="Device/Source" data-column="deviceType"><div class="font-medium">${session.deviceType}</div><div class="text-gray-400">${session.trafficSource}</div></td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="IP/Country" data-column="ipAddress"><div class="font-medium">${session.ipAddress}</div><div class="text-gray-400">${session.country}</div></td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="Email" data-column="email">${emailDisplay}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="User" data-column="user"><div class="font-medium">${session.gender}</div><div class="text-gray-400">Age: ${session.age}</div></td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="User Goal" data-column="userGoal">${session.userGoal}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="Progress" data-column="progressPercent">${session.progress}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="Duration" data-column="durationMs">${session.duration}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="Drop-off Point" data-column="dropOffPoint">${session.dropOffPoint}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="Payment" data-column="paymentStatus"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">${session.paymentStatus}</span><div class="text-gray-400">${session.paymentAmount}</div></td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="Errors" data-column="errorCount">${session.errorCount > 0 ? `<button data-session-id="${session.id}" data-error-count="${session.errorCount}" class="toggle-errors-btn bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600">Show (${session.errorCount})</button>` : '—'}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="Link" data-column="link">${session.resultLink && session.paymentStatus === 'succeeded' ? `<a href="/${session.resultLink}" target="_blank" class="text-purple-400 hover:text-purple-300">View</a>` : '<span class="text-gray-500 text-lg">❌</span>'}</td>
+                </tr>`;
+
+                if (session.errors && session.errors.length > 0) {
+                    rowHtml += `<tr id="errors-${session.id}" class="hidden"><td colspan="13" class="p-3 bg-gray-800" data-label="Error Details">${session.errors.map(err => `<div class="border-b border-gray-700 py-2 last:border-b-0"><p class="text-red-400 font-semibold">${err.message||'Unknown Error'}</p><p class="text-gray-400 text-xs font-mono break-all">${err.details||'No details'}</p><p class="text-gray-500 text-xs mt-1">${new Date(err.timestamp).toLocaleString()}</p></div>`).join('')}</td></tr>`;
+                }
+                return rowHtml;
+            }).join('');
+            
             updateColumnVisibility();
             updateSortIcons();
         }
 
         function updateSortIcons() {
-            document.querySelectorAll('#content-sessions th.sortable .sort-icon').forEach(icon => icon.textContent = '');
+            document.querySelectorAll('#content-sessions th.sortable .sort-icon').forEach(icon => { icon.textContent = ''; icon.classList.remove('asc', 'desc'); });
             const activeTh = document.querySelector(`#content-sessions th[data-column="${sortState.column}"]`);
             if (activeTh) {
                 const icon = activeTh.querySelector('.sort-icon');
@@ -379,3 +404,4 @@
     </script>
 </body>
 </html>
+
