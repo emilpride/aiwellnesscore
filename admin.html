@@ -41,7 +41,7 @@
             .table-custom tr,
             .funnel-table tr {
                 display: block;
-                margin-bottom: 1.5rem;
+                margin-bottom: 1rem; /* Уменьшаем отступ между карточками */
                 border: 1px solid var(--border-color);
                 border-radius: 0.5rem;
                 overflow: hidden;
@@ -51,10 +51,11 @@
             .table-custom td,
             .funnel-table td {
                 display: grid;
-                grid-template-columns: auto 1fr; /* Заголовок занимает авто-ширину, значение - остальное */
-                gap: 1rem;
+                /* Новая сетка: заголовок 110px, значение - остальное */
+                grid-template-columns: 110px 1fr; 
+                gap: 0.5rem; /* Уменьшаем отступ между заголовком и значением */
                 text-align: left;
-                padding: 0.75rem;
+                padding: 0.5rem 0.75rem; /* Уменьшаем вертикальные отступы */
                 border-bottom: 1px solid var(--border-color);
             }
             
@@ -69,6 +70,7 @@
                 font-weight: 600;
                 color: var(--text-secondary);
                 text-align: left;
+                padding-right: 0.5rem; /* Добавляем небольшой отступ справа от заголовка */
             }
         }
     </style>
@@ -325,7 +327,8 @@
                     if (event.target.classList.contains('truncate-email')) {
                         const element = event.target;
                         element.textContent = element.dataset.fullEmail;
-                        element.classList.remove('truncate-email', 'cursor-pointer');
+                        element.classList.remove('truncate-email', 'cursor-pointer', 'text-purple-400');
+                        element.classList.add('text-gray-300');
                     }
                 });
                 analyzeFunnelBtn.addEventListener('click', calculateAndRenderFunnel);
@@ -395,9 +398,9 @@
                     const email = session.email || 'N/A';
                     let emailDisplay;
                     if (email.length > 20 && email !== 'N/A') {
-                        emailDisplay = `<span class="truncate-email cursor-pointer" data-full-email="${email}">${email.substring(0, 17)}...</span>`;
+                        emailDisplay = `<span class="truncate-email cursor-pointer text-purple-400" data-full-email="${email}">${email.substring(0, 17)}...</span>`;
                     } else {
-                        emailDisplay = email;
+                        emailDisplay = `<span class="text-purple-400">${email}</span>`;
                     }
 
                     tableHTML += `
@@ -406,7 +409,7 @@
                             <td data-label="Date" class="px-4 py-3 whitespace-nowrap text-sm">${new Date(session.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', hour12: false })}</td>
                             <td data-label="Device/Source" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.deviceType}</div><div class="text-gray-400">${session.trafficSource}</div></td>
                             <td data-label="IP/Country" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.ipAddress}</div><div class="text-gray-400">${session.country}</div></td>
-                            <td data-label="Email" class="px-4 py-3 whitespace-nowrap text-sm text-purple-400">${emailDisplay}</td>
+                            <td data-label="Email" class="px-4 py-3 whitespace-nowrap text-sm">${emailDisplay}</td>
                             <td data-label="User" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.gender}</div><div class="text-gray-400">Age: ${session.age}</div></td>
                             <td data-label="User Goal" class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.userGoal}</td>
                             <td data-label="Progress" class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.progress}</td>
