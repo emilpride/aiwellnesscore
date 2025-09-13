@@ -10,7 +10,6 @@ if (!getApps().length) {
 }
 const db = getFirestore();
 
-// ОБНОВЛЕНО: Полностью синхронизированный список вопросов с quiz-new.html
 const ALL_QUESTION_KEYS = [
     'userGoal', 'age', 'gender', 'height', 'weight', 'sleep', 'activity',
     'nutrition', 'processed_food', 'hydration', 'stress', 'mindfulness',
@@ -30,91 +29,96 @@ exports.handler = async (event) => {
   }
 
   try {
-    // Получаем общее количество сессий из счетчика
     const statsRef = db.collection('metadata').doc('sessions');
     const statsDoc = await statsRef.get();
     const totalSessionsCount = statsDoc.exists ? statsDoc.data().totalCount : 0;
 
-    // УЛУЧШЕНО: Разбор тела запроса и проверка пароля перенесены внутрь try-catch
     const { password, startDate, endDate } = JSON.parse(event.body);
-
     if (password !== process.env.SHAURMA) {
       return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
     }
 
     const sessionsRef = db.collection('sessions');
-    let query = sessionsRef.orderBy('createdAt', 'desc'); // Начинаем с сортировки
+    let query = sessionsRef.orderBy('createdAt', 'desc');
 
-    // Применяем фильтры по дате, если они есть
-    if (startDate) {
-        query = query.where('createdAt', '>=', new Date(startDate).toISOString());
-    }
+    if (startDate) { query = query.where('createdAt', '>=', new Date(startDate).toISOString()); }
     if (endDate) {
         const endOfDay = new Date(endDate);
         endOfDay.setHours(23, 59, 59, 999);
         query = query.where('createdAt', '<=', endOfDay.toISOString());
     }
 
-    // ИЗМЕНЕНО: Применяем лимит ВСЕГДА, чтобы избежать перегрузки и лишних трат.
-    if (startDate || endDate) {
-        query = query.limit(1000);
-    } else {
-        query = query.limit(200);
-    }
+    query = query.limit(1000); // Увеличим лимит по умолчанию для более точной статистики
 
     const sessionsSnapshot = await query.get();
-
-    // --- НАЧАЛО ИСПРАВЛЕНИЯ: РАСЧЕТ СМЕЩЕНИЯ ДЛЯ ПРАВИЛЬНОЙ НУМЕРАЦИИ ---
+    
     let newerSessionsCount = 0;
-    // Если есть фильтр по дате и сессии найдены, считаем сколько сессий новее, чем первая в списке
     if (!sessionsSnapshot.empty && (startDate || endDate)) {
         const firstDocTimestamp = sessionsSnapshot.docs[0].data().createdAt;
         const newerSessionsQuery = sessionsRef.where('createdAt', '>', firstDocTimestamp);
-        // Используем .count() для эффективного подсчета без загрузки самих документов
         const newerSessionsSnapshot = await newerSessionsQuery.count().get();
         newerSessionsCount = newerSessionsSnapshot.data().count;
     }
-    // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 
     const messagesRef = db.collection('contact_submissions');
     const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').get();
-
-    let messagesData = [];
-    if (!messagesSnapshot.empty) {
-        messagesData = messagesSnapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id, name: data.name, email: data.email, subject: data.subject,
-                message: data.message,
-                receivedAt: new Date(data.createdAt).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })
-            };
-        });
-    }
+    let messagesData = messagesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), receivedAt: new Date(doc.data().createdAt).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' }) }));
 
     if (sessionsSnapshot.empty) {
-      return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: { totalSessions: totalSessionsCount, newerSessionsCount: 0 }, messages: messagesData }) };
+      return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: { totalSessions: totalSessionsCount }, messages: messagesData }) };
     }
-
-    let totalRevenue = 0;
-    let successfulPayments = 0;
-    let completedQuizzes = 0;
-    const trafficSourceCounts = {};
-    const countryCounts = {};
+    
+    // --- НАЧАЛО БЛОКА НОВОЙ СТАТИСТИКИ ---
+    let totalRevenue = 0, successfulPayments = 0, completedQuizzes = 0, totalErrors = 0;
+    const trafficSourceCounts = {}, countryCounts = {}, osCounts = {}, genderCounts = {}, dropOffCounts = {}, userGoalCounts = {};
+    const maleAges = [], femaleAges = [];
+    let totalDurationMs = 0, durationCount = 0;
+    // --- КОНЕЦ БЛОКА НОВОЙ СТАТИСТИКИ ---
 
     const sessionsData = sessionsSnapshot.docs.map(doc => {
       const data = doc.data();
       const answers = data.answers || {};
 
+      // Расчет прогресса (остается без изменений)
       const answeredKeys = Object.keys(answers).filter(key => ALL_QUESTION_KEYS.includes(key));
       const answeredCount = answeredKeys.length;
       const progressPercent = TOTAL_QUESTIONS > 0 ? Math.round((answeredCount / TOTAL_QUESTIONS) * 100) : 0;
       const progress = `${answeredCount} of ${TOTAL_QUESTIONS} (${progressPercent}%)`;
-      const dropOffDisplay = progressPercent === 100 ? 'Completed' : String(data.dropOffPoint || 'N/A').replace('question_', '');
-
-      if (answers.hasOwnProperty('email')) {
-        completedQuizzes++;
+      
+      // --- НАЧАЛО СБОРА ДАННЫХ ДЛЯ СТАТИСТИКИ ---
+      
+      // ОС
+      if (data.deviceType) {
+        const os = data.deviceType.split('/')[1] || 'Unknown';
+        osCounts[os] = (osCounts[os] || 0) + 1;
       }
 
+      // Пол и возраст
+      if (answers.gender && (answers.gender === 'male' || answers.gender === 'female')) {
+        genderCounts[answers.gender] = (genderCounts[answers.gender] || 0) + 1;
+        if (answers.age) {
+          if (answers.gender === 'male') maleAges.push(parseInt(answers.age, 10));
+          if (answers.gender === 'female') femaleAges.push(parseInt(answers.age, 10));
+        }
+      }
+      
+      // Точка отказа
+      const dropOffDisplay = progressPercent === 100 ? 'Completed' : String(data.dropOffPoint || 'N/A').replace('question_', '');
+      if (dropOffDisplay !== 'Completed' && dropOffDisplay !== 'N/A') {
+        dropOffCounts[dropOffDisplay] = (dropOffCounts[dropOffDisplay] || 0) + 1;
+      }
+
+      // Цель пользователя
+      if (answers.userGoal) {
+        userGoalCounts[answers.userGoal] = (userGoalCounts[answers.userGoal] || 0) + 1;
+      }
+      
+      // Ошибки
+      if (data.errors && data.errors.length > 0) {
+        totalErrors += data.errors.length;
+      }
+      
+      // Длительность сессии
       let duration = 'N/A';
       if (data.createdAt && data.quizEndedAt) {
         const start = new Date(data.createdAt);
@@ -122,48 +126,48 @@ exports.handler = async (event) => {
         if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
             const diffMs = end - start;
             if (diffMs >= 0) {
+                totalDurationMs += diffMs;
+                durationCount++;
                 const diffMins = Math.floor(diffMs / 60000);
-                const diffSecs = ((diffMs % 60000) / 1000).toFixed(0);
+                const diffSecs = Math.round((diffMs % 60000) / 1000);
                 duration = `${diffMins}m ${diffSecs}s`;
             }
         }
       }
-
+      
+      // --- КОНЕЦ СБОРА ДАННЫХ ---
+      
+      if (answers.hasOwnProperty('email')) { completedQuizzes++; }
       if (data.paymentStatus === 'succeeded' && data.paymentAmountUSD) {
         successfulPayments++;
         totalRevenue += parseFloat(data.paymentAmountUSD);
       }
-
       const source = data.trafficSource || 'Direct';
       trafficSourceCounts[source] = (trafficSourceCounts[source] || 0) + 1;
-
       const country = countryCodeToName[data.countryCode] || data.countryCode || 'Unknown';
       countryCounts[country] = (countryCounts[country] || 0) + 1;
 
       return {
-        id: doc.id,
-        createdAt: data.createdAt,
-        deviceType: data.deviceType || 'N/A',
-        trafficSource: source,
-        ipAddress: data.ipAddress || 'N/A',
-        country: country,
-        email: answers.email || 'N/A',
-        gender: answers.gender || 'N/A',
-        age: answers.age || 'N/A',
-        userGoal: answers.userGoal || 'N/A',
-        progress: progress,
-        progressPercent: progressPercent,
-        dropOffPoint: dropOffDisplay,
-        duration: duration,
-        paymentStatus: data.paymentStatus || 'pending',
-        paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A',
-        paymentMethod: data.paymentStatus === 'succeeded' ? 'Card/Wallet' : 'N/A',
-        errors: data.errors || [],
-        answers: answers,
-        events: data.events || {},
+        id: doc.id, createdAt: data.createdAt, deviceType: data.deviceType || 'N/A', trafficSource: source, ipAddress: data.ipAddress || 'N/A',
+        country: country, email: answers.email || 'N/A', gender: answers.gender || 'N/A', age: answers.age || 'N/A', userGoal: answers.userGoal || 'N/A',
+        progress: progress, dropOffPoint: dropOffDisplay, duration: duration, paymentStatus: data.paymentStatus || 'pending',
+        paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A', errors: data.errors || [], events: data.events || {},
         resultLink: `result-hybrid.html?session_id=${doc.id}`
       };
     });
+
+    // --- НАЧАЛО РАСЧЕТА НОВОЙ СТАТИСТИКИ ---
+    const calculateAverage = (arr) => arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : "N/A";
+    const totalOsCount = Object.values(osCounts).reduce((a,b) => a + b, 0);
+    const totalGenderCount = Object.values(genderCounts).reduce((a,b) => a + b, 0);
+    
+    let avgDurationStr = "N/A";
+    if (durationCount > 0) {
+        const avgMs = totalDurationMs / durationCount;
+        const avgMins = Math.floor(avgMs / 60000);
+        const avgSecs = Math.round((avgMs % 60000) / 1000);
+        avgDurationStr = `${avgMins}m ${avgSecs}s`;
+    }
 
     const statistics = {
         totalSessions: totalSessionsCount,
@@ -174,9 +178,19 @@ exports.handler = async (event) => {
         quizCompletionRate: sessionsSnapshot.size > 0 ? ((completedQuizzes / sessionsSnapshot.size) * 100).toFixed(2) : "0.00",
         topTrafficSources: Object.entries(trafficSourceCounts).sort((a, b) => b[1] - a[1]).slice(0, 5),
         topCountries: Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 5),
+        
+        // Новые поля
+        osBreakdown: Object.entries(osCounts).map(([os, count]) => ({ os, percent: totalOsCount > 0 ? ((count/totalOsCount)*100).toFixed(1) : 0 })),
+        genderBreakdown: Object.entries(genderCounts).map(([gender, count]) => ({ gender, percent: totalGenderCount > 0 ? ((count/totalGenderCount)*100).toFixed(1) : 0 })),
+        avgMaleAge: calculateAverage(maleAges),
+        avgFemaleAge: calculateAverage(femaleAges),
+        avgDuration: avgDurationStr,
+        topDropOff: Object.entries(dropOffCounts).sort((a, b) => b[1] - a[1])[0] || ['N/A', 0],
+        topUserGoal: Object.entries(userGoalCounts).sort((a, b) => b[1] - a[1])[0] || ['N/A', 0],
+        totalErrors: totalErrors
     };
+    // --- КОНЕЦ РАСЧЕТА ---
 
-    // --- НАЧАЛО ИСПРАВЛЕНИЯ: ПЕРЕДАЕМ СМЕЩЕНИЕ НА ФРОНТЕНД ---
     return {
       statusCode: 200,
       body: JSON.stringify({
@@ -185,7 +199,6 @@ exports.handler = async (event) => {
         messages: messagesData
       }),
     };
-    // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
   } catch (error) {
     console.error('Error in getAdminData function:', error);
     return { statusCode: 500, body: JSON.stringify({ error: 'Internal Server Error' }) };
