@@ -378,7 +378,7 @@
                 });
 
                 if (filteredData.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="12" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="13" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`;
                     return;
                 }
                 
@@ -387,6 +387,7 @@
                     const paymentStatusClass = session.paymentStatus === 'succeeded' ? 'bg-green-500 text-green-100' : (session.paymentStatus === 'pending' ? 'bg-yellow-500 text-yellow-100' : 'bg-red-500 text-red-100');
                     tableHTML += `
                         <tr class="main-row">
+                            <td data-label="#" class="px-4 py-3 whitespace-nowrap text-sm text-gray-400 font-medium">${index + 1}</td>
                             <td data-label="Date" class="px-4 py-3 whitespace-nowrap text-sm">${new Date(session.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', hour12: false })}</td>
                             <td data-label="Device/Source" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.deviceType}</div><div class="text-gray-400">${session.trafficSource}</div></td>
                             <td data-label="IP/Country" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.ipAddress}</div><div class="text-gray-400">${session.country}</div></td>
@@ -417,7 +418,7 @@
 
                         tableHTML += `
                             <tr id="errors-${session.id}" class="hidden">
-                                <td colspan="12" class="p-3 bg-gray-800">${errorsHTML}</td>
+                                <td colspan="13" class="p-3 bg-gray-800" data-label="Error Details">${errorsHTML}</td>
                             </tr>
                         `;
                     }
