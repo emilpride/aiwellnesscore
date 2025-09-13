@@ -789,6 +789,20 @@ const LibraryLoader = {
     // Отправляем событие "Lead", только когда квиз начинается (индекс был -1)
     if (App.currentQuestionIndex === -1) { 
         fbq('track', 'Lead');
+        // Отправляем событие о начале квиза
+if (App.sessionId) {
+    try {
+        fetch('/.netlify/functions/quiz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'trackEvent',
+                sessionId: App.sessionId,
+                eventName: 'quizStarted' // Название нашего нового события
+            })
+        });
+    } catch (e) { console.error('Failed to track quiz start:', e); }
+}
     }
     // ---- КОНЕЦ ИЗМЕНЕНИЯ ----
 
