@@ -12,8 +12,8 @@ const db = getFirestore();
 
 // ОБНОВЛЕНО: Полностью синхронизированный список вопросов с quiz-new.html
 const ALL_QUESTION_KEYS = [
-    'userGoal', 'age', 'gender', 'height', 'weight', 'sleep', 'activity', 
-    'nutrition', 'processed_food', 'hydration', 'stress', 'mindfulness', 
+    'userGoal', 'age', 'gender', 'height', 'weight', 'sleep', 'activity',
+    'nutrition', 'processed_food', 'hydration', 'stress', 'mindfulness',
     'mood', 'alcohol', 'smoking', 'screen_time', 'selfie', 'email'
 ];
 const TOTAL_QUESTIONS = ALL_QUESTION_KEYS.length;
@@ -25,37 +25,40 @@ const countryCodeToName = {
 };
 
 exports.handler = async (event) => {
-  const { password, startDate, endDate } = JSON.parse(event.body);
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   try {
-    const { password } = JSON.parse(event.body);
+    // УЛУЧШЕНО: Разбор тела запроса и проверка пароля перенесены внутрь try-catch
+    const { password, startDate, endDate } = JSON.parse(event.body);
+
     if (password !== process.env.SHAURMA) {
       return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
     }
 
     const sessionsRef = db.collection('sessions');
-let query = sessionsRef;
+    let query = sessionsRef.orderBy('createdAt', 'desc'); // Начинаем с сортировки
 
-// Применяем фильтры по дате, если они есть
-if (startDate) {
-    query = query.where('createdAt', '>=', new Date(startDate).toISOString());
-}
-if (endDate) {
-    // Добавляем время до конца дня, чтобы включить весь выбранный день
-    const endOfDay = new Date(endDate);
-    endOfDay.setHours(23, 59, 59, 999);
-    query = query.where('createdAt', '<=', endOfDay.toISOString());
-}
+    // Применяем фильтры по дате, если они есть
+    if (startDate) {
+        query = query.where('createdAt', '>=', new Date(startDate).toISOString());
+    }
+    if (endDate) {
+        const endOfDay = new Date(endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        query = query.where('createdAt', '<=', endOfDay.toISOString());
+    }
 
-// Если нет диапазона дат, оставляем лимит в 200 последних сессий
-if (!startDate && !endDate) {
-    query = query.limit(200);
-}
+    // ИЗМЕНЕНО: Применяем лимит ВСЕГДА, чтобы избежать перегрузки и лишних трат.
+    // Если есть фильтр по дате, даем больше записей, но не все.
+    if (startDate || endDate) {
+        query = query.limit(1000); // Например, до 1000 записей для отфильтрованного списка
+    } else {
+        query = query.limit(200); // Стандартный лимит для последних сессий
+    }
 
-const sessionsSnapshot = await query.orderBy('createdAt', 'desc').get();
+    const sessionsSnapshot = await query.get();
     const messagesRef = db.collection('contact_submissions');
     const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').get();
 
@@ -84,7 +87,7 @@ const sessionsSnapshot = await query.orderBy('createdAt', 'desc').get();
     const sessionsData = sessionsSnapshot.docs.map(doc => {
       const data = doc.data();
       const answers = data.answers || {};
-      
+
       const answeredKeys = Object.keys(answers).filter(key => ALL_QUESTION_KEYS.includes(key));
       const answeredCount = answeredKeys.length;
       const progressPercent = TOTAL_QUESTIONS > 0 ? Math.round((answeredCount / TOTAL_QUESTIONS) * 100) : 0;
@@ -130,7 +133,7 @@ const sessionsSnapshot = await query.orderBy('createdAt', 'desc').get();
         email: answers.email || 'N/A',
         gender: answers.gender || 'N/A',
         age: answers.age || 'N/A',
-        userGoal: answers.userGoal || 'N/A', // <-- ДОБАВЛЕНО НОВОЕ ПОЛЕ
+        userGoal: answers.userGoal || 'N/A',
         progress: progress,
         progressPercent: progressPercent,
         dropOffPoint: dropOffDisplay,
@@ -141,7 +144,6 @@ const sessionsSnapshot = await query.orderBy('createdAt', 'desc').get();
         errors: data.errors || [],
         answers: answers,
         events: data.events || {},
-        // Ссылка на новый гибридный отчет
         resultLink: `result-hybrid.html?session_id=${doc.id}`
       };
     });
@@ -170,3 +172,5 @@ const sessionsSnapshot = await query.orderBy('createdAt', 'desc').get();
     return { statusCode: 500, body: JSON.stringify({ error: 'Internal Server Error' }) };
   }
 };
+
+
