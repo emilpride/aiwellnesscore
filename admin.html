@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - AI WellnessCore</title>
+    <title>Admin Panel - AI WellnessCore</title
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
@@ -524,74 +524,73 @@
             }
 
             function calculateAndRenderFunnel() {
-                const checkedCheckboxes = document.querySelectorAll('.funnel-source-checkbox:checked');
-                const selectedSources = [...checkedCheckboxes].map(cb => cb.value);
-                const startDateInput = document.getElementById('start-date-stats').value;
-                const endDateInput = document.getElementById('end-date-stats').value;
-                const filteredSessions = allSessionsData.filter(session => {
-                    const sessionDate = new Date(session.createdAt);
-                    const sourceMatch = selectedSources.length === 0 || selectedSources.includes(session.trafficSource);
-                    const startDateMatch = !startDateInput || sessionDate >= new Date(startDateInput);
-                    const endDateMatch = !endDateInput || sessionDate <= new Date(endDateInput + 'T23:59:59');
-                    return sourceMatch && startDateMatch && endDateMatch;
-                });
-                
-                // *** ИСПРАВЛЕННАЯ ЛОГИКА ВОРОНКИ ***
-                const funnelSteps = [ 
-                    { name: '1. Quiz Page Viewed', condition: s => true }, 
-                    { name: '2. "Let\'s Start" Clicked', condition: s => s.events && s.events.hasOwnProperty('quizStarted') }, 
-                    { name: '3. Goal', condition: s => s.answers && s.answers.hasOwnProperty('userGoal') }, 
-                    { name: '4. Age', condition: s => s.answers && s.answers.hasOwnProperty('age') }, 
-                    { name: '5. Sex (Gender)', condition: s => s.answers && s.answers.hasOwnProperty('gender') }, 
-                    { name: '6. Height', condition: s => s.answers && s.answers.hasOwnProperty('height') }, 
-                    { name: '7. Weight', condition: s => s.answers && s.answers.hasOwnProperty('weight') }, 
-                    { name: '8. Sleep', condition: s => s.answers && s.answers.hasOwnProperty('sleep') }, 
-                    { name: '9. Activity', condition: s => s.answers && s.answers.hasOwnProperty('activity') }, 
-                    { name: '10. Nutrition', condition: s => s.answers && s.answers.hasOwnProperty('nutrition') }, 
-                    { name: '11. Processed Food', condition: s => s.answers && s.answers.hasOwnProperty('processed_food') }, 
-                    { name: '12. Hydration', condition: s => s.answers && s.answers.hasOwnProperty('hydration') }, 
-                    { name: '13. Mindfulness', condition: s => s.answers && s.answers.hasOwnProperty('mindfulness') }, 
-                    { name: '14. Mood', condition: s => s.answers && s.answers.hasOwnProperty('mood') }, 
-                    { name: '15. Alcohol', condition: s => s.answers && s.answers.hasOwnProperty('alcohol') }, 
-                    { name: '16. Smoking', condition: s => s.answers && s.answers.hasOwnProperty('smoking') }, 
-                    { name: '17. Screen Time', condition: s => s.answers && s.answers.hasOwnProperty('screen_time') }, 
-                    { name: '18. Photo (Selfie)', condition: s => s.answers && s.answers.hasOwnProperty('selfie') }, 
-                    { name: '19. Email', condition: s => s.answers && s.answers.hasOwnProperty('email') }, 
-                    { name: '20. Profile Page Viewed', condition: s => s.events && s.events.hasOwnProperty('profilePageViewed') }, 
-                    { name: '21. Payment Page Viewed', condition: s => s.events && s.events.hasOwnProperty('paymentPageViewed') }, 
-                    { name: '22. Purchase Completed', condition: s => s.paymentStatus === 'succeeded' } 
-                ];
+    const selectedSources = [...document.querySelectorAll('.funnel-source-checkbox:checked')].map(cb => cb.value);
+    const startDateInput = document.getElementById('start-date-stats').value;
+    const endDateInput = document.getElementById('end-date-stats').value;
+    
+    // 1. Фильтруем сессии по дате и источнику, как и раньше
+    const filteredSessions = allSessionsData.filter(session => {
+        const sessionDate = new Date(session.createdAt);
+        return (selectedSources.length === 0 || selectedSources.includes(session.trafficSource)) &&
+               (!startDateInput || sessionDate >= new Date(startDateInput)) &&
+               (!endDateInput || sessionDate <= new Date(endDateInput + 'T23:59:59'));
+    });
 
-                const initialCount = filteredSessions.length;
-                if (initialCount === 0) {
-                     document.getElementById('funnel-results-container').innerHTML = '<p class="text-center text-gray-400 mt-4">No sessions found for the selected filters.</p>';
-                     return;
-                }
-                
-                let previousStepCount = initialCount;
-                let results = funnelSteps.map(step => {
-                    const stepSessions = filteredSessions.filter(step.condition);
-                    const count = stepSessions.length;
-                    const result = {
-                        name: step.name,
-                        count: count,
-                        convFromPrev: previousStepCount > 0 ? ((count / previousStepCount) * 100).toFixed(1) : '0.0',
-                        convFromTotal: initialCount > 0 ? ((count / initialCount) * 100).toFixed(1) : '0.0'
-                    };
-                    // ВАЖНО: для шагов, которые зависят от предыдущих, предыдущим шагом должны быть те, кто прошел *этот* шаг
-                    // Но в данной логике, где каждый шаг - это подмножество отфильтрованных сессий, `previousStepCount` должен быть количеством прошедших предыдущий шаг.
-                    previousStepCount = count;
-                    return result;
-                });
+    const funnelSteps = [
+        { name: '1. Quiz Page Viewed', condition: s => true },
+        { name: '2. "Let\'s Start" Clicked', condition: s => s.events && s.events.hasOwnProperty('quizStarted') },
+        { name: '3. Goal', condition: s => s.answers && s.answers.hasOwnProperty('userGoal') },
+        { name: '4. Age', condition: s => s.answers && s.answers.hasOwnProperty('age') },
+        { name: '5. Sex (Gender)', condition: s => s.answers && s.answers.hasOwnProperty('gender') },
+        { name: '6. Height', condition: s => s.answers && s.answers.hasOwnProperty('height') },
+        { name: '7. Weight', condition: s => s.answers && s.answers.hasOwnProperty('weight') },
+        { name: '8. Sleep', condition: s => s.answers && s.answers.hasOwnProperty('sleep') },
+        { name: '9. Activity', condition: s => s.answers && s.answers.hasOwnProperty('activity') },
+        { name: '10. Nutrition', condition: s => s.answers && s.answers.hasOwnProperty('nutrition') },
+        { name: '11. Processed Food', condition: s => s.answers && s.answers.hasOwnProperty('processed_food') },
+        { name: '12. Hydration', condition: s => s.answers && s.answers.hasOwnProperty('hydration') },
+        { name: '13. Mindfulness', condition: s => s.answers && s.answers.hasOwnProperty('mindfulness') },
+        { name: '14. Mood', condition: s => s.answers && s.answers.hasOwnProperty('mood') },
+        { name: '15. Alcohol', condition: s => s.answers && s.answers.hasOwnProperty('alcohol') },
+        { name: '16. Smoking', condition: s => s.answers && s.answers.hasOwnProperty('smoking') },
+        { name: '17. Screen Time', condition: s => s.answers && s.answers.hasOwnProperty('screen_time') },
+        { name: '18. Photo (Selfie)', condition: s => s.answers && s.answers.hasOwnProperty('selfie') },
+        { name: '19. Email', condition: s => s.answers && s.answers.hasOwnProperty('email') },
+        { name: '20. Profile Page Viewed', condition: s => s.events && s.events.hasOwnProperty('profilePageViewed') },
+        { name: '21. Payment Page Viewed', condition: s => s.events && s.events.hasOwnProperty('paymentPageViewed') },
+        { name: '22. Purchase Completed', condition: s => s.paymentStatus === 'succeeded' }
+    ];
 
-                // Пересчет `convFromPrev` с правильной базой
-                for (let i = 1; i < results.length; i++) {
-                    const prevCount = results[i-1].count;
-                    results[i].convFromPrev = prevCount > 0 ? ((results[i].count / prevCount) * 100).toFixed(1) : '0.0';
-                }
+    const container = document.getElementById('funnel-results-container');
+    const initialCount = filteredSessions.length;
+    if (initialCount === 0) {
+        container.innerHTML = '<p class="text-center text-gray-400 mt-4">No sessions found for the selected filters.</p>';
+        return;
+    }
 
-                renderFunnelResults(results);
-            }
+    // --- НАЧАЛО ИСПРАВЛЕНИЯ: ПОСЛЕДОВАТЕЛЬНЫЙ ПОДСЧЕТ ---
+    let results = [];
+    let currentSessions = filteredSessions; // Начинаем со всех отфильтрованных сессий
+    let previousStepCount = initialCount;
+
+    funnelSteps.forEach(step => {
+        // На каждом шаге мы фильтруем РЕЗУЛЬТАТ ПРЕДЫДУЩЕГО ШАГА
+        currentSessions = currentSessions.filter(step.condition);
+        const count = currentSessions.length;
+        
+        results.push({
+            name: step.name,
+            count: count,
+            convFromPrev: previousStepCount > 0 ? ((count / previousStepCount) * 100).toFixed(1) : '0.0',
+            convFromTotal: initialCount > 0 ? ((count / initialCount) * 100).toFixed(1) : '0.0'
+        });
+        
+        previousStepCount = count; // Обновляем счетчик для следующего шага
+    });
+    // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+
+    renderFunnelResults(results);
+}
 
             function renderFunnelResults(results) {
                 const container = document.getElementById('funnel-results-container');
