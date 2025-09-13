@@ -8,8 +8,7 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         :root {
-            --bg-dark: #111827;
-            --bg-light: #1F2937; --border-color: #374151;
+            --bg-dark: #111827; --bg-light: #1F2937; --border-color: #374151;
             --text-main: #F9FAFB; --text-secondary: #9CA3AF; --accent-purple: #8b5cf6;
         }
         body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif; }
@@ -22,58 +21,25 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .bar-chart-bar { background-color: var(--accent-purple); transition: width 0.5s ease-out; }
-        .funnel-bar {
-            background: linear-gradient(90deg, var(--accent-purple) 0%, #6366f1 100%);
-            transition: width 0.5s ease-in-out;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        .funnel-bar { background: linear-gradient(90deg, var(--accent-purple) 0%, #6366f1 100%); transition: width 0.5s ease-in-out; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        
+        /* --- СТИЛИ ДЛЯ ФИЛЬТРА КОЛОНОК --- */
+        #column-filter-dropdown { transition: opacity 0.2s, transform 0.2s; }
+        .column-hidden { display: none; }
+
+        @media (max-width: 1024px) {
+            .table-custom thead { display: none; }
+            .table-custom tr { display: block; margin-bottom: 1rem; border: 1px solid var(--border-color); border-radius: 0.5rem; overflow: hidden; background-color: var(--bg-light); }
+            .table-custom td { display: grid; grid-template-columns: 110px 1fr; gap: 0.5rem; text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-color); }
+            .table-custom tr td:last-child { border-bottom: none; }
+            .table-custom td::before { content: attr(data-label); font-weight: 600; color: var(--text-secondary); text-align: left; padding-right: 0.5rem; }
+            /* Скрываем колонки на мобильных */
+            .table-custom td.column-hidden { display: none !important; }
         }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        @media (max-width: 1024px) {
-            .table-custom thead,
-            .funnel-table thead {
-                display: none;
-            }
-
-            .table-custom tr,
-            .funnel-table tr {
-                display: block;
-                margin-bottom: 1rem; /* Уменьшаем отступ между карточками */
-                border: 1px solid var(--border-color);
-                border-radius: 0.5rem;
-                overflow: hidden;
-                background-color: var(--bg-light);
-            }
-
-            .table-custom td,
-            .funnel-table td {
-                display: grid;
-                /* Новая сетка: заголовок 110px, значение - остальное */
-                grid-template-columns: 110px 1fr; 
-                gap: 0.5rem; /* Уменьшаем отступ между заголовком и значением */
-                text-align: left;
-                padding: 0.5rem 0.75rem; /* Уменьшаем вертикальные отступы */
-                border-bottom: 1px solid var(--border-color);
-            }
-            
-            .table-custom tr td:last-child,
-            .funnel-table tr td:last-child {
-                border-bottom: none;
-            }
-
-            .table-custom td::before,
-            .funnel-table td::before {
-                content: attr(data-label);
-                font-weight: 600;
-                color: var(--text-secondary);
-                text-align: left;
-                padding-right: 0.5rem; /* Добавляем небольшой отступ справа от заголовка */
-            }
-        }
-    </style>
 </head>
 <body class="antialiased">
 
@@ -89,7 +55,7 @@
     </div>
 
     <main id="admin-panel" class="hidden p-4 sm:p-6 lg:p-8">
-        <div class="max-w-6xl mx-auto">
+        <div class="max-w-7xl mx-auto">
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <h1 class="text-3xl font-bold text-white text-center sm:text-left">AI WellnessCore Dashboard</h1>
                 <div class="flex flex-col sm:flex-row items-center gap-4">
@@ -116,42 +82,28 @@
                     <button id="tab-funnel" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-400 border-transparent hover:text-gray-200 hover:border-gray-500">Funnel Analysis</button>
                 </nav>
             </div>
-
+            
             <div id="content-stats" class="tab-content active mt-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="md:col-span-1 space-y-6">
-                        <div class="stat-card p-6 rounded-lg">
-                            <p class="text-sm font-medium text-gray-400">Total Revenue</p>
-                            <p id="stat-total-revenue" class="text-3xl font-bold mt-1">$0.00</p>
-                        </div>
-                        <div class="stat-card p-6 rounded-lg">
-                            <p class="text-sm font-medium text-gray-400">Average Check</p>
-                            <p id="stat-avg-check" class="text-3xl font-bold mt-1">$0.00</p>
-                        </div>
-                        <div class="stat-card p-6 rounded-lg">
-                            <p class="text-sm font-medium text-gray-400">Conversion Rate</p>
-                            <p id="stat-conversion" class="text-3xl font-bold mt-1">0%</p>
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <div class="stat-card p-4 rounded-lg text-center"><p class="text-sm font-medium text-gray-400">Total Revenue</p><p id="stat-total-revenue" class="text-3xl font-bold mt-1">$0.00</p></div>
+                    <div class="stat-card p-4 rounded-lg text-center"><p class="text-sm font-medium text-gray-400">Average Check</p><p id="stat-avg-check" class="text-3xl font-bold mt-1">$0.00</p></div>
+                    <div class="stat-card p-4 rounded-lg text-center"><p class="text-sm font-medium text-gray-400">Conversion Rate</p><p id="stat-conversion" class="text-3xl font-bold mt-1">0%</p></div>
+                    <div class="stat-card p-4 rounded-lg text-center"><p class="text-sm font-medium text-gray-400">Total Errors</p><p id="stat-total-errors" class="text-3xl font-bold mt-1 text-red-400">0</p></div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div class="lg:col-span-1 space-y-4">
+                        <div class="stat-card p-4 rounded-lg"><h3 class="font-bold mb-2">OS Breakdown</h3><div id="stat-os-breakdown"></div></div>
+                        <div class="stat-card p-4 rounded-lg"><h3 class="font-bold mb-2">Gender Breakdown</h3><div id="stat-gender-breakdown"></div></div>
                     </div>
-                    <div class="md:col-span-2 space-y-6">
-                        <div class="stat-card p-6 rounded-lg">
-                            <p class="text-lg font-bold text-white mb-4">Conversion Funnel</p>
-                            <div class="space-y-4">
-                                <div id="funnel-start"></div>
-                                <div id="funnel-finish"></div>
-                                <div id="funnel-paid"></div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="stat-card p-6 rounded-lg">
-                                <p class="text-lg font-bold text-white mb-4">Top Traffic Sources</p>
-                                <ul id="stat-top-sources" class="space-y-2"></ul>
-                            </div>
-                            <div class="stat-card p-6 rounded-lg">
-                                <p class="text-lg font-bold text-white mb-4">Top Countries</p>
-                                <ul id="stat-top-countries" class="space-y-2"></ul>
-                            </div>
-                        </div>
+                    <div class="lg:col-span-1 space-y-4">
+                        <div class="stat-card p-4 rounded-lg"><h3 class="font-bold mb-2">Average Age</h3><div id="stat-avg-age"></div></div>
+                        <div class="stat-card p-4 rounded-lg"><h3 class="font-bold mb-2">Average Duration</h3><p id="stat-avg-duration" class="text-2xl font-semibold"></p></div>
+                        <div class="stat-card p-4 rounded-lg"><h3 class="font-bold mb-2">Most Popular Drop-off</h3><p id="stat-top-dropoff" class="text-lg font-semibold text-yellow-400"></p></div>
+                    </div>
+                    <div class="lg:col-span-1 space-y-4">
+                        <div class="stat-card p-4 rounded-lg"><h3 class="font-bold mb-2">Top Traffic Sources</h3><ul id="stat-top-sources" class="space-y-1 text-sm"></ul></div>
+                        <div class="stat-card p-4 rounded-lg"><h3 class="font-bold mb-2">Top Countries</h3><ul id="stat-top-countries" class="space-y-1 text-sm"></ul></div>
+                        <div class="stat-card p-4 rounded-lg"><h3 class="font-bold mb-2">Top User Goal</h3><p id="stat-top-goal" class="text-lg font-semibold text-purple-400"></p></div>
                     </div>
                 </div>
             </div>
@@ -165,24 +117,29 @@
                         <option value="pending">Pending</option>
                         <option value="failed">Failed</option>
                     </select>
+                    <div class="relative">
+                        <button id="column-filter-btn" class="form-input p-2 rounded-md hover:border-gray-400">Filter Columns</button>
+                        <div id="column-filter-dropdown" class="hidden absolute top-full right-0 mt-2 w-48 bg-gray-700 border border-gray-600 rounded-md shadow-lg z-10 p-2 space-y-1 origin-top-right">
+                            </div>
+                    </div>
                 </div>
                 <div class="mt-4 overflow-x-auto rounded-lg">
                     <table class="min-w-full divide-y divide-gray-700 table-custom">
                         <thead class="bg-gray-800">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">#</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Device/Source</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">IP/Country</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User Goal</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Progress</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Duration</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Drop-off Point</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Payment</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Errors</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Link</th>
+                                <th data-column="number" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">#</th>
+                                <th data-column="date" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
+                                <th data-column="device" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Device/Source</th>
+                                <th data-column="ip" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">IP/Country</th>
+                                <th data-column="email" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th>
+                                <th data-column="user" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
+                                <th data-column="goal" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User Goal</th>
+                                <th data-column="progress" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Progress</th>
+                                <th data-column="duration" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Duration</th>
+                                <th data-column="dropoff" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Drop-off Point</th>
+                                <th data-column="payment" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Payment</th>
+                                <th data-column="errors" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Errors</th>
+                                <th data-column="link" class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Link</th>
                             </tr>
                         </thead>
                         <tbody id="sessions-table-body" class="bg-gray-900"></tbody>
@@ -198,19 +155,9 @@
                 <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
                     <h2 class="text-xl font-bold text-white">Funnel Analysis</h2>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-400">Traffic Sources</label>
-                            <div id="funnel-sources-checkboxes" class="form-input w-full mt-1 h-32 overflow-y-auto p-2 space-y-1">
-                                </div>
-                        </div>
-                        <div>
-                            <label for="funnel-start-date" class="block text-sm font-medium text-gray-400">Start Date</label>
-                            <input type="date" id="funnel-start-date" class="form-input w-full mt-1">
-                        </div>
-                        <div>
-                            <label for="funnel-end-date" class="block text-sm font-medium text-gray-400">End Date</label>
-                            <input type="date" id="funnel-end-date" class="form-input w-full mt-1">
-                        </div>
+                        <div class="md:col-span-2"><label class="block text-sm font-medium text-gray-400">Traffic Sources</label><div id="funnel-sources-checkboxes" class="form-input w-full mt-1 h-32 overflow-y-auto p-2 space-y-1"></div></div>
+                        <div><label for="funnel-start-date" class="block text-sm font-medium text-gray-400">Start Date</label><input type="date" id="funnel-start-date" class="form-input w-full mt-1"></div>
+                        <div><label for="funnel-end-date" class="block text-sm font-medium text-gray-400">End Date</label><input type="date" id="funnel-end-date" class="form-input w-full mt-1"></div>
                     </div>
                     <button id="analyze-funnel-btn" class="mt-4 w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-md transition-colors">Analyze</button>
                 </div>
@@ -220,396 +167,353 @@
     </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const loginForm = document.getElementById('login-form');
-            const passwordInput = document.getElementById('password-input');
-            const loginError = document.getElementById('login-error');
-            const loginModal = document.getElementById('login-modal');
-            const adminPanel = document.getElementById('admin-panel');
-            const refreshBtn = document.getElementById('refresh-data-btn');
-            const refreshIcon = document.getElementById('refresh-icon');
+    document.addEventListener('DOMContentLoaded', () => {
+        const loginForm = document.getElementById('login-form'), passwordInput = document.getElementById('password-input'),
+            loginError = document.getElementById('login-error'), loginModal = document.getElementById('login-modal'),
+            adminPanel = document.getElementById('admin-panel'), refreshBtn = document.getElementById('refresh-data-btn'),
+            refreshIcon = document.getElementById('refresh-icon');
 
-            let allSessionsData = [];
-            let statisticsData = {};
-            let allMessagesData = [];
-            let adminPassword = null;
+        let allSessionsData = [], statisticsData = {}, allMessagesData = [], adminPassword = null;
 
-            async function fetchAndRenderData(password) {
-                if (!password) { loginError.textContent = 'Password is required.'; return; }
-                loginError.textContent = '';
-                refreshBtn.disabled = true;
-                refreshIcon.classList.add('animate-spin');
-
-                try {
-                    const startDate = document.getElementById('start-date-stats').value;
-                    const endDate = document.getElementById('end-date-stats').value;
-
-                    const response = await fetch('/.netlify/functions/getAdminData', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            password: password,
-                            startDate: startDate || null,
-                            endDate: endDate || null
-                        })
-                    });
-                    if (response.status === 401) throw new Error('Incorrect password.');
-                    if (!response.ok) throw new Error('Could not fetch data from server.');
-                    const { sessions, statistics, messages } = await response.json();
-                    
-                    allSessionsData = sessions;
-                    statisticsData = statistics;
-                    allMessagesData = messages;
-
-                    if (!adminPassword) {
-                        adminPassword = password;
-                        loginModal.classList.add('hidden');
-                        adminPanel.classList.remove('hidden');
-                        setupUI();
-                    }
-                    renderAll();
-                } catch (error) {
-                    console.error("Fetch Error:", error.message);
-                    loginError.textContent = error.message;
-                    if (adminPassword) {
-                        alert("Error fetching data: " + error.message);
-                    }
-                } finally {
-                    refreshBtn.disabled = false;
-                    refreshIcon.classList.remove('animate-spin');
+        async function fetchAndRenderData(password) {
+            if (!password) { loginError.textContent = 'Password is required.'; return; }
+            loginError.textContent = ''; refreshBtn.disabled = true; refreshIcon.classList.add('animate-spin');
+            try {
+                const startDate = document.getElementById('start-date-stats').value, endDate = document.getElementById('end-date-stats').value;
+                const response = await fetch('/.netlify/functions/getAdminData', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password, startDate: startDate || null, endDate: endDate || null })
+                });
+                if (response.status === 401) throw new Error('Incorrect password.');
+                if (!response.ok) throw new Error('Could not fetch data from server.');
+                const { sessions, statistics, messages } = await response.json();
+                allSessionsData = sessions; statisticsData = statistics; allMessagesData = messages;
+                if (!adminPassword) {
+                    adminPassword = password;
+                    loginModal.classList.add('hidden'); adminPanel.classList.remove('hidden');
+                    setupUI();
                 }
+                renderAll();
+            } catch (error) {
+                console.error("Fetch Error:", error.message); loginError.textContent = error.message;
+                if (adminPassword) alert("Error fetching data: " + error.message);
+            } finally {
+                refreshBtn.disabled = false; refreshIcon.classList.remove('animate-spin');
             }
+        }
 
-            loginForm.addEventListener('submit', async (e) => { e.preventDefault(); await fetchAndRenderData(passwordInput.value); });
-            refreshBtn.addEventListener('click', () => { if (adminPassword) fetchAndRenderData(adminPassword); });
+        loginForm.addEventListener('submit', async (e) => { e.preventDefault(); await fetchAndRenderData(passwordInput.value); });
+        refreshBtn.addEventListener('click', () => { if (adminPassword) fetchAndRenderData(adminPassword); });
 
-            function setupUI() {
-                const searchInput = document.getElementById('search-input');
-                const statusFilter = document.getElementById('status-filter');
-                const tabs = document.querySelectorAll('.tab-button');
-                const tabContents = document.querySelectorAll('.tab-content');
-                const tableBody = document.getElementById('sessions-table-body');
-                const analyzeFunnelBtn = document.getElementById('analyze-funnel-btn');
+        function setupUI() {
+            ['search-input', 'status-filter', 'start-date-stats', 'end-date-stats'].forEach(id => {
+                const el = document.getElementById(id);
+                const event = (id === 'search-input') ? 'input' : 'change';
+                el.addEventListener(event, () => {
+                    if (id === 'search-input' || id === 'status-filter') {
+                        renderTable(allSessionsData);
+                    } else if (adminPassword) {
+                        fetchAndRenderData(adminPassword);
+                    }
+                });
+            });
+
+            const tabs = document.querySelectorAll('.tab-button'), tabContents = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(tab.id.replace('tab-', 'content-')).classList.add('active');
+                });
+            });
+            
+            document.getElementById('sessions-table-body').addEventListener('click', (event) => {
+                if (event.target.classList.contains('toggle-errors-btn')) {
+                    const button = event.target, sessionId = button.dataset.sessionId,
+                        errorRow = document.getElementById(`errors-${sessionId}`);
+                    if (errorRow) {
+                        const isHidden = errorRow.classList.toggle('hidden');
+                        button.textContent = isHidden ? `Show (${button.dataset.errorCount})` : 'Hide';
+                    }
+                }
+                if (event.target.classList.contains('truncate-email')) {
+                    const element = event.target;
+                    element.textContent = element.dataset.fullEmail;
+                    element.classList.remove('truncate-email', 'cursor-pointer', 'text-purple-400');
+                    element.classList.add('text-gray-300');
+                }
+            });
+            
+            document.getElementById('analyze-funnel-btn').addEventListener('click', calculateAndRenderFunnel);
+            setupColumnFilter();
+        }
+
+        function setupColumnFilter() {
+            const btn = document.getElementById('column-filter-btn');
+            const dropdown = document.getElementById('column-filter-dropdown');
+            const tableHeaders = document.querySelectorAll('#content-sessions th[data-column]');
+            
+            const defaultVisible = ['number', 'date', 'device', 'ip', 'progress'];
+
+            dropdown.innerHTML = Array.from(tableHeaders).map(th => {
+                const key = th.dataset.column;
+                const text = th.textContent;
+                const isChecked = defaultVisible.includes(key) ? 'checked' : '';
+                return `
+                    <label class="flex items-center space-x-2 text-sm p-1 hover:bg-gray-600 rounded cursor-pointer">
+                        <input type="checkbox" data-column="${key}" class="column-toggle-cb" ${isChecked}>
+                        <span>${text}</span>
+                    </label>
+                `;
+            }).join('');
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('hidden');
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+
+            const checkboxes = dropdown.querySelectorAll('.column-toggle-cb');
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', updateColumnVisibility);
+            });
+
+            updateColumnVisibility();
+        }
+
+        function updateColumnVisibility() {
+            const checkboxes = document.querySelectorAll('.column-toggle-cb');
+            checkboxes.forEach(cb => {
+                const columnKey = cb.dataset.column;
+                const cells = document.querySelectorAll(`[data-column="${columnKey}"]`);
+                cells.forEach(cell => {
+                    cell.classList.toggle('column-hidden', !cb.checked);
+                });
+            });
+        }
+
+        function renderAll() {
+            renderStats(statisticsData);
+            renderTable(allSessionsData);
+            renderMessages(allMessagesData);
+            populateFunnelFilters();
+        }
+        
+        function renderStats(stats) {
+            document.getElementById('stat-total-revenue').textContent = `$${stats.totalRevenue}`;
+            document.getElementById('stat-avg-check').textContent = `$${stats.avgCheck}`;
+            document.getElementById('stat-conversion').textContent = `${stats.conversionRate}%`;
+            document.getElementById('stat-total-errors').textContent = stats.totalErrors;
+
+            const createBar = (item, total) => {
+                const percent = parseFloat(item.percent).toFixed(1);
+                return `<div class="flex justify-between items-center text-sm mb-1"><span class="capitalize">${item.os || item.gender}</span><span>${percent}%</span></div><div class="w-full bg-gray-700 rounded-full h-2"><div class="bg-purple-500 h-2 rounded-full" style="width:${percent}%"></div></div>`;
+            };
+
+            const osContainer = document.getElementById('stat-os-breakdown');
+            if (stats.osBreakdown) osContainer.innerHTML = stats.osBreakdown.map(os => createBar(os)).join('<div class="h-2"></div>');
+            
+            const genderContainer = document.getElementById('stat-gender-breakdown');
+            if (stats.genderBreakdown) genderContainer.innerHTML = stats.genderBreakdown.map(g => createBar(g)).join('<div class="h-2"></div>');
+
+            document.getElementById('stat-avg-age').innerHTML = `
+                <div class="flex justify-around text-center">
+                    <div><p class="text-xs text-gray-400">Avg. Female Age</p><p class="text-2xl font-semibold">${stats.avgFemaleAge}</p></div>
+                    <div><p class="text-xs text-gray-400">Avg. Male Age</p><p class="text-2xl font-semibold">${stats.avgMaleAge}</p></div>
+                </div>`;
                 
-                const startDateInput = document.getElementById('start-date-stats');
-                const endDateInput = document.getElementById('end-date-stats');
-                startDateInput.addEventListener('change', () => { if (adminPassword) fetchAndRenderData(adminPassword); });
-                endDateInput.addEventListener('change', () => { if (adminPassword) fetchAndRenderData(adminPassword); });
+            document.getElementById('stat-avg-duration').textContent = stats.avgDuration;
+            document.getElementById('stat-top-dropoff').textContent = stats.topDropOff[0].replace(/_/g, ' ');
+            document.getElementById('stat-top-goal').textContent = stats.topUserGoal[0].replace(/_/g, ' ');
+            
+            renderTopList('stat-top-sources', stats.topTrafficSources);
+            renderTopList('stat-top-countries', stats.topCountries);
+        }
 
-                tabs.forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        tabs.forEach(t => { 
-                            t.classList.remove('active', 'text-purple-400', 'border-purple-400');
-                            t.classList.add('text-gray-400', 'border-transparent', 'hover:text-gray-200', 'hover:border-gray-500');
-                        });
-                        tab.classList.add('active', 'text-purple-400', 'border-purple-400');
-                        tab.classList.remove('text-gray-400', 'border-transparent', 'hover:text-gray-200', 'hover:border-gray-500');
+        function renderTopList(elementId, data) {
+            const ul = document.getElementById(elementId);
+            ul.innerHTML = (!data || data.length === 0) 
+                ? `<li class="text-xs text-gray-500">No data</li>`
+                : data.map(([name, count]) => `<li class="flex justify-between"><span>${name}</span><strong>${count}</strong></li>`).join('');
+        }
 
-                        tabContents.forEach(content => content.classList.remove('active'));
-                        document.getElementById(tab.id.replace('tab-', 'content-')).classList.add('active');
-                    });
-                });
+        function renderTable(data) {
+            const tableBody = document.getElementById('sessions-table-body');
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const statusValue = document.getElementById('status-filter').value;
 
-                const applyFilters = () => renderTable(allSessionsData);
-                searchInput.addEventListener('input', applyFilters);
-                statusFilter.addEventListener('change', applyFilters);
+            let filteredData = data.filter(session => 
+                (session.ipAddress.toLowerCase().includes(searchTerm) || session.country.toLowerCase().includes(searchTerm) || (session.email && session.email.toLowerCase().includes(searchTerm))) &&
+                (statusValue ? session.paymentStatus === statusValue : true)
+            );
 
-                tableBody.addEventListener('click', (event) => {
-                    if (event.target.classList.contains('toggle-errors-btn')) {
-                        const button = event.target;
-                        const sessionId = button.dataset.sessionId;
-                        const errorRow = document.getElementById(`errors-${sessionId}`);
-                        if (errorRow) {
-                            const isHidden = errorRow.classList.toggle('hidden');
-                            button.textContent = isHidden ? `Show (${button.dataset.errorCount})` : 'Hide';
-                        }
-                    }
-                    if (event.target.classList.contains('truncate-email')) {
-                        const element = event.target;
-                        element.textContent = element.dataset.fullEmail;
-                        element.classList.remove('truncate-email', 'cursor-pointer', 'text-purple-400');
-                        element.classList.add('text-gray-300');
-                    }
-                });
-                analyzeFunnelBtn.addEventListener('click', calculateAndRenderFunnel);
-            }
-
-            function renderAll() {
-                renderStats(statisticsData);
-                renderTable(allSessionsData);
-                renderMessages(allMessagesData);
-                populateFunnelFilters();
-            }
-
-            function renderStats(stats) {
-                document.getElementById('stat-total-revenue').textContent = `$${stats.totalRevenue}`;
-                document.getElementById('stat-avg-check').textContent = `$${stats.avgCheck}`;
-                document.getElementById('stat-conversion').textContent = `${stats.conversionRate}%`;
-                const funnelStart = stats.totalSessions || 0;
-                const funnelFinish = Math.round((stats.totalSessions || 0) * (parseFloat(stats.quizCompletionRate) / 100));
-                const funnelPaid = stats.successfulPayments || 0;
-                document.getElementById('funnel-start').innerHTML = createFunnelStep('Sessions Started', funnelStart, funnelStart, '#6366f1');
-                document.getElementById('funnel-finish').innerHTML = createFunnelStep('Quiz Finished', funnelFinish, funnelStart, '#7c3aed');
-                document.getElementById('funnel-paid').innerHTML = createFunnelStep('Payment Completed', funnelPaid, funnelStart, '#a855f7');
-                renderTopList('stat-top-sources', stats.topTrafficSources);
-                renderTopList('stat-top-countries', stats.topCountries);
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="13" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`;
+                return;
             }
             
-            function createFunnelStep(label, value, total, color) {
-                const percent = total > 0 ? (value / total * 100).toFixed(1) : 0;
-                return `<div class="flex items-center justify-between text-sm"><p class="text-gray-300">${label}</p><p class="font-bold text-white">${value}</p></div><div class="w-full bg-gray-700 rounded-full h-2.5 mt-1"><div class="bar-chart-bar h-2.5 rounded-full" style="width: ${percent}%; background-color:${color};"></div></div>`;
-            }
-
-            function renderTopList(elementId, data) {
-                const ul = document.getElementById(elementId);
-                ul.innerHTML = '';
-                if (!data || data.length === 0) {
-                    ul.innerHTML = `<li class="text-sm text-gray-500">No data available</li>`;
-                    return;
+            let tableHTML = '';
+            const totalSessions = statisticsData.totalSessions || data.length;
+            const newerSessionsCount = statisticsData.newerSessionsCount || 0;
+            
+            filteredData.forEach((session, index) => {
+                const sessionNumber = totalSessions - newerSessionsCount - index;
+                const paymentStatusClass = session.paymentStatus === 'succeeded' ? 'bg-green-500 text-green-100' : session.paymentStatus === 'pending' ? 'bg-yellow-500 text-yellow-100' : 'bg-red-500 text-red-100';
+                let emailDisplay = `<span class="text-purple-400">${session.email || 'N/A'}</span>`;
+                if ((session.email || '').length > 20) {
+                    emailDisplay = `<span class="truncate-email cursor-pointer text-purple-400" data-full-email="${session.email}">${session.email.substring(0, 17)}...</span>`;
                 }
-                data.forEach(([name, count]) => {
-                    const li = document.createElement('li');
-                    li.className = 'flex justify-between items-center text-sm';
-                    li.innerHTML = `<span class="text-gray-300">${name}</span><span class="font-semibold text-white">${count}</span>`;
-                    ul.appendChild(li);
-                });
-            }
 
-            // /admin.html (внутри <script>)
+                tableHTML += `
+                    <tr class="main-row">
+                        <td data-label="#" data-column="number" class="px-4 py-3 whitespace-nowrap text-sm text-gray-400 font-medium">${sessionNumber}</td>
+                        <td data-label="Date" data-column="date" class="px-4 py-3 whitespace-nowrap text-sm">${new Date(session.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', hour12: false })}</td>
+                        <td data-label="Device/Source" data-column="device" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.deviceType}</div><div class="text-gray-400">${session.trafficSource}</div></td>
+                        <td data-label="IP/Country" data-column="ip" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.ipAddress}</div><div class="text-gray-400">${session.country}</div></td>
+                        <td data-label="Email" data-column="email" class="px-4 py-3 whitespace-nowrap text-sm">${emailDisplay}</td>
+                        <td data-label="User" data-column="user" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.gender}</div><div class="text-gray-400">Age: ${session.age}</div></td>
+                        <td data-label="User Goal" data-column="goal" class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.userGoal}</td>
+                        <td data-label="Progress" data-column="progress" class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.progress}</td>
+                        <td data-label="Duration" data-column="duration" class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.duration}</td>
+                        <td data-label="Drop-off Point" data-column="dropoff" class="px-4 py-3 whitespace-nowrap text-sm text-yellow-400 font-mono">${session.dropOffPoint}</td>
+                        <td data-label="Payment" data-column="payment" class="px-4 py-3 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">${session.paymentStatus}</span><div class="text-gray-400">${session.paymentAmount}</div></td>
+                        <td data-label="Errors" data-column="errors" class="px-4 py-3 whitespace-nowrap text-sm">
+                            ${session.errors && session.errors.length > 0 
+                                ? `<button data-session-id="${session.id}" data-error-count="${session.errors.length}" class="toggle-errors-btn bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600">Show (${session.errors.length})</button>`
+                                : '<span class="text-gray-600">—</span>'
+                            }
+                        </td>
+                        <td data-label="Link" data-column="link" class="px-4 py-3 whitespace-nowrap text-sm text-center">${session.resultLink && session.paymentStatus === 'succeeded' ? `<a href="/result.html?session_id=${session.id}" target="_blank" class="text-purple-400 hover:text-purple-300">View</a>` : '<span class="text-gray-500 text-lg">❌</span>'}</td>
+                    </tr>
+                `;
 
-function renderTable(data) {
-    const tableBody = document.getElementById('sessions-table-body');
-    const searchTerm = document.getElementById('search-input').value.toLowerCase();
-    const statusValue = document.getElementById('status-filter').value;
-
-    let filteredData = data.filter(session => {
-        const searchMatch = session.ipAddress.toLowerCase().includes(searchTerm) || session.country.toLowerCase().includes(searchTerm) || (session.email && session.email.toLowerCase().includes(searchTerm));
-        const statusMatch = statusValue ? session.paymentStatus === statusValue : true;
-        return searchMatch && statusMatch;
-    });
-
-    if (filteredData.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="13" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`;
-        return;
-    }
-    
-    let tableHTML = '';
-    // --- V-- НОВАЯ ЛОГИКА РАСЧЕТА НОМЕРА --V ---
-    const totalSessions = statisticsData.totalSessions || data.length;
-    const newerSessionsCount = statisticsData.newerSessionsCount || 0;
-
-    filteredData.forEach((session, index) => {
-        const sessionNumber = totalSessions - newerSessionsCount - index;
-        // --- A-- КОНЕЦ НОВОЙ ЛОГИКИ --A ---
-
-        const paymentStatusClass = session.paymentStatus === 'succeeded' ? 'bg-green-500 text-green-100' : (session.paymentStatus === 'pending' ? 'bg-yellow-500 text-yellow-100' : 'bg-red-500 text-red-100');
-        
-        const email = session.email || 'N/A';
-        let emailDisplay;
-        if (email.length > 20 && email !== 'N/A') {
-            emailDisplay = `<span class="truncate-email cursor-pointer text-purple-400" data-full-email="${email}">${email.substring(0, 17)}...</span>`;
-        } else {
-            emailDisplay = `<span class="text-purple-400">${email}</span>`;
+                if (session.errors && session.errors.length > 0) {
+                    tableHTML += `<tr id="errors-${session.id}" class="hidden"><td colspan="13" class="p-3 bg-gray-800" data-label="Error Details">${session.errors.map(err => `<div class="border-b border-gray-700 py-2 last:border-b-0"><p class="text-red-400 font-semibold">${err.message || 'Unknown Error'}</p><p class="text-gray-400 text-xs font-mono break-all">${err.details || 'No details'}</p><p class="text-gray-500 text-xs mt-1">${new Date(err.timestamp).toLocaleString()}</p></div>`).join('')}</td></tr>`;
+                }
+            });
+            tableBody.innerHTML = tableHTML;
+            updateColumnVisibility();
         }
 
-        tableHTML += `
-            <tr class="main-row">
-                <td data-label="#" class="px-4 py-3 whitespace-nowrap text-sm text-gray-400 font-medium">${sessionNumber}</td>
-                <td data-label="Date" class="px-4 py-3 whitespace-nowrap text-sm">${new Date(session.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', hour12: false })}</td>
-                <td data-label="Device/Source" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.deviceType}</div><div class="text-gray-400">${session.trafficSource}</div></td>
-                <td data-label="IP/Country" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.ipAddress}</div><div class="text-gray-400">${session.country}</div></td>
-                <td data-label="Email" class="px-4 py-3 whitespace-nowrap text-sm">${emailDisplay}</td>
-                <td data-label="User" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.gender}</div><div class="text-gray-400">Age: ${session.age}</div></td>
-                <td data-label="User Goal" class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.userGoal}</td>
-                <td data-label="Progress" class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.progress}</td>
-                <td data-label="Duration" class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.duration}</td>
-                <td data-label="Drop-off Point" class="px-4 py-3 whitespace-nowrap text-sm text-yellow-400 font-mono">${session.dropOffPoint}</td>
-                <td data-label="Payment" class="px-4 py-3 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">${session.paymentStatus}</span><div class="text-gray-400">${session.paymentAmount}</div></td>
-                <td data-label="Errors" class="px-4 py-3 whitespace-nowrap text-sm">
-                    ${session.errors && session.errors.length > 0 
-                        ? `<button data-session-id="${session.id}" data-error-count="${session.errors.length}" class="toggle-errors-btn bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600">Show (${session.errors.length})</button>`
-                        : '<span class="text-gray-600">—</span>'
-                    }
-                </td>
-                <td data-label="Link" class="px-4 py-3 whitespace-nowrap text-sm text-center">${session.resultLink && session.paymentStatus === 'succeeded' ? `<a href="/${session.resultLink}" target="_blank" class="text-purple-400 hover:text-purple-300">View</a>` : '<span class="text-gray-500 text-lg">❌</span>'}</td>
-            </tr>
-        `;
-
-        if (session.errors && session.errors.length > 0) {
-            let errorsHTML = session.errors.map(err => `
-                <div class="border-b border-gray-700 py-2 last:border-b-0">
-                    <p class="text-red-400 font-semibold">${err.message || 'Unknown Error'}</p>
-                    <p class="text-gray-400 text-xs font-mono break-all">${err.details || 'No details'}</p>
-                    <p class="text-gray-500 text-xs mt-1">${new Date(err.timestamp).toLocaleString()}</p>
-                </div>
-            `).join('');
-
-            tableHTML += `
-                <tr id="errors-${session.id}" class="hidden">
-                    <td colspan="13" class="p-3 bg-gray-800" data-label="Error Details">${errorsHTML}</td>
-                </tr>
-            `;
-        }
-    });
-    tableBody.innerHTML = tableHTML;
-}
-
-            function renderMessages(data) {
-                const container = document.getElementById('messages-container');
-                container.innerHTML = '';
-                if (!data || data.length === 0) {
-                    container.innerHTML = `<div class="text-center p-6 bg-gray-800 rounded-lg text-gray-400">No new messages.</div>`;
-                    return;
-                }
-                data.forEach(msg => {
-                    const card = document.createElement('div');
-                    card.className = 'bg-gray-800 border border-gray-700 rounded-lg p-4';
-                    card.innerHTML = `
+        function renderMessages(data) {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = (!data || data.length === 0)
+                ? `<div class="text-center p-6 bg-gray-800 rounded-lg text-gray-400">No new messages.</div>`
+                : data.map(msg => `
+                    <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
                         <div class="flex justify-between items-center border-b border-gray-600 pb-2 mb-2">
-                            <div>
-                                <p class="font-semibold text-white">${msg.subject}</p>
-                                <p class="text-sm text-gray-400">From: <a href="mailto:${msg.email}" class="text-purple-400 hover:underline">${msg.name}</a></p>
-                            </div>
+                            <div><p class="font-semibold text-white">${msg.subject}</p><p class="text-sm text-gray-400">From: <a href="mailto:${msg.email}" class="text-purple-400 hover:underline">${msg.name}</a></p></div>
                             <span class="text-xs text-gray-500">${msg.receivedAt}</span>
                         </div>
                         <p class="text-gray-300 whitespace-pre-wrap">${msg.message}</p>
-                    `;
-                    container.appendChild(card);
-                });
+                    </div>`).join('');
+        }
+
+        function populateFunnelFilters() {
+            const sources = [...new Set(allSessionsData.map(s => s.trafficSource))].sort();
+            const container = document.getElementById('funnel-sources-checkboxes');
+            container.innerHTML = sources.map(source => `
+                <label class="flex items-center space-x-2 text-sm text-gray-300 hover:bg-gray-700 p-1 rounded cursor-pointer">
+                    <input type="checkbox" value="${source}" class="funnel-source-checkbox h-4 w-4 rounded bg-gray-600 border-gray-500 text-purple-600 focus:ring-purple-500">
+                    <span>${source}</span>
+                </label>`).join('');
+        }
+
+        function calculateAndRenderFunnel() {
+            const selectedSources = [...document.querySelectorAll('.funnel-source-checkbox:checked')].map(cb => cb.value);
+            const startDateInput = document.getElementById('funnel-start-date').value, endDateInput = document.getElementById('funnel-end-date').value;
+            const filteredSessions = allSessionsData.filter(session => {
+                const sessionDate = new Date(session.createdAt);
+                return (selectedSources.length === 0 || selectedSources.includes(session.trafficSource)) &&
+                       (!startDateInput || sessionDate >= new Date(startDateInput)) &&
+                       (!endDateInput || sessionDate <= new Date(endDateInput + 'T23:59:59'));
+            });
+
+            const funnelSteps = [
+                { name: '1. Quiz Page Viewed', condition: s => true },
+                { name: '2. "Let\'s Start" Clicked', condition: s => s.events && s.events.hasOwnProperty('quizStarted') },
+                { name: '3. Goal', condition: s => s.answers && s.answers.hasOwnProperty('userGoal') },
+                { name: '4. Age', condition: s => s.answers && s.answers.hasOwnProperty('age') },
+                { name: '5. Sex (Gender)', condition: s => s.answers && s.answers.hasOwnProperty('gender') },
+                { name: '6. Height', condition: s => s.answers && s.answers.hasOwnProperty('height') },
+                { name: '7. Weight', condition: s => s.answers && s.answers.hasOwnProperty('weight') },
+                { name: '8. Sleep', condition: s => s.answers && s.answers.hasOwnProperty('sleep') },
+                { name: '9. Activity', condition: s => s.answers && s.answers.hasOwnProperty('activity') },
+                { name: '10. Nutrition', condition: s => s.answers && s.answers.hasOwnProperty('nutrition') },
+                { name: '11. Processed Food', condition: s => s.answers && s.answers.hasOwnProperty('processed_food') },
+                { name: '12. Hydration', condition: s => s.answers && s.answers.hasOwnProperty('hydration') },
+                { name: '13. Mindfulness', condition: s => s.answers && s.answers.hasOwnProperty('mindfulness') },
+                { name: '14. Mood', condition: s => s.answers && s.answers.hasOwnProperty('mood') },
+                { name: '15. Alcohol', condition: s => s.answers && s.answers.hasOwnProperty('alcohol') },
+                { name: '16. Smoking', condition: s => s.answers && s.answers.hasOwnProperty('smoking') },
+                { name: '17. Screen Time', condition: s => s.answers && s.answers.hasOwnProperty('screen_time') },
+                { name: '18. Photo (Selfie)', condition: s => s.answers && s.answers.hasOwnProperty('selfie') },
+                { name: '19. Email', condition: s => s.answers && s.answers.hasOwnProperty('email') },
+                { name: '20. Profile Page Viewed', condition: s => s.events && s.events.hasOwnProperty('profilePageViewed') },
+                { name: '21. Payment Page Viewed', condition: s => s.events && s.events.hasOwnProperty('paymentPageViewed') },
+                { name: '22. Purchase Completed', condition: s => s.paymentStatus === 'succeeded' }
+            ];
+
+            const container = document.getElementById('funnel-results-container');
+            const initialCount = filteredSessions.length;
+            if (initialCount === 0) {
+                container.innerHTML = '<p class="text-center text-gray-400 mt-4">No sessions found for the selected filters.</p>';
+                return;
             }
+            
+            let previousStepCount = initialCount;
+            const results = funnelSteps.map(step => {
+                const count = filteredSessions.filter(step.condition).length;
+                const result = {
+                    name: step.name, count: count,
+                    convFromPrev: previousStepCount > 0 ? (count / previousStepCount * 100).toFixed(1) : '0.0',
+                    convFromTotal: initialCount > 0 ? (count / initialCount * 100).toFixed(1) : '0.0'
+                };
+                previousStepCount = count;
+                return result;
+            });
+            
+            const maxCount = results[0].count;
+            const tableRows = results.map((step, index) => {
+                const dropOffThreshold = 50.0, barWidth = maxCount > 0 ? (step.count / maxCount * 100) : 0;
+                let rowClass = (index > 0 && parseFloat(step.convFromPrev) < dropOffThreshold) ? 'bg-red-900 bg-opacity-40' : '';
+                return `
+                    <tr class="${rowClass}">
+                        <td data-label="Step" class="py-3 px-4 text-sm text-white">${step.name}</td>
+                        <td data-label="Users" class="py-3 px-4 text-sm text-white font-bold text-center">${step.count}</td>
+                        <td data-label="Conv. (Step)" class="py-3 px-4 text-sm text-gray-400 text-center">${step.convFromPrev}%</td>
+                        <td data-label="Conv. (Total)" class="py-3 px-4 text-sm text-gray-400 text-center">${step.convFromTotal}%</td>
+                        <td data-label="Visualization" class="py-3 px-4 w-1/3">
+                            <div class="w-full bg-gray-700 rounded-full h-6">
+                                <div class="funnel-bar h-6 rounded-full flex items-center justify-center text-xs font-bold text-white px-2" style="width: ${barWidth > 5 ? barWidth : 5}%">${step.convFromTotal}%</div>
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join('');
 
-            function populateFunnelFilters() {
-                const sources = [...new Set(allSessionsData.map(s => s.trafficSource))].sort();
-                const container = document.getElementById('funnel-sources-checkboxes');
-                container.innerHTML = '';
-                sources.forEach(source => {
-                    const label = document.createElement('label');
-                    label.className = 'flex items-center space-x-2 text-sm text-gray-300 hover:bg-gray-700 p-1 rounded cursor-pointer';
-                    label.innerHTML = `
-                        <input type="checkbox" value="${source}" class="funnel-source-checkbox h-4 w-4 rounded bg-gray-600 border-gray-500 text-purple-600 focus:ring-purple-500">
-                        <span>${source}</span>
-                    `;
-                    container.appendChild(label);
-                });
-            }
-
-            function calculateAndRenderFunnel() {
-                const checkedCheckboxes = document.querySelectorAll('.funnel-source-checkbox:checked');
-                const selectedSources = [...checkedCheckboxes].map(cb => cb.value);
-                const startDateInput = document.getElementById('funnel-start-date').value;
-                const endDateInput = document.getElementById('funnel-end-date').value;
-                const filteredSessions = allSessionsData.filter(session => {
-                    const sessionDate = new Date(session.createdAt);
-                    const sourceMatch = selectedSources.length === 0 || selectedSources.includes(session.trafficSource);
-                    const startDateMatch = !startDateInput || sessionDate >= new Date(startDateInput);
-                    const endDateMatch = !endDateInput || sessionDate <= new Date(endDateInput + 'T23:59:59');
-                    return sourceMatch && startDateMatch && endDateMatch;
-                });
-
-                const funnelSteps = [
-    { name: '1. Quiz Page Viewed', condition: s => true },
-    { name: '2. "Let\'s Start" Clicked', condition: s => s.events && s.events.hasOwnProperty('quizStarted') },
-    { name: '3. Goal', condition: s => s.answers && s.answers.hasOwnProperty('userGoal') },
-    { name: '4. Age', condition: s => s.answers && s.answers.hasOwnProperty('age') },
-    { name: '5. Sex (Gender)', condition: s => s.answers && s.answers.hasOwnProperty('gender') },
-    { name: '6. Height', condition: s => s.answers && s.answers.hasOwnProperty('height') },
-    { name: '7. Weight', condition: s => s.answers && s.answers.hasOwnProperty('weight') },
-    { name: '8. Sleep', condition: s => s.answers && s.answers.hasOwnProperty('sleep') },
-    { name: '9. Activity', condition: s => s.answers && s.answers.hasOwnProperty('activity') },
-    { name: '10. Nutrition', condition: s => s.answers && s.answers.hasOwnProperty('nutrition') },
-    { name: '11. Processed Food', condition: s => s.answers && s.answers.hasOwnProperty('processed_food') },
-    { name: '12. Hydration', condition: s => s.answers && s.answers.hasOwnProperty('hydration') },
-    { name: '13. Mindfulness', condition: s => s.answers && s.answers.hasOwnProperty('mindfulness') },
-    { name: '14. Mood', condition: s => s.answers && s.answers.hasOwnProperty('mood') },
-    { name: '15. Alcohol', condition: s => s.answers && s.answers.hasOwnProperty('alcohol') },
-    { name: '16. Smoking', condition: s => s.answers && s.answers.hasOwnProperty('smoking') },
-    { name: '17. Screen Time', condition: s => s.answers && s.answers.hasOwnProperty('screen_time') },
-    { name: '18. Photo (Selfie)', condition: s => s.answers && s.answers.hasOwnProperty('selfie') },
-    { name: '19. Email', condition: s => s.answers && s.answers.hasOwnProperty('email') },
-    { name: '20. Profile Page Viewed', condition: s => s.events && s.events.hasOwnProperty('profilePageViewed') },
-    { name: '21. Payment Page Viewed', condition: s => s.events && s.events.hasOwnProperty('paymentPageViewed') },
-    { name: '22. Purchase Completed', condition: s => s.paymentStatus === 'succeeded' }
-];
-
-                let results = [];
-                const initialCount = filteredSessions.length;
-
-                if (initialCount === 0) {
-                     document.getElementById('funnel-results-container').innerHTML = '<p class="text-center text-gray-400 mt-4">No sessions found for the selected filters.</p>';
-                     return;
-                }
-                
-                let previousStepCount = initialCount;
-                funnelSteps.forEach(step => {
-                    const stepSessions = filteredSessions.filter(step.condition);
-                    const count = stepSessions.length;
-                    
-                    results.push({
-                        name: step.name,
-                        count: count,
-                        convFromPrev: previousStepCount > 0 ? ((count / previousStepCount) * 100).toFixed(1) : '0.0',
-                        convFromTotal: initialCount > 0 ? ((count / initialCount) * 100).toFixed(1) : '0.0'
-                    });
-                    
-                    previousStepCount = count;
-                });
-                renderFunnelResults(results);
-            }
-
-            function renderFunnelResults(results) {
-                const container = document.getElementById('funnel-results-container');
-                const maxCount = results.length > 0 ? results[0].count : 0;
-                
-                if (maxCount === 0) {
-                     container.innerHTML = '<p class="text-center text-gray-400 mt-4">No sessions found for the selected filters.</p>';
-                     return;
-                }
-
-                const tableRows = results.map((step, index) => {
-                    const dropOffThreshold = 50.0;
-                    let rowClass = 'border-b border-gray-700';
-
-                    if (index > 0 && parseFloat(step.convFromPrev) < dropOffThreshold) {
-                        rowClass += ' bg-red-900 bg-opacity-40'; 
-                    }
-
-                    const barWidth = maxCount > 0 ? (step.count / maxCount * 100) : 0;
-
-                    return `
-                        <tr class="${rowClass}">
-                            <td data-label="Step" class="py-3 px-4 text-sm text-white">${step.name}</td>
-                            <td data-label="Users" class="py-3 px-4 text-sm text-white font-bold text-center">${step.count}</td>
-                            <td data-label="Conv. (Step)" class="py-3 px-4 text-sm text-gray-400 text-center">${step.convFromPrev}%</td>
-                            <td data-label="Conv. (Total)" class="py-3 px-4 text-sm text-gray-400 text-center">${step.convFromTotal}%</td>
-                            <td data-label="Visualization" class="py-3 px-4 w-1/3">
-                                <div class="w-full bg-gray-700 rounded-full h-6">
-                                    <div class="funnel-bar h-6 rounded-full flex items-center justify-center text-xs font-bold text-white px-2" style="width: ${barWidth > 5 ? barWidth : 5}%">
-                                       ${step.convFromTotal}%
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-
-                container.innerHTML = `
-                    <div class="overflow-x-auto rounded-lg border border-gray-700 mt-6">
-                        <table class="min-w-full funnel-table">
-                            <thead>
-                                <tr>
-                                    <th class="py-3 px-4 text-left text-xs font-medium text-gray-300 uppercase">Step</th>
-                                    <th class="py-3 px-4 text-center text-xs font-medium text-gray-300 uppercase">Users</th>
-                                    <th class="py-3 px-4 text-center text-xs font-medium text-gray-300 uppercase">Conv. (Step)</th>
-                                    <th class="py-3 px-4 text-center text-xs font-medium text-gray-300 uppercase">Conv. (Total)</th>
-                                    <th class="py-3 px-4 text-left text-xs font-medium text-gray-300 uppercase">Visualization</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-gray-800">${tableRows}</tbody>
-                        </table>
-                    </div>
-                `;
-            }
-        });
+            container.innerHTML = `
+                <div class="overflow-x-auto rounded-lg border border-gray-700 mt-6">
+                    <table class="min-w-full funnel-table">
+                        <thead>
+                            <tr>
+                                <th class="py-3 px-4 text-left text-xs font-medium text-gray-300 uppercase">Step</th>
+                                <th class="py-3 px-4 text-center text-xs font-medium text-gray-300 uppercase">Users</th>
+                                <th class="py-3 px-4 text-center text-xs font-medium text-gray-300 uppercase">Conv. (Step)</th>
+                                <th class="py-3 px-4 text-center text-xs font-medium text-gray-300 uppercase">Conv. (Total)</th>
+                                <th class="py-3 px-4 text-left text-xs font-medium text-gray-300 uppercase">Visualization</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-gray-800">${tableRows}</tbody>
+                    </table>
+                </div>`;
+        }
+    });
     </script>
 </body>
 </html>
