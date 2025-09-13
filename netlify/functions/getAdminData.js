@@ -31,9 +31,10 @@ exports.handler = async (event) => {
 
   try {
     // Получаем общее количество сессий из счетчика
-const statsRef = db.collection('metadata').doc('sessions');
-const statsDoc = await statsRef.get();
-const totalSessionsCount = statsDoc.exists ? statsDoc.data().totalCount : 0;
+    const statsRef = db.collection('metadata').doc('sessions');
+    const statsDoc = await statsRef.get();
+    const totalSessionsCount = statsDoc.exists ? statsDoc.data().totalCount : 0;
+
     // УЛУЧШЕНО: Разбор тела запроса и проверка пароля перенесены внутрь try-catch
     const { password, startDate, endDate } = JSON.parse(event.body);
 
@@ -55,14 +56,26 @@ const totalSessionsCount = statsDoc.exists ? statsDoc.data().totalCount : 0;
     }
 
     // ИЗМЕНЕНО: Применяем лимит ВСЕГДА, чтобы избежать перегрузки и лишних трат.
-    // Если есть фильтр по дате, даем больше записей, но не все.
     if (startDate || endDate) {
-        query = query.limit(1000); // Например, до 1000 записей для отфильтрованного списка
+        query = query.limit(1000);
     } else {
-        query = query.limit(200); // Стандартный лимит для последних сессий
+        query = query.limit(200);
     }
 
     const sessionsSnapshot = await query.get();
+
+    // --- НАЧАЛО ИСПРАВЛЕНИЯ: РАСЧЕТ СМЕЩЕНИЯ ДЛЯ ПРАВИЛЬНОЙ НУМЕРАЦИИ ---
+    let newerSessionsCount = 0;
+    // Если есть фильтр по дате и сессии найдены, считаем сколько сессий новее, чем первая в списке
+    if (!sessionsSnapshot.empty && (startDate || endDate)) {
+        const firstDocTimestamp = sessionsSnapshot.docs[0].data().createdAt;
+        const newerSessionsQuery = sessionsRef.where('createdAt', '>', firstDocTimestamp);
+        // Используем .count() для эффективного подсчета без загрузки самих документов
+        const newerSessionsSnapshot = await newerSessionsQuery.count().get();
+        newerSessionsCount = newerSessionsSnapshot.data().count;
+    }
+    // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+
     const messagesRef = db.collection('contact_submissions');
     const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').get();
 
@@ -79,7 +92,7 @@ const totalSessionsCount = statsDoc.exists ? statsDoc.data().totalCount : 0;
     }
 
     if (sessionsSnapshot.empty) {
-      return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: {}, messages: messagesData }) };
+      return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: { totalSessions: totalSessionsCount, newerSessionsCount: 0 }, messages: messagesData }) };
     }
 
     let totalRevenue = 0;
@@ -163,18 +176,18 @@ const totalSessionsCount = statsDoc.exists ? statsDoc.data().totalCount : 0;
         topCountries: Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 5),
     };
 
+    // --- НАЧАЛО ИСПРАВЛЕНИЯ: ПЕРЕДАЕМ СМЕЩЕНИЕ НА ФРОНТЕНД ---
     return {
       statusCode: 200,
       body: JSON.stringify({
         sessions: sessionsData,
-        statistics,
+        statistics: { ...statistics, newerSessionsCount: newerSessionsCount },
         messages: messagesData
       }),
     };
+    // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
   } catch (error) {
     console.error('Error in getAdminData function:', error);
     return { statusCode: 500, body: JSON.stringify({ error: 'Internal Server Error' }) };
   }
 };
-
-
