@@ -48,7 +48,7 @@ exports.handler = async (event) => {
         query = query.where('createdAt', '<=', endOfDay.toISOString());
     }
 
-    query = query.limit(1000); // Увеличим лимит по умолчанию для более точной статистики
+    query = query.limit(1000);
 
     const sessionsSnapshot = await query.get();
     
@@ -68,32 +68,25 @@ exports.handler = async (event) => {
       return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: { totalSessions: totalSessionsCount }, messages: messagesData }) };
     }
     
-    // --- НАЧАЛО БЛОКА НОВОЙ СТАТИСТИКИ ---
     let totalRevenue = 0, successfulPayments = 0, completedQuizzes = 0, totalErrors = 0;
     const trafficSourceCounts = {}, countryCounts = {}, osCounts = {}, genderCounts = {}, dropOffCounts = {}, userGoalCounts = {};
     const maleAges = [], femaleAges = [];
     let totalDurationMs = 0, durationCount = 0;
-    // --- КОНЕЦ БЛОКА НОВОЙ СТАТИСТИКИ ---
 
     const sessionsData = sessionsSnapshot.docs.map(doc => {
       const data = doc.data();
       const answers = data.answers || {};
 
-      // Расчет прогресса (остается без изменений)
       const answeredKeys = Object.keys(answers).filter(key => ALL_QUESTION_KEYS.includes(key));
       const answeredCount = answeredKeys.length;
       const progressPercent = TOTAL_QUESTIONS > 0 ? Math.round((answeredCount / TOTAL_QUESTIONS) * 100) : 0;
       const progress = `${answeredCount} of ${TOTAL_QUESTIONS} (${progressPercent}%)`;
       
-      // --- НАЧАЛО СБОРА ДАННЫХ ДЛЯ СТАТИСТИКИ ---
-      
-      // ОС
       if (data.deviceType) {
         const os = data.deviceType.split('/')[1] || 'Unknown';
         osCounts[os] = (osCounts[os] || 0) + 1;
       }
 
-      // Пол и возраст
       if (answers.gender && (answers.gender === 'male' || answers.gender === 'female')) {
         genderCounts[answers.gender] = (genderCounts[answers.gender] || 0) + 1;
         if (answers.age) {
@@ -102,24 +95,16 @@ exports.handler = async (event) => {
         }
       }
       
-      // Точка отказа
       const dropOffDisplay = progressPercent === 100 ? 'Completed' : String(data.dropOffPoint || 'N/A').replace('question_', '');
       if (dropOffDisplay !== 'Completed' && dropOffDisplay !== 'N/A') {
         dropOffCounts[dropOffDisplay] = (dropOffCounts[dropOffDisplay] || 0) + 1;
       }
 
-      // Цель пользователя
-      if (answers.userGoal) {
-        userGoalCounts[answers.userGoal] = (userGoalCounts[answers.userGoal] || 0) + 1;
-      }
+      if (answers.userGoal) { userGoalCounts[answers.userGoal] = (userGoalCounts[answers.userGoal] || 0) + 1; }
+      if (data.errors) { totalErrors += data.errors.length; }
       
-      // Ошибки
-      if (data.errors && data.errors.length > 0) {
-        totalErrors += data.errors.length;
-      }
-      
-      // Длительность сессии
       let duration = 'N/A';
+      let durationMs = null;
       if (data.createdAt && data.quizEndedAt) {
         const start = new Date(data.createdAt);
         const end = new Date(data.quizEndedAt);
@@ -128,14 +113,13 @@ exports.handler = async (event) => {
             if (diffMs >= 0) {
                 totalDurationMs += diffMs;
                 durationCount++;
+                durationMs = diffMs;
                 const diffMins = Math.floor(diffMs / 60000);
                 const diffSecs = Math.round((diffMs % 60000) / 1000);
                 duration = `${diffMins}m ${diffSecs}s`;
             }
         }
       }
-      
-      // --- КОНЕЦ СБОРА ДАННЫХ ---
       
       if (answers.hasOwnProperty('email')) { completedQuizzes++; }
       if (data.paymentStatus === 'succeeded' && data.paymentAmountUSD) {
@@ -152,11 +136,14 @@ exports.handler = async (event) => {
         country: country, email: answers.email || 'N/A', gender: answers.gender || 'N/A', age: answers.age || 'N/A', userGoal: answers.userGoal || 'N/A',
         progress: progress, dropOffPoint: dropOffDisplay, duration: duration, paymentStatus: data.paymentStatus || 'pending',
         paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A', errors: data.errors || [], events: data.events || {},
-        resultLink: `result-hybrid.html?session_id=${doc.id}`
+        resultLink: `result.html?session_id=${doc.id}`,
+        // Добавляем поля для сортировки
+        progressPercent: progressPercent,
+        durationMs: durationMs,
+        errorCount: data.errors ? data.errors.length : 0,
       };
     });
 
-    // --- НАЧАЛО РАСЧЕТА НОВОЙ СТАТИСТИКИ ---
     const calculateAverage = (arr) => arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : "N/A";
     const totalOsCount = Object.values(osCounts).reduce((a,b) => a + b, 0);
     const totalGenderCount = Object.values(genderCounts).reduce((a,b) => a + b, 0);
@@ -178,8 +165,6 @@ exports.handler = async (event) => {
         quizCompletionRate: sessionsSnapshot.size > 0 ? ((completedQuizzes / sessionsSnapshot.size) * 100).toFixed(2) : "0.00",
         topTrafficSources: Object.entries(trafficSourceCounts).sort((a, b) => b[1] - a[1]).slice(0, 5),
         topCountries: Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 5),
-        
-        // Новые поля
         osBreakdown: Object.entries(osCounts).map(([os, count]) => ({ os, percent: totalOsCount > 0 ? ((count/totalOsCount)*100).toFixed(1) : 0 })),
         genderBreakdown: Object.entries(genderCounts).map(([gender, count]) => ({ gender, percent: totalGenderCount > 0 ? ((count/totalGenderCount)*100).toFixed(1) : 0 })),
         avgMaleAge: calculateAverage(maleAges),
@@ -189,7 +174,6 @@ exports.handler = async (event) => {
         topUserGoal: Object.entries(userGoalCounts).sort((a, b) => b[1] - a[1])[0] || ['N/A', 0],
         totalErrors: totalErrors
     };
-    // --- КОНЕЦ РАСЧЕТА ---
 
     return {
       statusCode: 200,
@@ -204,3 +188,4 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: JSON.stringify({ error: 'Internal Server Error' }) };
   }
 };
+
