@@ -375,76 +375,84 @@
                 });
             }
 
-            function renderTable(data) {
-                const tableBody = document.getElementById('sessions-table-body');
-                const searchTerm = document.getElementById('search-input').value.toLowerCase();
-                const statusValue = document.getElementById('status-filter').value;
+            // /admin.html (внутри <script>)
 
-                let filteredData = data.filter(session => {
-                    const searchMatch = session.ipAddress.toLowerCase().includes(searchTerm) || session.country.toLowerCase().includes(searchTerm) || (session.email && session.email.toLowerCase().includes(searchTerm));
-                    const statusMatch = statusValue ? session.paymentStatus === statusValue : true;
-                    return searchMatch && statusMatch;
-                });
+function renderTable(data) {
+    const tableBody = document.getElementById('sessions-table-body');
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    const statusValue = document.getElementById('status-filter').value;
 
-                if (filteredData.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="13" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`;
-                    return;
-                }
-                
-                let tableHTML = '';
-                const totalSessions = statisticsData.totalSessions || data.length;
-                filteredData.forEach((session, index) => {
-                    const sessionNumber = totalSessions - index;
-                    const paymentStatusClass = session.paymentStatus === 'succeeded' ? 'bg-green-500 text-green-100' : (session.paymentStatus === 'pending' ? 'bg-yellow-500 text-yellow-100' : 'bg-red-500 text-red-100');
-                    
-                    const email = session.email || 'N/A';
-                    let emailDisplay;
-                    if (email.length > 20 && email !== 'N/A') {
-                        emailDisplay = `<span class="truncate-email cursor-pointer text-purple-400" data-full-email="${email}">${email.substring(0, 17)}...</span>`;
-                    } else {
-                        emailDisplay = `<span class="text-purple-400">${email}</span>`;
+    let filteredData = data.filter(session => {
+        const searchMatch = session.ipAddress.toLowerCase().includes(searchTerm) || session.country.toLowerCase().includes(searchTerm) || (session.email && session.email.toLowerCase().includes(searchTerm));
+        const statusMatch = statusValue ? session.paymentStatus === statusValue : true;
+        return searchMatch && statusMatch;
+    });
+
+    if (filteredData.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="13" class="text-center p-6 text-gray-400">No sessions match filters.</td></tr>`;
+        return;
+    }
+    
+    let tableHTML = '';
+    // --- V-- НОВАЯ ЛОГИКА РАСЧЕТА НОМЕРА --V ---
+    const totalSessions = statisticsData.totalSessions || data.length;
+    const newerSessionsCount = statisticsData.newerSessionsCount || 0;
+
+    filteredData.forEach((session, index) => {
+        const sessionNumber = totalSessions - newerSessionsCount - index;
+        // --- A-- КОНЕЦ НОВОЙ ЛОГИКИ --A ---
+
+        const paymentStatusClass = session.paymentStatus === 'succeeded' ? 'bg-green-500 text-green-100' : (session.paymentStatus === 'pending' ? 'bg-yellow-500 text-yellow-100' : 'bg-red-500 text-red-100');
+        
+        const email = session.email || 'N/A';
+        let emailDisplay;
+        if (email.length > 20 && email !== 'N/A') {
+            emailDisplay = `<span class="truncate-email cursor-pointer text-purple-400" data-full-email="${email}">${email.substring(0, 17)}...</span>`;
+        } else {
+            emailDisplay = `<span class="text-purple-400">${email}</span>`;
+        }
+
+        tableHTML += `
+            <tr class="main-row">
+                <td data-label="#" class="px-4 py-3 whitespace-nowrap text-sm text-gray-400 font-medium">${sessionNumber}</td>
+                <td data-label="Date" class="px-4 py-3 whitespace-nowrap text-sm">${new Date(session.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', hour12: false })}</td>
+                <td data-label="Device/Source" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.deviceType}</div><div class="text-gray-400">${session.trafficSource}</div></td>
+                <td data-label="IP/Country" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.ipAddress}</div><div class="text-gray-400">${session.country}</div></td>
+                <td data-label="Email" class="px-4 py-3 whitespace-nowrap text-sm">${emailDisplay}</td>
+                <td data-label="User" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.gender}</div><div class="text-gray-400">Age: ${session.age}</div></td>
+                <td data-label="User Goal" class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.userGoal}</td>
+                <td data-label="Progress" class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.progress}</td>
+                <td data-label="Duration" class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.duration}</td>
+                <td data-label="Drop-off Point" class="px-4 py-3 whitespace-nowrap text-sm text-yellow-400 font-mono">${session.dropOffPoint}</td>
+                <td data-label="Payment" class="px-4 py-3 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">${session.paymentStatus}</span><div class="text-gray-400">${session.paymentAmount}</div></td>
+                <td data-label="Errors" class="px-4 py-3 whitespace-nowrap text-sm">
+                    ${session.errors && session.errors.length > 0 
+                        ? `<button data-session-id="${session.id}" data-error-count="${session.errors.length}" class="toggle-errors-btn bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600">Show (${session.errors.length})</button>`
+                        : '<span class="text-gray-600">—</span>'
                     }
+                </td>
+                <td data-label="Link" class="px-4 py-3 whitespace-nowrap text-sm text-center">${session.resultLink && session.paymentStatus === 'succeeded' ? `<a href="/${session.resultLink}" target="_blank" class="text-purple-400 hover:text-purple-300">View</a>` : '<span class="text-gray-500 text-lg">❌</span>'}</td>
+            </tr>
+        `;
 
-                    tableHTML += `
-                        <tr class="main-row">
-                            <td data-label="#" class="px-4 py-3 whitespace-nowrap text-sm text-gray-400 font-medium">${sessionNumber}</td>
-                            <td data-label="Date" class="px-4 py-3 whitespace-nowrap text-sm">${new Date(session.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short', hour12: false })}</td>
-                            <td data-label="Device/Source" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.deviceType}</div><div class="text-gray-400">${session.trafficSource}</div></td>
-                            <td data-label="IP/Country" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.ipAddress}</div><div class="text-gray-400">${session.country}</div></td>
-                            <td data-label="Email" class="px-4 py-3 whitespace-nowrap text-sm">${emailDisplay}</td>
-                            <td data-label="User" class="px-4 py-3 whitespace-nowrap text-sm"><div class="font-medium">${session.gender}</div><div class="text-gray-400">Age: ${session.age}</div></td>
-                            <td data-label="User Goal" class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.userGoal}</td>
-                            <td data-label="Progress" class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.progress}</td>
-                            <td data-label="Duration" class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${session.duration}</td>
-                            <td data-label="Drop-off Point" class="px-4 py-3 whitespace-nowrap text-sm text-yellow-400 font-mono">${session.dropOffPoint}</td>
-                            <td data-label="Payment" class="px-4 py-3 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatusClass}">${session.paymentStatus}</span><div class="text-gray-400">${session.paymentAmount}</div></td>
-                            <td data-label="Errors" class="px-4 py-3 whitespace-nowrap text-sm">
-                                ${session.errors && session.errors.length > 0 
-                                    ? `<button data-session-id="${session.id}" data-error-count="${session.errors.length}" class="toggle-errors-btn bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600">Show (${session.errors.length})</button>`
-                                    : '<span class="text-gray-600">—</span>'
-                                }
-                            </td>
-                            <td data-label="Link" class="px-4 py-3 whitespace-nowrap text-sm text-center">${session.resultLink && session.paymentStatus === 'succeeded' ? `<a href="/${session.resultLink}" target="_blank" class="text-purple-400 hover:text-purple-300">View</a>` : '<span class="text-gray-500 text-lg">❌</span>'}</td>
-                        </tr>
-                    `;
-                    if (session.errors && session.errors.length > 0) {
-                        let errorsHTML = session.errors.map(err => `
-                            <div class="border-b border-gray-700 py-2 last:border-b-0">
-                                <p class="text-red-400 font-semibold">${err.message || 'Unknown Error'}</p>
-                                <p class="text-gray-400 text-xs font-mono break-all">${err.details || 'No details'}</p>
-                                <p class="text-gray-500 text-xs mt-1">${new Date(err.timestamp).toLocaleString()}</p>
-                            </div>
-                        `).join('');
+        if (session.errors && session.errors.length > 0) {
+            let errorsHTML = session.errors.map(err => `
+                <div class="border-b border-gray-700 py-2 last:border-b-0">
+                    <p class="text-red-400 font-semibold">${err.message || 'Unknown Error'}</p>
+                    <p class="text-gray-400 text-xs font-mono break-all">${err.details || 'No details'}</p>
+                    <p class="text-gray-500 text-xs mt-1">${new Date(err.timestamp).toLocaleString()}</p>
+                </div>
+            `).join('');
 
-                        tableHTML += `
-                            <tr id="errors-${session.id}" class="hidden">
-                                <td colspan="13" class="p-3 bg-gray-800" data-label="Error Details">${errorsHTML}</td>
-                            </tr>
-                        `;
-                    }
-                });
-                tableBody.innerHTML = tableHTML;
-            }
+            tableHTML += `
+                <tr id="errors-${session.id}" class="hidden">
+                    <td colspan="13" class="p-3 bg-gray-800" data-label="Error Details">${errorsHTML}</td>
+                </tr>
+            `;
+        }
+    });
+    tableBody.innerHTML = tableHTML;
+}
 
             function renderMessages(data) {
                 const container = document.getElementById('messages-container');
