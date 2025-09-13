@@ -137,10 +137,10 @@ exports.handler = async (event) => {
         progress: progress, dropOffPoint: dropOffDisplay, duration: duration, paymentStatus: data.paymentStatus || 'pending',
         paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A', errors: data.errors || [], events: data.events || {},
         resultLink: `result.html?session_id=${doc.id}`,
-        // Добавляем поля для сортировки
         progressPercent: progressPercent,
         durationMs: durationMs,
         errorCount: data.errors ? data.errors.length : 0,
+        answers: answers, // <-- ВОТ ИСПРАВЛЕНИЕ. ЭТА СТРОКА БЫЛА УДАЛЕНА.
       };
     });
 
