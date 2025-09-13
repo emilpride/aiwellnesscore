@@ -166,6 +166,7 @@
                     <table class="min-w-full divide-y divide-gray-700 table-custom">
                         <thead class="bg-gray-800">
                             <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">#</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Device/Source</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">IP/Country</th>
@@ -382,7 +383,7 @@
                 }
                 
                 let tableHTML = '';
-                filteredData.forEach(session => {
+                filteredData.forEach((session, index) => {
                     const paymentStatusClass = session.paymentStatus === 'succeeded' ? 'bg-green-500 text-green-100' : (session.paymentStatus === 'pending' ? 'bg-yellow-500 text-yellow-100' : 'bg-red-500 text-red-100');
                     tableHTML += `
                         <tr class="main-row">
