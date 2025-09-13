@@ -19,7 +19,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        /* Стили для сортировки */
         .table-custom th.sortable { cursor: pointer; user-select: none; }
         .table-custom th.sortable:hover { background-color: #374151; }
         .sort-icon { display: inline-block; width: 1em; text-align: center; color: var(--text-secondary); }
@@ -319,8 +318,10 @@
             filteredData.sort((a, b) => {
                 let valA, valB;
                 if (column === 'number') {
-                    valA = totalSessions - newerSessionsCount - allSessionsData.indexOf(a);
-                    valB = totalSessions - newerSessionsCount - allSessionsData.indexOf(b);
+                    const indexA = allSessionsData.findIndex(s => s.id === a.id);
+                    const indexB = allSessionsData.findIndex(s => s.id === b.id);
+                    valA = totalSessions - newerSessionsCount - indexA;
+                    valB = totalSessions - newerSessionsCount - indexB;
                 } else {
                     valA = a[column];
                     valB = b[column];
@@ -341,9 +342,7 @@
             
             tableBody.innerHTML = filteredData.map(session => {
                 const sessionIndex = allSessionsData.findIndex(s => s.id === session.id);
-                // Если findIndex не находит (например, при фильтрации), используем оригинальный индекс из `data`
-                const originalIndex = (sessionIndex === -1) ? data.indexOf(session) : sessionIndex;
-                const sessionNumber = totalSessions - newerSessionsCount - originalIndex;
+                const sessionNumber = totalSessions - newerSessionsCount - sessionIndex;
 
                 const paymentStatusClass = session.paymentStatus === 'succeeded' ? 'bg-green-500 text-green-100' : session.paymentStatus === 'pending' ? 'bg-yellow-500 text-yellow-100' : 'bg-red-500 text-red-100';
                 let emailDisplay = `<span class="text-purple-400">${session.email || 'N/A'}</span>`;
