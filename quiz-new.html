@@ -785,22 +785,29 @@ const LibraryLoader = {
     }
     
     function next() {
-        App.currentQuestionIndex++;
-        const stepConfig = App.quizQuestions[App.currentQuestionIndex];
-        
-        if (!stepConfig) {
-            startAnalysis();
-            return;
-        }
-        
-        if (stepConfig.type === 'animation') {
-            renderAnimation(stepConfig.key);
-        } else {
-            goToStep('quiz');
-            renderQuestion();
-        }
-        updateProgressBar();
+    // ---- НАЧАЛО ИЗМЕНЕНИЯ ----
+    // Отправляем событие "Lead", только когда квиз начинается (индекс был -1)
+    if (App.currentQuestionIndex === -1) { 
+        fbq('track', 'Lead');
     }
+    // ---- КОНЕЦ ИЗМЕНЕНИЯ ----
+
+    App.currentQuestionIndex++;
+    const stepConfig = App.quizQuestions[App.currentQuestionIndex];
+    
+    if (!stepConfig) {
+        startAnalysis();
+        return;
+    }
+    
+    if (stepConfig.type === 'animation') {
+        renderAnimation(stepConfig.key);
+    } else {
+        goToStep('quiz');
+        renderQuestion();
+    }
+    updateProgressBar();
+}
 
     function previous() {
         if (App.currentQuestionIndex < 0) return;
