@@ -84,8 +84,10 @@
             </div>
             
             <div id="content-stats" class="tab-content active mt-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                     <div class="stat-card p-4 rounded-lg text-center"><p class="text-sm font-medium text-gray-400">Total Revenue</p><p id="stat-total-revenue" class="text-3xl font-bold mt-1">$0.00</p></div>
+                    <div class="stat-card p-4 rounded-lg text-center"><p class="text-sm font-medium text-gray-400">Sessions (Period)</p><p id="stat-sessions-period" class="text-3xl font-bold mt-1">0</p></div>
+                    <div class="stat-card p-4 rounded-lg text-center"><p class="text-sm font-medium text-gray-400">Completed Quizzes</p><p id="stat-completed-quizzes" class="text-3xl font-bold mt-1">0</p></div>
                     <div class="stat-card p-4 rounded-lg text-center"><p class="text-sm font-medium text-gray-400">Average Check</p><p id="stat-avg-check" class="text-3xl font-bold mt-1">$0.00</p></div>
                     <div class="stat-card p-4 rounded-lg text-center"><p class="text-sm font-medium text-gray-400">Conversion Rate</p><p id="stat-conversion" class="text-3xl font-bold mt-1">0%</p></div>
                     <div class="stat-card p-4 rounded-lg text-center"><p class="text-sm font-medium text-gray-400">Total Errors</p><p id="stat-total-errors" class="text-3xl font-bold mt-1 text-red-400">0</p></div>
@@ -263,7 +265,7 @@
 
         function setupColumnFilter() {
             const btn = document.getElementById('column-filter-btn'), dropdown = document.getElementById('column-filter-dropdown'), tableHeaders = document.querySelectorAll('#content-sessions th[data-column]');
-            const defaultVisible = ['number', 'date', 'device', 'ip', 'progress'];
+            const defaultVisible = ['number', 'createdAt', 'deviceType', 'ipAddress', 'progressPercent', 'durationMs'];
             dropdown.innerHTML = Array.from(tableHeaders).map(th => {
                 const key = th.dataset.column;
                 const text = th.textContent.replace('▲', '').replace('▼', '').trim() || '#';
@@ -290,7 +292,10 @@
             document.getElementById('stat-total-revenue').textContent = `$${stats.totalRevenue}`;
             document.getElementById('stat-avg-check').textContent = `$${stats.avgCheck}`;
             document.getElementById('stat-conversion').textContent = `${stats.conversionRate}%`;
+            document.getElementById('stat-sessions-period').textContent = stats.sessionsInPeriod;
+            document.getElementById('stat-completed-quizzes').textContent = stats.completedQuizzes;
             document.getElementById('stat-total-errors').textContent = stats.totalErrors;
+
             const createBar = (item) => `<div class="flex justify-between items-center text-sm mb-1"><span class="capitalize">${item.os || item.gender}</span><span>${item.percent}%</span></div><div class="w-full bg-gray-700 rounded-full h-2"><div class="bg-purple-500 h-2 rounded-full" style="width:${item.percent}%"></div></div>`;
             if (stats.osBreakdown) document.getElementById('stat-os-breakdown').innerHTML = stats.osBreakdown.map(createBar).join('<div class="h-2"></div>');
             if (stats.genderBreakdown) document.getElementById('stat-gender-breakdown').innerHTML = stats.genderBreakdown.map(createBar).join('<div class="h-2"></div>');
