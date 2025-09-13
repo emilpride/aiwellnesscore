@@ -96,7 +96,12 @@ exports.handler = async (event, context) => {
         events: {} // Добавляем объект для событий
       };
       await newSessionRef.set(sessionData);
-      
+
+      // Атомарно увеличиваем общий счетчик сессий
+const statsRef = db.collection('metadata').doc('sessions');
+await statsRef.set({ 
+    totalCount: FieldValue.increment(1) 
+}, { merge: true });
       logger.info('Session created successfully', { 
         sessionId: newSessionRef.id,
         countryCode,
