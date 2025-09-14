@@ -1388,55 +1388,6 @@ if (!App.faceMesh) {
         goToStep('selfie-confirm');
     }
 
-
-        
-        function goToSlide(index, animated = true) {
-            currentSlide = (index + totalSlides) % totalSlides;
-            swiperWrapper.style.transition = animated ? 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' : 'none';
-            swiperWrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
-            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
-        }
-
-        const startDrag = (e) => {
-            isDragging = true;
-            startX = e.pageX || e.touches[0].pageX;
-            swiperWrapper.style.transition = 'none';
-        }
-        const drag = (e) => {
-            if (!isDragging) return;
-            e.preventDefault();
-            currentX = e.pageX || e.touches[0].pageX;
-            const diff = currentX - startX;
-            swiperWrapper.style.transform = `translateX(calc(-${currentSlide * 100}% + ${diff}px))`;
-        }
-        const endDrag = (e) => {
-    if (!isDragging) return;
-    const diff = currentX - startX;
-
-    // Если сдвиг был очень маленьким, считаем это тапом и ничего не делаем
-    if (Math.abs(diff) < 10) {
-        isDragging = false;
-        return; 
-    }
-
-    isDragging = false; // Перемещаем эту строку ниже
-
-    if (Math.abs(diff) > 50) {
-        goToSlide(currentSlide + (diff < 0 ? 1 : -1));
-    } else {
-        goToSlide(currentSlide);
-    }
-}
-        
-        swiper.addEventListener('mousedown', startDrag);
-        swiper.addEventListener('mousemove', drag);
-        swiper.addEventListener('mouseup', endDrag);
-        swiper.addEventListener('mouseleave', endDrag);
-        swiper.addEventListener('touchstart', startDrag, { passive: true });
-        swiper.addEventListener('touchmove', drag, { passive: false });
-        swiper.addEventListener('touchend', endDrag);
-
-        goToSlide(0);
     
     function initMenu() {
         const menuBtn = document.getElementById('burger-menu-btn');
