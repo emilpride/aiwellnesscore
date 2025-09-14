@@ -567,9 +567,9 @@ quizQuestions: [
     { key: 'age', type: 'slider', text: "How old are you?", subtext: "Your age is a key factor in calculating your biological age baseline.", min: 18, max: 90, defaultValue: 30, unit: 'years' },
     { key: 'gender', type: 'gender_selection', text: "What’s your biological sex?", subtext: "Biological sex influences body composition and metabolic rate.", options: [{value: 'male', img: 'male.svg'}, {value: 'female', img: 'female.svg'}] },
     // UPDATED: Height in total inches for easier sliding
-    { key: 'height', type: 'slider', text: "What’s your height?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 54, max: 84, defaultValue: 69, unit: 'in' }, // 4'6" to 7'0"
+    { key: 'height', type: 'slider', text: "What’s your height?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 140, max: 220, defaultValue: 175, unit: 'cm' }, // 4'6" to 7'0"
     // UPDATED: Weight in pounds
-    { key: 'weight', type: 'slider', text: "What’s your weight?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 90, max: 350, defaultValue: 170, unit: 'lbs' },
+    { key: 'weight', type: 'slider', text: "What’s your weight?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 40, max: 150, defaultValue: 77, unit: 'kg' },
     { key: 'bmi_display', type: 'animation' },
     { key: 'sleep', type: 'options', text: "On average, how much do you sleep?", subtext: "Quality sleep is crucial for cellular repair and mental clarity.", options: [{text:"Less than 5 hours"}, {text:"5–6 hours"}, {text:"7–8 hours"}, {text:"More than 8 hours"}] },
     { key: 'sleep_visual', type: 'animation' },
@@ -1012,20 +1012,27 @@ function next() {
     }
     
     // Replace the old updateSliderDisplay function with this one
+// Вставьте этот код вместо вашей текущей функции updateSliderDisplay
 function updateSliderDisplay(question, value) {
     const valueDisplay = document.getElementById('slider-value-display');
     if (!valueDisplay) return;
 
     let displayHTML = `${value} ${question.unit || ''}`;
 
-    if (question.unit === 'in') { // Handle height in inches
-        const feet = Math.floor(value / 12);
-        const inches = value % 12;
-        displayHTML = `${feet}'${inches}"`;
-    } else if (question.unit === 'lbs') { // Handle weight
-         displayHTML = `${value} lbs`;
+    if (question.unit === 'cm') {
+        const totalInches = value / 2.54;
+        let feet = Math.floor(totalInches / 12);
+        let inches = Math.round(totalInches % 12);
+        if (inches === 12) {
+            feet++;
+            inches = 0;
+        }
+        displayHTML = `${feet}'${inches}" <span class="text-lg text-gray-400 font-medium">(${value} cm)</span>`;
+    } else if (question.unit === 'kg') {
+        const lbs = Math.round(value * 2.20462);
+        displayHTML = `${lbs} lbs <span class="text-lg text-gray-400 font-medium">(${value} kg)</span>`;
     }
-
+    
     valueDisplay.innerHTML = displayHTML;
 }
     
