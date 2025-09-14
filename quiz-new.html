@@ -849,30 +849,34 @@ const LibraryLoader = {
     
     // Файл: /quiz-new.html
 
-    function next() {
-        // ---- НАЧАЛО ИЗМЕНЕНИЯ ----
-        // Отправляем событие "Lead" в Facebook и наше событие "quizStarted" на бэкенд
-        if (App.currentQuestionIndex === -1) { 
-            fbq('track', 'Lead');
-            trackEvent('quizStarted'); // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
-        }
-        // ---- КОНЕЦ ИЗМЕНЕНИЯ ----
+    // ↓↓↓ СКОПИРУЙТЕ ЭТОТ КОД ПОЛНОСТЬЮ ↓↓↓
 
-        App.currentQuestionIndex++;
-        const stepConfig = App.quizQuestions[App.currentQuestionIndex];
-        if (!stepConfig) {
-            startAnalysis();
-            return; [cite: 1513]
-        }
-        
-        if (stepConfig.type === 'animation') {
-            renderAnimation(stepConfig.key);
-        } else {
-            goToStep('quiz');
-            renderQuestion();
-        }
-        updateProgressBar(); [cite: 1515]
+function next() {
+    // ---- НАЧАЛО ИЗМЕНЕНИЯ ----
+    // Отправляем событие "Lead" в Facebook и наше событие "quizStarted" на бэкенд
+    if (App.currentQuestionIndex === -1) {
+        fbq('track', 'Lead');
+        trackEvent('quizStarted'); // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
     }
+    // ---- КОНЕЦ ИЗМЕНЕНИЯ ----
+
+    App.currentQuestionIndex++;
+    const stepConfig = App.quizQuestions[App.currentQuestionIndex];
+    if (!stepConfig) {
+        startAnalysis();
+        return;
+    }
+
+    if (stepConfig.type === 'animation') {
+        renderAnimation(stepConfig.key);
+    } else {
+        goToStep('quiz');
+        renderQuestion();
+    }
+    updateProgressBar();
+}
+
+// ↑↑↑ СКОПИРУЙТЕ ЭТОТ КОД ПОЛНОСТЬЮ ↑↑↑
 
     function previous() {
         if (App.currentQuestionIndex < 0) return;
