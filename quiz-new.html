@@ -1212,17 +1212,25 @@ async function openCamera() {
     
     cameraModal.classList.add('active');
         
-    if (!App.faceMesh) {
-        try {
-            App.faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
-            App.faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
-            App.faceMesh.onResults(onFaceMeshResults);
-            await App.faceMesh.initialize();
-        } catch (error) {
-            alert('Failed to initialize AI model for camera. Please try again.');
-            closeCamera(); return;
-        }
+    // ПРАВИЛЬНЫЙ КОД ✅
+if (!App.faceMesh) {
+    try {
+        App.faceMesh = new FaceMesh({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
+            maxNumFaces: 1,
+            refineLandmarks: true,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+        App.faceMesh.onResults(onFaceMeshResults);
+        await App.faceMesh.initialize();
+    } catch (error) {
+        console.error("Failed to initialize FaceMesh:", error); // Для лучшей отладки
+        alert('Failed to initialize AI model for camera. Please try again.');
+        closeCamera(); 
+        return;
     }
+}
 
     try {
         const videoConstraints = {
