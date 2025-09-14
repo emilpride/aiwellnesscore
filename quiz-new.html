@@ -136,11 +136,13 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         /* ↓↓↓ ДОБАВЬТЕ ЭТИ СТИЛИ В КОНЕЦ БЛОКА <style> ↓↓↓ */
 
 /* Делаем главный блок на посадочной странице гибким */
+/* ПРАВИЛЬНО ✅ */
 #step-landing > .w-full {
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-around; /* Равномерно распределит пространство */
+    justify-content: flex-start; /* Выравниваем контент по верху */
+    padding-top: 2rem; /* Добавляем небольшой отступ, чтобы не прилипало к хедеру */
 }
 
 /* Медиа-запрос для экранов с небольшой высотой (типичные мобильные) */
