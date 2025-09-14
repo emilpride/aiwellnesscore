@@ -9,23 +9,6 @@
     })(window, document, "clarity", "script", "taixn4310d");
 </script>
     <script>
-        
-    async function trackEvent(eventName) {
-        if (!App.sessionId) return;
-        try {
-            await fetch('/.netlify/functions/quiz', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'trackEvent',
-                    sessionId: App.sessionId,
-                    eventName: eventName
-                })
-            });
-        } catch (e) {
-            console.error(`Failed to track event: ${eventName}`, e);
-        }
-    }
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -634,6 +617,37 @@ quizQuestions: [
     { key: 'email', type: 'email_step', text: "Enter your email 📩", subtext: "to get your personalized report summary. We respect your privacy." }
 ],
     };
+async function trackEvent(eventName) {
+
+        if (!App.sessionId) return;
+
+        try {
+
+            await fetch('/.netlify/functions/quiz', {
+
+                method: 'POST',
+
+                headers: { 'Content-Type': 'application/json' },
+
+                body: JSON.stringify({
+
+                    action: 'trackEvent',
+
+                    sessionId: App.sessionId,
+
+                    eventName: eventName
+
+                })
+
+            });
+
+        } catch (e) {
+
+            console.error(`Failed to track event: ${eventName}`, e);
+
+        }
+
+    }
 const LibraryLoader = {
         faceMeshLoaded: false,
         loadingPromise: null,
