@@ -859,14 +859,14 @@ const LibraryLoader = {
         // ---- КОНЕЦ ИЗМЕНЕНИЯ ----
 
         App.currentQuestionIndex++;
-        const stepConfig = App.quizQuestions[App.currentQuestionIndex]; [cite: 1512]
+        const stepConfig = App.quizQuestions[App.currentQuestionIndex];
         if (!stepConfig) {
             startAnalysis();
             return; [cite: 1513]
         }
         
         if (stepConfig.type === 'animation') {
-            renderAnimation(stepConfig.key); [cite: 1514]
+            renderAnimation(stepConfig.key);
         } else {
             goToStep('quiz');
             renderQuestion();
