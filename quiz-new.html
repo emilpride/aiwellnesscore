@@ -612,19 +612,6 @@ const LibraryLoader = {
             });
         }
     };
-    const AnimationManager = {
-        animations: new Map(),
-        add(id, path) {
-            if (this.animations.has(id) || !document.getElementById(id)) return;
-            const container = document.getElementById(id);
-            if(!container) return;
-            container.innerHTML = '';
-            try {
-                const anim = lottie.loadAnimation({ container, renderer: 'svg', loop: true, autoplay: true, path });
-                this.animations.set(id, anim);
-            } catch(e) { console.error(`Lottie error on container #${id}:`, e); }
-        }
-    };
     
     const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
 
