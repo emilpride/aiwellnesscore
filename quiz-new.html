@@ -2,28 +2,36 @@
 <html lang="en">
 <head>
     <script>
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '785592354117222');
-    fbq('track', 'PageView');
-    </script>
-    <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
-    /></noscript>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '785592354117222');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
+/></noscript>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Wellness Quiz 3.0</title>
+    <title>AI Wellness Quiz 2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Убираем эти строки (НЕ загружаем библиотеки сразу):
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core/dist/tf-core.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter/dist/tf-converter.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl/dist/tf-backend-webgl.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    -->
     
     <style>
         :root { 
@@ -35,6 +43,7 @@
         html, body { 
             overscroll-behavior: none; 
             font-family: 'Inter', sans-serif; 
+            /* Lighter, more subtle gradient */
             background: linear-gradient(120deg, #fdfcfb, #f9f7f5, #f5f2ef, #f9f7f5, #fdfcfb);
             background-size: 400% 400%;
             animation: moveBackground 40s ease infinite;
@@ -92,13 +101,30 @@
             background: transparent; border-color: transparent;
         }
         #quiz-header.onboarding-header .text-gray-600 {
-            color: var(--brand-dark-text); /* Use dark text on the light background */
+            color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
         #side-menu { position: fixed; top: 0; right: 0; height: 100%; width: 280px; background-color: white; z-index: 150; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -10px 0 30px rgba(0,0,0,0.1); }
         #side-menu.active { transform: translateX(0); }
         #menu-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 140; opacity: 0; transition: opacity 0.3s ease-in-out; pointer-events: none; }
         #menu-overlay.active { opacity: 1; pointer-events: all; }
+
+        #onboarding-swiper { cursor: grab; }
+        #onboarding-swiper:active { cursor: grabbing; }
+        .swiper-wrapper { display: flex; height: 100%; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* --- STYLE FOR ONBOARDING SLIDES --- */
+        .swiper-slide { 
+            flex-shrink: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 2rem;
+            background-color: #f3f4f6; /* Keep solid background for readability */
+        }
+        .swiper-wrapper .swiper-slide:first-child {
+            background-color: transparent; /* Allow video to show on first slide */
+        }
+        /* --- END ONBOARDING SLIDES STYLE --- */
+        
+        .dot { transition: background-color 0.3s, transform 0.3s; }
+        .dot.active { background-color: var(--brand-accent); transform: scale(1.25); }
         
         button.answer-option {
             background: #fff; color: var(--brand-dark-text); border: 2px solid #e5e7eb; padding: 0;
@@ -137,17 +163,34 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 1.5rem;
         }
         .stress-widget #slider-input {
-            -webkit-appearance: none; appearance: none; width: 100%; height: 16px;
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 16px;
             background: linear-gradient(to right, #4CAF50, #FFEB3B, #FF5722);
-            border-radius: 8px; outline: none; transition: opacity .2s;
+            border-radius: 8px;
+            outline: none;
+            transition: opacity .2s;
         }
         .stress-widget #slider-input::-webkit-slider-thumb {
-            -webkit-appearance: none; appearance: none; width: 28px; height: 28px; background: white; cursor: pointer;
-            border-radius: 50%; border: 4px solid var(--brand-accent); box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            background: white;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 4px solid var(--brand-accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
         .stress-widget #slider-input::-moz-range-thumb {
-            width: 28px; height: 28px; background: white; cursor: pointer; border-radius: 50%;
-            border: 4px solid var(--brand-accent); box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            width: 28px;
+            height: 28px;
+            background: white;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 4px solid var(--brand-accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
         #mood-slider-container { width: 100%; max-width: 360px; margin: 1.5rem auto 0; }
@@ -169,36 +212,99 @@
         #mood-emojis span { transition: transform 0.2s, opacity 0.2s; }
         
         #bmi-display-wrapper {
-            background-color: white; border-radius: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            padding: 2rem 1.5rem; max-width: 450px; width: 100%; position: relative;
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 2rem 1.5rem;
+            max-width: 450px;
+            width: 100%;
+            position: relative;
         }
         #bmi-info-box {
-            position: relative; z-index: 10; background-color: white; border-radius: 1rem;
-            padding: 1rem; margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 10;
+            background-color: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
         }
         #bmi-category {
-            background-color: #debea9; color: #3c3b31; font-weight: 700; padding: 0.25rem 0.75rem;
-            border-radius: 0.5rem; display: inline-block; margin-bottom: 0.5rem;
+            background-color: #debea9;
+            color: #3c3b31;
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            display: inline-block;
+            margin-bottom: 0.5rem;
         }
-        #bmi-details { display: flex; align-items: center; justify-content: center; gap: 1.5rem; margin-top: 1rem; }
-        @media (min-width: 768px) { #bmi-details { justify-content: flex-start; } }
-        #bmi-scale-container { position: relative; width: 32px; height: 250px; display: flex; align-items: center; justify-content: center; }
+        #bmi-details {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        @media (min-width: 768px) {
+            #bmi-details {
+                justify-content: flex-start;
+            }
+        }
+        #bmi-scale-container {
+            position: relative;
+            width: 32px;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         #bmi-scale-gradient-vertical {
-            width: 100%; height: 100%; background: linear-gradient(to top, #43B7FF, #33C75A, #FBF447, #FFA64D, #FF7D7E);
-            border-radius: 100px; position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, #43B7FF, #33C75A, #FBF447, #FFA64D, #FF7D7E);
+            border-radius: 100px;
+            position: absolute;
         }
         #bmi-thumb {
-            position: absolute; width: 40px; height: 40px; background: linear-gradient(180deg, #F2F2F2 0%, #E8E8E8 100%);
-            border: 2px solid #FFFFFF; box-shadow: 0px 0px 6.9px rgba(0, 0, 0, 0.25); border-radius: 50%;
-            left: 50%; transform: translateX(-50%); bottom: 0%; transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1;
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(180deg, #F2F2F2 0%, #E8E8E8 100%);
+            border: 2px solid #FFFFFF;
+            box-shadow: 0px 0px 6.9px rgba(0, 0, 0, 0.25);
+            border-radius: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 0%;
+            transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
         }
         #bmi-value-display {
-            position: absolute; font-size: 3rem; font-weight: 800; color: #FBF447; left: calc(100% + 1rem);
-            bottom: var(--thumb-position, 0%); transform: translateY(50%);
-            transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1); text-shadow: 1px 1px 2px rgba(0,0,0,0.2); z-index: 1;
+            position: absolute;
+            font-size: 3rem;
+            font-weight: 800;
+            color: #FBF447;
+            left: calc(100% + 1rem);
+            bottom: var(--thumb-position, 0%);
+            transform: translateY(50%);
+            transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            z-index: 1;
         }
-        #bmi-image-section { display: flex; align-items: flex-end; height: 250px; flex-grow: 1; justify-content: center; }
-        #bmi-image { height: 100%; width: auto; object-fit: contain; user-select: none; pointer-events: none; }
+
+        #bmi-image-section {
+            display: flex;
+            align-items: flex-end;
+            height: 250px;
+            flex-grow: 1;
+            justify-content: center;
+        }
+        #bmi-image {
+            height: 100%;
+            width: auto;
+            object-fit: contain;
+            user-select: none;
+            pointer-events: none;
+        }
         
         .sleep-animation-container {
             background-color: #1c2a4e; border-radius: 50%;
@@ -211,15 +317,35 @@
 
         #camera-modal { position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #camera-modal.active { opacity: 1; pointer-events: all; }
-        #camera-container {
-            position: relative; overflow: hidden; border-radius: 1.5rem; background: #111;
-            border: 1px solid rgba(255,255,255,0.2); display: flex; justify-content: center; align-items: center;
-        }
-        #camera-video, #camera-canvas {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            transform: scaleX(-1); /* Mirror view for selfie */
-        }
-        #camera-video { object-fit: cover; }
+        /* Финальный код */
+/* Правильный код */
+/* Финальный, единственно верный вариант */
+/* Финальный, упрощенный CSS */
+#camera-container {
+    position: relative;
+    /* Убраны все размеры - JS будет управлять этим */
+    overflow: hidden;
+    border-radius: 1.5rem;
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.2);
+    /* Добавляем flex для центровки на всякий случай */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+        /* Стало */
+#camera-video, #camera-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: scaleX(-1); /* Зеркальное отображение для селфи */
+}
+
+#camera-video {
+    object-fit: cover; /* Заполняет контейнер без искажений */
+}
         #camera-guide-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); text-align: center; pointer-events: none; }
         #camera-guide-box { width: 70%; aspect-ratio: 1/1.2; border: 2px dashed rgba(255,255,255,0.5); border-radius: 50%; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
         #camera-guide-box.locked { border-color: #34d399; box-shadow: 0 0 20px #34d399; }
@@ -251,78 +377,53 @@
     </header>
 
     <main id="steps-wrapper" class="pt-16">
-        <!-- === START: NEW SIMPLIFIED ONBOARDING STEP === -->
-        <section id="step-onboarding" class="quiz-step active">
-            <div class="w-full max-w-lg mx-auto text-center flex flex-col justify-center h-full">
-                <!-- Spacer to push content down a bit -->
-                <div class="flex-grow"></div> 
-                
-                <!-- Main Content -->
-                <div class="px-4">
-                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-[--brand-dark-text]">Discover Your Biological Age</h1>
-                    <p class="mt-4 max-w-md mx-auto text-lg text-gray-600">Lower it by 3 years with our AI analysis and a personalized plan based on the latest breakthrough technology.</p>
-
-                    <!-- Feature Highlights -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10 text-left">
-                        <div class="flex items-center gap-3 p-3 bg-white/60 rounded-lg">
-                            <span class="text-3xl">🎯</span>
-                            <div>
-                                <h3 class="font-semibold text-gray-800">AI Analysis</h3>
-                                <p class="text-sm text-gray-500">Accurate photo assessment</p>
-                            </div>
-                        </div>
-                         <div class="flex items-center gap-3 p-3 bg-white/60 rounded-lg">
-                            <span class="text-3xl">🌿</span>
-                            <div>
-                                <h3 class="font-semibold text-gray-800">Skin Analysis</h3>
-                                <p class="text-sm text-gray-500">Uncover hidden aging factors</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3 p-3 bg-white/60 rounded-lg">
-                            <span class="text-3xl">🗺️</span>
-                            <div>
-                                <h3 class="font-semibold text-gray-800">Personalized Plan</h3>
-                                <p class="text-sm text-gray-500">7-day improvement plan</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Spacer and Action Button -->
-                <div class="flex-grow"></div>
-                <div class="w-full p-4">
-                     <button id="start-quiz-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] text-lg font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[--brand-accent]/40" disabled>Let's start</button>
-                    <p class="text-xs text-gray-500 text-center mt-4">
-                        By continuing, you agree to our 
-                        <a href="terms.html" class="underline hover:text-gray-700" target="_blank">Terms of Service</a> 
-                        and 
-                        <a href="privacy.html" class="underline hover:text-gray-700" target="_blank">Privacy Policy</a>.
-                    </p>
-                </div>
-            </div>
+        <section id="step-onboarding" class="quiz-step active p-0 !pt-0">
+             <div id="onboarding-swiper" class="relative w-full h-full flex flex-col">
+                 <div class="flex-grow w-full h-full overflow-hidden">
+                     <div class="swiper-wrapper">
+                         <div class="swiper-slide !p-0">
+                             <video class="absolute top-0 left-0 w-full h-full object-cover -z-10" autoplay loop muted playsinline><source src="fon.webm" type="video/webm"><source src="fon.mp4" type="video/mp4"></video>
+                             <div class="w-full h-full flex flex-col justify-end items-center text-center p-8 bg-black/30 text-white">
+                                 <div class="flex-grow"></div><h1 class="text-4xl font-extrabold tracking-tight">Unlock Your Inner Potential.</h1><p class="mt-3 max-w-md text-lg text-gray-200">Discover your biological age and get a personalized wellness plan based on AI analysis.</p><div class="h-[15vh]"></div>
+                             </div>
+                         </div>
+                         <div class="swiper-slide"><div class="text-left w-full max-w-sm"><h2 class="text-2xl font-bold text-gray-800 text-center mb-6">What you'll get:</h2><ul class="space-y-4"><li class="flex items-center"><span class="text-2xl mr-3">🎯</span><div><h3 class="font-semibold">Wellness Score</h3><p class="text-sm text-gray-500">Your comprehensive health rating</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">⏳</span><div><h3 class="font-semibold">Biological Age</h3><p class="text-sm text-gray-500">How "young" you are for your years</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🌿</span><div><h3 class="font-semibold">Skin & Stress Analysis</h3><p class="text-sm text-gray-500">Learn about hidden factors</p></div></li><li class="flex items-center"><span class="text-2xl mr-3">🗺️</span><div><h3 class="font-semibold">Personalized Plan</h3><p class="text-sm text-gray-500">A 7-day plan for improvement</p></div></li></ul></div></div>
+                         <div class="swiper-slide"><div class="text-center"><h2 class="text-2xl font-bold text-gray-800 mb-6">Lower Your Biological Age</h2><div class="flex justify-center items-center space-x-4"><div class="text-center"><p class="text-gray-500">Chronological</p><p class="text-5xl font-bold text-gray-400">35</p></div><div id="lottie-onboarding-2" class="w-20 h-20"></div><div class="text-center"><p class="font-semibold" style="color: var(--brand-dark-text);">Biological</p><p class="text-6xl font-extrabold" style="color: var(--brand-dark-text);">32</p></div></div><p class="text-gray-600 mt-6 max-w-xs mx-auto">Our plan is designed to help you feel younger and more energetic.</p></div></div>
+                         <div class="swiper-slide"><div class="text-center max-w-sm"><h2 class="text-2xl font-bold text-gray-800 mb-8">Your Privacy is Our Priority</h2><div class="space-y-6 text-left"><div class="flex items-center"><span class="text-3xl mr-4">📸</span><p class="text-gray-600">Your photo is analyzed on-the-fly and never stored.</p></div><div class="flex items-center"><span class="text-3xl mr-4">🔒</span><p class="text-gray-600">All your data is anonymized and protected by encryption.</p></div><div class="flex items-center"><span class="text-3xl mr-4">⚕️</span><p class="text-gray-600">This is not medical advice. For informational purposes only.</p></div></div></div></div>
+                     </div>
+                 </div>
+                 <div class="py-6 px-6 bg-white"><div id="dots-container" class="flex justify-center items-center space-x-3 mb-6"></div><button id="start-quiz-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[--brand-accent]/40" disabled>Let's start</button>
+                 <p class="text-xs text-gray-500 text-center mt-4">
+    By continuing, you agree to our 
+    <a href="terms.html" class="underline hover:text-gray-700" target="_blank">Terms of Service</a> 
+    and 
+    <a href="privacy.html" class="underline hover:text-gray-700" target="_blank">Privacy Policy</a>.
+</p>
+                 </div>
+             </div>
         </section>
-        <!-- === END: NEW SIMPLIFIED ONBOARDING STEP === -->
 
         <section id="step-quiz" class="quiz-step prev">
             <div id="question-wrapper" class="w-full max-w-2xl"></div>
         </section>
         
         <section id="step-bmi" class="quiz-step prev">
-            <div id="bmi-display-wrapper" class="flex flex-col items-center">
-                <div id="bmi-category" class="text-lg"></div>
-                <p id="bmi-description" class="text-gray-600 mt-1 text-center max-w-xs"></p>
-                <div id="bmi-details" class="w-full mt-6">
-                    <div id="bmi-scale-container" class="relative">
-                        <div id="bmi-scale-gradient-vertical"></div>
-                        <div id="bmi-thumb"></div>
-                        <div id="bmi-value-display" style="--thumb-position: 0%;"></div>
-                    </div>
-                    <div id="bmi-image-section">
-                        <img id="bmi-image" src="" alt="BMI category illustration">
-                    </div>
-                </div>
-                <button id="bmi-continue-btn" class="w-full sm:max-w-xs block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition mt-8">Continue</button>
-            </div>
+             <div id="bmi-display-wrapper" class="flex flex-col items-center">
+                 <div id="bmi-category" class="text-lg"></div>
+                 <p id="bmi-description" class="text-gray-600 mt-1 text-center max-w-xs"></p>
+
+                 <div id="bmi-details" class="w-full mt-6">
+                     <div id="bmi-scale-container" class="relative">
+                         <div id="bmi-scale-gradient-vertical"></div>
+                         <div id="bmi-thumb"></div>
+                         <div id="bmi-value-display" style="--thumb-position: 0%;"></div>
+                     </div>
+                     <div id="bmi-image-section">
+                         <img id="bmi-image" src="" alt="BMI category illustration">
+                     </div>
+                 </div>
+                 <button id="bmi-continue-btn" class="w-full sm:max-w-xs block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition mt-8">Continue</button>
+             </div>
         </section>
         
         <section id="step-loading" class="quiz-step prev">
@@ -331,12 +432,14 @@
             <div id="analysis-steps" class="mt-6 text-gray-600 space-y-2 w-64 text-left"></div>
         </section>
 
+        <!-- NEW: Selfie Confirmation Step -->
         <section id="step-selfie-confirm" class="quiz-step prev">
             <div class="text-center max-w-sm mx-auto">
                 <h2 class="text-3xl font-bold text-gray-900">Looks good?</h2>
                 <img id="selfie-preview-img" src="" alt="Your selfie" class="w-full max-w-xs aspect-[3/4] object-cover rounded-2xl my-6 mx-auto shadow-lg border-2 border-white">
                 <div class="flex flex-col sm:flex-row gap-3">
                     <button id="selfie-retake-btn" class="w-full bg-white text-gray-800 font-bold py-3 px-6 rounded-full text-lg hover:bg-gray-100 transition border border-gray-300">Retake</button>
+                    <!-- MODIFIED BUTTON FOR LOADING STATE -->
                     <button id="selfie-confirm-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-6 rounded-full text-lg hover:opacity-90 transition flex items-center justify-center disabled:opacity-75">
                         <span class="btn-text">Confirm Photo</span>
                         <span class="spinner hidden">
@@ -391,13 +494,13 @@ document.addEventListener('DOMContentLoaded', () => {
         currentStep: 'onboarding',
         currentQuestionIndex: -1,
         userAnswers: {},
-        sessionId: null,
+        sessionId: null, // To hold the user's session ID
         cameraStream: null,
         faceMesh: null,
         cameraAnimFrame: null,
         captureTimeout: null,
-        lastPhotoDataUrl: null,
-        faceMeshDrawState: { startTime: null, duration: 500 },
+        lastPhotoDataUrl: null, // To hold photo data for confirmation
+        faceMeshDrawState: { startTime: null, duration: 500 }, // Added for mesh fade-in
         quizQuestions: [
             { key: 'userGoal', type: 'options', text: "What’s your main goal?", subtext: "This helps us tailor the final report to your interests.", options: [{text: 'Find out my Biological Age', value:'bio_age'}, {text:'Get a Skin Health Analysis', value: 'skin'}, {text:'Receive a 7-Day Improvement Plan', value:'plan'}, {text:'All of the above!', value: 'all'}] },
             { key: 'age', type: 'slider', text: "How old are you?", subtext: "Your age is a key factor in calculating your biological age baseline.", min: 18, max: 90, defaultValue: 30, unit: 'years' },
@@ -496,106 +599,115 @@ const LibraryLoader = {
     const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
 
     async function processAndSavePhoto() {
-        const confirmBtn = document.getElementById('selfie-confirm-btn');
-        const btnText = confirmBtn.querySelector('.btn-text');
-        const spinner = confirmBtn.querySelector('.spinner');
-        
-        if (!App.lastPhotoDataUrl || !App.sessionId) {
-            alert('An error occurred. Missing photo data or session ID.');
-            return;
-        }
-
-        confirmBtn.disabled = true;
-        btnText.classList.add('hidden');
-        spinner.classList.remove('hidden');
-
-        try {
-            console.log('Sending photo for analysis...');
-            const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ photoDataUrl: App.lastPhotoDataUrl })
-            });
-
-            const responseData = await analyzeResponse.json();
-            
-            if (!analyzeResponse.ok) {
-                if (responseData.error && responseData.error.includes('not configured')) {
-                    console.warn('Face analysis service not configured, skipping...');
-                    await saveAnswerToServer('selfie', App.lastPhotoDataUrl);
-                    await saveAnswerToServer('faceAnalysisSkipped', 'service_not_configured');
-                    handleAnswer('selfie', App.lastPhotoDataUrl);
-                    return;
-                }
-                throw new Error(`Face analysis failed: ${responseData.error || 'Unknown error'}`);
-            }
-
-            if (!responseData.faces || responseData.faces.length === 0) {
-                const retry = confirm('No face detected in the photo. Would you like to retake it?');
-                if (retry) {
-                    document.getElementById('selfie-retake-btn').click();
-                    return;
-                } else {
-                    await saveAnswerToServer('selfie', App.lastPhotoDataUrl);
-                    await saveAnswerToServer('faceAnalysisSkipped', 'no_face_detected');
-                    handleAnswer('selfie', App.lastPhotoDataUrl);
-                    return;
-                }
-            }
-
-            console.log('Saving analysis data...');
-            const saveResponse = await fetch('/.netlify/functions/quiz', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'saveAnalysisData',
-                    sessionId: App.sessionId,
-                    analysisData: responseData
-                })
-            });
-            
-            if (!saveResponse.ok) {
-                throw new Error('Failed to save analysis data.');
-            }
-            
-            console.log('Data saved successfully.');
-            handleAnswer('selfie', App.lastPhotoDataUrl);
-
-        } catch (error) {
-            console.error('Error during photo processing:', error);
-            
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = `
-                <div class="bg-white rounded-lg p-6 max-w-md w-full">
-                    <h2 class="text-xl font-bold text-yellow-600 mb-2">Photo Analysis Issue</h2>
-                    <p class="text-gray-700 mb-4">We couldn't analyze your photo, but you can still continue.</p>
-                    <p class="text-sm text-gray-600 mb-4">Error: ${error.message}</p>
-                    <div class="flex gap-3">
-                        <button onclick="
-                            document.getElementById('selfie-retake-btn').click();
-                            this.closest('.fixed').remove();
-                        " class="flex-1 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-                            Retake Photo
-                        </button>
-                        <button onclick="
-                            handleAnswer('selfie', 'skipped');
-                            this.closest('.fixed').remove();
-                        " class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">
-                            Skip Photo
-                        </button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-        } finally {
-            confirmBtn.disabled = false;
-            btnText.classList.remove('hidden');
-            spinner.classList.add('hidden');
-        }
+    const confirmBtn = document.getElementById('selfie-confirm-btn');
+    const btnText = confirmBtn.querySelector('.btn-text');
+    const spinner = confirmBtn.querySelector('.spinner');
+    
+    if (!App.lastPhotoDataUrl || !App.sessionId) {
+        alert('An error occurred. Missing photo data or session ID.');
+        return;
     }
 
+    confirmBtn.disabled = true;
+    btnText.classList.add('hidden');
+    spinner.classList.remove('hidden');
+
+    try {
+        // 1. Отправляем фото на анализ
+        console.log('Sending photo for analysis...');
+        const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ photoDataUrl: App.lastPhotoDataUrl })
+        });
+
+        const responseData = await analyzeResponse.json();
+        
+        if (!analyzeResponse.ok) {
+            // Проверяем, настроен ли сервис анализа
+            if (responseData.error && responseData.error.includes('not configured')) {
+                console.warn('Face analysis service not configured, skipping...');
+                // Сохраняем фото без анализа
+                await saveAnswerToServer('selfie', App.lastPhotoDataUrl);
+                await saveAnswerToServer('faceAnalysisSkipped', 'service_not_configured');
+                handleAnswer('selfie', App.lastPhotoDataUrl);
+                return;
+            }
+            throw new Error(`Face analysis failed: ${responseData.error || 'Unknown error'}`);
+        }
+
+        // 2. Проверяем, что в ответе есть данные о лицах
+        if (!responseData.faces || responseData.faces.length === 0) {
+            const retry = confirm('No face detected in the photo. Would you like to retake it?');
+            if (retry) {
+                document.getElementById('selfie-retake-btn').click();
+                return;
+            } else {
+                // Продолжаем без анализа
+                await saveAnswerToServer('selfie', App.lastPhotoDataUrl);
+                await saveAnswerToServer('faceAnalysisSkipped', 'no_face_detected');
+                handleAnswer('selfie', App.lastPhotoDataUrl);
+                return;
+            }
+        }
+
+        // 3. Сохраняем результат анализа
+        console.log('Saving analysis data...');
+        const saveResponse = await fetch('/.netlify/functions/quiz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'saveAnalysisData',
+                sessionId: App.sessionId,
+                analysisData: responseData
+            })
+        });
+        
+        if (!saveResponse.ok) {
+            throw new Error('Failed to save analysis data.');
+        }
+        
+        console.log('Data saved successfully.');
+        handleAnswer('selfie', App.lastPhotoDataUrl);
+
+    } catch (error) {
+        console.error('Error during photo processing:', error);
+        
+        // Предлагаем пользователю выбор
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+        modal.innerHTML = `
+            <div class="bg-white rounded-lg p-6 max-w-md w-full">
+                <h2 class="text-xl font-bold text-yellow-600 mb-2">Photo Analysis Issue</h2>
+                <p class="text-gray-700 mb-4">We couldn't analyze your photo, but you can still continue.</p>
+                <p class="text-sm text-gray-600 mb-4">Error: ${error.message}</p>
+                <div class="flex gap-3">
+                    <button onclick="
+                        document.getElementById('selfie-retake-btn').click();
+                        this.closest('.fixed').remove();
+                    " class="flex-1 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                        Retake Photo
+                    </button>
+                    <button onclick="
+                        App.handleAnswer('selfie', 'skipped');
+                        this.closest('.fixed').remove();
+                    " class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">
+                        Skip Photo
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+    } finally {
+        // Возвращаем кнопку в исходное состояние
+        confirmBtn.disabled = false;
+        btnText.classList.remove('hidden');
+        spinner.classList.add('hidden');
+    }
+}
+
+    // НОВАЯ ФУНКЦИЯ для отправки ответа на сервер
     async function saveAnswerToServer(questionKey, answer) {
         if (!App.sessionId) {
             console.error("Cannot save answer, session ID is missing.");
@@ -622,20 +734,25 @@ const LibraryLoader = {
         }
     }
 
+    // ИЗМЕНЕННАЯ ФУНКЦИЯ handleAnswer
     async function handleAnswer(questionKey, answer) {
         App.userAnswers[questionKey] = answer;
         
+        // Отправляем ответ на сервер и ждем завершения
         await saveAnswerToServer(questionKey, answer);
         
+        // Переходим к следующему вопросу только после сохранения
         setTimeout(next, 100);
     }
 
+    // ИЗМЕНЕННАЯ ФУНКЦИЯ handleOptionClick
     async function handleOptionClick(event, key, value) {
         const clickedButton = event.currentTarget;
         const parent = clickedButton.parentElement;
         parent.querySelectorAll('button').forEach(btn => btn.disabled = true);
         clickedButton.classList.add('selected');
         
+        // Используем await, чтобы дождаться завершения handleAnswer
         await handleAnswer(key, value);
     }
 
@@ -668,11 +785,12 @@ const LibraryLoader = {
     }
     
     function next() {
+    // ---- НАЧАЛО ИЗМЕНЕНИЯ ----
+    // Отправляем событие "Lead", только когда квиз начинается (индекс был -1)
     if (App.currentQuestionIndex === -1) { 
-        if(typeof fbq === 'function') {
-            fbq('track', 'Lead');
-        }
+        fbq('track', 'Lead');
     }
+    // ---- КОНЕЦ ИЗМЕНЕНИЯ ----
 
     App.currentQuestionIndex++;
     const stepConfig = App.quizQuestions[App.currentQuestionIndex];
@@ -741,20 +859,20 @@ const LibraryLoader = {
         
         if (question.key === 'stress') {
              contentHTML = `<div class="stress-widget">
-                    <h2 class="text-2xl font-bold text-gray-900 text-center">${question.text}</h2>
-                    <p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>
-                    <div class="my-6">
-                        <input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
-                    </div>
-                    <div class="flex justify-between text-sm text-gray-500 mt-2 px-1">
-                        <span>Relaxed</span>
-                        <span>Stressed</span>
-                    </div>
-                </div>`;
+                 <h2 class="text-2xl font-bold text-gray-900 text-center">${question.text}</h2>
+                 <p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>
+                 <div class="my-6">
+                     <input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
+                 </div>
+                 <div class="flex justify-between text-sm text-gray-500 mt-2 px-1">
+                     <span>Relaxed</span>
+                     <span>Stressed</span>
+                 </div>
+             </div>`;
         } else if (question.type === 'camera_step' || question.type === 'email_step') {
             contentHTML = `<img src="face.jpeg" alt="Face scan illustration" class="w-40 h-40 mx-auto rounded-full object-cover mb-6 shadow-lg">
-                                     <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
-                                     <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
+                                         <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
+                                         <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
             if (question.type === 'email_step') {
                  contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
                                              <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
@@ -842,15 +960,15 @@ const LibraryLoader = {
     }
     
     function renderAnimation(key) {
-        goToStep('quiz'); 
+        goToStep('quiz'); // Keep quiz step active for animation
         const wrapper = document.getElementById('question-wrapper');
         document.getElementById('footer-actions').innerHTML = '';
-        document.getElementById('back-btn').classList.add('hidden');
+        document.getElementById('back-btn').classList.add('hidden'); // Hide back button for animations
 
         let animationHTML = '';
 
         if (key === 'bmi_display') {
-            goToStep('bmi');
+            goToStep('bmi'); // Switch to dedicated BMI step
             renderBmiResult();
             return;
         } else if (key === 'sleep_visual') {
@@ -877,7 +995,7 @@ const LibraryLoader = {
             else if (answer.startsWith("More than 8")) percent = 100;
             
             const ringEl = document.getElementById('sleep-ring-fg-anim');
-            const circumference = 2 * Math.PI * 52; 
+            const circumference = 2 * Math.PI * 52; // For r=52
             if(ringEl) {
                 ringEl.style.strokeDasharray = circumference;
                 ringEl.style.strokeDashoffset = String(circumference - (percent / 100) * circumference);
@@ -897,7 +1015,7 @@ const LibraryLoader = {
             
             const dayElements = document.querySelectorAll('#activity-week-anim .activity-day');
             if (dayElements.length > 0) {
-                dayElements.forEach(day => day.classList.remove('active')); 
+                dayElements.forEach(day => day.classList.remove('active')); // Reset
                 for (let i = 0; i < Math.min(days, 7); i++) {
                     setTimeout(() => { dayElements[i]?.classList.add('active'); }, i * 200);
                 }
@@ -960,53 +1078,66 @@ const LibraryLoader = {
         document.getElementById('bmi-continue-btn').onclick = next;
     }
 
-    async function startAnalysis() {
-        goToStep('loading');
-        if (App.sessionId) {
-            fetch('/.netlify/functions/quiz', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'endQuiz',
-                    sessionId: App.sessionId
-                })
-            }).catch(err => console.error('Failed to save quiz end time:', err));
-        }
-        AnimationManager.add('loading-animation', 'loader.json');
-        const analysisStepsContainer = document.getElementById('analysis-steps');
-        analysisStepsContainer.innerHTML = '';
-        const steps = ["Analyzing lifestyle data...", "Calculating metabolic rate...", "Processing facial biomarkers...", "Compiling wellness report..."];
-        
-        for (let i = 0; i < steps.length; i++) {
-            await new Promise(resolve => setTimeout(resolve, 900));
-            const p = document.createElement('p');
-            p.textContent = `✓ ${steps[i]}`;
-            analysisStepsContainer.appendChild(p);
-        }
+    // /quiz-new.html
 
-        try {
-            const response = await fetch('/.netlify/functions/generateProfile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId: App.sessionId })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => {
-                    return { error: 'The server responded with an unexpected error.' };
-                });
-                throw new Error(errorData.error || `Server error: ${response.status}`);
-            }
+        async function startAnalysis() {
+            goToStep('loading');
+            // Сохраняем время окончания квиза
+if (App.sessionId) {
+    fetch('/.netlify/functions/quiz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action: 'endQuiz',
+            sessionId: App.sessionId
+        })
+    }).catch(err => console.error('Failed to save quiz end time:', err));
+}
+            AnimationManager.add('loading-animation', 'loader.json');
+            const analysisStepsContainer = document.getElementById('analysis-steps');
+            analysisStepsContainer.innerHTML = '';
+            const steps = ["Analyzing lifestyle data...", "Calculating metabolic rate...", "Processing facial biomarkers...", "Compiling wellness report..."];
             
-            console.log('Profile generated successfully, redirecting...');
-            window.location.href = `profile.html?session_id=${App.sessionId || ''}`;
+            // Эта часть с анимацией текста остается без изменений
+            for (let i = 0; i < steps.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, 900));
+                const p = document.createElement('p');
+                p.textContent = `✓ ${steps[i]}`;
+                analysisStepsContainer.appendChild(p);
+            }
 
-        } catch (error) {
-            console.error('Failed to generate profile:', error);
-            analysisStepsContainer.innerHTML = `<p class="text-red-600 font-bold text-lg">An error occurred while creating your profile.</p><p class="text-gray-600 mt-2">${error.message}</p><p class="mt-4"><a href="#" onclick="location.reload()" class="text-blue-600 font-semibold underline">Please click here to try again.</a></p>`;
+            try {
+                const response = await fetch('/.netlify/functions/generateProfile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: App.sessionId })
+                });
+
+                // --- ВОТ ГЛАВНОЕ ИЗМЕНЕНИЕ ---
+                // Проверяем, успешен ли ответ сервера (статус 200-299)
+                if (!response.ok) {
+                    // Пытаемся прочитать текст ошибки от сервера
+                    const errorData = await response.json().catch(() => {
+                        // Если сервер вернул не JSON, а просто текст, будет резервное сообщение
+                        return { error: 'The server responded with an unexpected error.' };
+                    });
+                    // Создаем ошибку с текстом от сервера, чтобы прервать выполнение
+                    throw new Error(errorData.error || `Server error: ${response.status}`);
+                }
+                
+                // Этот код выполнится только если response.ok === true
+                console.log('Profile generated successfully, redirecting...');
+                window.location.href = `profile.html?session_id=${App.sessionId || ''}`;
+
+            } catch (error) {
+                // Теперь этот блок будет ловить нашу новую, более понятную ошибку
+                console.error('Failed to generate profile:', error);
+                analysisStepsContainer.innerHTML = `<p class="text-red-600 font-bold text-lg">An error occurred while creating your profile.</p><p class="text-gray-600 mt-2">${error.message}</p><p class="mt-4"><a href="#" onclick="location.reload()" class="text-blue-600 font-semibold underline">Please click here to try again.</a></p>`;
+            }
         }
-    }
     
+    // ЗАМЕНИТЕ ВСЮ ФУНКЦИЮ openCamera НА ЭТОТ КОД
+
 async function openCamera() {
     try {
         await LibraryLoader.loadFaceMeshLibraries();
@@ -1047,21 +1178,27 @@ async function openCamera() {
         video.srcObject = App.cameraStream;
         
         video.addEventListener('loadeddata', () => {
+            // --- НОВАЯ ЛОГИКА РАСЧЕТА РАЗМЕРОВ ---
             const videoRatio = video.videoWidth / video.videoHeight;
             
+            // Максимально доступное пространство (90% от модального окна)
             const maxWidth = cameraModal.clientWidth * 0.9;
             const maxHeight = cameraModal.clientHeight * 0.9;
             
             let finalWidth, finalHeight;
 
+            // Расчет финальных размеров с сохранением пропорций
             if ((maxWidth / maxHeight) > videoRatio) {
+                // Если доступное пространство шире, чем видео -> высота является лимитом
                 finalHeight = maxHeight;
                 finalWidth = finalHeight * videoRatio;
             } else {
+                // Если доступное пространство выше, чем видео -> ширина является лимитом
                 finalWidth = maxWidth;
                 finalHeight = finalWidth / videoRatio;
             }
 
+            // Применяем ОДИНАКОВЫЕ размеры ко всем трем элементам
             cameraContainer.style.width = `${finalWidth}px`;
             cameraContainer.style.height = `${finalHeight}px`;
 
@@ -1071,6 +1208,8 @@ async function openCamera() {
             canvas.style.width = `${finalWidth}px`;
             canvas.style.height = `${finalHeight}px`;
             
+            // --- КОНЕЦ НОВОЙ ЛОГИКИ ---
+
             cameraLoop();
         });
 
@@ -1171,6 +1310,75 @@ async function openCamera() {
         goToStep('selfie-confirm');
     }
 
+    function initOnboarding() {
+        const swiper = document.getElementById('onboarding-swiper');
+        const swiperWrapper = swiper.querySelector('.swiper-wrapper');
+        const slides = swiper.querySelectorAll('.swiper-slide');
+        const dotsContainer = document.getElementById('dots-container');
+        if (!swiperWrapper || !slides.length || !dotsContainer) return;
+        
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+        let startX = 0, currentX = 0, isDragging = false;
+
+        dotsContainer.innerHTML = '';
+        slides.forEach((_, i) => {
+            const dot = document.createElement('button');
+            dot.className = 'dot w-2.5 h-2.5 bg-gray-300 rounded-full transition';
+            dot.onclick = () => goToSlide(i);
+            dotsContainer.appendChild(dot);
+        });
+        const dots = dotsContainer.querySelectorAll('.dot');
+        
+        function goToSlide(index, animated = true) {
+            currentSlide = (index + totalSlides) % totalSlides;
+            swiperWrapper.style.transition = animated ? 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' : 'none';
+            swiperWrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+        }
+
+        const startDrag = (e) => {
+            isDragging = true;
+            startX = e.pageX || e.touches[0].pageX;
+            swiperWrapper.style.transition = 'none';
+        }
+        const drag = (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            currentX = e.pageX || e.touches[0].pageX;
+            const diff = currentX - startX;
+            swiperWrapper.style.transform = `translateX(calc(-${currentSlide * 100}% + ${diff}px))`;
+        }
+        const endDrag = (e) => {
+    if (!isDragging) return;
+    const diff = currentX - startX;
+
+    // Если сдвиг был очень маленьким, считаем это тапом и ничего не делаем
+    if (Math.abs(diff) < 10) {
+        isDragging = false;
+        return; 
+    }
+
+    isDragging = false; // Перемещаем эту строку ниже
+
+    if (Math.abs(diff) > 50) {
+        goToSlide(currentSlide + (diff < 0 ? 1 : -1));
+    } else {
+        goToSlide(currentSlide);
+    }
+}
+        
+        swiper.addEventListener('mousedown', startDrag);
+        swiper.addEventListener('mousemove', drag);
+        swiper.addEventListener('mouseup', endDrag);
+        swiper.addEventListener('mouseleave', endDrag);
+        swiper.addEventListener('touchstart', startDrag, { passive: true });
+        swiper.addEventListener('touchmove', drag, { passive: false });
+        swiper.addEventListener('touchend', endDrag);
+
+        goToSlide(0);
+    }
+    
     function initMenu() {
         const menuBtn = document.getElementById('burger-menu-btn');
         const closeBtn = document.getElementById('close-menu-btn');
@@ -1186,109 +1394,116 @@ async function openCamera() {
     }
 
     async function startQuizSession() {
-        const startBtn = document.getElementById('start-quiz-btn');
-        let retryCount = 0;
-        const maxRetries = 3;
-        
-        const attemptSessionCreation = async () => {
-            try {
-                const getDeviceType = () => {
-                    const userAgent = navigator.userAgent.toLowerCase();
-                    let os = 'Unknown';
-                    if (/iphone|ipad|ipod/.test(userAgent)) os = 'iOS';
-                    else if (/android/.test(userAgent)) os = 'Android';
-                    else if (/windows phone/.test(userAgent)) os = 'Windows Phone';
-                    else if (/mac os x/.test(userAgent)) os = 'macOS';
-                    else if (/windows/.test(userAgent)) os = 'Windows';
-                    else if (/linux/.test(userAgent)) os = 'Linux';
-
-                    let device = 'Desktop';
-                    if (window.innerWidth < 768) device = 'Mobile';
-                    else if (window.innerWidth < 1024) device = 'Tablet';
-                    return `${device}/${os}`;
-                };
-                const deviceType = getDeviceType();
-                const urlParams = new URLSearchParams(window.location.search);
-                const trafficSource = urlParams.get('utm_source') || urlParams.get('ref') || 'direct';
-                
-                const response = await fetch('/.netlify/functions/quiz', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        action: 'startSession',
-                        deviceType: deviceType,
-                        source: trafficSource
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Could not start session. Status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                if (!data.sessionId) {
-                    throw new Error('Session ID not received from server');
-                }
-                
-                App.sessionId = data.sessionId;
-                console.log('Session successfully started:', App.sessionId);
-                if (typeof fbq === 'function') { fbq('track', 'ViewContent'); }
-                sessionStorage.setItem('quiz_session_id', App.sessionId);
-                
-                if(startBtn) {
-                    startBtn.disabled = false;
-                    startBtn.textContent = "Let's start";
-                }
-                
-                return true;
-                
-            } catch (error) {
-                console.error(`Session creation attempt ${retryCount + 1} failed:`, error);
-                retryCount++;
-                
-                if (retryCount < maxRetries) {
-                    await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
-                    return attemptSessionCreation();
-                } else {
-                    throw error;
-                }
-            }
-        };
-        
+    const startBtn = document.getElementById('start-quiz-btn');
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    // Функция для попытки создания сессии
+    const attemptSessionCreation = async () => {
         try {
-            await attemptSessionCreation();
-        } catch (error) {
-            console.error('CRITICAL: Failed to start session after all retries:', error);
+            // Добавляем информацию об устройстве и источнике трафика
+            const getDeviceType = () => {
+    const userAgent = navigator.userAgent.toLowerCase();
+    let os = 'Unknown';
+    if (/iphone|ipad|ipod/.test(userAgent)) os = 'iOS';
+    else if (/android/.test(userAgent)) os = 'Android';
+    else if (/windows phone/.test(userAgent)) os = 'Windows Phone';
+    else if (/mac os x/.test(userAgent)) os = 'macOS';
+    else if (/windows/.test(userAgent)) os = 'Windows';
+    else if (/linux/.test(userAgent)) os = 'Linux';
+
+    let device = 'Desktop';
+    if (window.innerWidth < 768) device = 'Mobile';
+    else if (window.innerWidth < 1024) device = 'Tablet';
+    return `${device}/${os}`;
+};
+const deviceType = getDeviceType();
+            const urlParams = new URLSearchParams(window.location.search);
+            const trafficSource = urlParams.get('utm_source') || urlParams.get('ref') || 'direct';
             
-            if(startBtn) {
-                startBtn.textContent = 'Connection Error - Refresh Page';
-                startBtn.classList.add('bg-red-500');
+            const response = await fetch('/.netlify/functions/quiz', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    action: 'startSession',
+                    deviceType: deviceType,
+                    source: trafficSource
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Could not start session. Status: ${response.status}`);
             }
             
-            const errorModal = document.createElement('div');
-            errorModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-            errorModal.innerHTML = `
-                <div class="bg-white rounded-lg p-6 max-w-md w-full">
-                    <h2 class="text-xl font-bold text-red-600 mb-2">Connection Error</h2>
-                    <p class="text-gray-700 mb-4">We couldn't connect to our servers. This might be due to:</p>
-                    <ul class="list-disc list-inside text-gray-600 mb-4">
-                        <li>Poor internet connection</li>
-                        <li>Browser blocking cookies</li>
-                        <li>Ad blocker interference</li>
-                    </ul>
-                    <div class="flex gap-3">
-                        <button onclick="location.reload()" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-                            Try Again
-                        </button>
-                        <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(errorModal);
+            const data = await response.json();
+            if (!data.sessionId) {
+                throw new Error('Session ID not received from server');
+            }
+            
+            App.sessionId = data.sessionId;
+            console.log('Session successfully started:', App.sessionId);
+            if (typeof fbq === 'function') { fbq('track', 'ViewContent'); }
+            // Сохраняем sessionId в sessionStorage как резервную копию
+            sessionStorage.setItem('quiz_session_id', App.sessionId);
+            
+            // Разблокируем кнопку только после успешного создания сессии
+            if(startBtn) {
+                startBtn.disabled = false;
+                startBtn.textContent = "Let's start";
+            }
+            
+            return true;
+            
+        } catch (error) {
+            console.error(`Session creation attempt ${retryCount + 1} failed:`, error);
+            retryCount++;
+            
+            if (retryCount < maxRetries) {
+                // Ждем перед повторной попыткой (экспоненциальная задержка)
+                await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
+                return attemptSessionCreation();
+            } else {
+                throw error;
+            }
         }
+    };
+    
+    // Запускаем создание сессии
+    try {
+        await attemptSessionCreation();
+    } catch (error) {
+        console.error('CRITICAL: Failed to start session after all retries:', error);
+        
+        if(startBtn) {
+            startBtn.textContent = 'Connection Error - Refresh Page';
+            startBtn.classList.add('bg-red-500');
+        }
+        
+        // Показываем понятное сообщение об ошибке пользователю
+        const errorModal = document.createElement('div');
+        errorModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+        errorModal.innerHTML = `
+            <div class="bg-white rounded-lg p-6 max-w-md w-full">
+                <h2 class="text-xl font-bold text-red-600 mb-2">Connection Error</h2>
+                <p class="text-gray-700 mb-4">We couldn't connect to our servers. This might be due to:</p>
+                <ul class="list-disc list-inside text-gray-600 mb-4">
+                    <li>Poor internet connection</li>
+                    <li>Browser blocking cookies</li>
+                    <li>Ad blocker interference</li>
+                </ul>
+                <div class="flex gap-3">
+                    <button onclick="location.reload()" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                        Try Again
+                    </button>
+                    <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">
+                        Close
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(errorModal);
     }
+}
 
 
     // --- App Initialization ---
@@ -1296,13 +1511,18 @@ async function openCamera() {
     window.addEventListener('resize', setVh);
     startQuizSession();
     goToStep('onboarding');
+    initOnboarding();
+    AnimationManager.add('lottie-onboarding-2', 'arrow.json');
     initMenu();
 
     document.getElementById('start-quiz-btn').addEventListener('click', next);
-    document.getElementById('start-quiz-btn').addEventListener('touchend', (event) => {
-        event.preventDefault(); 
-        next(); 
-    });
+    // FIX for Facebook/Mobile Browsers
+document.getElementById('start-quiz-btn').addEventListener('touchend', (event) => {
+    // Предотвращаем дальнейшее "всплытие" события, которое может вызвать свайп
+    event.preventDefault(); 
+    // Вызываем ту же функцию, что и при клике
+    next(); 
+});
     document.getElementById('back-btn').addEventListener('click', previous);
     document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
     
@@ -1314,4 +1534,3 @@ async function openCamera() {
 
 </body>
 </html>
-
