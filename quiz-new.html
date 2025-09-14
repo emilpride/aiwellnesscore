@@ -3,7 +3,7 @@
 <head>
     <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        c[a]=c[a]||function(){(c[a].q=c[a]||[]).push(arguments)};
         t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "taixn4310d");
@@ -32,89 +32,100 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Убираем эти строки (НЕ загружаем библиотеки сразу):
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core/dist/tf-core.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter/dist/tf-converter.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl/dist/tf-backend-webgl.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-    -->
-    
     <style>
         :root { 
             --brand-accent: #debea9;
-            --brand-dark-text: #3c3b31; 
+--brand-dark-text: #3c3b31; 
         }
         
         /* --- UPDATED LIGHTER ANIMATED BACKGROUND --- */
         html, body { 
-            overscroll-behavior: none; 
-            font-family: 'Inter', sans-serif; 
+            overscroll-behavior: none;
+font-family: 'Inter', sans-serif; 
             /* Lighter, more subtle gradient */
             background: linear-gradient(120deg, #fdfcfb, #f9f7f5, #f5f2ef, #f9f7f5, #fdfcfb);
-            background-size: 400% 400%;
+background-size: 400% 400%;
             animation: moveBackground 40s ease infinite;
         }
 
         @keyframes moveBackground {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% { background-position: 0% 50%;
+}
+            50% { background-position: 100% 50%;
+}
+            100% { background-position: 0% 50%;
+}
         }
         /* --- END NEW BACKGROUND --- */
 
         #quiz-container { 
-            display: flex; flex-direction: column; position: relative; 
+            display: flex;
+flex-direction: column; position: relative; 
             width: 100vw; height: 100vh; height: calc(var(--vh, 1vh) * 100); 
             overflow: hidden;
-        }
-        main#steps-wrapper { position: relative; width: 100%; flex-grow: 1; overflow: hidden; }
+}
+        main#steps-wrapper { position: relative; width: 100%; flex-grow: 1; overflow: hidden;
+}
         
         .quiz-step {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute;
+top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 1rem; 
-            background-color: transparent; /* Changed to show animated background */
+            background-color: transparent;
+/* Changed to show animated background */
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 1; overflow-y: auto;
+opacity: 1; overflow-y: auto;
         }
         .quiz-step:not(.active) { 
-            opacity: 0; 
-            pointer-events: none; 
+            opacity: 0;
+pointer-events: none; 
             transform: scale(1.05); 
         }
-        .quiz-step.active { transform: scale(1); }
-        .quiz-step.prev:not(.active) { transform: scale(0.95); }
+        .quiz-step.active { transform: scale(1);
+}
+        .quiz-step.prev:not(.active) { transform: scale(0.95);
+}
 
         @keyframes contentFadeInUp {
-            from { opacity: 0; transform: translateY(25px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0;
+transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0);
+}
         }
         .question-content-enter {
             animation: contentFadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
+}
         
         /* --- UPDATED HEADER STYLE WITH BLUR --- */
         #quiz-header { 
-            flex-shrink: 0; 
-            background: rgba(255, 255, 255, 0.6); /* Semi-transparent white */
+            flex-shrink: 0;
+background: rgba(255, 255, 255, 0.6); /* Semi-transparent white */
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px); /* For Safari */
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* Lighter border */
-            z-index: 50; 
-            transition: background-color 0.3s, border-color 0.3s;
+-webkit-backdrop-filter: blur(10px); /* For Safari */
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+/* Lighter border */
+            z-index: 50;
+transition: background-color 0.3s, border-color 0.3s;
         }
         #quiz-header.onboarding-header {
-            background: transparent; border-color: transparent;
+            background: transparent;
+border-color: transparent;
         }
         #quiz-header.onboarding-header .text-gray-600 {
-            color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            color: white;
+text-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
-        #side-menu { position: fixed; top: 0; right: 0; height: 100%; width: 280px; background-color: white; z-index: 150; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -10px 0 30px rgba(0,0,0,0.1); }
-        #side-menu.active { transform: translateX(0); }
-        #menu-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 140; opacity: 0; transition: opacity 0.3s ease-in-out; pointer-events: none; }
-        #menu-overlay.active { opacity: 1; pointer-events: all; }
+        #side-menu { position: fixed; top: 0;
+right: 0; height: 100%; width: 280px; background-color: white; z-index: 150; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+box-shadow: -10px 0 30px rgba(0,0,0,0.1); }
+        #side-menu.active { transform: translateX(0);
+}
+        #menu-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 140; opacity: 0;
+transition: opacity 0.3s ease-in-out; pointer-events: none; }
+        #menu-overlay.active { opacity: 1; pointer-events: all;
+}
 
         /* ↓↓↓ ДОБАВЬТЕ ЭТИ СТИЛИ В КОНЕЦ БЛОКА <style> ↓↓↓ */
 
@@ -122,7 +133,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 /* ПРАВИЛЬНО ✅ */
 #step-landing > .w-full {
     height: 100%;
-    display: flex;
+display: flex;
     flex-direction: column;
     justify-content: space-around; /* Это свойство создает отступ */
 }
@@ -130,152 +141,176 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 /* Медиа-запрос для экранов с небольшой высотой (типичные мобильные) */
 @media (max-height: 750px) {
     #landing-animation {
-        width: 100px;  /* Уменьшаем анимацию */
+        width: 100px;
+/* Уменьшаем анимацию */
         height: 100px;
-        margin-bottom: 0.75rem !important; /* Уменьшаем отступ */
+        margin-bottom: 0.75rem !important;
+/* Уменьшаем отступ */
     }
     #step-landing h1 {
-        font-size: 1.875rem !important; /* Уменьшаем заголовок (text-3xl) */
+        font-size: 1.875rem !important;
+/* Уменьшаем заголовок (text-3xl) */
         line-height: 2.25rem !important;
-    }
+}
     #step-landing p.text-lg {
-        font-size: 1rem !important; /* Уменьшаем текст */
+        font-size: 1rem !important;
+/* Уменьшаем текст */
         line-height: 1.5rem !important;
         margin-top: 0.75rem !important;
-    }
+}
     #step-landing .grid {
-        margin-top: 1.25rem !important; /* Уменьшаем все отступы */
+        margin-top: 1.25rem !important;
+/* Уменьшаем все отступы */
         gap: 1rem !important;
-    }
+}
     #step-landing .grid h3 {
         font-size: 0.875rem;
-    }
+}
     #step-landing .grid p {
         font-size: 0.75rem;
-    }
+}
     #step-landing div[style*="animation-delay: 400ms"] {
         margin-top: 1.25rem !important;
-    }
+}
 }
 
     
-    .dot.active { background-color: var(--brand-accent); transform: scale(1.25); }
+    .dot.active { background-color: var(--brand-accent); transform: scale(1.25);
+}
 
         
         button.answer-option {
-            background: #fff; color: var(--brand-dark-text); border: 2px solid #e5e7eb; padding: 0;
+            background: #fff;
+color: var(--brand-dark-text); border: 2px solid #e5e7eb; padding: 0;
             font: inherit; cursor: pointer; outline: inherit; text-align: center;
-            border-radius: 9999px; padding: 12px 24px; font-weight: 600;
+            border-radius: 9999px;
+padding: 12px 24px; font-weight: 600;
             box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
-        }
+transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
         .answer-option:hover:not(:disabled) { 
-            transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.07); border-color: #d1d5db;
+            transform: translateY(-3px);
+box-shadow: 0 4px 10px rgba(0,0,0,0.07); border-color: #d1d5db;
         }
         .answer-option.selected { 
-            border-color: var(--brand-accent); background-color: var(--brand-accent);
+            border-color: var(--brand-accent);
+background-color: var(--brand-accent);
             color: var(--brand-dark-text); transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 0 20px rgba(222, 190, 169, 0.7); 
-        }
-        .answer-option:disabled { opacity: 0.6; cursor: not-allowed; }
+            box-shadow: 0 0 20px rgba(222, 190, 169, 0.7);
+}
+        .answer-option:disabled { opacity: 0.6; cursor: not-allowed;
+}
         
         .gender-option { 
-            border: 2px solid #e5e7eb; background-color: #fff;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; 
-        }
-        .gender-option:hover:not(:disabled) { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.07); }
-        .gender-option.selected { transform: translateY(-5px) scale(1.02); border-color: var(--brand-accent); box-shadow: 0 0 20px rgba(222, 190, 169, 0.8); }
+            border: 2px solid #e5e7eb;
+background-color: #fff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+        .gender-option:hover:not(:disabled) { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+}
+        .gender-option.selected { transform: translateY(-5px) scale(1.02); border-color: var(--brand-accent);
+box-shadow: 0 0 20px rgba(222, 190, 169, 0.8); }
         .gender-option .gender-image-container { 
-            overflow: hidden; 
-            border-radius: 9999px; /* Changed to make it circular */
-            margin-bottom: 1rem; 
-            aspect-ratio: 1/1;
+            overflow: hidden;
+border-radius: 9999px; /* Changed to make it circular */
+            margin-bottom: 1rem;
+aspect-ratio: 1/1;
         }
-        .gender-option .gender-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
-        .gender-option:hover:not(:disabled) .gender-image { transform: scale(1.05); }
+        .gender-option .gender-image { width: 100%; height: 100%; object-fit: cover;
+transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+        .gender-option:hover:not(:disabled) .gender-image { transform: scale(1.05);
+}
 
         .stress-widget {
-            background-color: white; padding: 1.5rem 2rem; border-radius: 1.5rem;
+            background-color: white;
+padding: 1.5rem 2rem; border-radius: 1.5rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 1.5rem;
-        }
+}
         .stress-widget #slider-input {
             -webkit-appearance: none;
-            appearance: none;
+appearance: none;
             width: 100%;
             height: 16px;
             background: linear-gradient(to right, #4CAF50, #FFEB3B, #FF5722);
             border-radius: 8px;
             outline: none;
             transition: opacity .2s;
-        }
+}
         .stress-widget #slider-input::-webkit-slider-thumb {
             -webkit-appearance: none;
-            appearance: none;
+appearance: none;
             width: 28px;
             height: 28px;
             background: white;
             cursor: pointer;
             border-radius: 50%;
             border: 4px solid var(--brand-accent);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
         .stress-widget #slider-input::-moz-range-thumb {
             width: 28px;
-            height: 28px;
+height: 28px;
             background: white;
             cursor: pointer;
             border-radius: 50%;
             border: 4px solid var(--brand-accent);
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
+}
 
-        #mood-slider-container { width: 100%; max-width: 360px; margin: 1.5rem auto 0; }
+        #mood-slider-container { width: 100%; max-width: 360px; margin: 1.5rem auto 0;
+}
         #mood-slider {
-            -webkit-appearance: none; appearance: none; width: 100%; height: 16px; 
+            -webkit-appearance: none;
+appearance: none; width: 100%; height: 16px; 
             background: linear-gradient(to right, #60a5fa, #facc15, #4ade80);
             border-radius: 8px; outline: none; transition: opacity .2s;
-        }
+}
         #mood-slider::-webkit-slider-thumb {
-            -webkit-appearance: none; appearance: none; width: 32px; height: 32px;
+            -webkit-appearance: none;
+appearance: none; width: 32px; height: 32px;
             background: white; cursor: pointer; border-radius: 50%;
-            border: 5px solid var(--brand-accent); box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border: 5px solid var(--brand-accent);
+box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
         #mood-slider::-moz-range-thumb {
-            width: 32px; height: 32px; background: white; cursor: pointer; border-radius: 50%;
+            width: 32px;
+height: 32px; background: white; cursor: pointer; border-radius: 50%;
             border: 5px solid var(--brand-accent); box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        #mood-emojis { display: flex; justify-content: space-between; font-size: 2.5rem; margin-bottom: 1rem; padding: 0 0.5rem; }
-        #mood-emojis span { transition: transform 0.2s, opacity 0.2s; }
+}
+        #mood-emojis { display: flex; justify-content: space-between; font-size: 2.5rem; margin-bottom: 1rem;
+padding: 0 0.5rem; }
+        #mood-emojis span { transition: transform 0.2s, opacity 0.2s;
+}
         
         #bmi-display-wrapper {
             background-color: white;
-            border-radius: 1.5rem;
+border-radius: 1.5rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             padding: 2rem 1.5rem;
             max-width: 450px;
             width: 100%;
             position: relative;
-        }
+}
         #bmi-info-box {
             position: relative;
-            z-index: 10;
+z-index: 10;
             background-color: white;
             border-radius: 1rem;
             padding: 1rem;
             margin-bottom: 1.5rem;
-        }
+}
         #bmi-category {
             background-color: #debea9;
-            color: #3c3b31;
+color: #3c3b31;
             font-weight: 700;
             padding: 0.25rem 0.75rem;
             border-radius: 0.5rem;
             display: inline-block;
             margin-bottom: 0.5rem;
-        }
+}
         #bmi-details {
             display: flex;
-            align-items: center;
+align-items: center;
             justify-content: center;
             gap: 1.5rem;
             margin-top: 1rem;
@@ -283,137 +318,157 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         @media (min-width: 768px) {
             #bmi-details {
                 justify-content: flex-start;
-            }
+}
         }
         #bmi-scale-container {
             position: relative;
-            width: 32px;
+width: 32px;
             height: 250px;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
+}
         #bmi-scale-gradient-vertical {
             width: 100%;
-            height: 100%;
+height: 100%;
             background: linear-gradient(to top, #43B7FF, #33C75A, #FBF447, #FFA64D, #FF7D7E);
             border-radius: 100px;
             position: absolute;
-        }
+}
         #bmi-thumb {
             position: absolute;
-            width: 40px;
+width: 40px;
             height: 40px;
             background: linear-gradient(180deg, #F2F2F2 0%, #E8E8E8 100%);
             border: 2px solid #FFFFFF;
-            box-shadow: 0px 0px 6.9px rgba(0, 0, 0, 0.25);
+box-shadow: 0px 0px 6.9px rgba(0, 0, 0, 0.25);
             border-radius: 50%;
             left: 50%;
             transform: translateX(-50%);
             bottom: 0%;
-            transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1;
         }
         #bmi-value-display {
             position: absolute;
-            font-size: 3rem;
+font-size: 3rem;
             font-weight: 800;
             color: #FBF447;
             left: calc(100% + 1rem);
             bottom: var(--thumb-position, 0%);
             transform: translateY(50%);
-            transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
             text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
             z-index: 1;
-        }
+}
 
         #bmi-image-section {
             display: flex;
-            align-items: flex-end;
+align-items: flex-end;
             height: 250px;
             flex-grow: 1;
             justify-content: center;
         }
         #bmi-image {
             height: 100%;
-            width: auto;
+width: auto;
             object-fit: contain;
             user-select: none;
             pointer-events: none;
         }
         
         .sleep-animation-container {
-            background-color: #1c2a4e; border-radius: 50%;
+            background-color: #1c2a4e;
+border-radius: 50%;
             box-shadow: 0 0 25px rgba(76, 104, 186, 0.4); color: #f0f0f0;
-        }
-        .sleep-ring-bg { stroke: rgba(255, 255, 255, 0.2); }
-        .sleep-ring-fg { stroke: #a7b2ff; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .activity-day { width: 36px; height: 36px; border-radius: 10px; background-color: #e5e7eb; color: #6b7280; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .activity-day.active { background-color: var(--brand-accent); color: var(--brand-dark-text); transform: scale(1.15) translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+}
+        .sleep-ring-bg { stroke: rgba(255, 255, 255, 0.2);
+}
+        .sleep-ring-fg { stroke: #a7b2ff; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%;
+transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .activity-day { width: 36px;
+height: 36px; border-radius: 10px; background-color: #e5e7eb; color: #6b7280; font-weight: 700; display: flex; align-items: center; justify-content: center;
+transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .activity-day.active { background-color: var(--brand-accent);
+color: var(--brand-dark-text); transform: scale(1.15) translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
 
-        #camera-modal { position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-        #camera-modal.active { opacity: 1; pointer-events: all; }
+        #camera-modal { position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex;
+align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+}
+        #camera-modal.active { opacity: 1; pointer-events: all;
+}
         /* Финальный код */
 /* Правильный код */
 /* Финальный, единственно верный вариант */
 /* Финальный, упрощенный CSS */
 #camera-container {
     position: relative;
-    /* Убраны все размеры - JS будет управлять этим */
+/* Убраны все размеры - JS будет управлять этим */
     overflow: hidden;
     border-radius: 1.5rem;
     background: #111;
-    border: 1px solid rgba(255,255,255,0.2);
+border: 1px solid rgba(255,255,255,0.2);
     /* Добавляем flex для центровки на всякий случай */
     display: flex;
     justify-content: center;
-    align-items: center;
+align-items: center;
 }
         /* Стало */
 #camera-video, #camera-canvas {
     position: absolute;
-    top: 0;
+top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    transform: scaleX(-1); /* Зеркальное отображение для селфи */
+    transform: scaleX(-1);
+/* Зеркальное отображение для селфи */
 }
 
 #camera-video {
-    object-fit: cover; /* Заполняет контейнер без искажений */
+    object-fit: cover;
+/* Заполняет контейнер без искажений */
 }
-        #camera-guide-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); text-align: center; pointer-events: none; }
-        #camera-guide-box { width: 70%; aspect-ratio: 1/1.2; border: 2px dashed rgba(255,255,255,0.5); border-radius: 50%; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
-        #camera-guide-box.locked { border-color: #34d399; box-shadow: 0 0 20px #34d399; }
-        #close-camera-btn { position: absolute; top: 1rem; right: 1rem; background-color: rgba(0,0,0,0.5); border-radius: 50%; color: white; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
+        #camera-guide-overlay { position: absolute; inset: 0;
+display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); text-align: center; pointer-events: none;
+}
+        #camera-guide-box { width: 70%; aspect-ratio: 1/1.2; border: 2px dashed rgba(255,255,255,0.5); border-radius: 50%;
+transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+        #camera-guide-box.locked { border-color: #34d399;
+box-shadow: 0 0 20px #34d399; }
+        #close-camera-btn { position: absolute; top: 1rem;
+right: 1rem; background-color: rgba(0,0,0,0.5); border-radius: 50%; color: white; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+z-index: 10; }
         
         /* --- UPDATED FOOTER STYLE WITH BLUR --- */
         #quiz-footer { 
-            flex-shrink: 0; 
-            background-color: rgba(255, 255, 255, 0.6); /* Semi-transparent white */
+            flex-shrink: 0;
+background-color: rgba(255, 255, 255, 0.6); /* Semi-transparent white */
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px); /* For Safari */
-            border-top: 1px solid rgba(0, 0, 0, 0.05); /* Lighter border */
-            box-shadow: none; /* Removed shadow, blur is enough */
-            display: none; 
-            padding: 1rem; 
+-webkit-backdrop-filter: blur(10px); /* For Safari */
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+/* Lighter border */
+            box-shadow: none;
+/* Removed shadow, blur is enough */
+            display: none;
+padding: 1rem; 
         }
         /* НОВЫЕ СТИЛИ ДЛЯ АНИМАЦИИ ПОЯВЛЕНИЯ */
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(30px);
+transform: translateY(30px);
     }
     to {
         opacity: 1;
         transform: translateY(0);
-    }
+}
 }
 
 .fade-in-up {
     /* Изначально скрываем элемент */
-    opacity: 0; 
-    /* Запускаем анимацию, когда JS добавит класс 'visible' */
+    opacity: 0;
+/* Запускаем анимацию, когда JS добавит класс 'visible' */
     animation-fill-mode: forwards;
 }
 
@@ -422,6 +477,46 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     animation-duration: 0.8s;
     animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+
+        /* --- Updated Slider CSS for Touch Devices --- */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 5px;
+            outline: none;
+            touch-action: none; 
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 32px;
+            height: 32px;
+            background: white;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 4px solid var(--brand-accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        /* Дополнительные стили для мобильных */
+        @media (max-width: 768px) {
+            input[type="range"] {
+                height: 12px;
+                margin: 20px 0;
+            }
+            
+            input[type="range"]::-webkit-slider-thumb {
+                width: 40px;
+                height: 40px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -431,7 +526,8 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         <div class="flex items-center gap-4 max-w-2xl mx-auto">
             <a href="index.html" class="flex-shrink-0"><img src="logo.png" alt="Logo" class="h-8 w-auto"></a>
             <button id="back-btn" class="text-gray-600 hover:text-gray-900 transition hidden p-2 -ml-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg></button>
-            <div id="progress-container" class="flex-grow h-2 bg-gray-200/50 rounded-full overflow-hidden"><div id="progress-bar-inner" class="h-full transition-all duration-500 ease-out" style="background-image: linear-gradient(to right, #debea9, #f7b784);"></div></div>
+            <div id="progress-container" class="flex-grow h-2 bg-gray-200/50 rounded-full 
+overflow-hidden"><div id="progress-bar-inner" class="h-full transition-all duration-500 ease-out" style="background-image: linear-gradient(to right, #debea9, #f7b784);"></div></div>
             <button id="burger-menu-btn" class="text-gray-600 hover:text-gray-900 transition p-2 -mr-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
         </div>
     </header>
@@ -443,11 +539,13 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 <br>
 <br>
         <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-[--brand-dark-text] fade-in-up" style="animation-delay: 100ms;">
-            Your Biological Age is the Number That Matters
+  
+           Your Biological Age is the Number That Matters
         </h1>
 
         <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-xl mx-auto fade-in-up" style="animation-delay: 200ms;">
-            Our AI analyzes your lifestyle and selfie to reveal your true wellness age, then creates a personalized plan to help you feel younger. Lower your bio-age by 3+ years.
+            Our AI analyzes your lifestyle and selfie to reveal your true wellness age, then creates a personalized plan to help you feel younger.
+ Lower your bio-age by 3+ years.
         </p>
 
         <div class="grid grid-cols-3 gap-4 sm:gap-6 text-center" style="animation-delay: 300ms;">
@@ -455,21 +553,24 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     <div class="flex flex-col items-center">
         <div class="flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white shadow-md mb-3">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[--brand-accent]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M12 6V3m0 18v-3M5.636 5.636l-1.414-1.414M19.778 19.778l-1.414-1.414M18.364 5.636l-1.414 1.414M4.222 19.778l1.414-1.414M12 12a6 6 0 100-12 6 6 0 000 12z"></path></svg>
-        </div>
+  
+       </div>
         <h3 class="font-semibold text-gray-800 text-sm sm:text-base">AI-Powered Analysis</h3>
         <p class="text-xs sm:text-sm text-gray-500 hidden sm:block">Our model identifies hidden factors affecting your aging.</p>
     </div>
     
     <div class="flex flex-col items-center">
         <div class="flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white shadow-md mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[--brand-accent]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[--brand-accent]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 
+ 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
         </div>
         <h3 class="font-semibold text-gray-800 text-sm sm:text-base">Personalized Action Plan</h3>
         <p class="text-xs sm:text-sm text-gray-500 hidden sm:block">Simple, daily tasks to reduce stress and boost energy.</p>
     </div>
     
     <div class="flex flex-col items-center">
-        <div class="flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white shadow-md mb-3">
+        <div class="flex items-center justify-center 
+ h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white shadow-md mb-3">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[--brand-accent]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
         </div>
         <h3 class="font-semibold text-gray-800 text-sm sm:text-base">Trackable Results</h3>
@@ -478,15 +579,17 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 </div>
 
         <div class="fade-in-up" style="animation-delay: 400ms;">
-            <button id="start-quiz-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[--brand-accent]/40" disabled>
+    
+         <button id="start-quiz-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[--brand-accent]/40" disabled>
                 Start My Free Analysis
             </button>
             <p class="text-xs text-gray-500 text-center mt-4">
                 By continuing, you agree to our 
+       
                 <a href="terms.html" class="underline hover:text-gray-700" target="_blank">Terms of Service</a> 
                 and 
                 <a href="privacy.html" class="underline hover:text-gray-700" target="_blank">Privacy Policy</a>.
-            </p>
+ </p>
         </div>
     </div>
 </section>
@@ -497,21 +600,25 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         
         <section id="step-bmi" class="quiz-step prev">
              <div id="bmi-display-wrapper" class="flex flex-col items-center">
-                 <div id="bmi-category" class="text-lg"></div>
+                 <div 
+ id="bmi-category" class="text-lg"></div>
                  <p id="bmi-description" class="text-gray-600 mt-1 text-center max-w-xs"></p>
 
                  <div id="bmi-details" class="w-full mt-6">
                      <div id="bmi-scale-container" class="relative">
                          <div id="bmi-scale-gradient-vertical"></div>
+        
                          <div id="bmi-thumb"></div>
                          <div id="bmi-value-display" style="--thumb-position: 0%;"></div>
                      </div>
                      <div id="bmi-image-section">
+           
                          <img id="bmi-image" src="" alt="BMI category illustration">
                      </div>
                  </div>
                  <button id="bmi-continue-btn" class="w-full sm:max-w-xs block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition mt-8">Continue</button>
-             </div>
+             
+ </div>
         </section>
         
         <section id="step-loading" class="quiz-step prev">
@@ -520,21 +627,23 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             <div id="analysis-steps" class="mt-6 text-gray-600 space-y-2 w-64 text-left"></div>
         </section>
 
-        <!-- NEW: Selfie Confirmation Step -->
         <section id="step-selfie-confirm" class="quiz-step prev">
             <div class="text-center max-w-sm mx-auto">
                 <h2 class="text-3xl font-bold text-gray-900">Looks good?</h2>
                 <img id="selfie-preview-img" src="" alt="Your selfie" class="w-full max-w-xs aspect-[3/4] object-cover rounded-2xl my-6 mx-auto shadow-lg border-2 border-white">
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <button id="selfie-retake-btn" class="w-full bg-white text-gray-800 font-bold py-3 px-6 rounded-full text-lg hover:bg-gray-100 transition border border-gray-300">Retake</button>
-                    <!-- MODIFIED BUTTON FOR LOADING STATE -->
+   
+                     <button id="selfie-retake-btn" class="w-full bg-white text-gray-800 font-bold py-3 px-6 rounded-full text-lg hover:bg-gray-100 transition border border-gray-300">Retake</button>
                     <button id="selfie-confirm-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-6 rounded-full text-lg hover:opacity-90 transition flex items-center justify-center disabled:opacity-75">
-                        <span class="btn-text">Confirm Photo</span>
+         
+                       <span class="btn-text">Confirm Photo</span>
                         <span class="spinner hidden">
                             <svg class="animate-spin h-5 w-5 text-[--brand-dark-text]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                   
+                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
+                           
+ </svg>
                         </span>
                     </button>
                 </div>
@@ -543,6 +652,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     </main>
     
     <footer id="quiz-footer" class="w-full z-10">
+    
         <div id="footer-actions" class="w-full max-w-2xl mx-auto"></div>
     </footer>
 </div>
@@ -556,7 +666,8 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     <div class="flex flex-col space-y-2">
         <a href="index.html" class="text-lg text-gray-700 hover:text-[--brand-dark-text] p-3 rounded-md transition-colors">Home</a>
         <a href="terms.html" class="text-lg text-gray-700 hover:text-[--brand-dark-text] p-3 rounded-md transition-colors">Terms of Service</a>
-        <a href="privacy.html" class="text-lg text-gray-700 hover:text-[--brand-dark-text] p-3 rounded-md transition-colors">Privacy Policy</a>
+        <a href="privacy.html" class="text-lg text-gray-700 
+ hover:text-[--brand-dark-text] p-3 rounded-md transition-colors">Privacy Policy</a>
         <a href="contact.html" class="text-lg text-gray-700 hover:text-[--brand-dark-text] p-3 rounded-md transition-colors">Contact</a>
     </div>
 </nav>
@@ -568,8 +679,8 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         <div id="camera-guide-overlay">
             <h3 id="camera-guide-text" class="text-lg font-semibold">Center your face in the oval</h3>
             <div id="camera-guide-box"></div>
-        </div>
-        <button id="close-camera-btn" title="Close Camera">
+ 
+       <button id="close-camera-btn" title="Close Camera">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
     </div>
@@ -578,11 +689,30 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Добавьте в начало скрипта
+    // Предотвращаем pull-to-refresh и скролл на мобильных
+    let lastY = 0;
+    document.addEventListener('touchstart', (e) => {
+        const slider = e.target.closest('input[type="range"]');
+        if (slider) {
+            e.preventDefault(); // Блокируем скролл при касании ползунка
+        }
+        lastY = e.touches[0].clientY;
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', (e) => {
+        const slider = e.target.closest('input[type="range"]');
+        if (slider) {
+            e.preventDefault(); // Блокируем скролл при движении по ползунку
+        }
+    }, { passive: false });
+
     const App = {
         currentStep: 'onboarding',
         currentQuestionIndex: -1,
         userAnswers: {},
-        sessionId: null, // To hold the user's session ID
+        
+sessionId: null, // To hold the user's session ID
         cameraStream: null,
         faceMesh: null,
         cameraAnimFrame: null,
@@ -591,30 +721,39 @@ document.addEventListener('DOMContentLoaded', () => {
         faceMeshDrawState: { startTime: null, duration: 500 }, // Added for mesh fade-in
         // Replace the old quizQuestions array with this one
 quizQuestions: [
-    { key: 'userGoal', type: 'options', text: "What’s your main goal?", subtext: "This helps us tailor the final report to your interests.", options: [{text: 'Find out my Biological Age', value:'bio_age'}, {text:'Get a Skin Health Analysis', value: 'skin'}, {text:'Receive a 7-Day Improvement Plan', value:'plan'}, {text:'All of the above!', value: 'all'}] },
+    
+{ key: 'userGoal', type: 'options', text: "What’s your main goal?", subtext: "This helps us tailor the final report to your interests.", options: [{text: 'Find out my Biological Age', value:'bio_age'}, {text:'Get a Skin Health Analysis', value: 'skin'}, {text:'Receive a 7-Day Improvement Plan', value:'plan'}, {text:'All of the above!', value: 'all'}] },
     { key: 'age', type: 'slider', text: "How old are you?", subtext: "Your age is a key factor in calculating your biological age baseline.", min: 18, max: 90, defaultValue: 30, unit: 'years' },
-    { key: 'gender', type: 'gender_selection', text: "What’s your biological sex?", subtext: "Biological sex influences body composition and metabolic rate.", options: [{value: 'male', img: 'male.svg'}, {value: 'female', img: 'female.svg'}] },
+    { key: 'gender', type: 'gender_selection', text: "What’s your biological sex?", subtext: "Biological sex 
+ influences body composition and metabolic rate.", options: [{value: 'male', img: 'male.svg'}, {value: 'female', img: 'female.svg'}] },
     // UPDATED: Height in total inches for easier sliding
     { key: 'height', type: 'slider', text: "What’s your height?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 140, max: 220, defaultValue: 175, unit: 'cm' }, // 4'6" to 7'0"
     // UPDATED: Weight in pounds
-    { key: 'weight', type: 'slider', text: "What’s your weight?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 40, max: 150, defaultValue: 77, unit: 'kg' },
+    { key: 'weight', type: 'slider', text: "What’s your weight?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 40, max: 150, defaultValue: 
+ 77, unit: 'kg' },
     { key: 'bmi_display', type: 'animation' },
     { key: 'sleep', type: 'options', text: "On average, how much do you sleep?", subtext: "Quality sleep is crucial for cellular repair and mental clarity.", options: [{text:"Less than 5 hours"}, {text:"5–6 hours"}, {text:"7–8 hours"}, {text:"More than 8 hours"}] },
     { key: 'sleep_visual', type: 'animation' },
-    { key: 'activity', type: 'options', text: "How often do you exercise?", subtext: "Regular exercise impacts cardiovascular health and longevity.", options: [{text:"Rarely / Never"}, {text:"1–2 times a week"}, {text:"3–4 times a week"}, {text:"5+ times a week"}] },
+    { key: 'activity', type: 'options', text: "How often do you exercise?", subtext: "Regular exercise impacts cardiovascular health and longevity.", options: [{text:"Rarely / Never"}, {text:"1–2 times a week"}, {text:"3–4 times a week"}, {text:"5+ times a 
+ week"}] },
     { key: 'activity_visual', type: 'animation' },
     { key: 'nutrition', type: 'options', text: "How many servings of fruits & veggies do you eat daily?", subtext: "A diet rich in nutrients is vital for your overall well-being.", options: ["0–1 serving", "2–3 servings", "4–5 servings", "More than 5 servings"] },
     { key: 'processed_food', type: 'options', text: "How often do you eat processed or fast food?", subtext: "High consumption can lead to inflammation and other health issues.", options: ["Rarely", "1–2 times a week", "3–4 times a week", "Daily"] },
-    { key: 'hydration', type: 'options', text: "How much water do you drink per day?", subtext: "Proper hydration is essential for every bodily function.", options: ["1–3 cups", "4–6 cups", "7–9 cups", "10+ cups"] },
+    { 
+ key: 'hydration', type: 'options', text: "How much water do you drink per day?", subtext: "Proper hydration is essential for every bodily function.", options: ["1–3 cups", "4–6 cups", "7–9 cups", "10+ cups"] },
     { key: 'hydration_visual', type: 'animation' },
     { key: 'stress', type: 'slider', text: "How stressed do you usually feel?", subtext: "Chronic stress can significantly accelerate the aging process.", min: 1, max: 10, defaultValue: 5, unit: ''},
-    { key: 'mindfulness', type: 'options', text: "How often do you practice mindfulness?", subtext: "Mindfulness practices can reduce stress and improve focus.", options: ["Never", "Sometimes", "Weekly", "Daily"] },
+    { key: 'mindfulness', type: 'options', text: "How often do you practice mindfulness?", subtext: "Mindfulness practices can reduce stress and improve focus.", options: ["Never", "Sometimes", 
+ "Weekly", "Daily"] },
     { key: 'mood', type: 'emoji_slider', text: "How would you describe your overall mood?", subtext: "Your mental state is deeply connected to your physical health.", options: [ { text: '😟', value: 'Often stressed or down' }, { text: '😐', value: 'Changes a lot' }, { text: '🙂', value: 'Mostly content' }, { text: '😊', value: 'Happy & energetic' } ] },
-    { key: 'alcohol', type: 'options', text: "How much alcohol do you drink weekly?", subtext: "Alcohol consumption can affect sleep, hydration, and cellular health.", options: ["None", "1–3 drinks", "4–7 drinks", "8+ drinks"] },
+    { key: 'alcohol', type: 'options', text: "How much alcohol do you drink weekly?", subtext: "Alcohol consumption can affect sleep, hydration, and cellular health.", options: ["None", "1–3 drinks", "4–7 drinks", "8+ drinks"] 
+ },
     { key: 'smoking', type: 'options', text: "Do you smoke?", subtext: "Smoking is a major factor in premature aging and disease.", options: ["Never", "Used to, but quit", "Occasionally", "Yes, daily"] },
     { key: 'screen_time', type: 'options', text: "How much screen time do you have daily (outside of work)?", subtext: "Excessive screen time can impact sleep and mental well-being.", options: ["Less than 2 hours", "2–4 hours", "4–6 hours", "More than 6 hours"] },
-    { key: 'selfie', type: 'camera_step', text: 'AI Photo Analysis 📸', subtext: '(Optional – helps us analyze skin health & fine lines)'},
-    { key: 'email', type: 'email_step', text: "Enter your email 📩", subtext: "to get your personalized report summary. We respect your privacy." }
+    { key: 'selfie', type: 'camera_step', text: 'AI Photo Analysis 📸', subtext: '(Optional – helps us analyze skin health & 
+ fine lines)'},
+    { key: 'email', type: 'email_step', text: "Enter your email 📩", subtext: "to get your personalized report summary.
+ We respect your privacy." }
 ],
     };
 async function trackEvent(eventName) {
@@ -631,7 +770,8 @@ async function trackEvent(eventName) {
 
                 body: JSON.stringify({
 
-                    action: 'trackEvent',
+  
+                   action: 'trackEvent',
 
                     sessionId: App.sessionId,
 
@@ -641,7 +781,8 @@ async function trackEvent(eventName) {
 
             });
 
-        } catch (e) {
+        } catch (e) 
+ {
 
             console.error(`Failed to track event: ${eventName}`, e);
 
@@ -655,119 +796,120 @@ const LibraryLoader = {
         async loadFaceMeshLibraries() {
             if (this.faceMeshLoaded) return true;
             if (this.loadingPromise) return this.loadingPromise;
-            
+  
+           
             this.loadingPromise = new Promise(async (resolve, reject) => {
                 try {
                     const loadingDiv = document.createElement('div');
-                    loadingDiv.id = 'face-mesh-loading';
+ loadingDiv.id = 'face-mesh-loading';
                     loadingDiv.className = 'fixed top-4 right-4 bg-white rounded-lg shadow-lg p-4 z-50';
-                    loadingDiv.innerHTML = `
+ loadingDiv.innerHTML = `
                         <div class="flex items-center gap-3">
                             <div class="animate-spin h-5 w-5 border-2 border-gray-300 border-t-[--brand-accent] rounded-full"></div>
                             <span class="text-sm text-gray-600">Loading camera AI...</span>
-                        </div>
+    
+                     </div>
                     `;
-                    document.body.appendChild(loadingDiv);
+ document.body.appendChild(loadingDiv);
                     
                     const scripts = [
                         'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js',
                         'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core/dist/tf-core.js',
                         'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter/dist/tf-converter.js',
-                        'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl/dist/tf-backend-webgl.js',
+                        
+ 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl/dist/tf-backend-webgl.js',
                         'https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js'
                     ];
-                    
-                    for (const src of scripts) {
+ for (const src of scripts) {
                         await this.loadScript(src);
-                    }
+ }
                     
                     this.faceMeshLoaded = true;
-                    document.getElementById('face-mesh-loading')?.remove();
+ document.getElementById('face-mesh-loading')?.remove();
                     resolve(true);
                 } catch (error) {
                     document.getElementById('face-mesh-loading')?.remove();
-                    reject(error);
+ reject(error);
                 }
             });
             
             return this.loadingPromise;
-        },
+ },
         
         loadScript(src) {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
                 script.src = src;
                 script.crossOrigin = 'anonymous';
-                script.onload = resolve;
+           
+      script.onload = resolve;
                 script.onerror = () => reject(new Error(`Failed to load ${src}`));
                 document.head.appendChild(script);
             });
-        }
+ }
     };
     const AnimationManager = {
         animations: new Map(),
         add(id, path) {
             if (this.animations.has(id) || !document.getElementById(id)) return;
-            const container = document.getElementById(id);
+ const container = document.getElementById(id);
             if(!container) return;
             container.innerHTML = '';
             try {
                 const anim = lottie.loadAnimation({ container, renderer: 'svg', loop: true, autoplay: true, path });
-                this.animations.set(id, anim);
-            } catch(e) { console.error(`Lottie error on container #${id}:`, e); }
+ this.animations.set(id, anim);
+            } catch(e) { console.error(`Lottie error on container #${id}:`, e);
+ }
         }
     };
-    
-    const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+ const setVh = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
 
     async function processAndSavePhoto() {
     const confirmBtn = document.getElementById('selfie-confirm-btn');
-    const btnText = confirmBtn.querySelector('.btn-text');
+ const btnText = confirmBtn.querySelector('.btn-text');
     const spinner = confirmBtn.querySelector('.spinner');
     
     if (!App.lastPhotoDataUrl || !App.sessionId) {
         alert('An error occurred. Missing photo data or session ID.');
-        return;
+ return;
     }
 
     confirmBtn.disabled = true;
     btnText.classList.add('hidden');
     spinner.classList.remove('hidden');
-
-    try {
+ try {
         // 1. Отправляем фото на анализ
         console.log('Sending photo for analysis...');
-        const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
+ const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ photoDataUrl: App.lastPhotoDataUrl })
         });
-
-        const responseData = await analyzeResponse.json();
+ const responseData = await analyzeResponse.json();
         
         if (!analyzeResponse.ok) {
             // Проверяем, настроен ли сервис анализа
             if (responseData.error && responseData.error.includes('not configured')) {
                 console.warn('Face analysis service not configured, skipping...');
-                // Сохраняем фото без анализа
+ // Сохраняем фото без анализа
                 await saveAnswerToServer('selfie', App.lastPhotoDataUrl);
-                await saveAnswerToServer('faceAnalysisSkipped', 'service_not_configured');
+ await saveAnswerToServer('faceAnalysisSkipped', 'service_not_configured');
                 handleAnswer('selfie', App.lastPhotoDataUrl);
                 return;
             }
             throw new Error(`Face analysis failed: ${responseData.error || 'Unknown error'}`);
-        }
+ }
 
         // 2. Проверяем, что в ответе есть данные о лицах
         if (!responseData.faces || responseData.faces.length === 0) {
             const retry = confirm('No face detected in the photo. Would you like to retake it?');
-            if (retry) {
+ if (retry) {
                 document.getElementById('selfie-retake-btn').click();
                 return;
-            } else {
+ } else {
                 // Продолжаем без анализа
                 await saveAnswerToServer('selfie', App.lastPhotoDataUrl);
-                await saveAnswerToServer('faceAnalysisSkipped', 'no_face_detected');
+ await saveAnswerToServer('faceAnalysisSkipped', 'no_face_detected');
                 handleAnswer('selfie', App.lastPhotoDataUrl);
                 return;
             }
@@ -775,56 +917,59 @@ const LibraryLoader = {
 
         // 3. Сохраняем результат анализа
         console.log('Saving analysis data...');
-        const saveResponse = await fetch('/.netlify/functions/quiz', {
+ const saveResponse = await fetch('/.netlify/functions/quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'saveAnalysisData',
                 sessionId: App.sessionId,
                 analysisData: responseData
-            })
+  
+           })
         });
-        
-        if (!saveResponse.ok) {
+ if (!saveResponse.ok) {
             throw new Error('Failed to save analysis data.');
-        }
+ }
         
         console.log('Data saved successfully.');
-        handleAnswer('selfie', App.lastPhotoDataUrl);
+ handleAnswer('selfie', App.lastPhotoDataUrl);
 
     } catch (error) {
         console.error('Error during photo processing:', error);
-        
-        // Предлагаем пользователю выбор
+ // Предлагаем пользователю выбор
         const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-        modal.innerHTML = `
+ modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+ modal.innerHTML = `
             <div class="bg-white rounded-lg p-6 max-w-md w-full">
                 <h2 class="text-xl font-bold text-yellow-600 mb-2">Photo Analysis Issue</h2>
                 <p class="text-gray-700 mb-4">We couldn't analyze your photo, but you can still continue.</p>
                 <p class="text-sm text-gray-600 mb-4">Error: ${error.message}</p>
-                <div class="flex gap-3">
+            
+     <div class="flex gap-3">
                     <button onclick="
                         document.getElementById('selfie-retake-btn').click();
                         this.closest('.fixed').remove();
-                    " class="flex-1 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                    " class="flex-1 bg-blue-500 text-white py-2 
+ px-4 rounded hover:bg-blue-600">
                         Retake Photo
                     </button>
                     <button onclick="
                         App.handleAnswer('selfie', 'skipped');
-                        this.closest('.fixed').remove();
+       
+                  this.closest('.fixed').remove();
                     " class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">
                         Skip Photo
                     </button>
-                </div>
+           
+      </div>
             </div>
         `;
-        document.body.appendChild(modal);
+ document.body.appendChild(modal);
         
     } finally {
         // Возвращаем кнопку в исходное состояние
         confirmBtn.disabled = false;
-        btnText.classList.remove('hidden');
+ btnText.classList.remove('hidden');
         spinner.classList.add('hidden');
     }
 }
@@ -833,54 +978,52 @@ const LibraryLoader = {
     async function saveAnswerToServer(questionKey, answer) {
         if (!App.sessionId) {
             console.error("Cannot save answer, session ID is missing.");
-            return;
+ return;
         }
         try {
             const response = await fetch('/.netlify/functions/quiz', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    action: 'saveAnswer',
+                   
+  action: 'saveAnswer',
                     sessionId: App.sessionId,
                     questionId: questionKey,
                     answer: answer
                 })
             });
-            if (!response.ok) {
+ if (!response.ok) {
                 console.error('Failed to save answer for question:', questionKey);
-            } else {
+ } else {
                 console.log(`Answer for "${questionKey}" saved successfully.`);
-            }
+ }
         } catch (error) {
             console.error('Error saving answer:', error);
-        }
+ }
     }
 
     // ИЗМЕНЕННАЯ ФУНКЦИЯ handleAnswer
     async function handleAnswer(questionKey, answer) {
         App.userAnswers[questionKey] = answer;
-        
-        // Отправляем ответ на сервер и ждем завершения
+ // Отправляем ответ на сервер и ждем завершения
         await saveAnswerToServer(questionKey, answer);
-        
-        // Переходим к следующему вопросу только после сохранения
+ // Переходим к следующему вопросу только после сохранения
         setTimeout(next, 100);
-    }
+ }
 
     // ИЗМЕНЕННАЯ ФУНКЦИЯ handleOptionClick
     async function handleOptionClick(event, key, value) {
         const clickedButton = event.currentTarget;
-        const parent = clickedButton.parentElement;
+ const parent = clickedButton.parentElement;
         parent.querySelectorAll('button').forEach(btn => btn.disabled = true);
         clickedButton.classList.add('selected');
-        
-        // Используем await, чтобы дождаться завершения handleAnswer
+ // Используем await, чтобы дождаться завершения handleAnswer
         await handleAnswer(key, value);
-    }
+ }
 
     function goToStep(stepKey) {
         const prevStepEl = document.querySelector('.quiz-step.active');
-        if (prevStepEl) prevStepEl.classList.add('prev');
+ if (prevStepEl) prevStepEl.classList.add('prev');
 
         App.currentStep = stepKey;
         document.querySelectorAll('.quiz-step').forEach(step => {
@@ -888,22 +1031,21 @@ const LibraryLoader = {
             step.classList.toggle('active', isActive);
             if (!isActive) step.classList.remove('prev');
         });
-
-        const quizHeader = document.getElementById('quiz-header');
+ const quizHeader = document.getElementById('quiz-header');
         const progressContainer = document.getElementById('progress-container');
         const backBtn = document.getElementById('back-btn');
-        
-        if (stepKey === 'onboarding') {
+ if (stepKey === 'onboarding') {
             quizHeader.classList.add('onboarding-header');
             progressContainer.style.visibility = 'hidden';
-            backBtn.classList.add('hidden');
+ backBtn.classList.add('hidden');
         } else {
             quizHeader.classList.remove('onboarding-header');
             progressContainer.style.visibility = 'visible';
-            backBtn.classList.toggle('hidden', App.currentQuestionIndex <= 0);
+ backBtn.classList.toggle('hidden', App.currentQuestionIndex <= 0);
         }
 
-        document.getElementById('quiz-footer').style.display = (stepKey === 'quiz' || stepKey === 'bmi') ? 'block' : 'none';
+        document.getElementById('quiz-footer').style.display = (stepKey === 'quiz' || stepKey === 'bmi') ?
+ 'block' : 'none';
     }
     
     // Файл: /quiz-new.html
@@ -915,43 +1057,42 @@ function next() {
     // Отправляем событие "Lead" в Facebook и наше событие "quizStarted" на бэкенд
     if (App.currentQuestionIndex === -1) {
         fbq('track', 'Lead');
-        trackEvent('quizStarted'); // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
+ trackEvent('quizStarted'); // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
     }
     // ---- КОНЕЦ ИЗМЕНЕНИЯ ----
 
     App.currentQuestionIndex++;
-    const stepConfig = App.quizQuestions[App.currentQuestionIndex];
+ const stepConfig = App.quizQuestions[App.currentQuestionIndex];
     if (!stepConfig) {
         startAnalysis();
         return;
-    }
+ }
 
     if (stepConfig.type === 'animation') {
         renderAnimation(stepConfig.key);
-    } else {
+ } else {
         goToStep('quiz');
         renderQuestion();
     }
     updateProgressBar();
-}
+ }
 
 // ↑↑↑ СКОПИРУЙТЕ ЭТОТ КОД ПОЛНОСТЬЮ ↑↑↑
 
     function previous() {
         if (App.currentQuestionIndex < 0) return;
-        
-        if (App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') {
+ if (App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') {
              App.currentQuestionIndex--;
-             if (App.currentQuestionIndex >= 0 && App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') {
+ if (App.currentQuestionIndex >= 0 && App.quizQuestions[App.currentQuestionIndex]?.type === 'animation') {
                  App.currentQuestionIndex--;
-             }
+ }
         } else {
             App.currentQuestionIndex--;
-        }
+ }
         
         if (App.currentQuestionIndex < 0) {
             goToStep('landing');
-            return;
+ return;
         };
         
         goToStep('quiz');
@@ -961,105 +1102,107 @@ function next() {
     
     function updateProgressBar() {
         const totalNonAnimationCount = App.quizQuestions.filter(q => q.type !== 'animation').length;
-        if (totalNonAnimationCount === 0) return;
+ if (totalNonAnimationCount === 0) return;
 
         const passedQuestions = App.quizQuestions.slice(0, App.currentQuestionIndex + 1);
         const passedNonAnimationCount = passedQuestions.filter(q => q.type !== 'animation').length;
-        
-        const progress = (passedNonAnimationCount / totalNonAnimationCount) * 100;
+ const progress = (passedNonAnimationCount / totalNonAnimationCount) * 100;
 
         document.getElementById('progress-bar-inner').style.width = `${Math.min(100, progress)}%`;
         document.getElementById('back-btn').classList.toggle('hidden', App.currentQuestionIndex <= 0);
-    }
+ }
 
     function renderQuestion() {
         const question = App.quizQuestions[App.currentQuestionIndex];
-        if (!question) return;
+ if (!question) return;
 
         const wrapper = document.getElementById('question-wrapper');
         const footerWrapper = document.getElementById('footer-actions');
         footerWrapper.innerHTML = '';
-        
-        let contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>`;
+ let contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>`;
         if (question.subtext && question.type !== 'camera_step' && question.type !== 'email_step') {
             contentHTML += `<p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>`;
-        }
+ }
         
         if (question.key === 'stress') {
              contentHTML = `<div class="stress-widget">
                  <h2 class="text-2xl font-bold text-gray-900 text-center">${question.text}</h2>
                  <p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>
                  <div class="my-6">
-                     <input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
+   
+                   <input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
                  </div>
                  <div class="flex justify-between text-sm text-gray-500 mt-2 px-1">
                      <span>Relaxed</span>
-                     <span>Stressed</span>
+        
+              <span>Stressed</span>
                  </div>
              </div>`;
-        } else if (question.type === 'camera_step' || question.type === 'email_step') {
+ } else if (question.type === 'camera_step' || question.type === 'email_step') {
             contentHTML = `<img src="face.jpeg" alt="Face scan illustration" class="w-40 h-40 mx-auto rounded-full object-cover mb-6 shadow-lg">
                                          <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
-                                         <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
-            if (question.type === 'email_step') {
+                    
+                     <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
+ if (question.type === 'email_step') {
                  contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
                                              <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
-            }
+ }
         }
         
         wrapper.innerHTML = `<div class="question-content w-full question-content-enter">${contentHTML}</div>`;
-        
-        if (question.type === 'options') {
+ if (question.type === 'options') {
             const optionsHTML = question.options.map(opt => {
                 const displayText = typeof opt === 'object' ? opt.text : opt;
                 const value = typeof opt === 'object' ? (opt.value || opt.text) : opt;
                 return `<button class="answer-option" data-value="${value}">${displayText}</button>`;
-            }).join('');
+      
+       }).join('');
             footerWrapper.innerHTML = `<div class="flex justify-center flex-wrap gap-3 max-w-md mx-auto">${optionsHTML}</div>`;
-            footerWrapper.querySelectorAll('.answer-option').forEach(btn => {
+ footerWrapper.querySelectorAll('.answer-option').forEach(btn => {
                 btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
             });
-        } else if (question.type === 'slider' && question.key !== 'stress') {
+ } else if (question.type === 'slider') {
             const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-sm mt-6"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
             wrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', sliderContent);
-        }
 
-        if (question.type === 'slider') {
-             footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;
-             const sliderInput = document.getElementById('slider-input');
-             sliderInput.addEventListener('input', () => updateSliderDisplay(question, sliderInput.value));
-             footerWrapper.querySelector('#slider-confirm-btn').addEventListener('click', () => handleAnswer(question.key, sliderInput.value));
-             updateSliderDisplay(question, App.userAnswers[question.key] || question.defaultValue);
+            footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;
+
+            setTimeout(() => {
+                initSlider('slider-input', question, updateSliderDisplay);
+                footerWrapper.querySelector('#slider-confirm-btn').addEventListener('click', () => handleAnswer(question.key, document.getElementById('slider-input').value));
+            }, 50);
+
         }
         else if (question.type === 'gender_selection') {
             const optionsHTML = question.options.map(opt => `<button class="gender-option text-center rounded-2xl p-4" data-value="${opt.value}"><div class="gender-image-container"><img src="${opt.img}" alt="${opt.value}" class="gender-image"></div><span class="text-xl font-bold text-gray-800 capitalize">${opt.value}</span></button>`).join('');
-            footerWrapper.innerHTML = `<div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">${optionsHTML}</div>`;
+ footerWrapper.innerHTML = `<div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">${optionsHTML}</div>`;
             footerWrapper.querySelectorAll('.gender-option').forEach(btn => {
                 btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
             });
-        } else if (question.type === 'camera_step') {
+ } else if (question.type === 'camera_step') {
             footerWrapper.innerHTML = `<div class="max-w-sm mx-auto space-y-3 mt-4"><button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button></div>`;
-            footerWrapper.querySelector('#open-camera-btn').addEventListener('click', openCamera);
+ footerWrapper.querySelector('#open-camera-btn').addEventListener('click', openCamera);
             footerWrapper.querySelector('#skip-photo-btn').addEventListener('click', () => handleAnswer('selfie', 'skipped'));
         } else if (question.type === 'email_step') {
              footerWrapper.innerHTML = `<div class="flex gap-2 max-w-sm mx-auto mt-6"><input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-[--brand-accent] focus:border-[--brand-accent]"><button id="email-submit-btn" class="bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-5 rounded-lg hover:opacity-90 transition">Submit</button></div>`;
-             footerWrapper.querySelector('#email-submit-btn').addEventListener('click', () => {
+ footerWrapper.querySelector('#email-submit-btn').addEventListener('click', () => {
                  const email = document.getElementById('email-input').value;
                  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) handleAnswer('email', email);
                  else alert('Please enter a valid email address.');
              });
-        } else if (question.type === 'emoji_slider') {
+ } else if (question.type === 'emoji_slider') {
             const emojis = question.options.map(opt => `<span>${opt.text}</span>`).join('');
-            const sliderContent = `<div id="mood-slider-container"><div id="mood-emojis">${emojis}</div><input type="range" min="0" max="${question.options.length - 1}" value="1" step="1" id="mood-slider"></div>`;
+ const sliderContent = `<div id="mood-slider-container"><div id="mood-emojis">${emojis}</div><input type="range" min="0" max="${question.options.length - 1}" value="1" step="1" id="mood-slider"></div>`;
             wrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', sliderContent);
-            footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="mood-confirm-btn">Confirm</button>`;
+ footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="mood-confirm-btn">Confirm</button>`;
             const moodSlider = document.getElementById('mood-slider');
-            const emojiSpans = document.querySelectorAll('#mood-emojis span');
+ const emojiSpans = document.querySelectorAll('#mood-emojis span');
             const updateEmojiSelection = () => {
                 emojiSpans.forEach((span, index) => {
                     span.style.transform = index == moodSlider.value ? 'scale(1.5)' : 'scale(1)';
                     span.style.opacity = index == moodSlider.value ? '1' : '0.5';
-                });
+               
+  });
             };
             moodSlider.addEventListener('input', updateEmojiSelection);
             updateEmojiSelection();
@@ -1067,25 +1210,24 @@ function next() {
                 const selectedValue = question.options[moodSlider.value].value;
                 handleAnswer(question.key, selectedValue);
             });
-        }
+ }
     }
     
     // Replace the old updateSliderDisplay function with this one
 // Вставьте этот код вместо вашей текущей функции updateSliderDisplay
 function updateSliderDisplay(question, value) {
     const valueDisplay = document.getElementById('slider-value-display');
-    if (!valueDisplay) return;
+ if (!valueDisplay) return;
 
     let displayHTML = `${value} ${question.unit || ''}`;
-
-    if (question.unit === 'cm') {
+ if (question.unit === 'cm') {
         const totalInches = value / 2.54;
-        let feet = Math.floor(totalInches / 12);
+ let feet = Math.floor(totalInches / 12);
         let inches = Math.round(totalInches % 12);
-        if (inches === 12) {
+ if (inches === 12) {
             feet++;
             inches = 0;
-        }
+ }
         displayHTML = `${feet}'${inches}" <span class="text-lg text-gray-400 font-medium">(${value} cm)</span>`;
     } else if (question.unit === 'kg') {
         const lbs = Math.round(value * 2.20462);
@@ -1097,7 +1239,8 @@ function updateSliderDisplay(question, value) {
     
     function renderAnimation(key) {
         goToStep('quiz'); // Keep quiz step active for animation
-        const wrapper = document.getElementById('question-wrapper');
+       
+  const wrapper = document.getElementById('question-wrapper');
         document.getElementById('footer-actions').innerHTML = '';
         document.getElementById('back-btn').classList.add('hidden'); // Hide back button for animations
 
@@ -1107,14 +1250,17 @@ function updateSliderDisplay(question, value) {
             goToStep('bmi'); // Switch to dedicated BMI step
             renderBmiResult();
             return;
-        } else if (key === 'sleep_visual') {
-            animationHTML = `<div class="w-full max-w-sm mx-auto"><div class="relative mx-auto my-3 w-48 h-48 sleep-animation-container flex items-center justify-center"><svg class="w-full h-full absolute inset-0" viewBox="0 0 120 120"><circle class="sleep-ring-bg" stroke-width="10" fill="transparent" cx="60" cy="60" r="52" /><circle id="sleep-ring-fg-anim" class="sleep-ring-fg" stroke-width="10" fill="transparent" cx="60" cy="60" r="52" style="stroke-dasharray: 327; stroke-dashoffset: 327;"/></svg><div class="text-5xl">🌙</div></div></div>`;
+       
+  } else if (key === 'sleep_visual') {
+            animationHTML = `<div class="w-full max-w-sm mx-auto"><div class="relative mx-auto my-3 w-48 h-48 sleep-animation-container flex items-center justify-center"><svg class="w-full h-full absolute inset-0" viewBox="0 0 120 120"><circle class="sleep-ring-bg" stroke-width="10" fill="transparent" cx="60" cy="60" r="52" /><circle id="sleep-ring-fg-anim" class="sleep-ring-fg" stroke-width="10" fill="transparent" cx="60" cy="60" r="52" style="stroke-dasharray: 327;
+ stroke-dashoffset: 327;"/></svg><div class="text-5xl">🌙</div></div></div>`;
         } else if (key === 'activity_visual') {
             animationHTML = `<div class="w-full max-w-sm mx-auto bg-white p-6 rounded-2xl shadow-sm"><div class="font-semibold text-gray-600 text-center mb-4">Your Active Week</div><div class="activity-week flex justify-around gap-2" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div></div>`;
         } else if (key === 'hydration_visual') {
             animationHTML = `<div class="w-full max-w-sm mx-auto"><div id="water-animation" class="w-48 h-48 mx-auto"></div></div>`;
         }
-        
+      
+   
         wrapper.innerHTML = `<div class="question-content w-full question-content-enter">${animationHTML}</div>`;
         
         setTimeout(() => playAnimation(key), 100); 
@@ -1123,102 +1269,104 @@ function updateSliderDisplay(question, value) {
 
     function playAnimation(key) {
         if (key === 'sleep_visual') {
-            const answer = App.userAnswers.sleep || "";
+            const answer = App.userAnswers.sleep ||
+ "";
             let percent = 50;
             if (answer.startsWith("Less than 5")) percent = 25;
             else if (answer.startsWith("5–6")) percent = 50;
-            else if (answer.startsWith("7–8")) percent = 90;
+ else if (answer.startsWith("7–8")) percent = 90;
             else if (answer.startsWith("More than 8")) percent = 100;
             
             const ringEl = document.getElementById('sleep-ring-fg-anim');
-            const circumference = 2 * Math.PI * 52; // For r=52
+ const circumference = 2 * Math.PI * 52; // For r=52
             if(ringEl) {
                 ringEl.style.strokeDasharray = circumference;
-                ringEl.style.strokeDashoffset = String(circumference - (percent / 100) * circumference);
+ ringEl.style.strokeDashoffset = String(circumference - (percent / 100) * circumference);
             }
         } else if (key === 'activity_visual') {
             let days = 0;
-            const answer = App.userAnswers.activity || "";
+ const answer = App.userAnswers.activity || "";
             if (answer.includes("5+")) {
-                days = 7; 
-            } else if (answer.includes("3–4")) {
+                days = 7;
+ } else if (answer.includes("3–4")) {
                 days = 4;
-            } else if (answer.includes("1–2")) {
+ } else if (answer.includes("1–2")) {
                 days = 2;
-            } else if (answer.includes("Rarely")) {
+ } else if (answer.includes("Rarely")) {
                 days = 1;
-            }
+ }
             
             const dayElements = document.querySelectorAll('#activity-week-anim .activity-day');
-            if (dayElements.length > 0) {
-                dayElements.forEach(day => day.classList.remove('active')); // Reset
+ if (dayElements.length > 0) {
+                dayElements.forEach(day => day.classList.remove('active'));
+ // Reset
                 for (let i = 0; i < Math.min(days, 7); i++) {
                     setTimeout(() => { dayElements[i]?.classList.add('active'); }, i * 200);
-                }
+ }
             }
         } else if (key === 'hydration_visual') {
             AnimationManager.add('water-animation', 'water.json');
-        }
+ }
     }
     
     function renderBmiResult() {
         const heightM = App.userAnswers.height / 100;
-        const weightKg = App.userAnswers.weight;
+ const weightKg = App.userAnswers.weight;
         const gender = App.userAnswers.gender;
         const bmi = (weightKg / (heightM * heightM));
-
-        const categories = [
+ const categories = [
             { max: 16, img: 'under16', title: 'Severely Underweight', desc: 'Extremely low body mass.', color: '#43B7FF' },
             { max: 18.4, img: '16-18.4', title: 'Underweight', desc: 'Below healthy weight.', color: '#33C75A' },
             { max: 24.9, img: '18.5-24.9', title: 'Normal Weight', desc: 'Ideal weight range.', color: '#FBF447' },
-            { max: 29.9, img: '25.0-29.9', title: 'Overweight', desc: 'Slightly above normal. Risk of heart and metabolic issues.', color: '#FFA64D' },
+            { max: 29.9, img: '25.0-29.9', title: 'Overweight', 
+ desc: 'Slightly above normal. Risk of heart and metabolic issues.', color: '#FFA64D' },
             { max: 34.9, img: '30-above', title: 'Obesity (Class I)', desc: 'Increased health risk.', color: '#FF7D7E' },
             { max: 39.9, img: '30-above', title: 'Obesity (Class II)', desc: 'High health risk.', color: '#FF7D7E' },
             { max: Infinity, img: '30-above', title: 'Obesity (Class III)', desc: 'Very high health risk.', color: '#FF7D7E' }
-        ];
+      
+   ];
         const result = categories.find(c => bmi < c.max);
-        const prefix = gender === 'female' ? 'f' : 'm';
+        const prefix = gender === 'female' ?
+ 'f' : 'm';
         
         document.getElementById('bmi-image').src = `${prefix}-${result.img}.svg`;
         document.getElementById('bmi-category').textContent = result.title;
         document.getElementById('bmi-description').textContent = result.desc;
 
-        const minBmi = 15, maxBmi = 40; 
-        const normalizedBmi = Math.max(0, Math.min(1, (bmi - minBmi) / (maxBmi - minBmi)));
+        const minBmi = 15, maxBmi = 40;
+ const normalizedBmi = Math.max(0, Math.min(1, (bmi - minBmi) / (maxBmi - minBmi)));
         const thumbBottomPosition = normalizedBmi * 100;
-        
-        const bmiThumb = document.getElementById('bmi-thumb');
+ const bmiThumb = document.getElementById('bmi-thumb');
         const bmiValueDisplay = document.getElementById('bmi-value-display');
         
         bmiValueDisplay.style.setProperty('--thumb-position', `${thumbBottomPosition}%`);
         bmiThumb.style.bottom = `${thumbBottomPosition}%`;
 
         let currentBmi = 0;
-        const startTimestamp = performance.now();
+ const startTimestamp = performance.now();
         const duration = 1500;
 
         const animateBmiValue = (timestamp) => {
             const elapsed = timestamp - startTimestamp;
-            const progress = Math.min(elapsed / duration, 1);
+ const progress = Math.min(elapsed / duration, 1);
             currentBmi = progress * bmi;
             bmiValueDisplay.textContent = currentBmi.toFixed(1);
-
-            if (progress < 1) {
+ if (progress < 1) {
                 requestAnimationFrame(animateBmiValue);
-            } else {
+ } else {
                 bmiValueDisplay.textContent = bmi.toFixed(1);
-            }
+ }
         };
         requestAnimationFrame(animateBmiValue);
         
         document.getElementById('bmi-continue-btn').onclick = next;
-    }
+ }
 
     // /quiz-new.html
 
         async function startAnalysis() {
             goToStep('loading');
-            // Сохраняем время окончания квиза
+ // Сохраняем время окончания квиза
 if (App.sessionId) {
     fetch('/.netlify/functions/quiz', {
         method: 'POST',
@@ -1228,16 +1376,15 @@ if (App.sessionId) {
             sessionId: App.sessionId
         })
     }).catch(err => console.error('Failed to save quiz end time:', err));
-}
+ }
             AnimationManager.add('loading-animation', 'loader.json');
             const analysisStepsContainer = document.getElementById('analysis-steps');
-            analysisStepsContainer.innerHTML = '';
+ analysisStepsContainer.innerHTML = '';
             const steps = ["Analyzing lifestyle data...", "Calculating metabolic rate...", "Processing facial biomarkers...", "Compiling wellness report..."];
-            
-            // Эта часть с анимацией текста остается без изменений
+ // Эта часть с анимацией текста остается без изменений
             for (let i = 0; i < steps.length; i++) {
                 await new Promise(resolve => setTimeout(resolve, 900));
-                const p = document.createElement('p');
+ const p = document.createElement('p');
                 p.textContent = `✓ ${steps[i]}`;
                 analysisStepsContainer.appendChild(p);
             }
@@ -1246,30 +1393,31 @@ if (App.sessionId) {
                 const response = await fetch('/.netlify/functions/generateProfile', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sessionId: App.sessionId })
+            
+                  body: JSON.stringify({ sessionId: App.sessionId })
                 });
-
-                // --- ВОТ ГЛАВНОЕ ИЗМЕНЕНИЕ ---
+ // --- ВОТ ГЛАВНОЕ ИЗМЕНЕНИЕ ---
                 // Проверяем, успешен ли ответ сервера (статус 200-299)
                 if (!response.ok) {
                     // Пытаемся прочитать текст ошибки от сервера
                     const errorData = await response.json().catch(() => {
-                        // Если сервер вернул не JSON, а просто текст, будет резервное сообщение
+  
+                       // Если сервер вернул не JSON, а просто текст, будет резервное сообщение
                         return { error: 'The server responded with an unexpected error.' };
                     });
-                    // Создаем ошибку с текстом от сервера, чтобы прервать выполнение
+ // Создаем ошибку с текстом от сервера, чтобы прервать выполнение
                     throw new Error(errorData.error || `Server error: ${response.status}`);
-                }
+ }
                 
                 // Этот код выполнится только если response.ok === true
                 console.log('Profile generated successfully, redirecting...');
-                window.location.href = `profile.html?session_id=${App.sessionId || ''}`;
+ window.location.href = `profile.html?session_id=${App.sessionId || ''}`;
 
             } catch (error) {
                 // Теперь этот блок будет ловить нашу новую, более понятную ошибку
                 console.error('Failed to generate profile:', error);
-                analysisStepsContainer.innerHTML = `<p class="text-red-600 font-bold text-lg">An error occurred while creating your profile.</p><p class="text-gray-600 mt-2">${error.message}</p><p class="mt-4"><a href="#" onclick="location.reload()" class="text-blue-600 font-semibold underline">Please click here to try again.</a></p>`;
-            }
+ analysisStepsContainer.innerHTML = `<p class="text-red-600 font-bold text-lg">An error occurred while creating your profile.</p><p class="text-gray-600 mt-2">${error.message}</p><p class="mt-4"><a href="#" onclick="location.reload()" class="text-blue-600 font-semibold underline">Please click here to try again.</a></p>`;
+ }
         }
     
     // ЗАМЕНИТЕ ВСЮ ФУНКЦИЮ openCamera НА ЭТОТ КОД
@@ -1277,15 +1425,15 @@ if (App.sessionId) {
 async function openCamera() {
     try {
         await LibraryLoader.loadFaceMeshLibraries();
-    } catch (error) {
+ } catch (error) {
         alert('Failed to load camera AI libraries. Please check your internet connection and try again.');
-        return;
+ return;
     }
 
     const cameraModal = document.getElementById('camera-modal');
     const cameraContainer = document.getElementById('camera-container');
     const video = document.getElementById('camera-video');
-    const canvas = document.getElementById('camera-canvas');
+ const canvas = document.getElementById('camera-canvas');
     
     cameraModal.classList.add('active');
         
@@ -1298,13 +1446,15 @@ if (!App.faceMesh) {
             refineLandmarks: true,
             minDetectionConfidence: 0.5,
             minTrackingConfidence: 0.5
-        });
+       
+  });
         App.faceMesh.onResults(onFaceMeshResults);
         await App.faceMesh.initialize();
     } catch (error) {
-        console.error("Failed to initialize FaceMesh:", error); // Для лучшей отладки
+        console.error("Failed to initialize FaceMesh:", error);
+ // Для лучшей отладки
         alert('Failed to initialize AI model for camera. Please try again.');
-        closeCamera(); 
+ closeCamera(); 
         return;
     }
 }
@@ -1315,136 +1465,133 @@ if (!App.faceMesh) {
                 facingMode: 'user',
                 aspectRatio: { ideal: 3 / 4 },
                 height: { ideal: 1080 }
-            }
+          
+   }
         };
         
         App.cameraStream = await navigator.mediaDevices.getUserMedia(videoConstraints);
         video.srcObject = App.cameraStream;
-        
-        video.addEventListener('loadeddata', () => {
+ video.addEventListener('loadeddata', () => {
             // --- НОВАЯ ЛОГИКА РАСЧЕТА РАЗМЕРОВ ---
             const videoRatio = video.videoWidth / video.videoHeight;
             
             // Максимально доступное пространство (90% от модального окна)
             const maxWidth = cameraModal.clientWidth * 0.9;
-            const maxHeight = cameraModal.clientHeight * 0.9;
+            const maxHeight 
+ = cameraModal.clientHeight * 0.9;
             
             let finalWidth, finalHeight;
 
             // Расчет финальных размеров с сохранением пропорций
             if ((maxWidth / maxHeight) > videoRatio) {
                 // Если доступное пространство шире, чем видео -> высота является лимитом
-                finalHeight = maxHeight;
+         
+               finalHeight = maxHeight;
                 finalWidth = finalHeight * videoRatio;
             } else {
                 // Если доступное пространство выше, чем видео -> ширина является лимитом
                 finalWidth = maxWidth;
-                finalHeight = finalWidth / videoRatio;
+             
+              finalHeight = finalWidth / videoRatio;
             }
 
             // Применяем ОДИНАКОВЫЕ размеры ко всем трем элементам
             cameraContainer.style.width = `${finalWidth}px`;
-            cameraContainer.style.height = `${finalHeight}px`;
+ cameraContainer.style.height = `${finalHeight}px`;
 
             video.style.width = `${finalWidth}px`;
             video.style.height = `${finalHeight}px`;
 
             canvas.style.width = `${finalWidth}px`;
             canvas.style.height = `${finalHeight}px`;
-            
-            // --- КОНЕЦ НОВОЙ ЛОГИКИ ---
+ // --- КОНЕЦ НОВОЙ ЛОГИКИ ---
 
             cameraLoop();
         });
-
-    } catch (err) {
+ } catch (err) {
         console.error("Camera Error:", err);
-        let message = "Camera access was denied. Please allow camera access in your browser settings to continue.";
-        if (window.location.protocol !== 'https:') {
+ let message = "Camera access was denied. Please allow camera access in your browser settings to continue.";
+ if (window.location.protocol !== 'https:') {
             message += "\n\nNOTE: Camera access requires a secure connection (https://) or a local server (localhost).";
-        }
+ }
         alert(message);
-        closeCamera();
-    }
+ closeCamera();
+ }
 }
 
     function closeCamera() {
         const cameraModal = document.getElementById('camera-modal');
-        const guideBox = document.getElementById('camera-guide-box');
+ const guideBox = document.getElementById('camera-guide-box');
         if (App.cameraStream) App.cameraStream.getTracks().forEach(track => track.stop());
         cancelAnimationFrame(App.cameraAnimFrame);
         clearTimeout(App.captureTimeout);
         App.captureTimeout = null;
         cameraModal.classList.remove('active');
         if(guideBox) guideBox.classList.remove('locked');
-    }
+ }
     
     async function cameraLoop() {
         const video = document.getElementById('camera-video');
-        if (video.readyState >= 2) {
+ if (video.readyState >= 2) {
            await App.faceMesh.send({image: video});
-        }
+ }
         App.cameraAnimFrame = requestAnimationFrame(cameraLoop);
-    };
-
-    function onFaceMeshResults(results) {
+ };
+ function onFaceMeshResults(results) {
         const guideBox = document.getElementById('camera-guide-box');
         const guideText = document.getElementById('camera-guide-text');
-        const canvas = document.getElementById('camera-canvas');
+ const canvas = document.getElementById('camera-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = canvas.clientWidth;
         canvas.height = canvas.clientHeight;
         ctx.clearRect(0,0,canvas.width, canvas.height);
-
-        if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+ if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
             const landmarks = results.multiFaceLandmarks[0];
-            
-            if (App.faceMeshDrawState.startTime === null) {
+ if (App.faceMeshDrawState.startTime === null) {
                 App.faceMeshDrawState.startTime = performance.now();
-            }
+ }
             const elapsed = performance.now() - App.faceMeshDrawState.startTime;
-            const finalOpacity = 0.3; 
+ const finalOpacity = 0.3; 
             const opacity = Math.min(1, elapsed / App.faceMeshDrawState.duration) * finalOpacity;
-
-            if (window.drawConnectors && window.FACEMESH_TESSELATION) {
+ if (window.drawConnectors && window.FACEMESH_TESSELATION) {
                 drawConnectors(ctx, landmarks, window.FACEMESH_TESSELATION, {color: `rgba(222, 190, 169, ${opacity})`, lineWidth: 1});
-            }
+ }
 
             if (isFaceCentered(landmarks)) {
                 guideBox.classList.add('locked');
-                guideText.textContent = 'Perfect, hold still!';
+ guideText.textContent = 'Perfect, hold still!';
                 if (!App.captureTimeout) {
                     App.captureTimeout = setTimeout(takePhoto, 2000);
-                }
+ }
             } else {
                 guideBox.classList.remove('locked');
-                guideText.textContent = 'Center your face in the oval';
+ guideText.textContent = 'Center your face in the oval';
                 clearTimeout(App.captureTimeout);
                 App.captureTimeout = null;
-            }
+ }
         } else {
-            App.faceMeshDrawState.startTime = null; 
-            guideBox.classList.remove('locked');
+            App.faceMeshDrawState.startTime = null;
+ guideBox.classList.remove('locked');
             guideText.textContent = 'Center your face in the oval';
             clearTimeout(App.captureTimeout);
             App.captureTimeout = null;
-        }
+ }
     }
 
     function isFaceCentered(landmarks) {
         const nose = landmarks[4];
-        return nose.x > 0.3 && nose.x < 0.7 && nose.y > 0.3 && nose.y < 0.7 && nose.z < -0.03;
-    }
+ return nose.x > 0.3 && nose.x < 0.7 && nose.y > 0.3 && nose.y < 0.7 && nose.z < -0.03;
+ }
 
     function takePhoto() {
         const video = document.getElementById('camera-video');
-        const canvas = document.getElementById('photo-canvas');
+ const canvas = document.getElementById('photo-canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+ ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const photoDataUrl = canvas.toDataURL('image/jpeg', 0.9);
         
         App.lastPhotoDataUrl = photoDataUrl;
@@ -1452,26 +1599,26 @@ if (!App.faceMesh) {
 
         closeCamera();
         goToStep('selfie-confirm');
-    }
+ }
 
     
     function initMenu() {
         const menuBtn = document.getElementById('burger-menu-btn');
-        const closeBtn = document.getElementById('close-menu-btn');
+ const closeBtn = document.getElementById('close-menu-btn');
         const overlay = document.getElementById('menu-overlay');
         const menu = document.getElementById('side-menu');
-        const toggleMenu = () => {
+ const toggleMenu = () => {
             overlay.classList.toggle('active');
             menu.classList.toggle('active');
         };
-        menuBtn.addEventListener('click', toggleMenu);
+ menuBtn.addEventListener('click', toggleMenu);
         closeBtn.addEventListener('click', toggleMenu);
         overlay.addEventListener('click', toggleMenu);
     }
 
     async function startQuizSession() {
     const startBtn = document.getElementById('start-quiz-btn');
-    let retryCount = 0;
+ let retryCount = 0;
     const maxRetries = 3;
     
     // Функция для попытки создания сессии
@@ -1480,103 +1627,103 @@ if (!App.faceMesh) {
             // Добавляем информацию об устройстве и источнике трафика
             const getDeviceType = () => {
     const userAgent = navigator.userAgent.toLowerCase();
-    let os = 'Unknown';
+ let os = 'Unknown';
     if (/iphone|ipad|ipod/.test(userAgent)) os = 'iOS';
     else if (/android/.test(userAgent)) os = 'Android';
-    else if (/windows phone/.test(userAgent)) os = 'Windows Phone';
+ else if (/windows phone/.test(userAgent)) os = 'Windows Phone';
     else if (/mac os x/.test(userAgent)) os = 'macOS';
-    else if (/windows/.test(userAgent)) os = 'Windows';
+ else if (/windows/.test(userAgent)) os = 'Windows';
     else if (/linux/.test(userAgent)) os = 'Linux';
 
     let device = 'Desktop';
-    if (window.innerWidth < 768) device = 'Mobile';
+ if (window.innerWidth < 768) device = 'Mobile';
     else if (window.innerWidth < 1024) device = 'Tablet';
     return `${device}/${os}`;
 };
-const deviceType = getDeviceType();
+ const deviceType = getDeviceType();
             const urlParams = new URLSearchParams(window.location.search);
             const trafficSource = urlParams.get('utm_source') || urlParams.get('ref') || 'direct';
-            
-            const response = await fetch('/.netlify/functions/quiz', {
+ const response = await fetch('/.netlify/functions/quiz', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     action: 'startSession',
-                    deviceType: deviceType,
+                   
+  deviceType: deviceType,
                     source: trafficSource
                 })
             });
-            
-            if (!response.ok) {
+ if (!response.ok) {
                 throw new Error(`Could not start session. Status: ${response.status}`);
-            }
+ }
             
             const data = await response.json();
-            if (!data.sessionId) {
+ if (!data.sessionId) {
                 throw new Error('Session ID not received from server');
-            }
+ }
             
             App.sessionId = data.sessionId;
-            console.log('Session successfully started:', App.sessionId);
-            if (typeof fbq === 'function') { fbq('track', 'ViewContent'); }
+ console.log('Session successfully started:', App.sessionId);
+            if (typeof fbq === 'function') { fbq('track', 'ViewContent');
+ }
             // Сохраняем sessionId в sessionStorage как резервную копию
             sessionStorage.setItem('quiz_session_id', App.sessionId);
-            
-            // Разблокируем кнопку только после успешного создания сессии
+ // Разблокируем кнопку только после успешного создания сессии
             if(startBtn) {
                 startBtn.disabled = false;
-                startBtn.textContent = "Let's start";
+ startBtn.textContent = "Let's start";
             }
             
             return true;
-            
-        } catch (error) {
+ } catch (error) {
             console.error(`Session creation attempt ${retryCount + 1} failed:`, error);
-            retryCount++;
+ retryCount++;
             
             if (retryCount < maxRetries) {
                 // Ждем перед повторной попыткой (экспоненциальная задержка)
                 await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
-                return attemptSessionCreation();
+ return attemptSessionCreation();
             } else {
                 throw error;
-            }
+ }
         }
     };
-    
-    // Запускаем создание сессии
+ // Запускаем создание сессии
     try {
         await attemptSessionCreation();
-    } catch (error) {
+ } catch (error) {
         console.error('CRITICAL: Failed to start session after all retries:', error);
-        
-        if(startBtn) {
+ if(startBtn) {
             startBtn.textContent = 'Connection Error - Refresh Page';
-            startBtn.classList.add('bg-red-500');
+ startBtn.classList.add('bg-red-500');
         }
         
         // Показываем понятное сообщение об ошибке пользователю
         const errorModal = document.createElement('div');
-        errorModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-        errorModal.innerHTML = `
+ errorModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+ errorModal.innerHTML = `
             <div class="bg-white rounded-lg p-6 max-w-md w-full">
                 <h2 class="text-xl font-bold text-red-600 mb-2">Connection Error</h2>
-                <p class="text-gray-700 mb-4">We couldn't connect to our servers. This might be due to:</p>
+                <p class="text-gray-700 mb-4">We couldn't connect to our servers.
+ This might be due to:</p>
                 <ul class="list-disc list-inside text-gray-600 mb-4">
                     <li>Poor internet connection</li>
                     <li>Browser blocking cookies</li>
                     <li>Ad blocker interference</li>
-                </ul>
+          
+       </ul>
                 <div class="flex gap-3">
                     <button onclick="location.reload()" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
                         Try Again
                     </button>
-                    <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">
+   
+                  <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">
                         Close
                     </button>
                 </div>
             </div>
-        `;
+   
+      `;
         document.body.appendChild(errorModal);
     }
 }
@@ -1584,7 +1731,7 @@ const deviceType = getDeviceType();
 
     // --- App Initialization ---
     setVh();
-    window.addEventListener('resize', setVh);
+ window.addEventListener('resize', setVh);
     startQuizSession();
     goToStep('landing');
     initMenu();
@@ -1597,13 +1744,13 @@ document.getElementById('start-quiz-btn').addEventListener('touchend', (event) =
     // Вызываем ту же функцию, что и при клике
     next(); 
 });
-    document.getElementById('back-btn').addEventListener('click', previous);
+ document.getElementById('back-btn').addEventListener('click', previous);
     document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
     
     // Listeners for new selfie confirmation buttons
     document.getElementById('selfie-confirm-btn').addEventListener('click', processAndSavePhoto);
     document.getElementById('selfie-retake-btn').addEventListener('click', openCamera);
-    // ... code for initMenu(), startQuizSession(), etc.
+ // ... code for initMenu(), startQuizSession(), etc.
 
 // --- ADD THIS NEW CODE ---
 // 1. Initialize the new Lottie animation for the landing page
@@ -1617,37 +1764,90 @@ const observer = new IntersectionObserver((entries) => {
         }
     });
 }, { threshold: 0.1 });
-
-document.querySelectorAll('.fade-in-up').forEach(el => {
+ document.querySelectorAll('.fade-in-up').forEach(el => {
     observer.observe(el);
 });
 // --- END OF NEW CODE ---
 
 // --- App Initialization ---
 setVh();
-// ... rest of the initialization code
+ // ... rest of the initialization code
     // ↓↓↓ ВСТАВЬТЕ ЭТОТ КОД В КОНЕЦ ВАШЕГО СКРИПТА ↓↓↓
 
 // --- FIX for Header Overlap ---
 function adjustMainPadding() {
     const header = document.getElementById('quiz-header');
-    const main = document.getElementById('steps-wrapper');
+ const main = document.getElementById('steps-wrapper');
     if (header && main) {
         const headerHeight = header.offsetHeight;
-        main.style.paddingTop = `${headerHeight}px`;
+ main.style.paddingTop = `${headerHeight}px`;
     }
 }
 
 // Adjust padding on load and on resize
 window.addEventListener('resize', adjustMainPadding);
-adjustMainPadding(); // Call it once on initial load
+adjustMainPadding();
+ // Call it once on initial load
 
 // --- END of FIX ---
 
 // --- App Initialization ---
 // ... (у вас здесь идет остальной код инициализации)
 setVh();
-// ...
+
+// Универсальная функция для всех ползунков
+function initSlider(sliderId, question, onUpdate) {
+    const slider = document.getElementById(sliderId);
+    if (!slider) return;
+    
+    let isDragging = false;
+    
+    // Функция обновления значения
+    const updateValue = (value) => {
+        slider.value = value;
+        if (onUpdate) onUpdate(question, value);
+    };
+    
+    // Обработка всех типов событий
+    const handleStart = (e) => {
+        isDragging = true;
+        e.preventDefault(); // Предотвращаем скролл страницы
+    };
+    
+    const handleMove = (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+    };
+    
+    const handleEnd = (e) => {
+        if (isDragging) {
+            isDragging = false;
+            updateValue(slider.value);
+        }
+    };
+    
+    // Touch события
+    slider.addEventListener('touchstart', handleStart, { passive: false });
+    slider.addEventListener('touchmove', handleMove, { passive: false });
+    slider.addEventListener('touchend', handleEnd);
+    
+    // Mouse события  
+    slider.addEventListener('mousedown', handleStart);
+    slider.addEventListener('mousemove', handleMove);
+    slider.addEventListener('mouseup', handleEnd);
+    
+    // Input событие для изменений
+    slider.addEventListener('input', (e) => {
+        if (onUpdate) onUpdate(question, e.target.value);
+    });
+    // Change событие для финального значения
+    slider.addEventListener('change', (e) => {
+        updateValue(e.target.value);
+    });
+    // Инициализация начального значения
+    updateValue(App.userAnswers[question.key] || question.defaultValue);
+}
+
 });
 </script>
 
