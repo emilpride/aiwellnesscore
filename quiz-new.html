@@ -30,7 +30,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
     <!-- Убираем эти строки (НЕ загружаем библиотеки сразу):
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
@@ -42,19 +42,32 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     
     <style>
         :root { 
-            --brand-accent: #debea9;
-            --brand-dark-text: #3c3b31; 
+            --brand-accent: #A385E9;
+            --brand-dark-text: #2d2b33; 
         }
         
         /* --- UPDATED LIGHTER ANIMATED BACKGROUND --- */
         html, body { 
             overscroll-behavior: none; 
-            font-family: 'Inter', sans-serif; 
-            /* Lighter, more subtle gradient */
-            background: linear-gradient(120deg, #fdfcfb, #f9f7f5, #f5f2ef, #f9f7f5, #fdfcfb);
+            font-family: 'Raleway', 'Inter', sans-serif; 
+            min-height: 100%;
+            background: linear-gradient(120deg, #f8fbff, #fff7fb, #f8fbff);
             background-size: 400% 400%;
             animation: moveBackground 40s ease infinite;
+            position: relative;
         }
+        body::before, body::after {
+            content: "";
+            position: fixed;
+            inset: auto;
+            width: 420px; height: 420px;
+            filter: blur(100px);
+            opacity: 0.45;
+            z-index: 0;
+            pointer-events: none;
+        }
+        body::before { left: -60px; top: 10vh; background: #53E5FF; transform: rotate(14.51deg); }
+        body::after  { right: -60px; bottom: 8vh; background: #FF99CC; transform: rotate(-12deg); }
 
         @keyframes moveBackground {
             0% { background-position: 0% 50%; }
@@ -520,7 +533,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 </section>
 
         <section id="step-quiz" class="quiz-step prev">
-            <div id="quiz-card" class="w-full max-w-2xl mx-auto h-full flex flex-col justify-between gap-6 mt-20 px-4">
+            <div id="quiz-card" class="w-full max-w-2xl mx-auto min-h-full flex flex-col items-center justify-center gap-5 sm:gap-6 px-4">
                 <div id="question-wrapper" class="w-full"></div>
                 <div id="footer-actions" class="w-full"></div>
             </div>
@@ -546,9 +559,11 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         </section>
         
         <section id="step-loading" class="quiz-step prev">
-            <div id="loading-animation" class="w-48 h-48"></div>
-            <h2 class="text-3xl font-bold text-gray-800 mt-4 text-center">Analyzing Your Unique Profile...</h2>
-            <div id="analysis-steps" class="mt-6 text-gray-600 space-y-2 w-64 text-left"></div>
+            <div class="w-full h-full flex flex-col items-center justify-center relative">
+                <div id="loading-animation" class="w-48 h-48"></div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-800 mt-4 text-center">Analyzing Your Unique Profile...</h2>
+                <div id="analysis-steps" class="steps-list space-y-2"></div>
+            </div>
         </section>
 
         <!-- NEW: Selfie Confirmation Step -->
@@ -1130,9 +1145,30 @@ function next() {
                 ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev => btn.addEventListener(ev, remove));
             });
         } else if (question.type === 'camera_step') {
-            footerWrapper.innerHTML = `<div class="max-w-sm mx-auto space-y-3 mt-4"><button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button></div>`;
+            footerWrapper.innerHTML = `<div class="max-w-sm mx-auto space-y-3 mt-4">
+                <button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button>
+                <label class="w-full inline-flex items-center justify-center bg-white border border-gray-300 text-gray-800 font-semibold py-3 rounded-full text-lg hover:bg-gray-50 transition cursor-pointer">
+                    <input id="upload-photo-input" type="file" accept="image/*" class="hidden" />Upload a photo
+                </label>
+                <button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button>
+            </div>`;
             footerWrapper.querySelector('#open-camera-btn').addEventListener('click', openCamera);
             footerWrapper.querySelector('#skip-photo-btn').addEventListener('click', () => handleAnswer('selfie', 'skipped'));
+            const uploadInput = footerWrapper.querySelector('#upload-photo-input');
+            if (uploadInput) {
+                uploadInput.addEventListener('change', async (e) => {
+                    const file = e.target.files && e.target.files[0];
+                    if (!file) return;
+                    try {
+                        const dataUrl = await resizeToJpegDataUrl(file, 1500);
+                        App.lastPhotoDataUrl = dataUrl;
+                        document.getElementById('selfie-preview-img').src = dataUrl;
+                        goToStep('selfie-confirm');
+                    } catch (err) {
+                        alert('Could not process the selected image. Please try another file.');
+                    }
+                });
+            }
         } else if (question.type === 'email_step') {
              footerWrapper.innerHTML = `
                 <div class="flex flex-col gap-3 max-w-sm mx-auto mt-6">
@@ -1178,7 +1214,7 @@ function next() {
     
     // Replace the old updateSliderDisplay function with this one
 // Вставьте этот код вместо вашей текущей функции updateSliderDisplay
-function updateSliderDisplay(question, value) {
+    function updateSliderDisplay(question, value) {
     const valueDisplay = document.getElementById('slider-value-display');
     if (!valueDisplay) return;
 
@@ -1375,9 +1411,19 @@ if (App.sessionId) {
             
             // Эта часть с анимацией текста остается без изменений
             for (let i = 0; i < steps.length; i++) {
-                await new Promise(resolve => setTimeout(resolve, 900));
-                const p = document.createElement('p');
-                p.textContent = `✓ ${steps[i]}`;
+    await new Promise(resolve => setTimeout(resolve, 800));
+    const item = document.createElement('div');
+    item.className = 'analysis-step';
+    const circle = document.createElement('span');
+    circle.className = 'circle';
+    const text = document.createElement('span');
+    text.className = 'step-text';
+    text.textContent = steps[i];
+    item.appendChild(circle);
+    item.appendChild(text);
+    analysisStepsContainer.appendChild(item);
+    setTimeout(()=>circle.classList.add('done'), 150);
+}`;
                 analysisStepsContainer.appendChild(p);
             }
 
@@ -1608,6 +1654,25 @@ if (!App.faceMesh) {
         overlay.addEventListener('click', toggleMenu);
     }
 
+    // Utility: resize any image file to JPEG DataURL (maxSide px)
+    async function resizeToJpegDataUrl(file, maxSide = 1500) {
+        const blobUrl = URL.createObjectURL(file);
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = blobUrl; });
+        const w = img.naturalWidth || img.width;
+        const h = img.naturalHeight || img.height;
+        const scale = Math.min(1, maxSide / Math.max(w, h));
+        const tw = Math.max(1, Math.round(w * scale));
+        const th = Math.max(1, Math.round(h * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = tw; canvas.height = th;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, tw, th);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        URL.revokeObjectURL(blobUrl);
+        return dataUrl;
+    }
     // Global loader helpers and session readiness util
     function showGlobalLoader(message = 'Preparing your quiz...') {
         const overlay = document.getElementById('global-loader');
@@ -1819,3 +1884,12 @@ setVh();
 
 </body>
 </html>
+        /* Loading steps styling */
+        #step-loading { z-index: 1; }
+        #step-loading .steps-list { position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%); width: 18rem; }
+        .analysis-step { display: flex; align-items: center; gap: 10px; color: #57534e; }
+        .analysis-step .circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #A385E9; position: relative; overflow: hidden; }
+        .analysis-step .circle.done { background: #A385E9; border-color: #A385E9; }
+        .analysis-step .circle.done::after { content: "✔"; position: absolute; color: white; font-size: 14px; line-height: 22px; width: 100%; text-align: center; left: 0; top: 0; }
+
+
