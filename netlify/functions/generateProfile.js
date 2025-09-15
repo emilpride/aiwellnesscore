@@ -79,7 +79,10 @@ exports.handler = async (event) => {
     console.error(`[${sessionIdFromEvent || 'unknown'}] --- FATAL HANDLER ERROR:`, error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Internal Server Error', details: error.message })
+      body: JSON.stringify({ 
+        error: 'We could not generate your profile. Please try again.', 
+        details: error.message 
+      })
     };
   }
-};
+};;

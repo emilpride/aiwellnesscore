@@ -1,0 +1,1 @@
+ dump\; (Get-Content netlify\\functions\\payment.js -Raw) | Set-Content TMP_payment_before.txt; Write-Output \ok

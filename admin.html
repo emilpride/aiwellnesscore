@@ -80,6 +80,7 @@
                     <button id="tab-sessions" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-400 border-transparent hover:text-gray-200 hover:border-gray-500">Sessions</button>
                     <button id="tab-messages" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-400 border-transparent hover:text-gray-200 hover:border-gray-500">Messages</button>
                     <button id="tab-funnel" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-400 border-transparent hover:text-gray-200 hover:border-gray-500">Funnel Analysis</button>
+                    <button id="tab-config" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-400 border-transparent hover:text-gray-200 hover:border-gray-500">Config</button>
                 </nav>
             </div>
             
@@ -159,6 +160,34 @@
                 </div>
                 <div id="funnel-results-container" class="mt-6"></div>
             </div>
+
+            <div id="content-config" class="tab-content mt-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="stat-card p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-4">Pricing</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm text-gray-400 mb-1">Basic (7 days)</label>
+                        <input id="price-basic" type="number" step="0.01" min="0.5" class="w-full form-input rounded-md p-2 text-white" />
+                      </div>
+                      <div>
+                        <label class="block text-sm text-gray-400 mb-1">Advanced (14 days)</label>
+                        <input id="price-advanced" type="number" step="0.01" min="0.5" class="w-full form-input rounded-md p-2 text-white" />
+                      </div>
+                      <div>
+                        <label class="block text-sm text-gray-400 mb-1">Premium (21 days)</label>
+                        <input id="price-premium" type="number" step="0.01" min="0.5" class="w-full form-input rounded-md p-2 text-white" />
+                      </div>
+                      <div>
+                        <label class="block text-sm text-gray-400 mb-1">Currency</label>
+                        <input id="price-currency" type="text" class="w-full form-input rounded-md p-2 text-white" />
+                      </div>
+                    </div>
+                    <button id="save-pricing-btn" class="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-md transition-colors">Save Pricing</button>
+                    <p id="save-pricing-status" class="mt-2 text-sm"></p>
+                  </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -169,7 +198,7 @@
             adminPanel = document.getElementById('admin-panel'), refreshBtn = document.getElementById('refresh-data-btn'),
             refreshIcon = document.getElementById('refresh-icon');
 
-        let allSessionsData = [], statisticsData = {}, allMessagesData = [], adminPassword = null;
+        let allSessionsData = [], statisticsData = {}, allMessagesData = [], pricingData = null, adminPassword = null;
         let sortState = { column: 'createdAt', direction: 'desc' };
 
         const formatDate = (date) => {
@@ -197,8 +226,8 @@
                 });
                 if (response.status === 401) throw new Error('Incorrect password.');
                 if (!response.ok) throw new Error('Could not fetch data from server.');
-                const { sessions, statistics, messages } = await response.json();
-                allSessionsData = sessions; statisticsData = statistics; allMessagesData = messages;
+                const { sessions, statistics, messages, pricing } = await response.json();
+                allSessionsData = sessions; statisticsData = statistics; allMessagesData = messages; pricingData = pricing;
                 if (!adminPassword) {
                     adminPassword = password;
                     loginModal.classList.add('hidden'); adminPanel.classList.remove('hidden');
@@ -285,7 +314,19 @@
         }
 
         function renderAll() {
-            renderStats(statisticsData); renderTable(allSessionsData); renderMessages(allMessagesData); populateFunnelFilters();
+            renderStats(statisticsData); renderTable(allSessionsData); renderMessages(allMessagesData); populateFunnelFilters(); renderPricing(pricingData);
+        }
+        function renderPricing(pr) {
+            if (!pr) return;
+            const prices = pr.prices || {};
+            const elBasic = document.getElementById('price-basic');
+            const elAdvanced = document.getElementById('price-advanced');
+            const elPremium = document.getElementById('price-premium');
+            const elCurrency = document.getElementById('price-currency');
+            if (elBasic) elBasic.value = prices.basic ?? '';
+            if (elAdvanced) elAdvanced.value = prices.advanced ?? '';
+            if (elPremium) elPremium.value = prices.premium ?? '';
+            if (elCurrency) elCurrency.value = pr.currency || 'USD';
         }
         
         function renderStats(stats) {
@@ -497,6 +538,35 @@
             const tableRows = results.map((step, i) => `<tr class="${i > 0 && parseFloat(step.convFromPrev) < 50.0 ? 'bg-red-900 bg-opacity-40' : 'border-b border-gray-700'}"><td data-label="Step" class="py-3 px-4 text-sm text-white">${step.name}</td><td data-label="Users" class="py-3 px-4 text-sm text-white font-bold text-center">${step.count}</td><td data-label="Conv. (Step)" class="py-3 px-4 text-sm text-gray-400 text-center">${step.convFromPrev}%</td><td data-label="Conv. (Total)" class="py-3 px-4 text-sm text-gray-400 text-center">${step.convFromTotal}%</td><td data-label="Visualization" class="py-3 px-4 w-1/3"><div class="w-full bg-gray-700 rounded-full h-6"><div class="funnel-bar h-6 rounded-full flex items-center justify-center text-xs font-bold text-white px-2" style="width: ${maxCount > 0 ? (step.count / maxCount * 100) > 5 ? (step.count / maxCount * 100) : 5 : 5}%">${step.convFromTotal}%</div></div></td></tr>`).join('');
             container.innerHTML = `<div class="overflow-x-auto rounded-lg border border-gray-700 mt-6"><table class="min-w-full funnel-table"><thead><tr><th class="py-3 px-4 text-left text-xs font-medium text-gray-300 uppercase">Step</th><th class="py-3 px-4 text-center text-xs font-medium text-gray-300 uppercase">Users</th><th class="py-3 px-4 text-center text-xs font-medium text-gray-300 uppercase">Conv. (Step)</th><th class="py-3 px-4 text-center text-xs font-medium text-gray-300 uppercase">Conv. (Total)</th><th class="py-3 px-4 text-left text-xs font-medium text-gray-300 uppercase">Visualization</th></tr></thead><tbody class="bg-gray-800">${tableRows}</tbody></table></div>`;
         }
+
+        // Save pricing handler
+        (function attachPricingHandler(){
+            const saveBtn = document.getElementById('save-pricing-btn');
+            if (!saveBtn) return;
+            saveBtn.addEventListener('click', async () => {
+                if (!adminPassword) return;
+                const statusEl = document.getElementById('save-pricing-status');
+                statusEl.textContent = '';
+                const basic = parseFloat(document.getElementById('price-basic').value);
+                const advanced = parseFloat(document.getElementById('price-advanced').value);
+                const premium = parseFloat(document.getElementById('price-premium').value);
+                const currency = (document.getElementById('price-currency').value || 'USD').toUpperCase();
+                try {
+                    const resp = await fetch('/.netlify/functions/getAdminData', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password: adminPassword, action: 'updatePricing', pricing: { basic, advanced, premium, currency } })
+                    });
+                    if (!resp.ok) throw new Error('Failed to save pricing');
+                    statusEl.className = 'mt-2 text-sm text-green-400';
+                    statusEl.textContent = 'Saved successfully';
+                    fetchAndRenderData(adminPassword);
+                } catch (e) {
+                    statusEl.className = 'mt-2 text-sm text-red-400';
+                    statusEl.textContent = e.message;
+                }
+            });
+        })();
     });
     </script>
 </body>

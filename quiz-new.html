@@ -83,7 +83,8 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             pointer-events: none; 
             transform: scale(1.05); 
         }
-        .quiz-step.active { transform: scale(1); }
+        /* Avoid transform on the active step to prevent iOS Safari range-slider drag bugs */
+        .quiz-step.active { transform: none; }
         .quiz-step.prev:not(.active) { transform: scale(0.95); }
 
         @keyframes contentFadeInUp {
@@ -93,6 +94,19 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         .question-content-enter {
             animation: contentFadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
+
+        /* Improve range slider touch behavior across devices */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            touch-action: pan-y; /* allow vertical scrolling, keep horizontal drag for slider */
+        }
+        input[type="range"]:focus { outline: none; }
+        /* Make the clickable area slightly larger on iOS */
+        input[type="range"]::-webkit-slider-runnable-track { height: 10px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 26px; width: 26px; margin-top: -8px; border-radius: 50%; background: #3c3b31; }
+        input[type="range"]::-moz-range-track { height: 10px; }
+        input[type="range"]::-moz-range-thumb { height: 26px; width: 26px; border-radius: 50%; background: #3c3b31; border: none; }
         
         /* --- UPDATED HEADER STYLE WITH BLUR --- */
         #quiz-header { 
@@ -426,6 +440,13 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 </head>
 <body>
 
+    <!-- Global Loader Overlay -->
+    <div id="global-loader" class="fixed inset-0 bg-white/85 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-6">
+        <div class="w-14 h-14 border-4 border-gray-300 border-t-[--brand-accent] rounded-full animate-spin"></div>
+        <p id="global-loader-text" class="mt-4 text-lg font-semibold text-gray-700 text-center">Preparing your quiz...</p>
+        <p class="text-sm text-gray-500 mt-2">Warming up your personalized experience</p>
+    </div>
+
 <div id="quiz-container">
     <header id="quiz-header" class="w-full p-4 fixed top-0 left-0 right-0">
         <div class="flex items-center gap-4 max-w-2xl mx-auto">
@@ -478,7 +499,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 </div>
 
         <div class="fade-in-up" style="animation-delay: 400ms;">
-            <button id="start-quiz-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[--brand-accent]/40" disabled>
+            <button id="start-quiz-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-4 px-4 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[--brand-accent]/40">
                 Start My Free Analysis
             </button>
             <p class="text-xs text-gray-500 text-center mt-4">
@@ -989,9 +1010,9 @@ function next() {
              contentHTML = `<div class="stress-widget">
                  <h2 class="text-2xl font-bold text-gray-900 text-center">${question.text}</h2>
                  <p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>
-                 <div class="my-6">
-                     <input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
-                 </div>
+                    <div class="my-6">
+                        <input type="range" min="${question.min}" max="${question.max}" step="1" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
+                    </div>
                  <div class="flex justify-between text-sm text-gray-500 mt-2 px-1">
                      <span>Relaxed</span>
                      <span>Stressed</span>
@@ -1008,6 +1029,13 @@ function next() {
         }
         
         wrapper.innerHTML = `<div class="question-content w-full question-content-enter">${contentHTML}</div>`;
+        // Remove transform after entrance animation to avoid iOS slider drag issues
+        const contentEl = wrapper.querySelector('.question-content');
+        if (contentEl) {
+            contentEl.addEventListener('animationend', () => {
+                contentEl.style.transform = 'none';
+            }, { once: true });
+        }
         
         if (question.type === 'options') {
             const optionsHTML = question.options.map(opt => {
@@ -1020,14 +1048,15 @@ function next() {
                 btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
             });
         } else if (question.type === 'slider' && question.key !== 'stress') {
-            const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-sm mt-6"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
+            const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-sm mt-6"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" step="1" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
             wrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', sliderContent);
         }
 
         if (question.type === 'slider') {
              footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;
-             const sliderInput = document.getElementById('slider-input');
+             const sliderInput = wrapper.querySelector('#slider-input');
              sliderInput.addEventListener('input', () => updateSliderDisplay(question, sliderInput.value));
+             sliderInput.addEventListener('change', () => updateSliderDisplay(question, sliderInput.value));
              footerWrapper.querySelector('#slider-confirm-btn').addEventListener('click', () => handleAnswer(question.key, sliderInput.value));
              updateSliderDisplay(question, App.userAnswers[question.key] || question.defaultValue);
         }
@@ -1469,6 +1498,30 @@ if (!App.faceMesh) {
         overlay.addEventListener('click', toggleMenu);
     }
 
+    // Global loader helpers and session readiness util
+    function showGlobalLoader(message = 'Preparing your quiz...') {
+        const overlay = document.getElementById('global-loader');
+        const textEl = document.getElementById('global-loader-text');
+        if (textEl) textEl.textContent = message;
+        if (overlay) overlay.classList.remove('hidden');
+    }
+    function hideGlobalLoader() {
+        const overlay = document.getElementById('global-loader');
+        if (overlay) overlay.classList.add('hidden');
+    }
+    let sessionPromise = null;
+    async function ensureSessionReady() {
+        if (App.sessionId) return App.sessionId;
+        if (sessionPromise) return sessionPromise;
+        sessionPromise = startQuizSession();
+        try {
+            await sessionPromise;
+            return App.sessionId;
+        } finally {
+            sessionPromise = null;
+        }
+    }
+
     async function startQuizSession() {
     const startBtn = document.getElementById('start-quiz-btn');
     let retryCount = 0;
@@ -1527,6 +1580,7 @@ const deviceType = getDeviceType();
                 startBtn.disabled = false;
                 startBtn.textContent = "Let's start";
             }
+            hideGlobalLoader();
             
             return true;
             
@@ -1547,6 +1601,7 @@ const deviceType = getDeviceType();
     // Запускаем создание сессии
     try {
         await attemptSessionCreation();
+        return true;
     } catch (error) {
         console.error('CRITICAL: Failed to start session after all retries:', error);
         
@@ -1578,6 +1633,7 @@ const deviceType = getDeviceType();
             </div>
         `;
         document.body.appendChild(errorModal);
+        throw error;
     }
 }
 

@@ -68,8 +68,10 @@ exports.handler = async (event) => {
 
   let stripeEvent;
   try {
+    // Netlify may base64-encode the body. Construct Buffer accordingly.
+    const raw = event.isBase64Encoded ? Buffer.from(event.body, 'base64') : Buffer.from(event.body, 'utf8');
     stripeEvent = stripe.webhooks.constructEvent(
-      event.body,
+      raw,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
@@ -121,7 +123,10 @@ exports.handler = async (event) => {
 
       try {
         console.log(`[${sessionId}] Attempting to invoke generate-report-hybrid function...`);
-        await fetch(`${process.env.URL}/.netlify/functions/generate-report-hybrid`, {
+        const host = event.headers.host;
+        const proto = event.headers['x-forwarded-proto'] || 'https';
+        const base = process.env.URL || `${proto}://${host}`;
+        await fetch(`${base}/.netlify/functions/generate-report-hybrid`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ sessionId: sessionId })

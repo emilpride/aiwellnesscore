@@ -1,6 +1,7 @@
 'use strict';
 const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
+const RateLimiter = require('./utils/rateLimiter');
 
 if (!getApps().length) {
   try {
@@ -29,13 +30,40 @@ exports.handler = async (event) => {
   }
 
   try {
+    // Basic rate limiting per IP and action
+    const ip = event.headers['x-nf-client-connection-ip'] || event.headers['x-forwarded-for'] || 'unknown';
+    const body = JSON.parse(event.body);
+    const action = body?.action || 'getAdminData';
+    const rate = await RateLimiter.checkLimit(ip, action);
+    if (!rate.allowed) {
+      return { statusCode: 429, headers: { 'Retry-After': Math.ceil(rate.retryAfter/1000).toString() }, body: JSON.stringify({ error: 'Too many requests' }) };
+    }
+
     const statsRef = db.collection('metadata').doc('sessions');
     const statsDoc = await statsRef.get();
     const totalSessionsCount = statsDoc.exists ? statsDoc.data().totalCount : 0;
 
-    const { password, startDate, endDate } = JSON.parse(event.body);
+    const { password, startDate, endDate, pricing } = body;
     if (password !== process.env.SHAURMA) {
       return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
+    }
+
+    // Handle admin updates for pricing
+    if (action === 'updatePricing') {
+      const p = pricing || {};
+      const basic = Number(p.basic);
+      const advanced = Number(p.advanced);
+      const premium = Number(p.premium);
+      const currency = (p.currency || 'USD').toUpperCase();
+      if ([basic, advanced, premium].some(v => !Number.isFinite(v) || v <= 0)) {
+        return { statusCode: 400, body: JSON.stringify({ error: 'Invalid pricing values' }) };
+      }
+      await db.collection('metadata').doc('pricing').set({
+        currency,
+        prices: { basic, advanced, premium },
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+      return { statusCode: 200, body: JSON.stringify({ ok: true }) };
     }
 
     const sessionsRef = db.collection('sessions');
@@ -64,8 +92,24 @@ exports.handler = async (event) => {
     const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').get();
     let messagesData = messagesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), receivedAt: new Date(doc.data().createdAt).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' }) }));
 
+    // Load pricing to return for admin UI
+    let pricingDoc = await db.collection('metadata').doc('pricing').get();
+    let pricingData = { currency: 'USD', prices: { basic: 9.99, advanced: 13.99, premium: 19.99 } };
+    if (pricingDoc.exists) {
+      const pd = pricingDoc.data() || {};
+      if (pd.prices && typeof pd.prices === 'object') {
+        pricingData = { currency: pd.currency || 'USD', prices: pd.prices };
+      } else {
+        // legacy flat shape support
+        const { basic, advanced, premium, currency } = pd;
+        if ([basic, advanced, premium].every(v => typeof v === 'number')) {
+          pricingData = { currency: currency || 'USD', prices: { basic, advanced, premium } };
+        }
+      }
+    }
+
     if (sessionsSnapshot.empty) {
-      return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: { totalSessions: totalSessionsCount, sessionsInPeriod: 0, completedQuizzes: 0 }, messages: messagesData }) };
+      return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: { totalSessions: totalSessionsCount, sessionsInPeriod: 0, completedQuizzes: 0 }, messages: messagesData, pricing: pricingData }) };
     }
     
     let totalRevenue = 0, successfulPayments = 0, completedQuizzes = 0, totalErrors = 0;
@@ -182,7 +226,8 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         sessions: sessionsData,
         statistics: { ...statistics, newerSessionsCount: newerSessionsCount },
-        messages: messagesData
+        messages: messagesData,
+        pricing: pricingData
       }),
     };
   } catch (error) {

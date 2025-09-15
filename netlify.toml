@@ -1,41 +1,19 @@
-# Единый правильный файл конфигурации netlify.toml
+## Netlify configuration
 
-# Раздел "build" указывает Netlify, как собирать ваш сайт.
 [build]
-  # Команда сборки не нужна для простого HTML/JS сайта.
   command = "echo 'No build command'"
-  
-  # Указываем, что публиковать нужно корневую папку.
-  publish = "/"
-  
-  # ЭТО САМАЯ ВАЖНАЯ СТРОКА: Явно говорим Netlify, где лежат функции.
+  publish = "."
   functions = "netlify/functions"
 
-# Общий раздел для всех функций
 [functions]
-  # Используем современный сборщик функций
   node_bundler = "esbuild"
-  
-  # ВАЖНО: Принудительно включаем файл с логикой расчетов,
-  # чтобы функция generateProfile могла его найти.
-  included_files = ["netlify/functions/bio-age-calculation.js"]
 
-# --- Далее идут ваши специфические настройки для отдельных функций ---
-
-# Увеличиваем время ожидания для фоновой функции генерации отчета
-[functions."result-background"]
-  timeout = 90
-
-# Увеличиваем время ожидания для функции админ-панели
-[functions."getAdminData"]
-  timeout = 25
-
-# Настройки для вебхука Stripe
 [functions."stripe-webhook"]
+  # Stripe SDK is used in the webhook
   external_node_modules = ["stripe"]
 
-# Заголовки для вебхука Stripe
 [[headers]]
   for = "/.netlify/functions/stripe-webhook"
   [headers.values]
     Content-Type = "application/json"
+
