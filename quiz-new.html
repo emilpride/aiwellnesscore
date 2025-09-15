@@ -1394,16 +1394,16 @@ function next() {
         async function startAnalysis() {
             goToStep('loading');
             // Сохраняем время окончания квиза
-if (App.sessionId) {
-    fetch('/.netlify/functions/quiz', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            action: 'endQuiz',
-            sessionId: App.sessionId
-        })
-    }).catch(err => console.error('Failed to save quiz end time:', err));
-}
+            if (App.sessionId) {
+                fetch('/.netlify/functions/quiz', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'endQuiz',
+                        sessionId: App.sessionId
+                    })
+                }).catch(err => console.error('Failed to save quiz end time:', err));
+            }
             AnimationManager.add('loading-animation', 'loader.json');
             const analysisStepsContainer = document.getElementById('analysis-steps');
             analysisStepsContainer.innerHTML = '';
@@ -1411,19 +1411,18 @@ if (App.sessionId) {
             
             // Эта часть с анимацией текста остается без изменений
             for (let i = 0; i < steps.length; i++) {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    const item = document.createElement('div');
-    item.className = 'analysis-step';
-    const circle = document.createElement('span');
-    circle.className = 'circle';
-    const text = document.createElement('span');
-    text.className = 'step-text';
-    text.textContent = steps[i];
-    item.appendChild(circle);
-    item.appendChild(text);
-    analysisStepsContainer.appendChild(item);
-            setTimeout(()=>circle.classList.add('done'), 150);
-}
+                await new Promise(resolve => setTimeout(resolve, 800));
+                const item = document.createElement('div');
+                item.className = 'analysis-step';
+                const circle = document.createElement('span');
+                circle.className = 'circle';
+                const text = document.createElement('span');
+                text.className = 'step-text';
+                text.textContent = steps[i];
+                item.appendChild(circle);
+                item.appendChild(text);
+                analysisStepsContainer.appendChild(item);
+                setTimeout(() => circle.classList.add('done'), 150);
             }
 
             try {
