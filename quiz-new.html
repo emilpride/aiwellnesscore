@@ -1279,7 +1279,7 @@ function next() {
             animationHTML = `<div class="w-full max-w-sm mx-auto bg-white p-6 rounded-2xl shadow-sm text-center"><div class="font-semibold text-gray-600 mb-3">Smart Swaps</div><div class="flex justify-center gap-3"><div class="px-3 py-2 rounded-lg bg-rose-100 text-rose-600 line-through">🍔 Soda</div><div class="px-3 py-2 rounded-lg bg-emerald-100 text-emerald-700">🥑 Water</div></div></div>`;
         } else if (key === 'mindfulness_visual') {
             animationHTML = `<div class="w-full max-w-sm mx-auto text-center"><div class="mx-auto w-40 h-40 rounded-full border-2 border-indigo-200 flex items-center justify-center"><div class="w-24 h-24 rounded-full bg-indigo-100 animate-pulse"></div></div></div>`;
-        } else if (key === 'mood_visual') {
+        } else if (key === 'mood_visual_broken') {
             const faces = ['🙂','😌','😐','😮‍💨','😊','😁'];
             animationHTML = `<div class="w-full max-w-sm mx-auto text-center"><div class="flex justify-center gap-2 text-3xl">${faces.map(f=>`<span class='animate-bounce'>${f}</span>`).join('')}</div></div>`;
         } else if (key === 'alcohol_visual') {
@@ -1422,9 +1422,8 @@ if (App.sessionId) {
     item.appendChild(circle);
     item.appendChild(text);
     analysisStepsContainer.appendChild(item);
-    setTimeout(()=>circle.classList.add('done'), 150);
-}`;
-                analysisStepsContainer.appendChild(p);
+            setTimeout(()=>circle.classList.add('done'), 150);
+}
             }
 
             try {
@@ -1443,7 +1442,7 @@ if (App.sessionId) {
                         return { error: 'The server responded with an unexpected error.' };
                     });
                     // Создаем ошибку с текстом от сервера, чтобы прервать выполнение
-                    throw new Error(errorData.error || `Server error: ${response.status}`);
+                    throw new Error(errorData.error || ('Server error: ' + response.status));
                 }
                 
                 // Этот код выполнится только если response.ok === true
@@ -1820,15 +1819,25 @@ const deviceType = getDeviceType();
     goToStep('landing');
     initMenu();
 
-    document.getElementById('start-quiz-btn').addEventListener('click', next);
-    // FIX for Facebook/Mobile Browsers
-document.getElementById('start-quiz-btn').addEventListener('touchend', (event) => {
-    // Предотвращаем дальнейшее "всплытие" события, которое может вызвать свайп
-    event.preventDefault(); 
-    // Вызываем ту же функцию, что и при клике
-    next(); 
-});
-    document.getElementById('back-btn').addEventListener('click', previous);
+    const startBtnEl = document.getElementById('start-quiz-btn');
+const handleStart = async (event) => {
+    if (event && event.type === 'touchend') event.preventDefault();
+    try {
+        if (startBtnEl) startBtnEl.disabled = true;
+        showGlobalLoader('Preparing your quiz...');
+        await ensureSessionReady();
+        hideGlobalLoader();
+        next();
+    } catch (e) {
+        hideGlobalLoader();
+        if (startBtnEl) { startBtnEl.disabled = false; startBtnEl.textContent = 'Try Again'; }
+    }
+};
+if (startBtnEl) {
+    startBtnEl.addEventListener('click', handleStart);
+    startBtnEl.addEventListener('touchend', handleStart);
+}
+document.getElementById('back-btn').addEventListener('click', previous);
     document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
     
     // Listeners for new selfie confirmation buttons
@@ -1891,5 +1900,7 @@ setVh();
         .analysis-step .circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #A385E9; position: relative; overflow: hidden; }
         .analysis-step .circle.done { background: #A385E9; border-color: #A385E9; }
         .analysis-step .circle.done::after { content: "✔"; position: absolute; color: white; font-size: 14px; line-height: 22px; width: 100%; text-align: center; left: 0; top: 0; }
+
+
 
 
