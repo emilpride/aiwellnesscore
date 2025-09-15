@@ -513,7 +513,10 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 </section>
 
         <section id="step-quiz" class="quiz-step prev">
-            <div id="question-wrapper" class="w-full max-w-2xl"></div>
+            <div id="quiz-card" class="w-full max-w-2xl mx-auto h-full flex flex-col justify-between gap-6 mt-20 px-4">
+                <div id="question-wrapper" class="w-full"></div>
+                <div id="footer-actions" class="w-full"></div>
+            </div>
         </section>
         
         <section id="step-bmi" class="quiz-step prev">
@@ -564,7 +567,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     </main>
     
     <footer id="quiz-footer" class="w-full z-10">
-        <div id="footer-actions" class="w-full max-w-2xl mx-auto"></div>
+        
     </footer>
 </div>
 
@@ -1001,18 +1004,26 @@ function next() {
         const footerWrapper = document.getElementById('footer-actions');
         footerWrapper.innerHTML = '';
         
-        let contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>`;
+        const iconMap = {
+            userGoal: '🎯', age: '👤', gender: '⚧️', height: '📏', weight: '⚖️',
+            sleep: '😴', activity: '🏃', nutrition: '🥗', processed_food: '🍔', hydration: '💧',
+            stress: '💥', mindfulness: '🧘', mood: '🙂', alcohol: '🍷', smoking: '🚭',
+            screen_time: '📱', genetics: '🧬', chronic: '⚕️', sun_protection: '🧴'
+        };
+        const icon = iconMap[question.key] || '✨';
+        let contentHTML = `<div class="text-4xl mb-3 text-[--brand-dark-text] text-center">${icon}</div><h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>`;
         if (question.subtext && question.type !== 'camera_step' && question.type !== 'email_step') {
             contentHTML += `<p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>`;
         }
         
         if (question.key === 'stress') {
              contentHTML = `<div class="stress-widget">
+                 <div class="text-4xl mb-3 text-[--brand-dark-text] text-center">${icon}</div>
                  <h2 class="text-2xl font-bold text-gray-900 text-center">${question.text}</h2>
                  <p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>
-                    <div class="my-6">
-                        <input type="range" min="${question.min}" max="${question.max}" step="1" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
-                    </div>
+                 <div class="my-6">
+                     <input type="range" min="${question.min}" max="${question.max}" step="1" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
+                 </div>
                  <div class="flex justify-between text-sm text-gray-500 mt-2 px-1">
                      <span>Relaxed</span>
                      <span>Stressed</span>
