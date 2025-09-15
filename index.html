@@ -59,329 +59,206 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="assets/css/theme.css">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <style>
-        :root { 
-            --brand-accent: #debea9;
-            --brand-dark-text: #3c3b31; 
-        }
-        
-        html, body { 
-            overscroll-behavior: none;
-            font-family: 'Inter', sans-serif; 
-            background: linear-gradient(120deg, #fdfcfb, #f9f7f5, #f5f2ef, #f9f7f5, #fdfcfb);
-            background-size: 400% 400%;
-            animation: moveBackground 25s ease infinite;
-            scroll-behavior: smooth;
-        }
-
-        @keyframes moveBackground {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .content-card {
-            background-color: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.07);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .content-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-
-        .cta-button {
-            background-color: var(--brand-dark-text);
-            color: white;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 15px rgba(60, 59, 49, 0.2);
-            white-space: nowrap;
-        }
-        .cta-button:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(60, 59, 49, 0.3);
-        }
-        
-        @keyframes pulsate {
-            0%, 100% { transform: scale(1); box-shadow: 0 8px 25px rgba(60, 59, 49, 0.3); }
-            50% { transform: scale(1.03); box-shadow: 0 12px 35px rgba(60, 59, 49, 0.4); }
-        }
-        .pulsating {
-            animation: pulsate 2.5s infinite ease-in-out;
-        }
-
-        .animate-on-scroll {
-            opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
-        }
-        .animate-on-scroll.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        details summary::-webkit-details-marker { display: none; }
-        details summary {
-            position: relative;
-            padding-right: 2rem;
-            cursor: pointer;
-            list-style: none;
-        }
-        details summary:after {
-            content: '+';
-            position: absolute;
-            right: 0.25rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.5rem;
-            font-weight: 300;
-            transition: transform 0.3s ease-in-out;
-        }
-        details[open] summary:after {
-            transform: translateY(-50%) rotate(45deg);
-        }
-        
-        .score-ring-bg {
-            stroke: #f5f5f4;
-        }
-        .score-ring-fg {
-            stroke: var(--brand-accent);
-            stroke-linecap: round;
-            transform-origin: 50% 50%;
-            transform: rotate(-90deg);
-            transition: stroke-dashoffset 2s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        
-        .animated-gradient-text {
-            background: linear-gradient(90deg, var(--brand-accent), #b38e77, var(--brand-accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-size: 200% auto;
-            animation: text-shine 4s linear infinite;
-        }
-        @keyframes text-shine {
-            to { background-position: 200% center; }
-        }
-
-        .animate-on-scroll.visible .icon-container {
-            animation: icon-pop 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) 0.2s forwards;
-            transform: scale(0);
-        }
-        @keyframes icon-pop {
-            0% { transform: scale(0); }
-            70% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        details .faq-content {
-            display: grid;
-            grid-template-rows: 0fr;
-            transition: grid-template-rows 0.3s ease-out;
-        }
-        details[open] .faq-content {
-            grid-template-rows: 1fr;
-        }
-        .faq-content > div {
-            overflow: hidden;
-        }
-    </style>
+    
 </head>
-<body class="antialiased text-gray-800">
+<body>
 
-    <header class="sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-gray-200/50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="index.html"><img src="logo.png" alt="AI WELLNESSCORE Logo" class="h-12 w-auto"></a>
-            <nav class="flex items-center space-x-6">
-                <a href="#faq" class="hidden sm:block text-gray-600 hover:text-gray-900 transition-colors font-medium">FAQ</a>
-                <a href="quiz-new.html" class="px-5 py-2.5 text-sm font-semibold bg-white border border-gray-200 rounded-full hover:bg-gray-100 text-[--brand-dark-text] transition-all">Start Analysis</a>
-            </nav>
-        </div>
-    </header>
+    <header class=\"site-header\">
+    <div class=\"site-header__inner\">
+        <a href=\"index.html\" class=\"site-logo\">
+            <img src=\"logo.png\" alt=\"AI WELLNESSCORE logo\" style=\"height: 46px; width: auto;\">
+            <span>AI WELLNESSCORE</span>
+        </a>
+        <nav class=\"site-nav\">
+            <a href=\"#about\">About</a>
+            <a href=\"#features\">Features</a>
+            <a href=\"#faq\">FAQ</a>
+            <a href=\"quiz-new.html\" class=\"primary-cta\">Start Analysis</a>
+        </nav>
+    </div>
+</header>
 
-    <main class="py-16 md:py-24 space-y-24 md:space-y-32">
-        <section class="max-w-7xl mx-auto px-4 text-center">
-            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-[--brand-dark-text]">Discover Your <span class="animated-gradient-text">True</span> Wellness Age</h1>
-            <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">Our AI analyzes your lifestyle and selfie to reveal your biological age, identify hidden stressors, and create a personalized plan for rejuvenation.</p>
-            <a href="quiz-new.html" class="cta-button pulsating inline-block px-8 py-4 text-lg font-bold rounded-xl shadow-lg mt-8">
-                Start My Free Analysis
-            </a>
-        </section>
-
-        <section class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold text-[--brand-dark-text]">Your Path to Insight in 3 Simple Steps</h2>
-            </div>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="content-card p-8 text-center animate-on-scroll">
-                    <div class="icon-container w-16 h-16 mx-auto bg-white/80 rounded-2xl flex items-center justify-center shadow-inner mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-[--brand-accent]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Take the Quiz</h3>
-                    <p class="text-gray-500">Complete a short, conversational quiz about your lifestyle, habits, and goals.</p>
-                </div>
-                <div class="content-card p-8 text-center animate-on-scroll" style="transition-delay: 150ms;">
-                     <div class="icon-container w-16 h-16 mx-auto bg-white/80 rounded-2xl flex items-center justify-center shadow-inner mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-[--brand-accent]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.896-1.792A2 2 0 0110.428 4h3.144a2 2 0 011.664.89l.896 1.792A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Snap a Secure Selfie</h3>
-                    <p class="text-gray-500">Our AI analyzes non-medical indicators of stress. Your photo is never stored.</p>
-                </div>
-                <div class="content-card p-8 text-center animate-on-scroll" style="transition-delay: 300ms;">
-                     <div class="icon-container w-16 h-16 mx-auto bg-white/80 rounded-2xl flex items-center justify-center shadow-inner mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-[--brand-accent]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Unlock Your Report</h3>
-                    <p class="text-gray-500">Get an instant report with your Wellness Score, Archetype, and actionable first steps.</p>
-                </div>
+    <main class="page-wrapper">
+    <div class="space-y-24">
+        <section id="about" class="glass-panel text-center">
+            <span class="badge">AI wellness quiz</span>
+            <h1 class="section-heading">Discover Your <span class="animated-gradient-text">True</span> Wellness Age</h1>
+            <p class="section-subtitle">Our AI analyzes your lifestyle and selfie to reveal your biological age, uncover hidden stressors, and build a rejuvenation roadmap you can follow today.</p>
+            <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem;">
+                <a href="quiz-new.html" class="cta-button pulsating">Start My Free Analysis</a>
+                <a href="#features" class="secondary-cta">How it works</a>
             </div>
         </section>
 
-        <section id="demo-report-section" class="max-w-5xl mx-auto px-4 animate-on-scroll">
-            <div class="text-center mb-12">
-                 <h2 class="text-3xl md:text-4xl font-bold text-[--brand-dark-text]">Visualize Your Wellness Like Never Before</h2>
-                 <p class="mt-3 text-lg text-gray-500">See what our AI can reveal for you.</p>
+        <section id="features" class="glass-panel glass-panel--muted">
+            <div class="text-center" style="margin-bottom:2rem;">
+                <h2 class="section-heading">Your path to insight in 3 simple steps</h2>
+                <p class="section-subtitle">Every element mirrors the experience inside the quiz.</p>
             </div>
-            <div class="content-card p-6 md:p-10 shadow-2xl">
+            <div class="feature-grid">
+                <div class="content-card animate-on-scroll">
+                    <div class="icon-container w-16 h-16 mx-auto flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                    </div>
+                    <h3 class="section-heading-sm" style="text-align:center;margin-bottom:0.5rem;">Take the quiz</h3>
+                    <p class="section-subtitle" style="font-size:1rem;">Conversational questions map your habits, recovery and energy patterns.</p>
+                </div>
+                <div class="content-card animate-on-scroll" style="transition-delay:150ms;">
+                    <div class="icon-container w-16 h-16 mx-auto flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.896-1.792A2 2 0 0110.428 4h3.144a2 2 0 011.664.89l.896 1.792A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <h3 class="section-heading-sm" style="text-align:center;margin-bottom:0.5rem;">Snap a secure selfie</h3>
+                    <p class="section-subtitle" style="font-size:1rem;">Optional facial markers reveal stress and recovery patterns. Images are never stored.</p>
+                </div>
+                <div class="content-card animate-on-scroll" style="transition-delay:300ms;">
+                    <div class="icon-container w-16 h-16 mx-auto flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <h3 class="section-heading-sm" style="text-align:center;margin-bottom:0.5rem;">Unlock your report</h3>
+                    <p class="section-subtitle" style="font-size:1rem;">Receive your Wellness Age, archetype and first 7-day game plan.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="demo-report-section" class="glass-panel animate-on-scroll">
+            <div class="text-center" style="margin-bottom:2rem;">
+                <h2 class="section-heading">Visualize your wellness like never before</h2>
+                <p class="section-subtitle">A preview of the experience waiting inside your report.</p>
+            </div>
+            <div class="content-card" style="padding:clamp(1.8rem,3vw,2.5rem); box-shadow:none;">
                 <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
                     <div class="space-y-6 text-center md:text-left">
                         <div>
-                            <span class="text-sm font-semibold px-4 py-1.5 rounded-full bg-white/80 border border-gray-200 text-[--brand-dark-text]">Your Wellness Archetype</span>
-                            <h3 class="text-4xl font-black text-gray-900 mt-3" style="color: var(--brand-dark-text);">The Balanced Achiever</h3>
+                            <span class="badge">Your wellness archetype</span>
+                            <h3 class="section-heading" style="font-size:clamp(2rem,3vw,2.4rem); margin-top:0.75rem;">The Balanced Achiever</h3>
                         </div>
-                        <div class="flex gap-4 justify-center md:justify-start">
+                        <div style="display:flex; gap:1.5rem; justify-content:center;">
                             <div class="text-center">
-                                <h4 class="text-lg font-bold text-gray-500">Bio-Age</h4>
-                                <p class="text-5xl font-bold mt-1" style="color: var(--brand-accent);">32</p>
+                                <h4 class="section-heading-sm" style="margin-bottom:0.35rem;">Bio-age</h4>
+                                <p class="section-heading" style="font-size:2.75rem; color:var(--brand-accent);">32</p>
                             </div>
-                             <div class="text-center">
-                                <h4 class="text-lg font-bold text-gray-500">Real Age</h4>
-                                <p class="text-5xl text-gray-400 font-bold mt-1">35</p>
+                            <div class="text-center">
+                                <h4 class="section-heading-sm" style="margin-bottom:0.35rem;">Real age</h4>
+                                <p class="section-heading" style="font-size:2.75rem; color:rgba(38,35,48,0.4);">35</p>
                             </div>
                         </div>
                     </div>
                     <div class="relative w-56 h-56 mx-auto">
                         <svg class="w-full h-full" viewBox="0 0 36 36">
                             <path class="score-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="4" />
-                            <path id="score-ring" class="score-ring-fg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke-width="4" stroke-dasharray="100, 100" stroke-dashoffset="100"/>
+                            <path id="score-ring" class="score-ring-fg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke-width="4" stroke-dasharray="100, 100" stroke-dashoffset="100" />
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
-                            <span id="score-text" class="text-6xl font-black text-gray-800" style="color: var(--brand-dark-text);">50</span>
-                            <span class="text-lg text-gray-500">Overall Score</span>
+                            <span id="score-text" class="section-heading" style="font-size:3rem; margin:0;">50</span>
+                            <span class="section-subtitle" style="font-size:1rem;">Overall Score</span>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="potential-charts-section" class="max-w-5xl mx-auto px-4 animate-on-scroll">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold text-[--brand-dark-text]">Unlock Your Long-Term Potential</h2>
-                <p class="mt-3 text-lg text-gray-500">See the potential impact of small, consistent changes on your healthspan.</p>
+        <section id="potential-charts-section" class="glass-panel animate-on-scroll">
+            <div class="text-center" style="margin-bottom:2rem;">
+                <h2 class="section-heading">Unlock your long-term potential</h2>
+                <p class="section-subtitle">See how consistent micro-actions move the metric.</p>
             </div>
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="content-card p-6 sm:p-8">
-                    <h3 class="text-xl font-bold text-center mb-4" style="color: var(--brand-dark-text);">Bio-Age Transformation</h3>
+            <div class="feature-grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
+                <div class="content-card" style="box-shadow:none;">
+                    <h3 class="section-heading-sm" style="text-align:center;">Bio-age transformation</h3>
                     <div class="h-64 sm:h-72"><canvas id="potentialAgeChart"></canvas></div>
                 </div>
-                <div class="content-card p-6 sm:p-8">
-                    <h3 class="text-xl font-bold text-center mb-4" style="color: var(--brand-dark-text);">Life Expectancy Forecast</h3>
+                <div class="content-card" style="box-shadow:none;">
+                    <h3 class="section-heading-sm" style="text-align:center;">Life expectancy forecast</h3>
                     <div class="h-64 sm:h-72"><canvas id="potentialLifespanChart"></canvas></div>
                 </div>
             </div>
         </section>
 
-        <section class="max-w-7xl mx-auto px-4">
-            <h2 class="text-3xl md:text-4xl font-bold text-[--brand-dark-text] text-center mb-12">Trusted by People Like You</h2>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="content-card p-8 animate-on-scroll">
-                    <p class="text-gray-600 italic">"I was shocked by my Wellness Age. It was the wake-up call I needed. The first step was so simple, and it made an immediate difference in my sleep."</p>
+        <section class="glass-panel animate-on-scroll">
+            <div class="text-center" style="margin-bottom:2rem;">
+                <h2 class="section-heading">Trusted by people like you</h2>
+                <p class="section-subtitle">Real stories from early members lowering their wellness age.</p>
+            </div>
+            <div class="testimonial-grid">
+                <!-- Keep existing testimonial cards -->
+                <div class="content-card animate-on-scroll">
+                    <p class="section-subtitle" style="font-size:1rem;">"I was shocked by my Wellness Age. It was the wake-up call I needed. The first step was so simple, and it made an immediate difference in my sleep."</p>
                     <div class="flex items-center mt-6">
                         <img src="https://placehold.co/48x48/f5f2ef/3c3b31?text=JM" alt="Jessica M." class="w-12 h-12 rounded-full mr-4">
                         <div>
-                            <p class="font-bold text-gray-800">Jessica M.</p>
-                            <p class="text-sm text-gray-500">Improved score by 8 points</p>
+                            <p class="section-heading-sm" style="margin-bottom:0;">Jessica M.</p>
+                            <p class="section-subtitle" style="font-size:0.9rem;">Improved score by 8 points</p>
                         </div>
                     </div>
                 </div>
-                <div class="content-card p-8 animate-on-scroll" style="transition-delay: 150ms;">
-                    <p class="text-gray-600 italic">"Finally, a wellness tool that isn't about guilt. The 'Creative Owl' archetype resonated so much with me. It felt like it truly understood my lifestyle."</p>
+                <div class="content-card animate-on-scroll" style="transition-delay:150ms;">
+                    <p class="section-subtitle" style="font-size:1rem;">"Finally, a wellness tool that isn't about guilt. The 'Creative Owl' archetype resonated so much with me. It felt like it truly understood my lifestyle."</p>
                     <div class="flex items-center mt-6">
                         <img src="https://placehold.co/48x48/f5f2ef/3c3b31?text=DL" alt="David L." class="w-12 h-12 rounded-full mr-4">
                         <div>
-                            <p class="font-bold text-gray-800">David L.</p>
-                            <p class="text-sm text-gray-500">Gained insight on work stress</p>
+                            <p class="section-heading-sm" style="margin-bottom:0;">David L.</p>
+                            <p class="section-subtitle" style="font-size:0.9rem;">Gained insight on work stress</p>
                         </div>
                     </div>
                 </div>
-                <div class="content-card p-8 md:col-span-2 lg:col-span-1 animate-on-scroll" style="transition-delay: 300ms;">
-                    <p class="text-gray-600 italic">"The photo analysis was fascinating. I had no idea my screen time was showing up as visible eye strain. This service connected the dots for me."</p>
+                <div class="content-card animate-on-scroll" style="transition-delay:300ms;">
+                    <p class="section-subtitle" style="font-size:1rem;">"The photo analysis was fascinating. I had no idea my screen time was showing up as visible eye strain. This service connected the dots for me."</p>
                     <div class="flex items-center mt-6">
                         <img src="https://placehold.co/48x48/f5f2ef/3c3b31?text=SK" alt="Sarah K." class="w-12 h-12 rounded-full mr-4">
                         <div>
-                            <p class="font-bold text-gray-800">Sarah K.</p>
-                            <p class="text-sm text-gray-500">Identified key energy drains</p>
+                            <p class="section-heading-sm" style="margin-bottom:0;">Sarah K.</p>
+                            <p class="section-subtitle" style="font-size:0.9rem;">Identified key energy drains</p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="faq" class="max-w-4xl mx-auto px-4">
-            <h2 class="text-3xl md:text-4xl font-bold text-[--brand-dark-text] text-center mb-12">Frequently Asked Questions</h2>
-            <div class="space-y-4">
-                <details class="content-card p-6 cursor-pointer animate-on-scroll">
-                    <summary class="font-semibold text-lg text-gray-800">Is this a medical service?</summary>
-                    <div class="faq-content">
-                        <div><p class="text-gray-600 pt-4">No. AI WELLNESSCORE is an educational tool designed to provide insights into your lifestyle and general well-being. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified health provider for any medical concerns.</p></div>
-                    </div>
+        <section id="faq" class="glass-panel animate-on-scroll">
+            <h2 class="section-heading" style="text-align:center;">Frequently asked questions</h2>
+            <div class="faq-list">
+                <details class="content-card animate-on-scroll">
+                    <summary class="section-heading-sm" style="cursor:pointer;">Is this a medical service?</summary>
+                    <p class="section-subtitle" style="margin-top:1rem; font-size:1rem;">No. AI WELLNESSCORE is an educational tool designed to provide insights into your lifestyle and general well-being. It is not a substitute for professional medical advice, diagnosis, or treatment.</p>
                 </details>
-                <details class="content-card p-6 cursor-pointer animate-on-scroll" style="transition-delay: 150ms;">
-                    <summary class="font-semibold text-lg text-gray-800">How is my data protected?</summary>
-                     <div class="faq-content">
-                        <div><p class="text-gray-600 pt-4">We take your privacy seriously. Your quiz answers are used solely to generate your report. Your photo is processed in real-time and is deleted immediately after analysis. We do not store or share your photo. All payments for premium reports are handled securely by Stripe.</p></div>
-                    </div>
+                <details class="content-card animate-on-scroll" style="transition-delay:150ms;">
+                    <summary class="section-heading-sm" style="cursor:pointer;">How is my data protected?</summary>
+                    <p class="section-subtitle" style="margin-top:1rem; font-size:1rem;">Your quiz answers stay within your secure session. Photos are processed in real time then deleted instantly. Payments run through Stripe.</p>
                 </details>
-                <details class="content-card p-6 cursor-pointer animate-on-scroll" style="transition-delay: 300ms;">
-                    <summary class="font-semibold text-lg text-gray-800">Do I need to upload a photo?</summary>
-                    <div class="faq-content">
-                        <div><p class="text-gray-600 pt-4">The photo analysis is a key part of our holistic approach, but it is optional. You can skip this step and still receive a comprehensive report based on your quiz answers, though the skin-related insights will not be included.</p></div>
-                    </div>
+                <details class="content-card animate-on-scroll" style="transition-delay:300ms;">
+                    <summary class="section-heading-sm" style="cursor:pointer;">Do I need to upload a photo?</summary>
+                    <p class="section-subtitle" style="margin-top:1rem; font-size:1rem;">It's optional but recommended for full insights. Skip it and you'll still receive lifestyle guidance.</p>
                 </details>
             </div>
         </section>
 
-        <section class="max-w-5xl mx-auto px-4">
-             <div class="content-card text-center p-10 md:p-16">
-                <h2 class="text-3xl md:text-5xl font-bold text-[--brand-dark-text] mb-4">Ready to Discover Your Wellness Core?</h2>
-                <p class="text-lg text-gray-600 max-w-xl mx-auto mb-8">Get your free, personalized report in under 2 minutes. Your journey to a better you starts now.</p>
-                <a href="quiz-new.html" class="cta-button pulsating inline-block px-8 py-4 text-lg font-bold rounded-xl shadow-lg">
-                    Start My Free Analysis
-                </a>
+        <section class="glass-panel text-center animate-on-scroll">
+            <span class="badge">Ready when you are</span>
+            <h2 class="section-heading">Get your personalized report in under 2 minutes</h2>
+            <p class="section-subtitle">Your journey to a better you starts now.</p>
+            <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem;">
+                <a href="quiz-new.html" class="cta-button pulsating">Start My Free Analysis</a>
+                <a href="payment.html" class="secondary-cta">See premium plans</a>
             </div>
         </section>
-    </main>
+    </div>
+</main>
 
-    <footer class="text-center p-8 border-t border-gray-200/50 mt-16">
-        <div class="max-w-7xl mx-auto text-gray-500">
-            <p class="text-xs mb-4 max-w-3xl mx-auto">
-                <strong>Medical Disclaimer:</strong> AI WELLNESSCORE is not a medical service and does not provide medical advice. The information provided is for educational and informational purposes only. Consult a healthcare professional for any health concerns.
-            </p>
-            <div class="flex justify-center space-x-6 mb-4">
-                <a href="privacy.html" class="hover:text-gray-800 transition">Privacy Policy</a>
-                <a href="terms.html" class="hover:text-gray-800 transition">Terms of Service</a>
-                <a href="contact.html" class="hover:text-gray-800 transition">Contact</a>
-            </div>
-            <p>&copy; 2025 AI WELLNESSCORE. All Rights Reserved.</p>
+<footer class="site-footer">
+    <div style="max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; align-items: center; text-align: center;">
+        <p class="section-subtitle" style="margin: 0;">Medical disclaimer: AI WELLNESSCORE is an educational wellness experience and does not replace professional medical advice.</p>
+        <div style="display:flex; gap:1.5rem; flex-wrap:wrap; justify-content:center;">
+            <a href="privacy.html">Privacy Policy</a>
+            <a href="terms.html">Terms of Service</a>
+            <a href="contact.html">Contact</a>
         </div>
-    </footer>
+        <p style="margin:0; opacity:0.85;">&copy; 2025 AI WELLNESSCORE. All rights reserved.</p>
+    </div>
+</footer>
     
     <div id="cookie-consent-banner" class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm p-4 z-50 hidden transition-opacity duration-300 border-t">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -542,4 +419,3 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     </script>
 </body>
 </html>
-
