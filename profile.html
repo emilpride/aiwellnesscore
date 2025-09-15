@@ -234,8 +234,14 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                 </div>
                 <div id="skin-analysis-container" class="md:col-span-2 content-card p-6 animate-on-scroll delay-1">
                     <h3 class="text-xl font-bold mb-4" style="color: var(--brand-dark-text);">Skin Analysis</h3>
-                    <ul id="skin-analysis-list" class="space-y-3">
-                        </ul>
+                    <ul id="skin-analysis-list" class="space-y-3"></ul>
+
+                    <div id="skin-advanced-wrapper" class="mt-4">
+                        <button id="toggle-advanced-metrics-btn" class="text-sm font-semibold underline text-gray-600 hover:text-gray-900">
+                            Show advanced metrics
+                        </button>
+                        <ul id="skin-advanced-list" class="space-y-3 mt-3 hidden"></ul>
+                    </div>
                 </div>
             </section>
    
@@ -466,6 +472,9 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                     // Если есть данные анализа кожи, показываем их
                     if (data.skinStatus && Object.keys(data.skinStatus).length > 0) {
                         populateSkinAnalysis(data.skinStatus);
+                        if (typeof populateSkinAdvanced === 'function') {
+                            populateSkinAdvanced(data.skinStatus);
+                        }
                     } else {
                         // Если фото есть, а данных анализа нет (на всякий случай)
                         if(skinAnalysisContainer) skinAnalysisContainer.style.display = 'none';
@@ -529,22 +538,34 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                 const list = document.getElementById('skin-analysis-list');
                 if (!list) return;
 
+                // Tone-of-voice labels + tooltips
                 const metricMap = {
-                    dark_circle: 'Dark Circles',
-                    eye_pouch: 'Eye Bags',
-                    forehead_wrinkle: 'Forehead Wrinkles',
-                    crows_feet: 'Crow\'s Feet',
+                    dark_circle: 'Under‑Eye Shadows',
+                    eye_pouch: 'Puffiness',
+                    forehead_wrinkle: 'Forehead Lines',
+                    crows_feet: 'Crow’s Feet',
                     nasolabial_fold: 'Smile Lines',
-                    acne: 'Acne',
-                    skin_spot: 'Skin Spots',
-                    blackhead: 'Blackheads'
+                    acne: 'Breakouts',
+                    skin_spot: 'Pigmentation Spots',
+                    blackhead: 'Clogged Pores'
+                };
+                const tooltipMap = {
+                    dark_circle: 'Visibility of under‑eye darkness (0–30 low, 31–60 moderate, 61–100 high).',
+                    eye_pouch: 'Under‑eye puffiness (0–30 low, 31–60 moderate, 61–100 high).',
+                    forehead_wrinkle: 'Depth of forehead lines (0–30 low, 31–60 moderate, 61–100 high).',
+                    crows_feet: 'Lines at the outer corners of eyes (0–30 low, 31–60 moderate, 61–100 high).',
+                    nasolabial_fold: 'Smile line prominence (0–30 low, 31–60 moderate, 61–100 high).',
+                    acne: 'Active blemishes (0–30 few, 31–60 moderate, 61–100 many).',
+                    skin_spot: 'Uneven tone/spots (0–30 mild, 31–60 moderate, 61–100 pronounced).',
+                    blackhead: 'Comedones/clogged pores (0–30 few, 31–60 moderate, 61–100 many).'
                 };
 
                 let htmlContent = '';
                 for (const key in metricMap) {
                     if (skinStatus.hasOwnProperty(key)) {
-                        const value = skinStatus[key];
+                        const value = Number(skinStatus[key]) || 0;
                         const label = metricMap[key];
+                        const tip = tooltipMap[key] || '';
 
                         // Определяем цвет в зависимости от значения (0-30 - хорошо, 31-60 - средне, 61+ - плохо)
                         let barColorClass = 'bg-green-500';
@@ -554,10 +575,10 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                         htmlContent += `
                             <li>
                                 <div class="flex justify-between items-center mb-1">
-                                    <span class="skin-metric-label">${label}</span>
-                                    <span class="text-sm font-bold" style="color: var(--brand-dark-text);">${Math.round(value)}%</span>
+                                    <span class="skin-metric-label" title="${tip}">${label}</span>
+                                    <span class="text-sm font-bold" style="color: var(--brand-dark-text);" title="${tip}">${Math.round(value)}%</span>
                                 </div>
-                                <div class="progress-bar-bg">
+                                <div class="progress-bar-bg" title="${tip}">
                                     <div class="progress-bar-fg ${barColorClass}" style="width: 0%;" data-width="${value}%"></div>
                                 </div>
                             </li>
@@ -565,6 +586,76 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                     }
                 }
                 list.innerHTML = htmlContent;
+            }
+
+            // Advanced Skin Metrics (optional toggle)
+            function populateSkinAdvanced(skinStatus) {
+                const advWrapper = document.getElementById('skin-advanced-wrapper');
+                const advList = document.getElementById('skin-advanced-list');
+                const advBtn = document.getElementById('toggle-advanced-metrics-btn');
+                if (!advWrapper || !advList || !advBtn) return;
+
+                const map = {
+                    health: 'Overall Skin Vitality',
+                    pore: 'Visible Pores',
+                    stain: 'Uneven Tone',
+                    eye_finelines: 'Eye Fine Lines',
+                    glabella_wrinkle: 'Frown Lines'
+                };
+                const tips = {
+                    health: 'Higher is better (0–30 needs attention, 31–60 fair, 61–100 great).',
+                    pore: 'Visibility of pores (0–30 low, 31–60 moderate, 61–100 high).',
+                    stain: 'Pigment unevenness (0–30 mild, 31–60 moderate, 61–100 pronounced).',
+                    eye_finelines: 'Fine lines around the eyes (0–30 few, 31–60 moderate, 61–100 many).',
+                    glabella_wrinkle: 'Lines between the brows (0–30 few, 31–60 moderate, 61–100 many).'
+                };
+
+                // Check if any advanced metrics present
+                const hasAny = Object.keys(map).some(k => Object.prototype.hasOwnProperty.call(skinStatus, k));
+                if (!hasAny) {
+                    advWrapper.style.display = 'none';
+                    return;
+                }
+
+                const invertColorKeys = new Set(['health']); // higher is better for health
+                let html = '';
+                for (const key in map) {
+                    if (!Object.prototype.hasOwnProperty.call(skinStatus, key)) continue;
+                    const raw = skinStatus[key];
+                    const value = Number(raw) || 0;
+                    const label = map[key];
+                    const tip = tips[key] || '';
+                    let barColorClass;
+                    if (invertColorKeys.has(key)) {
+                        if (value > 60) barColorClass = 'bg-green-500';
+                        else if (value > 30) barColorClass = 'bg-yellow-500';
+                        else barColorClass = 'bg-red-500';
+                    } else {
+                        if (value > 60) barColorClass = 'bg-red-500';
+                        else if (value > 30) barColorClass = 'bg-yellow-500';
+                        else barColorClass = 'bg-green-500';
+                    }
+                    html += `
+                        <li>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="skin-metric-label" title="${tip}">${label}</span>
+                                <span class="text-sm font-bold" style="color: var(--brand-dark-text);" title="${tip}">${Math.round(value)}%</span>
+                            </div>
+                            <div class="progress-bar-bg" title="${tip}">
+                                <div class="progress-bar-fg ${barColorClass}" style="width: 0%;" data-width="${value}%"></div>
+                            </div>
+                        </li>`;
+                }
+                advList.innerHTML = html;
+
+                if (!advBtn.dataset.bound) {
+                    advBtn.dataset.bound = 'true';
+                    advBtn.addEventListener('click', () => {
+                        const hidden = advList.classList.contains('hidden');
+                        advList.classList.toggle('hidden');
+                        advBtn.textContent = hidden ? 'Hide advanced metrics' : 'Show advanced metrics';
+                    });
+                }
             }
 
             function animateValue(id, start, end, duration) {

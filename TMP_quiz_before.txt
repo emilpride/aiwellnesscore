@@ -107,13 +107,6 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 26px; width: 26px; margin-top: -8px; border-radius: 50%; background: #3c3b31; }
         input[type="range"]::-moz-range-track { height: 10px; }
         input[type="range"]::-moz-range-thumb { height: 26px; width: 26px; border-radius: 50%; background: #3c3b31; border: none; }
-
-        /* Micro-interaction: press feedback for option cards */
-        .answer-option, .gender-option {
-            transition: transform 120ms ease-out, box-shadow 120ms ease-out;
-            will-change: transform;
-        }
-        .answer-option.pressed, .gender-option.pressed { transform: scale(0.96) translateZ(0); box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important; }
         
         /* --- UPDATED HEADER STYLE WITH BLUR --- */
         #quiz-header { 
@@ -1051,16 +1044,16 @@ function next() {
             screen_time: '📱', genetics: '🧬', chronic: '⚕️', sun_protection: '🧴'
         };
         const icon = iconMap[question.key] || '✨';
-        let contentHTML = `<div class="text-3xl sm:text-4xl mb-2 sm:mb-3 text-[--brand-dark-text] text-center">${icon}</div><h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight text-gray-900 text-center">${question.text}</h2>`;
+        let contentHTML = `<div class="text-4xl mb-3 text-[--brand-dark-text] text-center">${icon}</div><h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>`;
         if (question.subtext && question.type !== 'camera_step' && question.type !== 'email_step') {
-            contentHTML += `<p class="text-gray-500 mt-2 sm:mt-3 text-center max-w-md mx-auto text-base sm:text-lg">${question.subtext}</p>`;
+            contentHTML += `<p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>`;
         }
         
         if (question.key === 'stress') {
              contentHTML = `<div class="stress-widget">
-                 <div class="text-3xl sm:text-4xl mb-2 sm:mb-3 text-[--brand-dark-text] text-center">${icon}</div>
-                 <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight text-gray-900 text-center">${question.text}</h2>
-                 <p class="text-gray-500 mt-2 sm:mt-3 text-center max-w-md mx-auto text-base sm:text-lg">${question.subtext}</p>
+                 <div class="text-4xl mb-3 text-[--brand-dark-text] text-center">${icon}</div>
+                 <h2 class="text-2xl font-bold text-gray-900 text-center">${question.text}</h2>
+                 <p class="text-gray-500 mt-2 text-center max-w-md mx-auto">${question.subtext}</p>
                  <div class="my-6">
                      <input type="range" min="${question.min}" max="${question.max}" step="1" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
                  </div>
@@ -1092,17 +1085,12 @@ function next() {
             const optionsHTML = question.options.map(opt => {
                 const displayText = typeof opt === 'object' ? opt.text : opt;
                 const value = typeof opt === 'object' ? (opt.value || opt.text) : opt;
-                return `<button class="answer-option px-4 py-3 rounded-xl bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transform transition-transform ease-out duration-150 focus:outline-none focus:ring-2 focus:ring-[--brand-accent] hover:shadow-md active:scale-95 select-none" data-value="${value}">${displayText}</button>`;
+                return `<button class="answer-option px-4 py-3 rounded-xl bg-white border border-gray-200 shadow-sm hover:bg-gray-50" data-value="${value}">${displayText}</button>`;
             }).join('');
-            const optionsBlock = `<div class="mt-5 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto">${optionsHTML}</div>`;
+            const optionsBlock = `<div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto">${optionsHTML}</div>`;
             wrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', optionsBlock);
             wrapper.querySelectorAll('.answer-option').forEach(btn => {
                 btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
-                const add = () => btn.classList.add('pressed');
-                const remove = () => btn.classList.remove('pressed');
-                btn.addEventListener('mousedown', add);
-                btn.addEventListener('touchstart', add, { passive: true });
-                ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev => btn.addEventListener(ev, remove));
             });
         } else if (question.type === 'slider' && question.key !== 'stress') {
             const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-sm mt-6"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" step="1" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
@@ -1118,16 +1106,11 @@ function next() {
              updateSliderDisplay(question, App.userAnswers[question.key] || question.defaultValue);
         }
         else if (question.type === 'gender_selection') {
-            const optionsHTML = question.options.map(opt => `<button class="gender-option text-center rounded-2xl p-4 bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transform transition-transform ease-out duration-150 hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-[--brand-accent] select-none" data-value="${opt.value}"><div class="gender-image-container"><img src="${opt.img}" alt="${opt.value}" class="gender-image"></div><span class="text-xl font-bold text-gray-800 capitalize">${opt.value}</span></button>`).join('');
-            const optionsBlock = `<div class="mt-5 sm:mt-6 grid grid-cols-2 gap-4 max-w-sm mx-auto">${optionsHTML}</div>`;
+            const optionsHTML = question.options.map(opt => `<button class="gender-option text-center rounded-2xl p-4 bg-white border border-gray-200 shadow-sm hover:bg-gray-50" data-value="${opt.value}"><div class="gender-image-container"><img src="${opt.img}" alt="${opt.value}" class="gender-image"></div><span class="text-xl font-bold text-gray-800 capitalize">${opt.value}</span></button>`).join('');
+            const optionsBlock = `<div class="mt-6 grid grid-cols-2 gap-4 max-w-sm mx-auto">${optionsHTML}</div>`;
             wrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', optionsBlock);
             wrapper.querySelectorAll('.gender-option').forEach(btn => {
                 btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
-                const add = () => btn.classList.add('pressed');
-                const remove = () => btn.classList.remove('pressed');
-                btn.addEventListener('mousedown', add);
-                btn.addEventListener('touchstart', add, { passive: true });
-                ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev => btn.addEventListener(ev, remove));
             });
         } else if (question.type === 'camera_step') {
             footerWrapper.innerHTML = `<div class="max-w-sm mx-auto space-y-3 mt-4"><button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button><button id="skip-photo-btn" class="w-full text-sm text-gray-500 hover:text-gray-800">Skip for now</button></div>`;
@@ -1208,24 +1191,6 @@ function updateSliderDisplay(question, value) {
         document.getElementById('back-btn').classList.add('hidden'); // Hide back button for animations
 
         let animationHTML = '';
-        // Motivation based on the user's last answer
-        let motivation = '';
-        const la = App.lastAnswer || {};
-        const motiv = {
-            sleep: (v) => v && (''+v).includes('Less') ? "Short nights add up. Even +20–30 minutes can boost energy tomorrow." : v && (''+v).includes('7') ? "Great sleep window — your recovery rhythm is on point." : "Aim for a steady schedule — consistency drives deeper rest.",
-            activity: (v) => v && (''+v).includes('Rarely') ? "Small starts matter: a 10‑minute walk still counts — today’s the day." : v && (''+v).includes('5+') ? "Powerful routine — your heart and brain thank you." : "Consistency beats intensity. Keep moving and build momentum.",
-            hydration: (v) => v && (''+v).includes('1') ? "Your cells are thirsty. Keep a bottle nearby — sip, don’t wait." : v && (''+v).includes('10') ? "Hydration hero — this keeps skin and energy stable." : "A steady sip routine can lift focus and mood.",
-            nutrition: (v) => v && (''+v).includes('0') ? "Add one colorful serving today — simple, tangible, effective." : v && (''+v).includes('More') ? "Antioxidant rich — you’re feeding longevity." : "Try a ‘colors on the plate’ rule for balance.",
-            processed_food: (v) => v && (''+v).includes('Daily') ? "Tiny swaps beat big overhauls — try one whole‑food swap today." : v && (''+v).includes('Rarely') ? "Nice baseline — your gut and skin benefit." : "Plan a quick snack kit to skip impulse grabs.",
-            mindfulness: (v) => v==='Daily' ? "Calm is a skill — you’re practicing longevity." : v==='Never' ? "60 seconds of breathing shifts your nervous system — try now." : "Make micro‑pauses your superpower during the day.",
-            mood: (v) => v && (''+v).toLowerCase().includes('stressed') ? "You’re not alone — short walks and breath cycles help quickly." : v && (''+v).toLowerCase().includes('happy') ? "That spark fuels better choices everywhere — keep it going." : "Label the mood, lighten the load — awareness already helps.",
-            alcohol: (v) => v && (''+v).includes('8+') ? "Your sleep will love one ‘dry’ day. Notice the morning after." : v==='None' ? "Clear head, clear gains — your biology likes it." : "Try a hydration chaser — better sleep, better recovery.",
-            smoking: (v) => v && (''+v).toLowerCase().includes('daily') ? "Micro‑wins count: delay the first cigarette by 10 minutes." : v==='Never' ? "Massive long‑term edge — keep it that way." : "Swap one trigger routine for a quick breath walk.",
-            screen_time: (v) => v && (''+v).includes('More than 6') ? "Screens steal sleep — set a tiny cutoff ‘15 minutes earlier’ tonight." : v && (''+v).includes('Less than 2') ? "Nice boundary — your circadian rhythm thanks you." : "Batch the scrolling — fewer switches, calmer brain."
-        };
-        if (la.key && typeof motiv[la.key] === 'function') {
-            try { motivation = motiv[la.key](la.value) || ''; } catch (e) { motivation = ''; }
-        }
 
         if (key === 'bmi_display') {
             goToStep('bmi'); // Switch to dedicated BMI step
@@ -1237,24 +1202,9 @@ function updateSliderDisplay(question, value) {
             animationHTML = `<div class="w-full max-w-sm mx-auto bg-white p-6 rounded-2xl shadow-sm"><div class="font-semibold text-gray-600 text-center mb-4">Your Active Week</div><div class="activity-week flex justify-around gap-2" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div></div>`;
         } else if (key === 'hydration_visual') {
             animationHTML = `<div class="w-full max-w-sm mx-auto"><div id="water-animation" class="w-48 h-48 mx-auto"></div></div>`;
-        } else if (key === 'nutrition_visual') {
-            animationHTML = `<div class="w-full max-w-sm mx-auto bg-white p-6 rounded-2xl shadow-sm text-center"><div class="font-semibold text-gray-600 mb-3">Balanced Plate</div><div class="mx-auto w-36 h-36 rounded-full border-4 border-emerald-300 relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-tr from-emerald-200 via-amber-200 to-rose-200 animate-pulse"></div></div></div>`;
-        } else if (key === 'food_visual') {
-            animationHTML = `<div class="w-full max-w-sm mx-auto bg-white p-6 rounded-2xl shadow-sm text-center"><div class="font-semibold text-gray-600 mb-3">Smart Swaps</div><div class="flex justify-center gap-3"><div class="px-3 py-2 rounded-lg bg-rose-100 text-rose-600 line-through">🍔 Soda</div><div class="px-3 py-2 rounded-lg bg-emerald-100 text-emerald-700">🥑 Water</div></div></div>`;
-        } else if (key === 'mindfulness_visual') {
-            animationHTML = `<div class="w-full max-w-sm mx-auto text-center"><div class="mx-auto w-40 h-40 rounded-full border-2 border-indigo-200 flex items-center justify-center"><div class="w-24 h-24 rounded-full bg-indigo-100 animate-pulse"></div></div></div>`;
-        } else if (key === 'mood_visual') {
-            const faces = ['🙂','😌','😐','😮‍💨','😊','😁'];
-            animationHTML = `<div class="w-full max-w-sm mx-auto text-center"><div class="flex justify-center gap-2 text-3xl">${faces.map(f=>`<span class='animate-bounce'>${f}</span>`).join('')}</div></div>`;
-        } else if (key === 'alcohol_visual') {
-            animationHTML = `<div class="w-full max-w-sm mx-auto text-center"><div class="mx-auto w-24 h-40 border-2 border-amber-600 rounded-b-xl overflow-hidden relative"><div class="absolute bottom-0 left-0 right-0 bg-amber-400 h-1/2 animate-pulse"></div></div></div>`;
-        } else if (key === 'smoking_visual') {
-            animationHTML = `<div class="w-full max-w-sm mx-auto text-center"><div class="mx-auto w-32 h-32 relative"><div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-16 bg-gray-400"></div><div class="absolute -top-2 left-1/2 -translate-x-1/2 w-6 h-6 bg-gray-200 rounded-full animate-ping"></div></div></div>`;
-        } else if (key === 'screen_time_visual') {
-            animationHTML = `<div class="w-full max-w-sm mx-auto text-center"><div class="mx-auto w-28 h-40 rounded-2xl border-2 border-gray-800 bg-gray-100 flex items-center justify-center animate-pulse">📱</div></div>`;
         }
         
-        wrapper.innerHTML = `<div class="question-content w-full question-content-enter flex-1 flex items-center justify-center flex-col">${animationHTML}${motivation ? `<p class='mt-4 text-center text-gray-700 max-w-sm mx-auto'>${motivation}</p>` : ''}</div>`;
+        wrapper.innerHTML = `<div class="question-content w-full question-content-enter flex-1 flex items-center justify-center">${animationHTML}</div>`;
         
         setTimeout(() => playAnimation(key), 100); 
         setTimeout(next, 2200);
@@ -1819,3 +1769,4 @@ setVh();
 
 </body>
 </html>
+
