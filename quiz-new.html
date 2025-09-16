@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <script type="text/javascript">
@@ -32,7 +32,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <!-- Убираем эти строки (НЕ загружаем библиотеки сразу):
+    <!-- РЈР±РёСЂР°РµРј СЌС‚Рё СЃС‚СЂРѕРєРё (РќР• Р·Р°РіСЂСѓР¶Р°РµРј Р±РёР±Р»РёРѕС‚РµРєРё СЃСЂР°Р·Сѓ):
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core/dist/tf-core.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter/dist/tf-converter.js" crossorigin="anonymous"></script>
@@ -150,35 +150,35 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         #menu-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 140; opacity: 0; transition: opacity 0.3s ease-in-out; pointer-events: none; }
         #menu-overlay.active { opacity: 1; pointer-events: all; }
 
-        /* ↓↓↓ ДОБАВЬТЕ ЭТИ СТИЛИ В КОНЕЦ БЛОКА <style> ↓↓↓ */
+        /* в†“в†“в†“ Р”РћР‘РђР’Р¬РўР• Р­РўР РЎРўРР›Р Р’ РљРћРќР•Р¦ Р‘Р›РћРљРђ <style> в†“в†“в†“ */
 
-/* Делаем главный блок на посадочной странице гибким */
-/* ПРАВИЛЬНО ✅ */
+/* Р”РµР»Р°РµРј РіР»Р°РІРЅС‹Р№ Р±Р»РѕРє РЅР° РїРѕСЃР°РґРѕС‡РЅРѕР№ СЃС‚СЂР°РЅРёС†Рµ РіРёР±РєРёРј */
+/* РџР РђР’РР›Р¬РќРћ вњ… */
 #step-landing > .w-full {
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-around; /* Это свойство создает отступ */
+    justify-content: space-around; /* Р­С‚Рѕ СЃРІРѕР№СЃС‚РІРѕ СЃРѕР·РґР°РµС‚ РѕС‚СЃС‚СѓРї */
 }
 
-/* Медиа-запрос для экранов с небольшой высотой (типичные мобильные) */
+/* РњРµРґРёР°-Р·Р°РїСЂРѕСЃ РґР»СЏ СЌРєСЂР°РЅРѕРІ СЃ РЅРµР±РѕР»СЊС€РѕР№ РІС‹СЃРѕС‚РѕР№ (С‚РёРїРёС‡РЅС‹Рµ РјРѕР±РёР»СЊРЅС‹Рµ) */
 @media (max-height: 750px) {
     #landing-animation {
-        width: 100px;  /* Уменьшаем анимацию */
+        width: 100px;  /* РЈРјРµРЅСЊС€Р°РµРј Р°РЅРёРјР°С†РёСЋ */
         height: 100px;
-        margin-bottom: 0.75rem !important; /* Уменьшаем отступ */
+        margin-bottom: 0.75rem !important; /* РЈРјРµРЅСЊС€Р°РµРј РѕС‚СЃС‚СѓРї */
     }
     #step-landing h1 {
-        font-size: 1.875rem !important; /* Уменьшаем заголовок (text-3xl) */
+        font-size: 1.875rem !important; /* РЈРјРµРЅСЊС€Р°РµРј Р·Р°РіРѕР»РѕРІРѕРє (text-3xl) */
         line-height: 2.25rem !important;
     }
     #step-landing p.text-lg {
-        font-size: 1rem !important; /* Уменьшаем текст */
+        font-size: 1rem !important; /* РЈРјРµРЅСЊС€Р°РµРј С‚РµРєСЃС‚ */
         line-height: 1.5rem !important;
         margin-top: 0.75rem !important;
     }
     #step-landing .grid {
-        margin-top: 1.25rem !important; /* Уменьшаем все отступы */
+        margin-top: 1.25rem !important; /* РЈРјРµРЅСЊС€Р°РµРј РІСЃРµ РѕС‚СЃС‚СѓРїС‹ */
         gap: 1rem !important;
     }
     #step-landing .grid h3 {
@@ -197,27 +197,62 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 
         
         button.answer-option {
-            background: #fff; color: var(--brand-dark-text); border: 2px solid #e5e7eb; padding: 0;
-            font: inherit; cursor: pointer; outline: inherit; text-align: center;
-            border-radius: 9999px; padding: 12px 24px; font-weight: 600;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            color: var(--brand-dark-text);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 18px;
+            padding: 1rem 1.25rem;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
             transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
         }
-        .answer-option:hover:not(:disabled) { 
-            transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.07); border-color: #d1d5db;
+        button.answer-option span {
+            flex: 1;
+            pointer-events: none;
         }
-        .answer-option.selected { 
-            border-color: var(--brand-accent); background-color: var(--brand-accent);
-            color: var(--brand-dark-text); transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 0 20px rgba(222, 190, 169, 0.7); 
+        button.answer-option::after {
+            content: "\203A";
+            font-size: 1.3rem;
+            line-height: 1;
+            color: rgba(100, 116, 139, 0.85);
+            transition: transform 0.2s ease, color 0.2s ease;
         }
-        .answer-option:disabled { opacity: 0.6; cursor: not-allowed; }
-        
-        .gender-option { 
-            border: 2px solid #e5e7eb; background-color: #fff;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; 
+        .answer-option:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px rgba(15, 23, 42, 0.12);
+            border-color: rgba(148, 163, 184, 0.6);
+            background-color: rgba(255, 255, 255, 0.95);
         }
-        .gender-option:hover:not(:disabled) { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.07); }
+        .answer-option:hover::after {
+            transform: translateX(4px);
+            color: rgba(30, 41, 59, 0.85);
+        }
+        .answer-option.selected {
+            border-color: var(--brand-accent);
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.25), rgba(56, 189, 248, 0.25));
+            color: var(--brand-dark-text);
+            box-shadow: 0 18px 32px rgba(80, 56, 140, 0.18);
+        }
+        .answer-option.selected::after {
+            transform: translateX(4px);
+            color: var(--brand-dark-text);
+        }
+        .answer-option:disabled {
+            opacity: 0.75;
+            cursor: not-allowed;
+        }
+        .gender-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1.25rem;
+        }        .gender-option:hover:not(:disabled) { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.07); }
         .gender-option.selected { transform: translateY(-5px) scale(1.02); border-color: var(--brand-accent); box-shadow: 0 0 20px rgba(222, 190, 169, 0.8); }
         .gender-option .gender-image-container { 
             overflow: hidden; 
@@ -227,139 +262,6 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         }
         .gender-option .gender-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
         .gender-option:hover:not(:disabled) .gender-image { transform: scale(1.05); }
-
-        .stress-widget {
-            background-color: white; padding: 1.5rem 2rem; border-radius: 1.5rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 1.5rem;
-        }
-        .stress-widget #slider-input {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 16px;
-            background: linear-gradient(to right, #4CAF50, #FFEB3B, #FF5722);
-            border-radius: 8px;
-            outline: none;
-            transition: opacity .2s;
-        }
-        .stress-widget #slider-input::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 28px;
-            height: 28px;
-            background: white;
-            cursor: pointer;
-            border-radius: 50%;
-            border: 4px solid var(--brand-accent);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        .stress-widget #slider-input::-moz-range-thumb {
-            width: 28px;
-            height: 28px;
-            background: white;
-            cursor: pointer;
-            border-radius: 50%;
-            border: 4px solid var(--brand-accent);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        #mood-slider-container { width: 100%; max-width: 360px; margin: 1.5rem auto 0; }
-        #mood-slider {
-            -webkit-appearance: none; appearance: none; width: 100%; height: 16px; 
-            background: linear-gradient(to right, #60a5fa, #facc15, #4ade80);
-            border-radius: 8px; outline: none; transition: opacity .2s;
-        }
-        #mood-slider::-webkit-slider-thumb {
-            -webkit-appearance: none; appearance: none; width: 32px; height: 32px;
-            background: white; cursor: pointer; border-radius: 50%;
-            border: 5px solid var(--brand-accent); box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        #mood-slider::-moz-range-thumb {
-            width: 32px; height: 32px; background: white; cursor: pointer; border-radius: 50%;
-            border: 5px solid var(--brand-accent); box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        #mood-emojis { display: flex; justify-content: space-between; font-size: 2.5rem; margin-bottom: 1rem; padding: 0 0.5rem; }
-        #mood-emojis span { transition: transform 0.2s, opacity 0.2s; }
-        
-        #bmi-display-wrapper {
-            background-color: white;
-            border-radius: 1.5rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            padding: 2rem 1.5rem;
-            max-width: 450px;
-            width: 100%;
-            position: relative;
-        }
-        #bmi-info-box {
-            position: relative;
-            z-index: 10;
-            background-color: white;
-            border-radius: 1rem;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        #bmi-category {
-            background-color: #debea9;
-            color: #3c3b31;
-            font-weight: 700;
-            padding: 0.25rem 0.75rem;
-            border-radius: 0.5rem;
-            display: inline-block;
-            margin-bottom: 0.5rem;
-        }
-        #bmi-details {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-top: 1rem;
-        }
-        @media (min-width: 768px) {
-            #bmi-details {
-                justify-content: flex-start;
-            }
-        }
-        #bmi-scale-container {
-            position: relative;
-            width: 32px;
-            height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #bmi-scale-gradient-vertical {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to top, #43B7FF, #33C75A, #FBF447, #FFA64D, #FF7D7E);
-            border-radius: 100px;
-            position: absolute;
-        }
-        #bmi-thumb {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(180deg, #F2F2F2 0%, #E8E8E8 100%);
-            border: 2px solid #FFFFFF;
-            box-shadow: 0px 0px 6.9px rgba(0, 0, 0, 0.25);
-            border-radius: 50%;
-            left: 50%;
-            transform: translateX(-50%);
-            bottom: 0%;
-            transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1;
-        }
-        #bmi-value-display {
-            position: absolute;
-            font-size: 3rem;
-            font-weight: 800;
-            color: #FBF447;
-            left: calc(100% + 1rem);
-            bottom: var(--thumb-position, 0%);
-            transform: translateY(50%);
-            transition: bottom 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-            z-index: 1;
-        }
 
         #bmi-image-section {
             display: flex;
@@ -387,34 +289,34 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 
         #camera-modal { position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         #camera-modal.active { opacity: 1; pointer-events: all; }
-        /* Финальный код */
-/* Правильный код */
-/* Финальный, единственно верный вариант */
-/* Финальный, упрощенный CSS */
+        /* Р¤РёРЅР°Р»СЊРЅС‹Р№ РєРѕРґ */
+/* РџСЂР°РІРёР»СЊРЅС‹Р№ РєРѕРґ */
+/* Р¤РёРЅР°Р»СЊРЅС‹Р№, РµРґРёРЅСЃС‚РІРµРЅРЅРѕ РІРµСЂРЅС‹Р№ РІР°СЂРёР°РЅС‚ */
+/* Р¤РёРЅР°Р»СЊРЅС‹Р№, СѓРїСЂРѕС‰РµРЅРЅС‹Р№ CSS */
 #camera-container {
     position: relative;
-    /* Убраны все размеры - JS будет управлять этим */
+    /* РЈР±СЂР°РЅС‹ РІСЃРµ СЂР°Р·РјРµСЂС‹ - JS Р±СѓРґРµС‚ СѓРїСЂР°РІР»СЏС‚СЊ СЌС‚РёРј */
     overflow: hidden;
     border-radius: 1.5rem;
     background: #111;
     border: 1px solid rgba(255,255,255,0.2);
-    /* Добавляем flex для центровки на всякий случай */
+    /* Р”РѕР±Р°РІР»СЏРµРј flex РґР»СЏ С†РµРЅС‚СЂРѕРІРєРё РЅР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№ */
     display: flex;
     justify-content: center;
     align-items: center;
 }
-        /* Стало */
+        /* РЎС‚Р°Р»Рѕ */
 #camera-video, #camera-canvas {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    transform: scaleX(-1); /* Зеркальное отображение для селфи */
+    transform: scaleX(-1); /* Р—РµСЂРєР°Р»СЊРЅРѕРµ РѕС‚РѕР±СЂР°Р¶РµРЅРёРµ РґР»СЏ СЃРµР»С„Рё */
 }
 
 #camera-video {
-    object-fit: cover; /* Заполняет контейнер без искажений */
+    object-fit: cover; /* Р—Р°РїРѕР»РЅСЏРµС‚ РєРѕРЅС‚РµР№РЅРµСЂ Р±РµР· РёСЃРєР°Р¶РµРЅРёР№ */
 }
         #camera-guide-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); text-align: center; pointer-events: none; }
         #camera-guide-box { width: 70%; aspect-ratio: 1/1.2; border: 2px dashed rgba(255,255,255,0.5); border-radius: 50%; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
@@ -432,7 +334,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             display: none; 
             padding: 1rem; 
         }
-        /* НОВЫЕ СТИЛИ ДЛЯ АНИМАЦИИ ПОЯВЛЕНИЯ */
+        /* РќРћР’Р«Р• РЎРўРР›Р Р”Р›РЇ РђРќРРњРђР¦РР РџРћРЇР’Р›Р•РќРРЇ */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -445,9 +347,9 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 }
 
 .fade-in-up {
-    /* Изначально скрываем элемент */
+    /* РР·РЅР°С‡Р°Р»СЊРЅРѕ СЃРєСЂС‹РІР°РµРј СЌР»РµРјРµРЅС‚ */
     opacity: 0; 
-    /* Запускаем анимацию, когда JS добавит класс 'visible' */
+    /* Р—Р°РїСѓСЃРєР°РµРј Р°РЅРёРјР°С†РёСЋ, РєРѕРіРґР° JS РґРѕР±Р°РІРёС‚ РєР»Р°СЃСЃ 'visible' */
     animation-fill-mode: forwards;
 }
 
@@ -461,43 +363,275 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             width: 100%;
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 0 1rem;
+            align-items: stretch;
+            padding: clamp(1.25rem, 4vw, 3.5rem);
         }
         .question-content {
-            width: min(100%, 640px);
+            width: 100%;
+        }
+        .question-shell {
+            width: min(100%, 1100px);
             margin: 0 auto;
-            padding: clamp(1.5rem, 4vw, 2.5rem);
-            background: #ffffff;
+            padding: clamp(2.5rem, 5vw, 3.5rem);
+            border-radius: 32px;
+            background: rgba(255, 255, 255, 0.68);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            box-shadow: 0 24px 60px rgba(80, 56, 140, 0.15);
+            backdrop-filter: blur(26px);
+            -webkit-backdrop-filter: blur(26px);
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+            gap: clamp(2rem, 5vw, 3.5rem);
+            position: relative;
+            overflow: hidden;
+        }
+        .question-shell::before {
+            content: "";
+            position: absolute;
+            inset: -18% auto auto -18%;
+            width: 55%;
+            height: 130%;
+            background: radial-gradient(circle at top, rgba(163, 133, 233, 0.35), transparent 70%);
+            transform: rotate(-10deg);
+            pointer-events: none;
+        }
+        .question-shell > * {
+            position: relative;
+            z-index: 1;
+        }
+        .question-shell.cardless {
+            background: rgba(255, 255, 255, 0.52);
+            border: 1px solid rgba(255, 255, 255, 0.38);
+            box-shadow: 0 18px 40px rgba(60, 44, 115, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.75rem;
+            text-align: center;
+        }
+        .question-shell.cardless::before {
+            display: none;
+        }
+        .question-lead {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.75rem;
+        }
+        .question-shell.cardless .question-lead {
+            align-items: center;
+            text-align: center;
+        }
+        .question-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 22px;
+            background: linear-gradient(145deg, rgba(167, 139, 250, 0.24), rgba(56, 189, 248, 0.22));
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--brand-dark-text);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 15px 35px rgba(81, 56, 140, 0.1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .question-shell.cardless .question-icon {
+            margin: 0 auto;
+        }
+        .question-copy {
+            max-width: 34rem;
+        }
+        .question-shell.cardless .question-copy {
+            max-width: 32rem;
+        }
+        .question-copy h2 {
+            color: #1f2937;
+            font-weight: 800;
+            letter-spacing: -0.015em;
+        }
+        .question-copy p {
+            color: #475569;
+        }
+        .question-body {
+            align-self: stretch;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+        .answer-stack {
+            display: grid;
+            gap: 1rem;
+        }
+        .question-media {
+            width: 144px;
+            height: 144px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 20px 46px rgba(80, 56, 140, 0.22);
+            margin: 0 auto;
+        }
+        .question-illustration {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .slider-panel {
+            background: rgba(255, 255, 255, 0.82);
             border-radius: 26px;
-            box-shadow: 0 28px 55px rgba(163, 133, 233, 0.18);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            padding: clamp(1.75rem, 3vw, 2.25rem);
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            box-shadow: 0 20px 40px rgba(80, 56, 140, 0.14);
+        }
+        .slider-readout {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        #slider-value-display {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 0.75rem;
+            font-size: clamp(2.5rem, 4vw, 3.25rem);
+            font-weight: 800;
+            color: var(--brand-dark-text);
+        }
+        #slider-value-display span,
+        #slider-value-display strong {
+            font-weight: inherit;
+        }
+        #slider-value-display small,
+        #slider-value-display span.text-lg {
+            font-size: 1rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+        #slider-value-display .stress-score {
+            font-weight: 800;
+        }
+        #slider-value-display[data-level="low"] .stress-score {
+            color: #22c55e;
+        }
+        #slider-value-display[data-level="medium"] .stress-score {
+            color: #f97316;
+        }
+        #slider-value-display[data-level="high"] .stress-score {
+            color: #ef4444;
+        }
+        .question-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 12px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(167, 139, 250, 0.65), rgba(56, 189, 248, 0.65));
+            outline: none;
+        }
+        .question-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid var(--brand-accent);
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+            cursor: pointer;
+        }
+        .question-slider::-moz-range-thumb {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid var(--brand-accent);
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+            cursor: pointer;
+        }
+        .slider-range {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        .stress-panel {
+            background: rgba(255, 255, 255, 0.88);
+        }
+        .stress-slider {
+            background: linear-gradient(to right, #22c55e, #f97316, #ef4444);
+        }
+        .stress-scale {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #a1a1aa;
+        }
+        #mood-slider-container {
+            width: min(100%, 360px);
+            margin-top: 1.5rem;
+            padding: 1.5rem 1.75rem;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            box-shadow: 0 18px 36px rgba(80, 56, 140, 0.15);
+        }
+        #mood-slider {
+            width: 100%;
+            margin-top: 1.25rem;
+        }
+        .mood-slider {
+            background: linear-gradient(to right, #38bdf8, #facc15, #34d399);
+        }
+        .mood-slider::-webkit-slider-thumb,
+        .mood-slider::-moz-range-thumb {
+            width: 30px;
+            height: 30px;
+            border-width: 4px;
+        }
+        #mood-emojis {
+            display: flex;
+            justify-content: space-between;
+            font-size: 2.5rem;
+            margin-bottom: 1.25rem;
+            padding: 0 0.5rem;
+        }
+        #mood-emojis span {
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        @media (max-width: 1024px) {
+            #question-wrapper {
+                padding: clamp(1rem, 6vw, 2.5rem);
+            }
+            .question-shell {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .question-lead {
+                align-items: center;
+                text-align: center;
+            }
+            .question-body {
+                width: 100%;
+            }
+        }
+        @media (max-width: 640px) {
+            .question-icon {
+                width: 60px;
+                height: 60px;
+                border-radius: 18px;
+            }
+            #slider-value-display {
+                font-size: clamp(2.25rem, 8vw, 2.75rem);
+            }
         }
         .question-content.animation-wrapper {
             background: transparent;
             box-shadow: none;
             padding: 0;
-        }
-        .question-content.cardless {
-            background: transparent;
-            box-shadow: none;
-            padding: 0;
-            border-radius: 0;
-        }
-        .question-content h2 { color: #1f2937; }
-        .question-content p { color: #475569; }
-        .question-content .answer-option { background: rgba(255, 255, 255, 0.92); }
-
-        /* Progress bar refresh */
-        #progress-container {
-            height: 12px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.45);
-            box-shadow: inset 0 2px 6px rgba(15, 23, 42, 0.08);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
         }
         #progress-bar-inner {
             width: 0%;
@@ -900,30 +1034,30 @@ document.addEventListener('DOMContentLoaded', () => {
         faceMeshDrawState: { startTime: null, duration: 500 }, // Added for mesh fade-in
         // Replace the old quizQuestions array with this one
 quizQuestions: [
-    { key: 'userGoal', type: 'options', text: "What’s your main goal?", subtext: "This helps us tailor the final report to your interests.", options: [{text: 'Find out my Biological Age', value:'bio_age'}, {text:'Get a Skin Health Analysis', value: 'skin'}, {text:'Receive a 7-Day Improvement Plan', value:'plan'}, {text:'All of the above!', value: 'all'}] },
+    { key: 'userGoal', type: 'options', text: "WhatвЂ™s your main goal?", subtext: "This helps us tailor the final report to your interests.", options: [{text: 'Find out my Biological Age', value:'bio_age'}, {text:'Get a Skin Health Analysis', value: 'skin'}, {text:'Receive a 7-Day Improvement Plan', value:'plan'}, {text:'All of the above!', value: 'all'}] },
     { key: 'age', type: 'slider', text: "How old are you?", subtext: "Your age is a key factor in calculating your biological age baseline.", min: 18, max: 90, defaultValue: 30, unit: 'years' },
-    { key: 'gender', type: 'gender_selection', text: "What’s your biological sex?", subtext: "Biological sex influences body composition and metabolic rate.", options: [{value: 'male', img: 'male.svg'}, {value: 'female', img: 'female.svg'}] },
+    { key: 'gender', type: 'gender_selection', text: "WhatвЂ™s your biological sex?", subtext: "Biological sex influences body composition and metabolic rate.", options: [{value: 'male', img: 'male.svg'}, {value: 'female', img: 'female.svg'}] },
     // UPDATED: Height in total inches for easier sliding
-    { key: 'height', type: 'slider', text: "What’s your height?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 140, max: 220, defaultValue: 175, unit: 'cm' }, // 4'6" to 7'0"
+    { key: 'height', type: 'slider', text: "WhatвЂ™s your height?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 140, max: 220, defaultValue: 175, unit: 'cm' }, // 4'6" to 7'0"
     // UPDATED: Weight in pounds
-    { key: 'weight', type: 'slider', text: "What’s your weight?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 40, max: 150, defaultValue: 77, unit: 'kg' },
+    { key: 'weight', type: 'slider', text: "WhatвЂ™s your weight?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 40, max: 150, defaultValue: 77, unit: 'kg' },
     { key: 'bmi_display', type: 'animation' },
-    { key: 'sleep', type: 'options', text: "On average, how much do you sleep?", subtext: "Quality sleep is crucial for cellular repair and mental clarity.", options: [{text:"Less than 5 hours"}, {text:"5–6 hours"}, {text:"7–8 hours"}, {text:"More than 8 hours"}] },
+    { key: 'sleep', type: 'options', text: "On average, how much do you sleep?", subtext: "Quality sleep is crucial for cellular repair and mental clarity.", options: [{text:"Less than 5 hours"}, {text:"5вЂ“6 hours"}, {text:"7вЂ“8 hours"}, {text:"More than 8 hours"}] },
     { key: 'sleep_visual', type: 'animation' },
-    { key: 'activity', type: 'options', text: "How often do you exercise?", subtext: "Regular exercise impacts cardiovascular health and longevity.", options: [{text:"Rarely / Never"}, {text:"1–2 times a week"}, {text:"3–4 times a week"}, {text:"5+ times a week"}] },
+    { key: 'activity', type: 'options', text: "How often do you exercise?", subtext: "Regular exercise impacts cardiovascular health and longevity.", options: [{text:"Rarely / Never"}, {text:"1вЂ“2 times a week"}, {text:"3вЂ“4 times a week"}, {text:"5+ times a week"}] },
     { key: 'activity_visual', type: 'animation' },
-    { key: 'nutrition', type: 'options', text: "How many servings of fruits & veggies do you eat daily?", subtext: "A diet rich in nutrients is vital for your overall well-being.", options: ["0–1 serving", "2–3 servings", "4–5 servings", "More than 5 servings"] },
-    { key: 'processed_food', type: 'options', text: "How often do you eat processed or fast food?", subtext: "High consumption can lead to inflammation and other health issues.", options: ["Rarely", "1–2 times a week", "3–4 times a week", "Daily"] },
-    { key: 'hydration', type: 'options', text: "How much water do you drink per day?", subtext: "Proper hydration is essential for every bodily function.", options: ["1–3 cups", "4–6 cups", "7–9 cups", "10+ cups"] },
+    { key: 'nutrition', type: 'options', text: "How many servings of fruits & veggies do you eat daily?", subtext: "A diet rich in nutrients is vital for your overall well-being.", options: ["0вЂ“1 serving", "2вЂ“3 servings", "4вЂ“5 servings", "More than 5 servings"] },
+    { key: 'processed_food', type: 'options', text: "How often do you eat processed or fast food?", subtext: "High consumption can lead to inflammation and other health issues.", options: ["Rarely", "1вЂ“2 times a week", "3вЂ“4 times a week", "Daily"] },
+    { key: 'hydration', type: 'options', text: "How much water do you drink per day?", subtext: "Proper hydration is essential for every bodily function.", options: ["1вЂ“3 cups", "4вЂ“6 cups", "7вЂ“9 cups", "10+ cups"] },
     { key: 'hydration_visual', type: 'animation' },
     { key: 'stress', type: 'slider', text: "How stressed do you usually feel?", subtext: "Chronic stress can significantly accelerate the aging process.", min: 1, max: 10, defaultValue: 5, unit: ''},
     { key: 'mindfulness', type: 'options', text: "How often do you practice mindfulness?", subtext: "Mindfulness practices can reduce stress and improve focus.", options: ["Never", "Sometimes", "Weekly", "Daily"] },
-    { key: 'mood', type: 'emoji_slider', text: "How would you describe your overall mood?", subtext: "Your mental state is deeply connected to your physical health.", options: [ { text: '😟', value: 'Often stressed or down' }, { text: '😐', value: 'Changes a lot' }, { text: '🙂', value: 'Mostly content' }, { text: '😊', value: 'Happy & energetic' } ] },
-    { key: 'alcohol', type: 'options', text: "How much alcohol do you drink weekly?", subtext: "Alcohol consumption can affect sleep, hydration, and cellular health.", options: ["None", "1–3 drinks", "4–7 drinks", "8+ drinks"] },
+    { key: 'mood', type: 'emoji_slider', text: "How would you describe your overall mood?", subtext: "Your mental state is deeply connected to your physical health.", options: [ { text: 'рџџ', value: 'Often stressed or down' }, { text: 'рџђ', value: 'Changes a lot' }, { text: 'рџ™‚', value: 'Mostly content' }, { text: 'рџЉ', value: 'Happy & energetic' } ] },
+    { key: 'alcohol', type: 'options', text: "How much alcohol do you drink weekly?", subtext: "Alcohol consumption can affect sleep, hydration, and cellular health.", options: ["None", "1вЂ“3 drinks", "4вЂ“7 drinks", "8+ drinks"] },
     { key: 'smoking', type: 'options', text: "Do you smoke?", subtext: "Smoking is a major factor in premature aging and disease.", options: ["Never", "Used to, but quit", "Occasionally", "Yes, daily"] },
-    { key: 'screen_time', type: 'options', text: "How much screen time do you have daily (outside of work)?", subtext: "Excessive screen time can impact sleep and mental well-being.", options: ["Less than 2 hours", "2–4 hours", "4–6 hours", "More than 6 hours"] },
-    { key: 'selfie', type: 'camera_step', text: 'AI Photo Analysis 📸', subtext: '(Optional – helps us analyze skin health & fine lines)'},
-    { key: 'email', type: 'email_step', text: "Enter your email 📩", subtext: "to get your personalized report summary. We respect your privacy." }
+    { key: 'screen_time', type: 'options', text: "How much screen time do you have daily (outside of work)?", subtext: "Excessive screen time can impact sleep and mental well-being.", options: ["Less than 2 hours", "2вЂ“4 hours", "4вЂ“6 hours", "More than 6 hours"] },
+    { key: 'selfie', type: 'camera_step', text: 'AI Photo Analysis рџ“ё', subtext: '(Optional вЂ“ helps us analyze skin health & fine lines)'},
+    { key: 'email', type: 'email_step', text: "Enter your email рџ“©", subtext: "to get your personalized report summary. We respect your privacy." }
 ],
     };
 
@@ -1075,7 +1209,7 @@ const LibraryLoader = {
     spinner.classList.remove('hidden');
 
     try {
-        // 1. Отправляем фото на анализ
+        // 1. РћС‚РїСЂР°РІР»СЏРµРј С„РѕС‚Рѕ РЅР° Р°РЅР°Р»РёР·
         console.log('Sending photo for analysis...');
         const analyzeResponse = await fetch('/.netlify/functions/analyzeSkin', {
             method: 'POST',
@@ -1086,10 +1220,10 @@ const LibraryLoader = {
         const responseData = await analyzeResponse.json();
         
         if (!analyzeResponse.ok) {
-            // Проверяем, настроен ли сервис анализа
+            // РџСЂРѕРІРµСЂСЏРµРј, РЅР°СЃС‚СЂРѕРµРЅ Р»Рё СЃРµСЂРІРёСЃ Р°РЅР°Р»РёР·Р°
             if (responseData.error && responseData.error.includes('not configured')) {
                 console.warn('Face analysis service not configured, skipping...');
-                // Сохраняем фото без анализа
+                // РЎРѕС…СЂР°РЅСЏРµРј С„РѕС‚Рѕ Р±РµР· Р°РЅР°Р»РёР·Р°
                 await saveAnswerToServer('selfie', App.lastPhotoDataUrl);
                 await saveAnswerToServer('faceAnalysisSkipped', 'service_not_configured');
                 handleAnswer('selfie', App.lastPhotoDataUrl);
@@ -1098,14 +1232,14 @@ const LibraryLoader = {
             throw new Error(`Face analysis failed: ${responseData.error || 'Unknown error'}`);
         }
 
-        // 2. Проверяем, что в ответе есть данные о лицах
+        // 2. РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РІ РѕС‚РІРµС‚Рµ РµСЃС‚СЊ РґР°РЅРЅС‹Рµ Рѕ Р»РёС†Р°С…
         if (!responseData.faces || responseData.faces.length === 0) {
             const retry = confirm('No face detected in the photo. Would you like to retake it?');
             if (retry) {
                 document.getElementById('selfie-retake-btn').click();
                 return;
             } else {
-                // Продолжаем без анализа
+                // РџСЂРѕРґРѕР»Р¶Р°РµРј Р±РµР· Р°РЅР°Р»РёР·Р°
                 await saveAnswerToServer('selfie', App.lastPhotoDataUrl);
                 await saveAnswerToServer('faceAnalysisSkipped', 'no_face_detected');
                 handleAnswer('selfie', App.lastPhotoDataUrl);
@@ -1113,7 +1247,7 @@ const LibraryLoader = {
             }
         }
 
-        // 3. Сохраняем результат анализа
+        // 3. РЎРѕС…СЂР°РЅСЏРµРј СЂРµР·СѓР»СЊС‚Р°С‚ Р°РЅР°Р»РёР·Р°
         console.log('Saving analysis data...');
         const saveResponse = await fetch('/.netlify/functions/quiz', {
             method: 'POST',
@@ -1135,7 +1269,7 @@ const LibraryLoader = {
     } catch (error) {
         console.error('Error during photo processing:', error);
         
-        // Предлагаем пользователю выбор
+        // РџСЂРµРґР»Р°РіР°РµРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ РІС‹Р±РѕСЂ
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
         modal.innerHTML = `
@@ -1162,14 +1296,14 @@ const LibraryLoader = {
         document.body.appendChild(modal);
         
     } finally {
-        // Возвращаем кнопку в исходное состояние
+        // Р’РѕР·РІСЂР°С‰Р°РµРј РєРЅРѕРїРєСѓ РІ РёСЃС…РѕРґРЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ
         confirmBtn.disabled = false;
         btnText.classList.remove('hidden');
         spinner.classList.add('hidden');
     }
 }
 
-    // НОВАЯ ФУНКЦИЯ для отправки ответа на сервер
+    // РќРћР’РђРЇ Р¤РЈРќРљР¦РРЇ РґР»СЏ РѕС‚РїСЂР°РІРєРё РѕС‚РІРµС‚Р° РЅР° СЃРµСЂРІРµСЂ
     async function saveAnswerToServer(questionKey, answer) {
         if (!App.sessionId) {
             console.error("Cannot save answer, session ID is missing.");
@@ -1196,26 +1330,26 @@ const LibraryLoader = {
         }
     }
 
-    // ИЗМЕНЕННАЯ ФУНКЦИЯ handleAnswer
+    // РР—РњР•РќР•РќРќРђРЇ Р¤РЈРќРљР¦РРЇ handleAnswer
 async function handleAnswer(questionKey, answer) {
         App.userAnswers[questionKey] = answer;
         App.lastAnswer = { key: questionKey, value: answer };
         
-        // Отправляем ответ на сервер и ждем завершения
+        // РћС‚РїСЂР°РІР»СЏРµРј РѕС‚РІРµС‚ РЅР° СЃРµСЂРІРµСЂ Рё Р¶РґРµРј Р·Р°РІРµСЂС€РµРЅРёСЏ
         await saveAnswerToServer(questionKey, answer);
         
-        // Переходим к следующему вопросу только после сохранения
+        // РџРµСЂРµС…РѕРґРёРј Рє СЃР»РµРґСѓСЋС‰РµРјСѓ РІРѕРїСЂРѕСЃСѓ С‚РѕР»СЊРєРѕ РїРѕСЃР»Рµ СЃРѕС…СЂР°РЅРµРЅРёСЏ
         setTimeout(next, 100);
     }
 
-    // ИЗМЕНЕННАЯ ФУНКЦИЯ handleOptionClick
+    // РР—РњР•РќР•РќРќРђРЇ Р¤РЈРќРљР¦РРЇ handleOptionClick
     async function handleOptionClick(event, key, value) {
         const clickedButton = event.currentTarget;
         const parent = clickedButton.parentElement;
         parent.querySelectorAll('button').forEach(btn => btn.disabled = true);
         clickedButton.classList.add('selected');
         
-        // Используем await, чтобы дождаться завершения handleAnswer
+        // РСЃРїРѕР»СЊР·СѓРµРј await, С‡С‚РѕР±С‹ РґРѕР¶РґР°С‚СЊСЃСЏ Р·Р°РІРµСЂС€РµРЅРёСЏ handleAnswer
         await handleAnswer(key, value);
     }
 
@@ -1247,18 +1381,18 @@ async function handleAnswer(questionKey, answer) {
         document.getElementById('quiz-footer').style.display = (stepKey === 'quiz' || stepKey === 'bmi') ? 'block' : 'none';
     }
     
-    // Файл: /quiz-new.html
+    // Р¤Р°Р№Р»: /quiz-new.html
 
-    // ↓↓↓ СКОПИРУЙТЕ ЭТОТ КОД ПОЛНОСТЬЮ ↓↓↓
+    // в†“в†“в†“ РЎРљРћРџРР РЈР™РўР• Р­РўРћРў РљРћР” РџРћР›РќРћРЎРўР¬Р® в†“в†“в†“
 
 function next() {
-    // ---- НАЧАЛО ИЗМЕНЕНИЯ ----
-    // Отправляем событие "Lead" в Facebook и наше событие "quizStarted" на бэкенд
+    // ---- РќРђР§РђР›Рћ РР—РњР•РќР•РќРРЇ ----
+    // РћС‚РїСЂР°РІР»СЏРµРј СЃРѕР±С‹С‚РёРµ "Lead" РІ Facebook Рё РЅР°С€Рµ СЃРѕР±С‹С‚РёРµ "quizStarted" РЅР° Р±СЌРєРµРЅРґ
     if (App.currentQuestionIndex === -1) {
         fbq('track', 'Lead');
-        trackEvent('quizStarted'); // <-- ДОБАВЬТЕ ЭТУ СТРОКУ
+        trackEvent('quizStarted'); // <-- Р”РћР‘РђР’Р¬РўР• Р­РўРЈ РЎРўР РћРљРЈ
     }
-    // ---- КОНЕЦ ИЗМЕНЕНИЯ ----
+    // ---- РљРћРќР•Р¦ РР—РњР•РќР•РќРРЇ ----
 
     App.currentQuestionIndex++;
     const stepConfig = App.quizQuestions[App.currentQuestionIndex];
@@ -1276,7 +1410,7 @@ function next() {
     updateProgressBar();
 }
 
-// ↑↑↑ СКОПИРУЙТЕ ЭТОТ КОД ПОЛНОСТЬЮ ↑↑↑
+// в†‘в†‘в†‘ РЎРљРћРџРР РЈР™РўР• Р­РўРћРў РљРћР” РџРћР›РќРћРЎРўР¬Р® в†‘в†‘в†‘
 
     function previous() {
         if (App.currentQuestionIndex < 0) return;
@@ -1317,94 +1451,136 @@ function next() {
         const wrapper = document.getElementById('question-wrapper');
         const footerWrapper = document.getElementById('footer-actions');
         footerWrapper.innerHTML = '';
-        
+
         const iconMap = {
-            userGoal: '🎯', age: '👤', gender: '⚧️', height: '📏', weight: '⚖️',
-            sleep: '😴', activity: '🏃', nutrition: '🥗', processed_food: '🍔', hydration: '💧',
-            stress: '💥', mindfulness: '🧘', mood: '🙂', alcohol: '🍷', smoking: '🚭',
-            screen_time: '📱', genetics: '🧬', chronic: '⚕️', sun_protection: '🧴'
+            userGoal: '🎯', age: '🧭', gender: '⚧️', height: '📏', weight: '⚖️',
+            sleep: '🛌', activity: '💪', nutrition: '🥗', processed_food: '🍔', hydration: '💧',
+            stress: '😓', mindfulness: '🧘', mood: '🙂', alcohol: '🍷', smoking: '🚬',
+            screen_time: '💻', genetics: '🧬', chronic: '🏥', sun_protection: '🌤', selfie: '📸'
         };
-        const icon = iconMap[question.key] || '✨';
-        let contentHTML = `<div class="text-3xl sm:text-4xl mb-2 sm:mb-3 text-[--brand-dark-text] text-center">${icon}</div><h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight text-gray-900 text-center">${question.text}</h2>`;
-        if (question.subtext && question.type !== 'camera_step' && question.type !== 'email_step') {
-            contentHTML += `<p class="text-gray-500 mt-2 sm:mt-3 text-center max-w-md mx-auto text-base sm:text-lg">${question.subtext}</p>`;
-        }
-        
+        const icon = iconMap[question.key] || '🌿';
+        const showSubtext = question.subtext && question.type !== 'camera_step' && question.type !== 'email_step';
+
+        let contentHTML = `
+            <div class="question-lead">
+                <span class="question-icon">${icon}</span>
+                <div class="question-copy">
+                    <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight text-gray-900">${question.text}</h2>
+                    ${showSubtext ? `<p class="mt-3 text-base sm:text-lg text-gray-600 max-w-xl">${question.subtext}</p>` : ''}
+                </div>
+            </div>
+            <div class="question-body"></div>`;
+
         if (question.key === 'stress') {
-             contentHTML = `<div class="stress-widget">
-                 <div class="text-3xl sm:text-4xl mb-2 sm:mb-3 text-[--brand-dark-text] text-center">${icon}</div>
-                 <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight text-gray-900 text-center">${question.text}</h2>
-                 <p class="text-gray-500 mt-2 sm:mt-3 text-center max-w-md mx-auto text-base sm:text-lg">${question.subtext}</p>
-                 <div class="my-6">
-                     <input type="range" min="${question.min}" max="${question.max}" step="1" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input">
-                 </div>
-                 <div class="flex justify-between text-sm text-gray-500 mt-2 px-1">
-                     <span>Relaxed</span>
-                     <span>Stressed</span>
-                 </div>
-             </div>`;
-        } else if (question.type === 'camera_step' || question.type === 'email_step') {
-            contentHTML = `<img src="face.jpeg" alt="Face scan illustration" class="w-40 h-40 mx-auto rounded-full object-cover mb-6 shadow-lg">
-                                         <h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
-                                         <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
-            if (question.type === 'email_step') {
-                 contentHTML = `<h2 class="text-3xl font-bold text-gray-900 text-center">${question.text}</h2>
-                                             <p class="text-gray-600 mt-2 text-center max-w-sm mx-auto">${question.subtext}</p>`;
-            }
+            const sliderValue = App.userAnswers[question.key] || question.defaultValue;
+            contentHTML = `
+                <div class="question-lead">
+                    <span class="question-icon">${icon}</span>
+                    <div class="question-copy">
+                        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight text-gray-900">${question.text}</h2>
+                        ${question.subtext ? `<p class="mt-3 text-base sm:text-lg text-gray-600 max-w-xl">${question.subtext}</p>` : ''}
+                    </div>
+                </div>
+                <div class="question-body">
+                    <div class="slider-panel stress-panel">
+                        <div class="slider-readout"><span id="slider-value-display"></span></div>
+                        <input type="range" min="${question.min}" max="${question.max}" step="1" value="${sliderValue}" class="question-slider stress-slider" id="slider-input">
+                        <div class="stress-scale">
+                            <span>Relaxed</span>
+                            <span>Stressed</span>
+                        </div>
+                    </div>
+                </div>`;
+        } else if (question.type === 'camera_step') {
+            contentHTML = `
+                <div class="question-lead">
+                    <div class="question-media">
+                        <img src="face.jpeg" alt="Face scan illustration" class="question-illustration">
+                    </div>
+                    <div class="question-copy text-center">
+                        <h2 class="text-3xl font-bold text-gray-900">${question.text}</h2>
+                        ${question.subtext ? `<p class="mt-3 text-gray-600 max-w-sm mx-auto">${question.subtext}</p>` : ''}
+                    </div>
+                </div>`;
+        } else if (question.type === 'email_step') {
+            contentHTML = `
+                <div class="question-lead">
+                    <span class="question-icon">✉️</span>
+                    <div class="question-copy text-center">
+                        <h2 class="text-3xl font-bold text-gray-900">${question.text}</h2>
+                        ${question.subtext ? `<p class="mt-3 text-gray-600 max-w-sm mx-auto">${question.subtext}</p>` : ''}
+                    </div>
+                </div>`;
         }
-        
-        wrapper.innerHTML = `<div class="question-content w-full question-content-enter">${contentHTML}</div>`;
-        // Remove transform after entrance animation to avoid iOS slider drag issues
-        const contentEl = wrapper.querySelector('.question-content');
-        if (contentEl) {
-            const needsCardless = question.key === 'stress' || question.type === 'camera_step' || question.type === 'email_step';
-            contentEl.classList.toggle('cardless', needsCardless);
-            contentEl.addEventListener('animationend', () => {
-                contentEl.style.transform = 'none';
+
+        wrapper.innerHTML = `<div class="question-shell question-content w-full question-content-enter">${contentHTML}</div>`;
+        const shellEl = wrapper.querySelector('.question-shell');
+        if (shellEl) {
+            const needsCardless = question.type === 'camera_step' || question.type === 'email_step';
+            shellEl.classList.toggle('cardless', needsCardless);
+            shellEl.addEventListener('animationend', () => {
+                shellEl.style.transform = 'none';
             }, { once: true });
         }
-        
+
+        const targetContainer = wrapper.querySelector('.question-body') || shellEl;
+
         if (question.type === 'options') {
             const optionsHTML = question.options.map(opt => {
                 const displayText = typeof opt === 'object' ? opt.text : opt;
                 const value = typeof opt === 'object' ? (opt.value || opt.text) : opt;
-                return `<button class="answer-option px-4 py-3 rounded-xl bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transform transition-transform ease-out duration-150 focus:outline-none focus:ring-2 focus:ring-[--brand-accent] hover:shadow-md active:scale-95 select-none" data-value="${value}">${displayText}</button>`;
+                return `<button class="answer-option" data-value="${value}"><span>${displayText}</span></button>`;
             }).join('');
-            const optionsBlock = `<div class="mt-5 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto">${optionsHTML}</div>`;
-            wrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', optionsBlock);
-            wrapper.querySelectorAll('.answer-option').forEach(btn => {
-                btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
-                const add = () => btn.classList.add('pressed');
-                const remove = () => btn.classList.remove('pressed');
-                btn.addEventListener('mousedown', add);
-                btn.addEventListener('touchstart', add, { passive: true });
-                ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev => btn.addEventListener(ev, remove));
-            });
+            const optionsBlock = `<div class="answer-stack">${optionsHTML}</div>`;
+            if (targetContainer) {
+                targetContainer.insertAdjacentHTML('beforeend', optionsBlock);
+                targetContainer.querySelectorAll('.answer-option').forEach(btn => {
+                    btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
+                    const add = () => btn.classList.add('pressed');
+                    const remove = () => btn.classList.remove('pressed');
+                    btn.addEventListener('mousedown', add);
+                    btn.addEventListener('touchstart', add, { passive: true });
+                    ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(ev => btn.addEventListener(ev, remove));
+                });
+            }
         } else if (question.type === 'slider' && question.key !== 'stress') {
-            const sliderContent = `<div class="bg-white p-6 rounded-2xl shadow-sm mt-6"><div id="slider-value-display" class="text-4xl font-extrabold text-[--brand-dark-text] mb-2 text-center"></div><input type="range" min="${question.min}" max="${question.max}" step="1" value="${App.userAnswers[question.key] || question.defaultValue}" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="slider-input"></div>`;
-            wrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', sliderContent);
+            const sliderValue = App.userAnswers[question.key] || question.defaultValue;
+            const sliderContent = `<div class="slider-panel">
+                <div class="slider-readout"><span id="slider-value-display"></span></div>
+                <input type="range" min="${question.min}" max="${question.max}" step="1" value="${sliderValue}" class="question-slider" id="slider-input">
+                <div class="slider-range"><span>${question.min}${question.unit ? ` ${question.unit}` : ''}</span><span>${question.max}${question.unit ? ` ${question.unit}` : ''}</span></div>
+            </div>`;
+            if (targetContainer) {
+                targetContainer.insertAdjacentHTML('beforeend', sliderContent);
+            }
         }
 
         if (question.type === 'slider') {
-             footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;
-             const sliderInput = wrapper.querySelector('#slider-input');
-             sliderInput.addEventListener('input', () => updateSliderDisplay(question, sliderInput.value));
-             sliderInput.addEventListener('change', () => updateSliderDisplay(question, sliderInput.value));
-             footerWrapper.querySelector('#slider-confirm-btn').addEventListener('click', () => handleAnswer(question.key, sliderInput.value));
-             updateSliderDisplay(question, App.userAnswers[question.key] || question.defaultValue);
-        }
-        else if (question.type === 'gender_selection') {
+            footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="slider-confirm-btn">Confirm</button>`;
+            const sliderInput = wrapper.querySelector('#slider-input');
+            if (sliderInput) {
+                sliderInput.addEventListener('input', () => updateSliderDisplay(question, sliderInput.value));
+                sliderInput.addEventListener('change', () => updateSliderDisplay(question, sliderInput.value));
+                const confirmBtn = footerWrapper.querySelector('#slider-confirm-btn');
+                if (confirmBtn) {
+                    confirmBtn.addEventListener('click', () => handleAnswer(question.key, sliderInput.value));
+                }
+                updateSliderDisplay(question, sliderInput.value);
+            }
+        } else if (question.type === 'gender_selection') {
             const optionsHTML = question.options.map(opt => `<button class="gender-option text-center rounded-2xl p-4 bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transform transition-transform ease-out duration-150 hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-[--brand-accent] select-none" data-value="${opt.value}"><div class="gender-image-container"><img src="${opt.img}" alt="${opt.value}" class="gender-image"></div><span class="text-xl font-bold text-gray-800 capitalize">${opt.value}</span></button>`).join('');
-            const optionsBlock = `<div class="mt-5 sm:mt-6 grid grid-cols-2 gap-4 max-w-sm mx-auto">${optionsHTML}</div>`;
-            wrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', optionsBlock);
-            wrapper.querySelectorAll('.gender-option').forEach(btn => {
-                btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
-                const add = () => btn.classList.add('pressed');
-                const remove = () => btn.classList.remove('pressed');
-                btn.addEventListener('mousedown', add);
-                btn.addEventListener('touchstart', add, { passive: true });
-                ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev => btn.addEventListener(ev, remove));
-            });
+            const optionsBlock = `<div class="gender-stack">${optionsHTML}</div>`;
+            if (targetContainer) {
+                targetContainer.insertAdjacentHTML('beforeend', optionsBlock);
+                targetContainer.querySelectorAll('.gender-option').forEach(btn => {
+                    btn.addEventListener('click', (e) => handleOptionClick(e, question.key, btn.dataset.value));
+                    const add = () => btn.classList.add('pressed');
+                    const remove = () => btn.classList.remove('pressed');
+                    btn.addEventListener('mousedown', add);
+                    btn.addEventListener('touchstart', add, { passive: true });
+                    ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(ev => btn.addEventListener(ev, remove));
+                });
+            }
         } else if (question.type === 'camera_step') {
             footerWrapper.innerHTML = `<div class="max-w-sm mx-auto space-y-3 mt-4">
                 <button id="open-camera-btn" class="w-full bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Allow Camera Access</button>
@@ -1437,7 +1613,7 @@ function next() {
                     <input type="email" id="email-input" placeholder="your@email.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-[--brand-accent] focus:border-[--brand-accent]">
                     <button id="email-submit-btn" class="bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-5 rounded-lg hover:opacity-90 transition">Submit</button>
                   </div>
-                  <button id="email-skip-btn" class="text-gray-600 hover:text-gray-900 underline text-sm">Skip for now — I’ll download the report myself</button>
+                  <button id="email-skip-btn" class="text-gray-600 hover:text-gray-900 underline text-sm">Skip for now - I'll download the report myself</button>
                 </div>`;
              footerWrapper.querySelector('#email-submit-btn').addEventListener('click', () => {
                  const email = document.getElementById('email-input').value;
@@ -1447,54 +1623,81 @@ function next() {
              const skipBtn = footerWrapper.querySelector('#email-skip-btn');
              if (skipBtn) {
                skipBtn.addEventListener('click', async () => {
-                   try { await trackEvent('emailSkipped'); } catch(e) {}
+                   try { await trackEvent('emailSkipped'); } catch (e) {}
                    handleAnswer('email', 'skipped');
                });
              }
         } else if (question.type === 'emoji_slider') {
             const emojis = question.options.map(opt => `<span>${opt.text}</span>`).join('');
-            const sliderContent = `<div id="mood-slider-container"><div id="mood-emojis">${emojis}</div><input type="range" min="0" max="${question.options.length - 1}" value="1" step="1" id="mood-slider"></div>`;
-            wrapper.querySelector('.question-content').insertAdjacentHTML('beforeend', sliderContent);
+            const sliderContent = `<div id="mood-slider-container"><div id="mood-emojis">${emojis}</div><input type="range" min="0" max="${question.options.length - 1}" value="1" step="1" id="mood-slider" class="question-slider mood-slider"></div>`;
+            if (targetContainer) {
+                targetContainer.insertAdjacentHTML('beforeend', sliderContent);
+            }
             footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="mood-confirm-btn">Confirm</button>`;
             const moodSlider = document.getElementById('mood-slider');
             const emojiSpans = document.querySelectorAll('#mood-emojis span');
             const updateEmojiSelection = () => {
+                if (!moodSlider) return;
                 emojiSpans.forEach((span, index) => {
                     span.style.transform = index == moodSlider.value ? 'scale(1.5)' : 'scale(1)';
                     span.style.opacity = index == moodSlider.value ? '1' : '0.5';
                 });
             };
-            moodSlider.addEventListener('input', updateEmojiSelection);
-            updateEmojiSelection();
-            footerWrapper.querySelector('#mood-confirm-btn').addEventListener('click', () => {
-                const selectedValue = question.options[moodSlider.value].value;
-                handleAnswer(question.key, selectedValue);
-            });
+            if (moodSlider) {
+                moodSlider.addEventListener('input', updateEmojiSelection);
+                updateEmojiSelection();
+            }
+            const moodConfirm = footerWrapper.querySelector('#mood-confirm-btn');
+            if (moodConfirm && moodSlider) {
+                moodConfirm.addEventListener('click', () => {
+                    const selectedValue = question.options[moodSlider.value].value;
+                    handleAnswer(question.key, selectedValue);
+                });
+            }
         }
     }
-    
+
     // Replace the old updateSliderDisplay function with this one
-// Вставьте этот код вместо вашей текущей функции updateSliderDisplay
+// Р’СЃС‚Р°РІСЊС‚Рµ СЌС‚РѕС‚ РєРѕРґ РІРјРµСЃС‚Рѕ РІР°С€РµР№ С‚РµРєСѓС‰РµР№ С„СѓРЅРєС†РёРё updateSliderDisplay
     function updateSliderDisplay(question, value) {
-    const valueDisplay = document.getElementById('slider-value-display');
-    if (!valueDisplay) return;
+        const valueDisplay = document.getElementById('slider-value-display');
+        if (!valueDisplay) return;
 
-    let displayHTML = `${value} ${question.unit || ''}`;
-
-    if (question.unit === 'cm') {
-        const totalInches = value / 2.54;
-        let feet = Math.floor(totalInches / 12);
-        let inches = Math.round(totalInches % 12);
-        if (inches === 12) {
-            feet++;
-            inches = 0;
+        const numericValue = Number(value);
+        if (question.key === 'stress') {
+            valueDisplay.innerHTML = `<span class="stress-score">${numericValue}</span><small>/10</small>`;
+            if (numericValue <= 4) {
+                valueDisplay.dataset.level = 'low';
+            } else if (numericValue <= 7) {
+                valueDisplay.dataset.level = 'medium';
+            } else {
+                valueDisplay.dataset.level = 'high';
+            }
+            return;
         }
-        displayHTML = `${feet}'${inches}" <span class="text-lg text-gray-400 font-medium">(${value} cm)</span>`;
-    } else if (question.unit === 'kg') {
-        const lbs = Math.round(value * 2.20462);
-        displayHTML = `${lbs} lbs <span class="text-lg text-gray-400 font-medium">(${value} kg)</span>`;
-    }
-    
+
+        if (valueDisplay.dataset.level) {
+            delete valueDisplay.dataset.level;
+        }
+
+        let displayHTML = `${numericValue}${question.unit ? ` ${question.unit}` : ''}`;
+
+        if (question.unit === 'cm') {
+            const totalInches = numericValue / 2.54;
+            let feet = Math.floor(totalInches / 12);
+            let inches = Math.round(totalInches % 12);
+            if (inches === 12) {
+                feet += 1;
+                inches = 0;
+            }
+            displayHTML = `${feet}'${inches}" <span class="text-lg text-gray-400 font-medium">(${numericValue} cm)</span>`;
+        } else if (question.unit === 'kg') {
+            const lbs = Math.round(numericValue * 2.20462);
+            displayHTML = `${lbs} lbs <span class="text-lg text-gray-400 font-medium">(${numericValue} kg)</span>`;
+        }
+
+        valueDisplay.innerHTML = displayHTML;
+    }    
     valueDisplay.innerHTML = displayHTML;
 }
     
@@ -1509,16 +1712,16 @@ function next() {
         let motivation = '';
         const la = App.lastAnswer || {};
         const motiv = {
-            sleep: (v) => v && (''+v).includes('Less') ? "Short nights add up. Even +20–30 minutes can boost energy tomorrow." : v && (''+v).includes('7') ? "Great sleep window — your recovery rhythm is on point." : "Aim for a steady schedule — consistency drives deeper rest.",
-            activity: (v) => v && (''+v).includes('Rarely') ? "Small starts matter: a 10‑minute walk still counts — today’s the day." : v && (''+v).includes('5+') ? "Powerful routine — your heart and brain thank you." : "Consistency beats intensity. Keep moving and build momentum.",
-            hydration: (v) => v && (''+v).includes('1') ? "Your cells are thirsty. Keep a bottle nearby — sip, don’t wait." : v && (''+v).includes('10') ? "Hydration hero — this keeps skin and energy stable." : "A steady sip routine can lift focus and mood.",
-            nutrition: (v) => v && (''+v).includes('0') ? "Add one colorful serving today — simple, tangible, effective." : v && (''+v).includes('More') ? "Antioxidant rich — you’re feeding longevity." : "Try a ‘colors on the plate’ rule for balance.",
-            processed_food: (v) => v && (''+v).includes('Daily') ? "Tiny swaps beat big overhauls — try one whole‑food swap today." : v && (''+v).includes('Rarely') ? "Nice baseline — your gut and skin benefit." : "Plan a quick snack kit to skip impulse grabs.",
-            mindfulness: (v) => v==='Daily' ? "Calm is a skill — you’re practicing longevity." : v==='Never' ? "60 seconds of breathing shifts your nervous system — try now." : "Make micro‑pauses your superpower during the day.",
-            mood: (v) => v && (''+v).toLowerCase().includes('stressed') ? "You’re not alone — short walks and breath cycles help quickly." : v && (''+v).toLowerCase().includes('happy') ? "That spark fuels better choices everywhere — keep it going." : "Label the mood, lighten the load — awareness already helps.",
-            alcohol: (v) => v && (''+v).includes('8+') ? "Your sleep will love one ‘dry’ day. Notice the morning after." : v==='None' ? "Clear head, clear gains — your biology likes it." : "Try a hydration chaser — better sleep, better recovery.",
-            smoking: (v) => v && (''+v).toLowerCase().includes('daily') ? "Micro‑wins count: delay the first cigarette by 10 minutes." : v==='Never' ? "Massive long‑term edge — keep it that way." : "Swap one trigger routine for a quick breath walk.",
-            screen_time: (v) => v && (''+v).includes('More than 6') ? "Screens steal sleep — set a tiny cutoff ‘15 minutes earlier’ tonight." : v && (''+v).includes('Less than 2') ? "Nice boundary — your circadian rhythm thanks you." : "Batch the scrolling — fewer switches, calmer brain."
+            sleep: (v) => v && (''+v).includes('Less') ? "Short nights add up. Even +20вЂ“30 minutes can boost energy tomorrow." : v && (''+v).includes('7') ? "Great sleep window вЂ” your recovery rhythm is on point." : "Aim for a steady schedule вЂ” consistency drives deeper rest.",
+            activity: (v) => v && (''+v).includes('Rarely') ? "Small starts matter: a 10вЂ‘minute walk still counts вЂ” todayвЂ™s the day." : v && (''+v).includes('5+') ? "Powerful routine вЂ” your heart and brain thank you." : "Consistency beats intensity. Keep moving and build momentum.",
+            hydration: (v) => v && (''+v).includes('1') ? "Your cells are thirsty. Keep a bottle nearby вЂ” sip, donвЂ™t wait." : v && (''+v).includes('10') ? "Hydration hero вЂ” this keeps skin and energy stable." : "A steady sip routine can lift focus and mood.",
+            nutrition: (v) => v && (''+v).includes('0') ? "Add one colorful serving today вЂ” simple, tangible, effective." : v && (''+v).includes('More') ? "Antioxidant rich вЂ” youвЂ™re feeding longevity." : "Try a вЂcolors on the plateвЂ™ rule for balance.",
+            processed_food: (v) => v && (''+v).includes('Daily') ? "Tiny swaps beat big overhauls вЂ” try one wholeвЂ‘food swap today." : v && (''+v).includes('Rarely') ? "Nice baseline вЂ” your gut and skin benefit." : "Plan a quick snack kit to skip impulse grabs.",
+            mindfulness: (v) => v==='Daily' ? "Calm is a skill вЂ” youвЂ™re practicing longevity." : v==='Never' ? "60 seconds of breathing shifts your nervous system вЂ” try now." : "Make microвЂ‘pauses your superpower during the day.",
+            mood: (v) => v && (''+v).toLowerCase().includes('stressed') ? "YouвЂ™re not alone вЂ” short walks and breath cycles help quickly." : v && (''+v).toLowerCase().includes('happy') ? "That spark fuels better choices everywhere вЂ” keep it going." : "Label the mood, lighten the load вЂ” awareness already helps.",
+            alcohol: (v) => v && (''+v).includes('8+') ? "Your sleep will love one вЂdryвЂ™ day. Notice the morning after." : v==='None' ? "Clear head, clear gains вЂ” your biology likes it." : "Try a hydration chaser вЂ” better sleep, better recovery.",
+            smoking: (v) => v && (''+v).toLowerCase().includes('daily') ? "MicroвЂ‘wins count: delay the first cigarette by 10 minutes." : v==='Never' ? "Massive longвЂ‘term edge вЂ” keep it that way." : "Swap one trigger routine for a quick breath walk.",
+            screen_time: (v) => v && (''+v).includes('More than 6') ? "Screens steal sleep вЂ” set a tiny cutoff вЂ15 minutes earlierвЂ™ tonight." : v && (''+v).includes('Less than 2') ? "Nice boundary вЂ” your circadian rhythm thanks you." : "Batch the scrolling вЂ” fewer switches, calmer brain."
         };
         if (la.key && typeof motiv[la.key] === 'function') {
             try { motivation = motiv[la.key](la.value) || ''; } catch (e) { motivation = ''; }
@@ -1529,22 +1732,22 @@ function next() {
             renderBmiResult();
             return;
         } else if (key === 'sleep_visual') {
-            animationHTML = `<div class="w-full max-w-sm mx-auto"><div class="relative mx-auto my-3 w-48 h-48 sleep-animation-container flex items-center justify-center"><svg class="w-full h-full absolute inset-0" viewBox="0 0 120 120"><circle class="sleep-ring-bg" stroke-width="10" fill="transparent" cx="60" cy="60" r="52" /><circle id="sleep-ring-fg-anim" class="sleep-ring-fg" stroke-width="10" fill="transparent" cx="60" cy="60" r="52" style="stroke-dasharray: 327; stroke-dashoffset: 327;"/></svg><div class="text-5xl">🌙</div></div></div>`;
+            animationHTML = `<div class="w-full max-w-sm mx-auto"><div class="relative mx-auto my-3 w-48 h-48 sleep-animation-container flex items-center justify-center"><svg class="w-full h-full absolute inset-0" viewBox="0 0 120 120"><circle class="sleep-ring-bg" stroke-width="10" fill="transparent" cx="60" cy="60" r="52" /><circle id="sleep-ring-fg-anim" class="sleep-ring-fg" stroke-width="10" fill="transparent" cx="60" cy="60" r="52" style="stroke-dasharray: 327; stroke-dashoffset: 327;"/></svg><div class="text-5xl">рџЊ™</div></div></div>`;
         } else if (key === 'activity_visual') {
             animationHTML = `<div class="w-full max-w-sm mx-auto bg-white p-6 rounded-2xl shadow-sm"><div class="font-semibold text-gray-600 text-center mb-4">Your Active Week</div><div class="activity-week flex justify-around gap-2" id="activity-week-anim">${['M','T','W','T','F','S','S'].map(d => `<div class="activity-day">${d}</div>`).join('')}</div></div>`;
         } else if (key === 'hydration_visual') {
             animationHTML = `<div class="w-full max-w-sm mx-auto"><div id="water-animation" class="w-48 h-48 mx-auto"></div></div>`;
         } else if (key === 'nutrition_visual') {
-            animationHTML = `<div class="insight-card nutrition-card"><div class="insight-icon">🥗</div><h3>Plant-Powered Score</h3><p>Every colorful serving supports cellular health.</p><div class="insight-meter"><div class="insight-meter-fill" id="nutrition-meter"></div></div><div class="insight-meter-labels"><span>0</span><span>3</span><span>6+</span></div></div>`;
+            animationHTML = `<div class="insight-card nutrition-card"><div class="insight-icon">рџҐ—</div><h3>Plant-Powered Score</h3><p>Every colorful serving supports cellular health.</p><div class="insight-meter"><div class="insight-meter-fill" id="nutrition-meter"></div></div><div class="insight-meter-labels"><span>0</span><span>3</span><span>6+</span></div></div>`;
         } else if (key === 'food_visual') {
-            animationHTML = `<div class="w-full max-w-sm mx-auto bg-white p-6 rounded-2xl shadow-sm text-center"><div class="font-semibold text-gray-600 mb-3">Smart Swaps</div><div class="flex justify-center gap-3"><div class="px-3 py-2 rounded-lg bg-rose-100 text-rose-600 line-through">🍔 Soda</div><div class="px-3 py-2 rounded-lg bg-emerald-100 text-emerald-700">🥑 Water</div></div></div>`;
+            animationHTML = `<div class="w-full max-w-sm mx-auto bg-white p-6 rounded-2xl shadow-sm text-center"><div class="font-semibold text-gray-600 mb-3">Smart Swaps</div><div class="flex justify-center gap-3"><div class="px-3 py-2 rounded-lg bg-rose-100 text-rose-600 line-through">рџЌ” Soda</div><div class="px-3 py-2 rounded-lg bg-emerald-100 text-emerald-700">рџҐ‘ Water</div></div></div>`;
         } else if (key === 'mindfulness_visual') {
             animationHTML = `<div class="insight-card mindfulness-card"><div class="breath-circle"><div class="breath-pulse" id="mindfulness-pulse"></div></div><h3>Mindfulness Rhythm</h3><p id="mindfulness-cue">Inhale slowly</p></div>`;
         } else if (key === 'mood_visual_broken') {
-            const faces = ['🙂','😌','😐','😮‍💨','😊','😁'];
+            const faces = ['рџ™‚','рџЊ','рџђ','рџ®вЂЌрџ’Ё','рџЉ','рџЃ'];
             animationHTML = `<div class="w-full max-w-sm mx-auto text-center"><div class="flex justify-center gap-2 text-3xl">${faces.map(f=>`<span class='animate-bounce'>${f}</span>`).join('')}</div></div>`;
         } else if (key === 'alcohol_visual') {
-            animationHTML = `<div class="insight-card alcohol-card"><div class="insight-icon">🍷</div><div class="glass-meter"><div class="glass-fill" id="alcohol-fill"></div></div><h3>Alcohol Balance</h3><p id="alcohol-tip">Even small breaks restore deeper sleep.</p></div>`;
+            animationHTML = `<div class="insight-card alcohol-card"><div class="insight-icon">рџЌ·</div><div class="glass-meter"><div class="glass-fill" id="alcohol-fill"></div></div><h3>Alcohol Balance</h3><p id="alcohol-tip">Even small breaks restore deeper sleep.</p></div>`;
         } else if (key === 'smoking_visual') {
             animationHTML = `<div class="w-full max-w-sm mx-auto text-center"><div class="mx-auto w-32 h-32 relative"><div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-16 bg-gray-400"></div><div class="absolute -top-2 left-1/2 -translate-x-1/2 w-6 h-6 bg-gray-200 rounded-full animate-ping"></div></div></div>`;
         } else if (key === 'screen_time_visual') {
@@ -1562,8 +1765,8 @@ function next() {
             const answer = App.userAnswers.sleep || "";
             let percent = 50;
             if (answer.startsWith("Less than 5")) percent = 25;
-            else if (answer.startsWith("5–6")) percent = 50;
-            else if (answer.startsWith("7–8")) percent = 90;
+            else if (answer.startsWith("5вЂ“6")) percent = 50;
+            else if (answer.startsWith("7вЂ“8")) percent = 90;
             else if (answer.startsWith("More than 8")) percent = 100;
             
             const ringEl = document.getElementById('sleep-ring-fg-anim');
@@ -1577,9 +1780,9 @@ function next() {
             const answer = App.userAnswers.activity || "";
             if (answer.includes("5+")) {
                 days = 7; 
-            } else if (answer.includes("3–4")) {
+            } else if (answer.includes("3вЂ“4")) {
                 days = 4;
-            } else if (answer.includes("1–2")) {
+            } else if (answer.includes("1вЂ“2")) {
                 days = 2;
             } else if (answer.includes("Rarely")) {
                 days = 1;
@@ -1645,7 +1848,7 @@ function next() {
             let tip = 'Protect your evening wind-down routine.';
             if (answer.includes('Less than 2')) {
                 duration = 3.6;
-                tip = 'Nice boundaries — your eyes and sleep thank you.';
+                tip = 'Nice boundaries вЂ” your eyes and sleep thank you.';
             } else if (answer.includes('2-4')) {
                 duration = 3;
                 tip = 'Set a soft limits timer to keep evenings calm.';
@@ -1723,7 +1926,7 @@ function next() {
 
         async function startAnalysis() {
             goToStep('loading');
-            // Сохраняем время окончания квиза
+            // РЎРѕС…СЂР°РЅСЏРµРј РІСЂРµРјСЏ РѕРєРѕРЅС‡Р°РЅРёСЏ РєРІРёР·Р°
             if (App.sessionId) {
                 fetch('/.netlify/functions/quiz', {
                     method: 'POST',
@@ -1739,7 +1942,7 @@ function next() {
             analysisStepsContainer.innerHTML = '';
             const steps = ["Analyzing lifestyle data...", "Calculating metabolic rate...", "Processing facial biomarkers...", "Compiling wellness report..."];
             
-            // Эта часть с анимацией текста остается без изменений
+            // Р­С‚Р° С‡Р°СЃС‚СЊ СЃ Р°РЅРёРјР°С†РёРµР№ С‚РµРєСЃС‚Р° РѕСЃС‚Р°РµС‚СЃСЏ Р±РµР· РёР·РјРµРЅРµРЅРёР№
             for (let i = 0; i < steps.length; i++) {
                 await new Promise(resolve => setTimeout(resolve, 800));
                 const item = document.createElement('div');
@@ -1763,30 +1966,30 @@ function next() {
                     body: JSON.stringify({ sessionId: App.sessionId })
                 });
 
-                // --- ВОТ ГЛАВНОЕ ИЗМЕНЕНИЕ ---
-                // Проверяем, успешен ли ответ сервера (статус 200-299)
+                // --- Р’РћРў Р“Р›РђР’РќРћР• РР—РњР•РќР•РќРР• ---
+                // РџСЂРѕРІРµСЂСЏРµРј, СѓСЃРїРµС€РµРЅ Р»Рё РѕС‚РІРµС‚ СЃРµСЂРІРµСЂР° (СЃС‚Р°С‚СѓСЃ 200-299)
                 if (!response.ok) {
-                    // Пытаемся прочитать текст ошибки от сервера
+                    // РџС‹С‚Р°РµРјСЃСЏ РїСЂРѕС‡РёС‚Р°С‚СЊ С‚РµРєСЃС‚ РѕС€РёР±РєРё РѕС‚ СЃРµСЂРІРµСЂР°
                     const errorData = await response.json().catch(() => {
-                        // Если сервер вернул не JSON, а просто текст, будет резервное сообщение
+                        // Р•СЃР»Рё СЃРµСЂРІРµСЂ РІРµСЂРЅСѓР» РЅРµ JSON, Р° РїСЂРѕСЃС‚Рѕ С‚РµРєСЃС‚, Р±СѓРґРµС‚ СЂРµР·РµСЂРІРЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ
                         return { error: 'The server responded with an unexpected error.' };
                     });
-                    // Создаем ошибку с текстом от сервера, чтобы прервать выполнение
+                    // РЎРѕР·РґР°РµРј РѕС€РёР±РєСѓ СЃ С‚РµРєСЃС‚РѕРј РѕС‚ СЃРµСЂРІРµСЂР°, С‡С‚РѕР±С‹ РїСЂРµСЂРІР°С‚СЊ РІС‹РїРѕР»РЅРµРЅРёРµ
                     throw new Error(errorData.error || ('Server error: ' + response.status));
                 }
                 
-                // Этот код выполнится только если response.ok === true
+                // Р­С‚РѕС‚ РєРѕРґ РІС‹РїРѕР»РЅРёС‚СЃСЏ С‚РѕР»СЊРєРѕ РµСЃР»Рё response.ok === true
                 console.log('Profile generated successfully, redirecting...');
                 window.location.href = `profile.html?session_id=${App.sessionId || ''}`;
 
             } catch (error) {
-                // Теперь этот блок будет ловить нашу новую, более понятную ошибку
+                // РўРµРїРµСЂСЊ СЌС‚РѕС‚ Р±Р»РѕРє Р±СѓРґРµС‚ Р»РѕРІРёС‚СЊ РЅР°С€Сѓ РЅРѕРІСѓСЋ, Р±РѕР»РµРµ РїРѕРЅСЏС‚РЅСѓСЋ РѕС€РёР±РєСѓ
                 console.error('Failed to generate profile:', error);
                 analysisStepsContainer.innerHTML = `<p class="text-red-600 font-bold text-lg">An error occurred while creating your profile.</p><p class="text-gray-600 mt-2">${error.message}</p><p class="mt-4"><a href="#" onclick="location.reload()" class="text-blue-600 font-semibold underline">Please click here to try again.</a></p>`;
             }
         }
     
-    // ЗАМЕНИТЕ ВСЮ ФУНКЦИЮ openCamera НА ЭТОТ КОД
+    // Р—РђРњР•РќРРўР• Р’РЎР® Р¤РЈРќРљР¦РР® openCamera РќРђ Р­РўРћРў РљРћР”
 
 async function openCamera() {
     try {
@@ -1803,7 +2006,7 @@ async function openCamera() {
     
     cameraModal.classList.add('active');
         
-    // ПРАВИЛЬНЫЙ КОД ✅
+    // РџР РђР’РР›Р¬РќР«Р™ РљРћР” вњ…
 if (!App.faceMesh) {
     try {
         App.faceMesh = new FaceMesh({
@@ -1816,7 +2019,7 @@ if (!App.faceMesh) {
         App.faceMesh.onResults(onFaceMeshResults);
         await App.faceMesh.initialize();
     } catch (error) {
-        console.error("Failed to initialize FaceMesh:", error); // Для лучшей отладки
+        console.error("Failed to initialize FaceMesh:", error); // Р”Р»СЏ Р»СѓС‡С€РµР№ РѕС‚Р»Р°РґРєРё
         alert('Failed to initialize AI model for camera. Please try again.');
         closeCamera(); 
         return;
@@ -1836,27 +2039,27 @@ if (!App.faceMesh) {
         video.srcObject = App.cameraStream;
         
         video.addEventListener('loadeddata', () => {
-            // --- НОВАЯ ЛОГИКА РАСЧЕТА РАЗМЕРОВ ---
+            // --- РќРћР’РђРЇ Р›РћР“РРљРђ Р РђРЎР§Р•РўРђ Р РђР—РњР•Р РћР’ ---
             const videoRatio = video.videoWidth / video.videoHeight;
             
-            // Максимально доступное пространство (90% от модального окна)
+            // РњР°РєСЃРёРјР°Р»СЊРЅРѕ РґРѕСЃС‚СѓРїРЅРѕРµ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ (90% РѕС‚ РјРѕРґР°Р»СЊРЅРѕРіРѕ РѕРєРЅР°)
             const maxWidth = cameraModal.clientWidth * 0.9;
             const maxHeight = cameraModal.clientHeight * 0.9;
             
             let finalWidth, finalHeight;
 
-            // Расчет финальных размеров с сохранением пропорций
+            // Р Р°СЃС‡РµС‚ С„РёРЅР°Р»СЊРЅС‹С… СЂР°Р·РјРµСЂРѕРІ СЃ СЃРѕС…СЂР°РЅРµРЅРёРµРј РїСЂРѕРїРѕСЂС†РёР№
             if ((maxWidth / maxHeight) > videoRatio) {
-                // Если доступное пространство шире, чем видео -> высота является лимитом
+                // Р•СЃР»Рё РґРѕСЃС‚СѓРїРЅРѕРµ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ С€РёСЂРµ, С‡РµРј РІРёРґРµРѕ -> РІС‹СЃРѕС‚Р° СЏРІР»СЏРµС‚СЃСЏ Р»РёРјРёС‚РѕРј
                 finalHeight = maxHeight;
                 finalWidth = finalHeight * videoRatio;
             } else {
-                // Если доступное пространство выше, чем видео -> ширина является лимитом
+                // Р•СЃР»Рё РґРѕСЃС‚СѓРїРЅРѕРµ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ РІС‹С€Рµ, С‡РµРј РІРёРґРµРѕ -> С€РёСЂРёРЅР° СЏРІР»СЏРµС‚СЃСЏ Р»РёРјРёС‚РѕРј
                 finalWidth = maxWidth;
                 finalHeight = finalWidth / videoRatio;
             }
 
-            // Применяем ОДИНАКОВЫЕ размеры ко всем трем элементам
+            // РџСЂРёРјРµРЅСЏРµРј РћР”РРќРђРљРћР’Р«Р• СЂР°Р·РјРµСЂС‹ РєРѕ РІСЃРµРј С‚СЂРµРј СЌР»РµРјРµРЅС‚Р°Рј
             cameraContainer.style.width = `${finalWidth}px`;
             cameraContainer.style.height = `${finalHeight}px`;
 
@@ -1866,7 +2069,7 @@ if (!App.faceMesh) {
             canvas.style.width = `${finalWidth}px`;
             canvas.style.height = `${finalHeight}px`;
             
-            // --- КОНЕЦ НОВОЙ ЛОГИКИ ---
+            // --- РљРћРќР•Р¦ РќРћР’РћР™ Р›РћР“РРљР ---
 
             cameraLoop();
         });
@@ -2031,10 +2234,10 @@ if (!App.faceMesh) {
     let retryCount = 0;
     const maxRetries = 3;
     
-    // Функция для попытки создания сессии
+    // Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїРѕРїС‹С‚РєРё СЃРѕР·РґР°РЅРёСЏ СЃРµСЃСЃРёРё
     const attemptSessionCreation = async () => {
         try {
-            // Добавляем информацию об устройстве и источнике трафика
+            // Р”РѕР±Р°РІР»СЏРµРј РёРЅС„РѕСЂРјР°С†РёСЋ РѕР± СѓСЃС‚СЂРѕР№СЃС‚РІРµ Рё РёСЃС‚РѕС‡РЅРёРєРµ С‚СЂР°С„РёРєР°
             const getDeviceType = () => {
     const userAgent = navigator.userAgent.toLowerCase();
     let os = 'Unknown';
@@ -2076,10 +2279,10 @@ const deviceType = getDeviceType();
             App.sessionId = data.sessionId;
             console.log('Session successfully started:', App.sessionId);
             if (typeof fbq === 'function') { fbq('track', 'ViewContent'); }
-            // Сохраняем sessionId в sessionStorage как резервную копию
+            // РЎРѕС…СЂР°РЅСЏРµРј sessionId РІ sessionStorage РєР°Рє СЂРµР·РµСЂРІРЅСѓСЋ РєРѕРїРёСЋ
             sessionStorage.setItem('quiz_session_id', App.sessionId);
             
-            // Разблокируем кнопку только после успешного создания сессии
+            // Р Р°Р·Р±Р»РѕРєРёСЂСѓРµРј РєРЅРѕРїРєСѓ С‚РѕР»СЊРєРѕ РїРѕСЃР»Рµ СѓСЃРїРµС€РЅРѕРіРѕ СЃРѕР·РґР°РЅРёСЏ СЃРµСЃСЃРёРё
             if(startBtn) {
                 startBtn.disabled = false;
                 startBtn.textContent = "Let's start";
@@ -2093,7 +2296,7 @@ const deviceType = getDeviceType();
             retryCount++;
             
             if (retryCount < maxRetries) {
-                // Ждем перед повторной попыткой (экспоненциальная задержка)
+                // Р–РґРµРј РїРµСЂРµРґ РїРѕРІС‚РѕСЂРЅРѕР№ РїРѕРїС‹С‚РєРѕР№ (СЌРєСЃРїРѕРЅРµРЅС†РёР°Р»СЊРЅР°СЏ Р·Р°РґРµСЂР¶РєР°)
                 await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
                 return attemptSessionCreation();
             } else {
@@ -2102,7 +2305,7 @@ const deviceType = getDeviceType();
         }
     };
     
-    // Запускаем создание сессии
+    // Р—Р°РїСѓСЃРєР°РµРј СЃРѕР·РґР°РЅРёРµ СЃРµСЃСЃРёРё
     try {
         await attemptSessionCreation();
         return true;
@@ -2114,7 +2317,7 @@ const deviceType = getDeviceType();
             startBtn.classList.add('bg-red-500');
         }
         
-        // Показываем понятное сообщение об ошибке пользователю
+        // РџРѕРєР°Р·С‹РІР°РµРј РїРѕРЅСЏС‚РЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ РѕР± РѕС€РёР±РєРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ
         const errorModal = document.createElement('div');
         errorModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
         errorModal.innerHTML = `
@@ -2194,9 +2397,8 @@ document.querySelectorAll('.fade-in-up').forEach(el => {
 // --- END OF NEW CODE ---
 
 // --- App Initialization ---
-setVh();
-// ... rest of the initialization code
-    // ↓↓↓ ВСТАВЬТЕ ЭТОТ КОД В КОНЕЦ ВАШЕГО СКРИПТА ↓↓↓
+// (initialized earlier above)
+    // в†“в†“в†“ Р’РЎРўРђР’Р¬РўР• Р­РўРћРў РљРћР” Р’ РљРћРќР•Р¦ Р’РђРЁР•Р“Рћ РЎРљР РРџРўРђ в†“в†“в†“
 
 // --- FIX for Header Overlap ---
 function adjustMainPadding() {
@@ -2215,11 +2417,11 @@ adjustMainPadding(); // Call it once on initial load
 // --- END of FIX ---
 
 // --- App Initialization ---
-// ... (у вас здесь идет остальной код инициализации)
-setVh();
-// ...
+// ... (Сѓ РІР°СЃ Р·РґРµСЃСЊ РёРґРµС‚ РѕСЃС‚Р°Р»СЊРЅРѕР№ РєРѕРґ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё)
 });
 </script>
 
 </body>
 </html>
+
+
