@@ -23,49 +23,648 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     <meta name="description" content="Your personalized AI-powered wellness report, including your Wellness Age, detailed metrics, skin analysis, and a 7-day improvement plan.">
     <meta name="robots" content="noindex, nofollow">
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script> 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="assets/css/theme.css">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { 
+            --brand-accent: #debea9;
+            --brand-dark-text: #3c3b31; 
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+        }
+
+        .report-page {
+            width: 100%;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+            page-break-after: always;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            font-size: 0.875rem;
+            color: #d1d5db;
+            font-weight: 600;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        #loading-overlay {
+            transition: opacity 0.5s ease-out;
+        }
+        .spinner {
+            width: 56px;
+            height: 56px;
+            border: 5px solid #d1d5db;
+            border-bottom-color: var(--brand-dark-text);
+            border-radius: 50%;
+            animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation {
+            100% { transform: rotate(360deg); }
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #8a2be2, #4b0082);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .metric-bar-bg {
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            height: 10px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .metric-bar-fg {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @media print {
+            body { 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+                background-color: #ffffff !important;
+            }
+            .no-print { display: none !important; }
+            .report-page { 
+                box-shadow: none !important; 
+                border: 1px solid #e5e7eb !important; 
+                margin: 0;
+                padding: 1.5rem;
+            }
+            html, body {
+                width: 100%;
+                height: auto;
+                background: none;
+            }
+            main {
+                padding: 0 !important;
+            }
+            .gradient-text {
+                background: none !important;
+                -webkit-background-clip: unset !important;
+                background-clip: unset !important;
+                color: #4b0082 !important;
+            }
+        }
+    </style>
 </head>
-<body>
-
-    <div id="loading-overlay" class="loading-overlay fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex-col items-center justify-center">
+<body class="text-gray-800">
+    <div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
         <div class="spinner"></div>
-        <h2 id="loading-text" class="section-heading" style="font-size:1.25rem; margin-top:1.5rem;">We are preparing your personal report...</h2>
-        <p class="section-subtitle" style="margin:0;">This may take up to 20 seconds.</p>
+        <h2 id="loading-text" class="text-xl font-semibold text-gray-700 mt-6">We are preparing your personal report...</h2>
+        <p class="text-gray-500 mt-2">This may take up to 20 seconds.</p>
+    </div>
+    
+    <div class="relative overflow-hidden">
+        <header class="sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-white/20 no-print">
+            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <a href="index.html" class="flex items-center">
+                    <img src="logo.png" alt="AI WELLNESSCORE Logo" class="h-10">
+                </a>
+                <div class="flex items-center gap-4">
+                    <button class="download-pdf-btn bg-[--brand-dark-text] text-white font-semibold px-5 py-2 rounded-full text-sm sm:text-base hover:opacity-90 transition-opacity">
+                        Download PDF
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="relative z-10">
+            <div id="report-content" class="container mx-auto px-4 md:px-6 py-12 md:py-20" style="visibility: hidden;">
+
+                <!-- Page 1: Title Page -->
+                <section class="report-page text-center flex flex-col items-center justify-center min-h-[80vh] reveal">
+                    <img src="logo.png" alt="Logo" class="h-20 mb-4">
+                    <p class="text-lg text-gray-500">Your Personalized Wellness Report</p>
+                    <h1 class="text-5xl md:text-6xl font-black my-4" id="user-name"></h1>
+                    <div class="mt-8 text-center">
+                        <p class="font-semibold text-gray-600">Overall Wellness Score</p>
+                        <p id="main-wellness-score" class="text-8xl md:text-9xl font-black gradient-text">0</p>
+                        <p class="text-gray-500">out of 100</p>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-8" id="report-date"></p>
+                    <div class="page-number">1 / 10</div>
+                </section>
+
+                <!-- Page 2: Bio-Age -->
+                <section class="report-page reveal">
+                    <h2 class="text-3xl font-bold mb-6 text-center">Biological vs. Chronological Age</h2>
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div class="text-center bg-gray-50 p-8 rounded-2xl">
+                            <p class="text-lg font-semibold text-gray-600">Your Chronological Age</p>
+                            <p id="chrono-age" class="text-8xl font-black text-gray-800">0</p>
+                        </div>
+                        <div class="text-center bg-violet-50 p-8 rounded-2xl">
+                             <p class="text-lg font-semibold text-violet-800">Your Biological Age is</p>
+                             <p id="bio-age" class="text-8xl font-black gradient-text">0</p>
+                        </div>
+                    </div>
+                    <div class="mt-8 p-6 bg-gray-50 rounded-2xl">
+                        <h3 class="font-bold text-lg">What does this mean?</h3>
+                        <p id="age-explanation" class="mt-2 text-gray-600"></p>
+                    </div>
+                    <div class="page-number">2 / 10</div>
+                </section>
+                
+                 <!-- Page 3: Key Factors -->
+                <section class="report-page reveal">
+                     <h2 class="text-3xl font-bold mb-6 text-center">Key Lifestyle Factors</h2>
+                     <div class="grid md:grid-cols-2 gap-8 mt-8">
+                        <div class="bg-red-50 p-6 rounded-2xl border border-red-100">
+                             <h3 class="text-2xl font-bold text-red-700 flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
+                                Increasing Your Age
+                            </h3>
+                             <ul id="increasing-factors" class="mt-4 space-y-3 text-gray-700 list-disc list-inside"></ul>
+                        </div>
+                         <div class="bg-green-50 p-6 rounded-2xl border border-green-100">
+                             <h3 class="text-2xl font-bold text-green-700 flex items-center gap-3">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                Decreasing Your Age
+                            </h3>
+                            <ul id="decreasing-factors" class="mt-4 space-y-3 text-gray-700 list-disc list-inside"></ul>
+                        </div>
+                    </div>
+                    <div class="page-number">3 / 10</div>
+                </section>
+
+                <!-- Page 4: Stress & Sleep -->
+                <section class="report-page reveal">
+                    <h2 class="text-3xl font-bold mb-8 text-center">Deep Dive: Stress & Sleep</h2>
+                    <div class="space-y-8">
+                        <div id="stress-metric"></div>
+                        <div id="sleep-metric"></div>
+                    </div>
+                     <div class="mt-8 p-6 bg-gray-50 rounded-2xl">
+                        <h3 class="font-bold text-lg">Insights & Recommendations</h3>
+                        <p id="stress-sleep-insights" class="mt-2 text-gray-600"></p>
+                    </div>
+                    <div class="page-number">4 / 10</div>
+                </section>
+                
+                <!-- Page 5: Nutrition & Hydration -->
+                <section class="report-page reveal">
+                     <h2 class="text-3xl font-bold mb-8 text-center">Deep Dive: Nutrition & Hydration</h2>
+                     <div class="space-y-8">
+                        <div id="nutrition-metric"></div>
+                        <div id="hydration-metric"></div>
+                    </div>
+                     <div class="mt-8 p-6 bg-gray-50 rounded-2xl">
+                        <h3 class="font-bold text-lg">Insights & Recommendations</h3>
+                        <p id="nutrition-hydration-insights" class="mt-2 text-gray-600"></p>
+                    </div>
+                    <div class="page-number">5 / 10</div>
+                </section>
+
+                <!-- Page 6: Physical Activity -->
+                <section class="report-page reveal">
+                    <h2 class="text-3xl font-bold mb-8 text-center">Deep Dive: Physical Activity</h2>
+                    <div id="activity-metric" class="max-w-xl mx-auto"></div>
+                    <div class="mt-8 p-6 bg-gray-50 rounded-2xl">
+                        <h3 class="font-bold text-lg">Insights & Recommendations</h3>
+                        <p id="activity-insights" class="mt-2 text-gray-600"></p>
+                    </div>
+                     <div class="page-number">6 / 10</div>
+                </section>
+                
+                <!-- Page 7: Skin Analysis -->
+                <section class="report-page reveal">
+                     <h2 class="text-3xl font-bold mb-6 text-center">Skin Analysis Results</h2>
+                     <div class="grid md:grid-cols-2 gap-8 items-center">
+                         <div>
+                             <h3 class="font-bold text-lg mb-4">Key Indicators</h3>
+                             <ul id="skin-analysis-list" class="space-y-4"></ul>
+                         </div>
+                         <div id="user-photo-container" class="relative">
+                            <img src="https://placehold.co/400x530/f0f0f0/333?text=Your+Photo" id="user-photo" class="rounded-2xl w-full max-w-sm mx-auto">
+                            <!-- Spots will be dynamically added here -->
+                         </div>
+                     </div>
+                     <div class="mt-8 p-6 bg-gray-50 rounded-2xl">
+                        <h3 class="font-bold text-lg">Skin Conclusion</h3>
+                        <p id="skin-conclusion" class="mt-2 text-gray-600"></p>
+                    </div>
+                     <div class="page-number">7 / 10</div>
+                </section>
+                
+                <!-- Page 8: Wellness Archetype -->
+                <section class="report-page reveal text-center">
+                    <h2 class="text-3xl font-bold mb-4">Your Wellness Archetype</h2>
+                    <div id="archetype-icon" class="text-8xl my-6"></div>
+                    <h3 id="archetype-name" class="text-4xl font-black gradient-text"></h3>
+                    <p id="archetype-desc" class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto"></p>
+                    <div class="page-number">8 / 10</div>
+                </section>
+                
+                <!-- Page 9: Action Plan -->
+                <section class="report-page reveal">
+                     <h2 class="text-3xl font-bold mb-6 text-center">Your <span id="plan-duration">7</span>-Day Action Plan</h2>
+                     <p class="text-center text-gray-600 mb-8">Start with these small, actionable steps tailored to you.</p>
+                     <div id="seven-day-plan" class="space-y-6"></div>
+                     <div class="page-number">9 / 10</div>
+                </section>
+                
+                <!-- Page 10: Long-Term Potential -->
+                <section class="report-page reveal">
+                     <h2 class="text-3xl font-bold mb-6 text-center">Your Long-Term Potential</h2>
+                     <div class="grid md:grid-cols-2 gap-8">
+                        <div class="h-80"><canvas id="potentialAgeChart"></canvas></div>
+                        <div class="h-80"><canvas id="potentialLifespanChart"></canvas></div>
+                    </div>
+                    <div class="mt-8 p-6 bg-gray-50 rounded-2xl text-center">
+                        <h3 class="font-bold text-lg">Final Thoughts</h3>
+                        <p class="mt-2 text-gray-600">This report is your starting point. Consistency is key to achieving lasting results. You have the power to influence your health journey every day. Keep up the great work!</p>
+                    </div>
+                    <div class="page-number">10 / 10</div>
+                </section>
+                
+                <!-- Final CTA Section -->
+                <section class="text-center mt-8 no-print">
+                    <button class="download-pdf-btn bg-[--brand-dark-text] text-white font-semibold px-8 py-4 rounded-full text-lg hover:opacity-90 transition-opacity">
+                        Download PDF
+                    </button>
+                </section>
+
+            </div>
+        </main>
     </div>
 
-    <header class="site-header no-print">
-        <div class="site-header__inner">
-            <a href="index.html" class="site-logo">
-                <img src="logo.png" alt="AI WELLNESSCORE logo" style="height:46px; width:auto;">
-                <span>AI WELLNESSCORE</span>
-            </a>
-            <nav class="site-nav">
-                <button class="secondary-cta download-pdf-btn">Download PDF</button>
-                <a href="quiz-new.html" class="primary-cta">Retake Quiz</a>
-            </nav>
-        </div>
-    </header>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
 
-    <main class="page-wrapper"><div id="report-content" class="space-y-12" style="visibility: hidden;">                  <!-- Page 1: Title Page -->                 <section class="report-page text-center flex flex-col items-center justify-center min-h-[80vh] reveal">                     <img src="logo.png" alt="Logo" class="h-20 mb-4">                     <p class="text-lg text-gray-500">Your Personalized Wellness Report</p>                     <h1 class="text-5xl md:text-6xl font-black my-4" id="user-name"></h1>                     <div class="mt-8 text-center">                         <p class="font-semibold text-gray-600">Overall Wellness Score</p>                         <p id="main-wellness-score" class="text-8xl md:text-9xl font-black gradient-text">0</p>                         <p class="text-gray-500">out of 100</p>                     </div>                     <p class="text-sm text-gray-400 mt-8" id="report-date"></p>                     <div class="page-number">1 / 10</div>                 </section>                  <!-- Page 2: Bio-Age -->                 <section class="report-page reveal">                     <h2 class="text-3xl font-bold mb-6 text-center">Biological vs. Chronological Age</h2>                     <div class="grid md:grid-cols-2 gap-8 items-center">                         <div class="text-center bg-gray-50 p-8 rounded-2xl">                             <p class="text-lg font-semibold text-gray-600">Your Chronological Age</p>                             <p id="chrono-age" class="text-8xl font-black text-gray-800">0</p>                         </div>                         <div class="text-center bg-violet-50 p-8 rounded-2xl">                              <p class="text-lg font-semibold text-violet-800">Your Biological Age is</p>                              <p id="bio-age" class="text-8xl font-black gradient-text">0</p>                         </div>                     </div>                     <div class="mt-8 p-6 bg-gray-50 rounded-2xl">                         <h3 class="font-bold text-lg">What does this mean?</h3>                         <p id="age-explanation" class="mt-2 text-gray-600"></p>                     </div>                     <div class="page-number">2 / 10</div>                 </section>                                   <!-- Page 3: Key Factors -->                 <section class="report-page reveal">                      <h2 class="text-3xl font-bold mb-6 text-center">Key Lifestyle Factors</h2>                      <div class="grid md:grid-cols-2 gap-8 mt-8">                         <div class="bg-red-50 p-6 rounded-2xl border border-red-100">                              <h3 class="text-2xl font-bold text-red-700 flex items-center gap-3">                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>                                 Increasing Your Age                             </h3>                              <ul id="increasing-factors" class="mt-4 space-y-3 text-gray-700 list-disc list-inside"></ul>                         </div>                          <div class="bg-green-50 p-6 rounded-2xl border border-green-100">                              <h3 class="text-2xl font-bold text-green-700 flex items-center gap-3">                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>                                 Decreasing Your Age                             </h3>                             <ul id="decreasing-factors" class="mt-4 space-y-3 text-gray-700 list-disc list-inside"></ul>                         </div>                     </div>                     <div class="page-number">3 / 10</div>                 </section>                  <!-- Page 4: Stress & Sleep -->                 <section class="report-page reveal">                     <h2 class="text-3xl font-bold mb-8 text-center">Deep Dive: Stress & Sleep</h2>                     <div class="space-y-8">                         <div id="stress-metric"></div>                         <div id="sleep-metric"></div>                     </div>                      <div class="mt-8 p-6 bg-gray-50 rounded-2xl">                         <h3 class="font-bold text-lg">Insights & Recommendations</h3>                         <p id="stress-sleep-insights" class="mt-2 text-gray-600"></p>                     </div>                     <div class="page-number">4 / 10</div>                 </section>                                  <!-- Page 5: Nutrition & Hydration -->                 <section class="report-page reveal">                      <h2 class="text-3xl font-bold mb-8 text-center">Deep Dive: Nutrition & Hydration</h2>                      <div class="space-y-8">                         <div id="nutrition-metric"></div>                         <div id="hydration-metric"></div>                     </div>                      <div class="mt-8 p-6 bg-gray-50 rounded-2xl">                         <h3 class="font-bold text-lg">Insights & Recommendations</h3>                         <p id="nutrition-hydration-insights" class="mt-2 text-gray-600"></p>                     </div>                     <div class="page-number">5 / 10</div>                 </section>                  <!-- Page 6: Physical Activity -->                 <section class="report-page reveal">                     <h2 class="text-3xl font-bold mb-8 text-center">Deep Dive: Physical Activity</h2>                     <div id="activity-metric" class="max-w-xl mx-auto"></div>                     <div class="mt-8 p-6 bg-gray-50 rounded-2xl">                         <h3 class="font-bold text-lg">Insights & Recommendations</h3>                         <p id="activity-insights" class="mt-2 text-gray-600"></p>                     </div>                      <div class="page-number">6 / 10</div>                 </section>                                  <!-- Page 7: Skin Analysis -->                 <section class="report-page reveal">                      <h2 class="text-3xl font-bold mb-6 text-center">Skin Analysis Results</h2>                      <div class="grid md:grid-cols-2 gap-8 items-center">                          <div>                              <h3 class="font-bold text-lg mb-4">Key Indicators</h3>                              <ul id="skin-analysis-list" class="space-y-4"></ul>                          </div>                          <div id="user-photo-container" class="relative">                             <img src="https://placehold.co/400x530/f0f0f0/333?text=Your+Photo" id="user-photo" class="rounded-2xl w-full max-w-sm mx-auto">                             <!-- Spots will be dynamically added here -->                          </div>                      </div>                      <div class="mt-8 p-6 bg-gray-50 rounded-2xl">                         <h3 class="font-bold text-lg">Skin Conclusion</h3>                         <p id="skin-conclusion" class="mt-2 text-gray-600"></p>                     </div>                      <div class="page-number">7 / 10</div>                 </section>                                  <!-- Page 8: Wellness Archetype -->                 <section class="report-page reveal text-center">                     <h2 class="text-3xl font-bold mb-4">Your Wellness Archetype</h2>                     <div id="archetype-icon" class="text-8xl my-6"></div>                     <h3 id="archetype-name" class="text-4xl font-black gradient-text"></h3>                     <p id="archetype-desc" class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto"></p>                     <div class="page-number">8 / 10</div>                 </section>                                  <!-- Page 9: Action Plan -->                 <section class="report-page reveal">                      <h2 class="text-3xl font-bold mb-6 text-center">Your <span id="plan-duration">7</span>-Day Action Plan</h2>                      <p class="text-center text-gray-600 mb-8">Start with these small, actionable steps tailored to you.</p>                      <div id="seven-day-plan" class="space-y-6"></div>                      <div class="page-number">9 / 10</div>                 </section>                                  <!-- Page 10: Long-Term Potential -->                 <section class="report-page reveal">                      <h2 class="text-3xl font-bold mb-6 text-center">Your Long-Term Potential</h2>                      <div class="grid md:grid-cols-2 gap-8">                         <div class="h-80"><canvas id="potentialAgeChart"></canvas></div>                         <div class="h-80"><canvas id="potentialLifespanChart"></canvas></div>                     </div>                     <div class="mt-8 p-6 bg-gray-50 rounded-2xl text-center">                         <h3 class="font-bold text-lg">Final Thoughts</h3>                         <p class="mt-2 text-gray-600">This report is your starting point. Consistency is key to achieving lasting results. You have the power to influence your health journey every day. Keep up the great work!</p>                     </div>                     <div class="page-number">10 / 10</div>                 </section>                                  <!-- Final CTA Section -->                 <section class="text-center mt-8 no-print">                     <button class="download-pdf-btn bg-[--brand-dark-text] text-white font-semibold px-8 py-4 rounded-full text-lg hover:opacity-90 transition-opacity">                         Download PDF                     </button>                 </section>              </div>         </main>     </div>          </div>
-</main>
+       async function fetchHybridReportData(sessionId) {
+    return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const maxAttempts = 40;
+        let intervalDelay = 2500;
+        let hasTriggeredGeneration = false;
 
-<footer class="site-footer no-print">
-    <div style="max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; align-items: center; text-align: center;">
-        <p class="section-subtitle" style="margin: 0;">Medical disclaimer: AI WELLNESSCORE is an educational wellness experience and does not replace professional medical advice.</p>
-        <div style="display:flex; gap:1.5rem; flex-wrap:wrap; justify-content:center;">
-            <a href="privacy.html">Privacy Policy</a>
-            <a href="terms.html">Terms of Service</a>
-            <a href="contact.html">Contact</a>
-        </div>
-        <p style="margin:0; opacity:0.85;">&copy; 2025 AI WELLNESSCORE. All rights reserved.</p>
-    </div>
-</footer>
-<script>     document.addEventListener("DOMContentLoaded", function() {         async function fetchHybridReportData(sessionId) {     return new Promise((resolve, reject) => {         let attempts = 0;         const maxAttempts = 40;         let intervalDelay = 2500;         let hasTriggeredGeneration = false;          const checkReport = async () => {             attempts++;             const loadingText = document.getElementById('loading-text');              try {                 console.log(`Checking report status... Attempt ${attempts}/${maxAttempts}`);                 const response = await fetch('/.netlify/functions/checkResult', {                     method: 'POST',                     headers: { 'Content-Type': 'application/json' },                     body: JSON.stringify({ sessionId: sessionId })                 });                  if (!response.ok) {                     throw new Error(`Server error (${response.status})`);                 }                                  const result = await response.json(); // <-- result теперь определён здесь                 console.log('Report status:', result.status);                                  // --- ЭТОТ БЛОК ТЕПЕРЬ РАБОТАЕТ ПРАВИЛЬНО ---                 if (loadingText) {                     const percentage = Math.round((attempts / maxAttempts) * 95);                     switch (result.status) {                         case 'queued':                             loadingText.textContent = `Your request is in the queue... (${percentage}%)`;                             break;                         case 'processing':                             loadingText.textContent = `Analyzing your data... (${percentage}%)`;                             break;                         default: // 'pending' и любые другие статусы                             loadingText.textContent = `Preparing your report... (${percentage}%)`;                             break;                     }                 }                 // --- КОНЕЦ БЛОКА ---                  if (result.status === 'complete' && result.data) {                     console.log('Report data received successfully');                     resolve(result.data);                     return;                 }                                   if (result.status === 'error') {                      if (!hasTriggeredGeneration && attempts < 5) {                         hasTriggeredGeneration = true;                         console.log('Error detected, attempting to re-trigger report generation...');                         fetch('/.netlify/functions/generate-report-hybrid', {                             method: 'POST',                             headers: {'Content-Type': 'application/json'},                             body: JSON.stringify({ sessionId: sessionId })                         });                         setTimeout(checkReport, 3000); // Даем время на запуск                         return;                     }                     reject(new Error(result.message || 'Report generation failed.'));                     return;                 }                                   if (attempts >= maxAttempts) {                     reject(new Error("Report generation timed out. Please refresh the page."));                     return;                 }                                  intervalDelay = Math.min(intervalDelay * 1.1, 8000);                 setTimeout(checkReport, intervalDelay);                              } catch (error) {                 console.error('Error checking report:', error);                 if (attempts < 3) {                     setTimeout(checkReport, 5000); // Более длинная задержка при ошибках сети                 } else {                     reject(error);                 }             }         };          checkReport(); // Начинаем проверку     }); }                  // --- UI POPULATION FUNCTIONS ---         function populateUI(data) {             const userNameEl = document.getElementById('user-name');             if (userNameEl) {                 if (data.userName && data.userName !== "there" && data.userName !== "Valued User") {                     userNameEl.textContent = data.userName;                 } else {                     const precedingP = userNameEl.previousElementSibling;                     if (precedingP && precedingP.tagName === 'P') {                         precedingP.textContent = "Your Personalized Wellness Report";                     }                     userNameEl.remove();                 }             }                          if(document.getElementById('main-wellness-score')) document.getElementById('main-wellness-score').textContent = data.metrics.wellnessScore.value;             if(document.getElementById('chrono-age')) document.getElementById('chrono-age').textContent = data.chronoAge;             if(document.getElementById('bio-age')) document.getElementById('bio-age').textContent = data.wellnessAge;             if(document.getElementById('age-explanation')) document.getElementById('age-explanation').textContent = data.ageExplanation;                          const populateList = (elementId, items) => {                 const list = document.getElementById(elementId);                 if (list && items) {                     list.innerHTML = items.map(item => `<li>${item}</li>`).join('');                 }             };             populateList('increasing-factors', data.increasingFactors);             populateList('decreasing-factors', data.decreasingFactors);              if(data.insights) {                 if(document.getElementById('stress-sleep-insights')) document.getElementById('stress-sleep-insights').textContent = data.insights.stressSleep;                 if(document.getElementById('nutrition-hydration-insights')) document.getElementById('nutrition-hydration-insights').textContent = data.insights.nutritionHydration;                 if(document.getElementById('activity-insights')) document.getElementById('activity-insights').textContent = data.insights.activity;             }              if(document.getElementById('user-photo') && data.userPhotoUrl) document.getElementById('user-photo').src = data.userPhotoUrl;             if(document.getElementById('skin-conclusion')) document.getElementById('skin-conclusion').textContent = data.skinConclusion;                          populateSkinAnalysis(data.skinAnalysis);                          if(data.archetype) {                 if(document.getElementById('archetype-icon')) document.getElementById('archetype-icon').textContent = data.archetype.icon;                 if(document.getElementById('archetype-name')) document.getElementById('archetype-name').textContent = data.archetype.name;                 if(document.getElementById('archetype-desc')) document.getElementById('archetype-desc').textContent = data.archetype.description;             }                          if(document.getElementById('plan-duration') && data.sevenDayPlan) document.getElementById('plan-duration').textContent = data.sevenDayPlan.length;             populateSevenDayPlan(data.sevenDayPlan);              if(document.getElementById('report-date')) document.getElementById('report-date').textContent = `Report generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;              animateValue(document.getElementById('main-wellness-score'), 0, data.metrics.wellnessScore.value, 1500);         }          function populateSkinAnalysis(skinData) {             const list = document.getElementById('skin-analysis-list');             const photoContainer = document.getElementById('user-photo-container');             if (!list || !photoContainer || !skinData) return;             list.innerHTML = '';              const skinMap = {                 dark_circle: { title: 'Dark Circles', position: { top: '55%', left: '40%' } },                 eye_pouch: { title: 'Eye Bags', position: { top: '58%', left: '60%' } },                 forehead_wrinkle: { title: 'Forehead Lines', position: { top: '35%', left: '50%' } },                 acne: { title: 'Acne', position: { top: '70%', left: '30%' } },                 skin_spot: { title: 'Skin Spots', position: { top: '65%', left: '70%' } }             };              for (const key in skinData) {                 if (skinMap[key]) {                     const value = skinData[key];                     const color = value > 50 ? 'bg-red-500' : value > 25 ? 'bg-yellow-500' : 'bg-green-500';                     list.innerHTML += `                         <li class="flex items-center justify-between">                             <span class="font-semibold">${skinMap[key].title}</span>                             <div class="w-1/2 bg-gray-200 rounded-full h-2.5">                                 <div class="metric-bar-fg ${color}" style="width: ${value}%"></div>                             </div>                         </li>                     `;                     const spot = document.createElement('div');                     spot.className = `absolute w-3 h-3 ${color} rounded-full border-2 border-white opacity-70`;                     spot.style.top = skinMap[key].position.top;                     spot.style.left = skinMap[key].position.left;                     photoContainer.appendChild(spot);                 }             }         }          function populateSevenDayPlan(plan) {             const container = document.getElementById('seven-day-plan');             if (!container || !plan) return;             container.innerHTML = plan.map(day => `                 <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">                     <div class="flex items-center gap-4 border-b border-gray-200 pb-3 mb-4">                         <div class="text-4xl">${day.icon}</div>                         <div>                             <h4 class="text-xl font-bold text-gray-800">Day ${day.day}: ${day.theme}</h4>                         </div>                     </div>                     <div class="grid sm:grid-cols-2 gap-4 text-sm">                         <div class="bg-white p-3 rounded-lg">                             <h5 class="font-bold text-blue-600">MORNING</h5>                             <p class="text-gray-700">${day.morning.task}</p>                         </div>                         <div class="bg-white p-3 rounded-lg">                             <h5 class="font-bold text-green-600">NUTRITION</h5>                             <p class="text-gray-700">${day.nutrition.task}</p>                         </div>                         <div class="bg-white p-3 rounded-lg">                             <h5 class="font-bold text-orange-600">ACTIVITY</h5>                             <p class="text-gray-700">${day.activity.task}</p>                         </div>                         <div class="bg-white p-3 rounded-lg">                             <h5 class="font-bold text-indigo-600">EVENING</h5>                             <p class="text-gray-700">${day.evening.task}</p>                         </div>                     </div>                 </div>             `).join('');         }          // --- CHARTING & METRIC FUNCTIONS ---                  function getMetricStatus(score) {             if (score >= 75) return { text: "Excellent", color: "text-green-600", bg: "bg-green-500" };             if (score >= 50) return { text: "Good", color: "text-yellow-600", bg: "bg-yellow-500" };             return { text: "Needs Improvement", color: "text-red-600", bg: "bg-red-500" };         }          function createMetric(containerId, title, score) {             const container = document.getElementById(containerId);             if (!container) return;              const status = getMetricStatus(score);             container.innerHTML = `                 <div class="bg-gray-50 p-6 rounded-2xl border">                     <div class="flex justify-between items-center mb-2">                         <h4 class="text-xl font-bold">${title}</h4>                         <span class="font-bold text-xl ${status.color}">${score}<span class="text-sm text-gray-400">/100</span></span>                     </div>                     <div class="metric-bar-bg">                         <div class="metric-bar-fg ${status.bg}" style="width: 0%;" data-width="${score}%"></div>                     </div>                     <p class="text-right text-sm font-semibold mt-1 ${status.color}">${status.text}</p>                 </div>             `;         }          function createBarChart(canvasId, labels, data, bgColors, borderColors) {             const ctx = document.getElementById(canvasId)?.getContext('2d');             if(!ctx) return;             new Chart(ctx, {                 type: 'bar',                 data: { labels, datasets: [{ label: 'Value', data, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 2, borderRadius: 8 }] },                 options: {                     responsive: true, maintainAspectRatio: false,                     plugins: { legend: { display: false }, tooltip: { enabled: false } },                     scales: {                         y: { min: Math.min(...data) - 5, grid: { drawOnChartArea: false }, ticks: { font: { weight: 'bold' } } },                         x: { grid: { display: false } }                     },                     animation: { duration: 1500, easing: 'easeOutQuart' }                 }             });         }                  function renderAllMetricsAndCharts(data) {             createMetric('stress-metric', 'Stress Level', data.metrics.stress.value);             createMetric('sleep-metric', 'Sleep Quality', data.metrics.sleep.value);             createMetric('nutrition-metric', 'Nutrition Score', data.metrics.nutrition.value);             createMetric('hydration-metric', 'Hydration Level', data.metrics.hydration.value);             createMetric('activity-metric', 'Activity Score', data.metrics.activity.value);              if (data.potential) {                  createBarChart('potentialAgeChart', ['Current Bio-Age', 'Potential Age'], [data.wellnessAge, data.potential.age], ['#a855f7', '#d8b4fe'], ['#8b5cf6', '#c084fc']);                  createBarChart('potentialLifespanChart', ['Standard Lifespan', 'Potential Lifespan'], [82, data.potential.lifespan], ['#6b7280', '#10b981'], ['#4b5563', '#059669']);             }         }                  function animateValue(obj, start, end, duration) {             let startTimestamp = null;             const step = (timestamp) => {                 if (!startTimestamp) startTimestamp = timestamp;                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);                 obj.innerHTML = Math.floor(progress * (end - start) + start);                 if (progress < 1) window.requestAnimationFrame(step);             };             window.requestAnimationFrame(step);         }          // --- INITIALIZATION ---                  async function initializeReport() {             const params = new URLSearchParams(window.location.search);             const sessionId = params.get('session_id');              if (!sessionId) {                 document.getElementById('loading-text').textContent = "Error: Session ID is missing. Please complete the quiz first.";                 document.querySelector('#loading-overlay .spinner').style.display = 'none';                 return;             }                          try {                 const reportData = await fetchHybridReportData(sessionId);                                  const loadingOverlay = document.getElementById('loading-overlay');                 const reportContent = document.getElementById('report-content');                                  populateUI(reportData);                 renderAllMetricsAndCharts(reportData);                  loadingOverlay.style.opacity = 0;                 setTimeout(() => {                     loadingOverlay.style.display = 'none';                     reportContent.style.visibility = 'visible';                      const observer = new IntersectionObserver((entries) => {                         entries.forEach(entry => {                             if (entry.isIntersecting) {                                 entry.target.classList.add('active');                                 const bars = entry.target.querySelectorAll('.metric-bar-fg');                                 bars.forEach(bar => {                                     bar.style.width = bar.dataset.width;                                 });                             }                         });                     }, { threshold: 0.1 });                      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));                 }, 500);              } catch(error) {                 console.error("Failed to initialize report:", error);                 document.getElementById('loading-text').textContent = `Error: ${error.message}`;                 document.querySelector('#loading-overlay .spinner').style.display = 'none';             }         }                  initializeReport();          // PDF Download Logic         document.querySelectorAll('.download-pdf-btn').forEach(button => {             button.addEventListener('click', () => {                 const element = document.getElementById('report-content');                 const opt = {                     margin: 0.2,                     filename: 'AI-WELLNESSCORE-Report.pdf',                     image: { type: 'jpeg', quality: 0.98 },                     html2canvas: { scale: 2, useCORS: true },                     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }                 };                 html2pdf().set(opt).from(element).save();             });         });     });     </script> </body> </html>  
+        const checkReport = async () => {
+            attempts++;
+            const loadingText = document.getElementById('loading-text');
 
+            try {
+                console.log(`Checking report status... Attempt ${attempts}/${maxAttempts}`);
+                const response = await fetch('/.netlify/functions/checkResult', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: sessionId })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error (${response.status})`);
+                }
+                
+                const result = await response.json(); // <-- result теперь определён здесь
+                console.log('Report status:', result.status);
+                
+                // --- ЭТОТ БЛОК ТЕПЕРЬ РАБОТАЕТ ПРАВИЛЬНО ---
+                if (loadingText) {
+                    const percentage = Math.round((attempts / maxAttempts) * 95);
+                    switch (result.status) {
+                        case 'queued':
+                            loadingText.textContent = `Your request is in the queue... (${percentage}%)`;
+                            break;
+                        case 'processing':
+                            loadingText.textContent = `Analyzing your data... (${percentage}%)`;
+                            break;
+                        default: // 'pending' и любые другие статусы
+                            loadingText.textContent = `Preparing your report... (${percentage}%)`;
+                            break;
+                    }
+                }
+                // --- КОНЕЦ БЛОКА ---
+
+                if (result.status === 'complete' && result.data) {
+                    console.log('Report data received successfully');
+                    resolve(result.data);
+                    return;
+                } 
+                
+                if (result.status === 'error') {
+                     if (!hasTriggeredGeneration && attempts < 5) {
+                        hasTriggeredGeneration = true;
+                        console.log('Error detected, attempting to re-trigger report generation...');
+                        fetch('/.netlify/functions/generate-report-hybrid', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ sessionId: sessionId })
+                        });
+                        setTimeout(checkReport, 3000); // Даем время на запуск
+                        return;
+                    }
+                    reject(new Error(result.message || 'Report generation failed.'));
+                    return;
+                } 
+                
+                if (attempts >= maxAttempts) {
+                    reject(new Error("Report generation timed out. Please refresh the page."));
+                    return;
+                }
+                
+                intervalDelay = Math.min(intervalDelay * 1.1, 8000);
+                setTimeout(checkReport, intervalDelay);
+                
+            } catch (error) {
+                console.error('Error checking report:', error);
+                if (attempts < 3) {
+                    setTimeout(checkReport, 5000); // Более длинная задержка при ошибках сети
+                } else {
+                    reject(error);
+                }
+            }
+        };
+
+        checkReport(); // Начинаем проверку
+    });
+}
+        
+        // --- UI POPULATION FUNCTIONS ---
+        function populateUI(data) {
+            const userNameEl = document.getElementById('user-name');
+            if (userNameEl) {
+                if (data.userName && data.userName !== "there" && data.userName !== "Valued User") {
+                    userNameEl.textContent = data.userName;
+                } else {
+                    const precedingP = userNameEl.previousElementSibling;
+                    if (precedingP && precedingP.tagName === 'P') {
+                        precedingP.textContent = "Your Personalized Wellness Report";
+                    }
+                    userNameEl.remove();
+                }
+            }
+            
+            if(document.getElementById('main-wellness-score')) document.getElementById('main-wellness-score').textContent = data.metrics.wellnessScore.value;
+            if(document.getElementById('chrono-age')) document.getElementById('chrono-age').textContent = data.chronoAge;
+            if(document.getElementById('bio-age')) document.getElementById('bio-age').textContent = data.wellnessAge;
+            if(document.getElementById('age-explanation')) document.getElementById('age-explanation').textContent = data.ageExplanation;
+            
+            const populateList = (elementId, items) => {
+                const list = document.getElementById(elementId);
+                if (list && items) {
+                    list.innerHTML = items.map(item => `<li>${item}</li>`).join('');
+                }
+            };
+            populateList('increasing-factors', data.increasingFactors);
+            populateList('decreasing-factors', data.decreasingFactors);
+
+            if(data.insights) {
+                if(document.getElementById('stress-sleep-insights')) document.getElementById('stress-sleep-insights').textContent = data.insights.stressSleep;
+                if(document.getElementById('nutrition-hydration-insights')) document.getElementById('nutrition-hydration-insights').textContent = data.insights.nutritionHydration;
+                if(document.getElementById('activity-insights')) document.getElementById('activity-insights').textContent = data.insights.activity;
+            }
+
+            if(document.getElementById('user-photo') && data.userPhotoUrl) document.getElementById('user-photo').src = data.userPhotoUrl;
+            if(document.getElementById('skin-conclusion')) document.getElementById('skin-conclusion').textContent = data.skinConclusion;
+            
+            populateSkinAnalysis(data.skinAnalysis);
+            
+            if(data.archetype) {
+                if(document.getElementById('archetype-icon')) document.getElementById('archetype-icon').textContent = data.archetype.icon;
+                if(document.getElementById('archetype-name')) document.getElementById('archetype-name').textContent = data.archetype.name;
+                if(document.getElementById('archetype-desc')) document.getElementById('archetype-desc').textContent = data.archetype.description;
+            }
+            
+            if(document.getElementById('plan-duration') && data.sevenDayPlan) document.getElementById('plan-duration').textContent = data.sevenDayPlan.length;
+            populateSevenDayPlan(data.sevenDayPlan);
+
+            if(document.getElementById('report-date')) document.getElementById('report-date').textContent = `Report generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+
+            animateValue(document.getElementById('main-wellness-score'), 0, data.metrics.wellnessScore.value, 1500);
+        }
+
+        function populateSkinAnalysis(skinData) {
+            const list = document.getElementById('skin-analysis-list');
+            const photoContainer = document.getElementById('user-photo-container');
+            if (!list || !photoContainer || !skinData) return;
+            list.innerHTML = '';
+
+            const skinMap = {
+                dark_circle: { title: 'Dark Circles', position: { top: '55%', left: '40%' } },
+                eye_pouch: { title: 'Eye Bags', position: { top: '58%', left: '60%' } },
+                forehead_wrinkle: { title: 'Forehead Lines', position: { top: '35%', left: '50%' } },
+                acne: { title: 'Acne', position: { top: '70%', left: '30%' } },
+                skin_spot: { title: 'Skin Spots', position: { top: '65%', left: '70%' } }
+            };
+
+            for (const key in skinData) {
+                if (skinMap[key]) {
+                    const value = skinData[key];
+                    const color = value > 50 ? 'bg-red-500' : value > 25 ? 'bg-yellow-500' : 'bg-green-500';
+                    list.innerHTML += `
+                        <li class="flex items-center justify-between">
+                            <span class="font-semibold">${skinMap[key].title}</span>
+                            <div class="w-1/2 bg-gray-200 rounded-full h-2.5">
+                                <div class="metric-bar-fg ${color}" style="width: ${value}%"></div>
+                            </div>
+                        </li>
+                    `;
+                    const spot = document.createElement('div');
+                    spot.className = `absolute w-3 h-3 ${color} rounded-full border-2 border-white opacity-70`;
+                    spot.style.top = skinMap[key].position.top;
+                    spot.style.left = skinMap[key].position.left;
+                    photoContainer.appendChild(spot);
+                }
+            }
+        }
+
+        function populateSevenDayPlan(plan) {
+            const container = document.getElementById('seven-day-plan');
+            if (!container || !plan) return;
+            container.innerHTML = plan.map(day => `
+                <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                    <div class="flex items-center gap-4 border-b border-gray-200 pb-3 mb-4">
+                        <div class="text-4xl">${day.icon}</div>
+                        <div>
+                            <h4 class="text-xl font-bold text-gray-800">Day ${day.day}: ${day.theme}</h4>
+                        </div>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-4 text-sm">
+                        <div class="bg-white p-3 rounded-lg">
+                            <h5 class="font-bold text-blue-600">MORNING</h5>
+                            <p class="text-gray-700">${day.morning.task}</p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg">
+                            <h5 class="font-bold text-green-600">NUTRITION</h5>
+                            <p class="text-gray-700">${day.nutrition.task}</p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg">
+                            <h5 class="font-bold text-orange-600">ACTIVITY</h5>
+                            <p class="text-gray-700">${day.activity.task}</p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg">
+                            <h5 class="font-bold text-indigo-600">EVENING</h5>
+                            <p class="text-gray-700">${day.evening.task}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- CHARTING & METRIC FUNCTIONS ---
+        
+        function getMetricStatus(score) {
+            if (score >= 75) return { text: "Excellent", color: "text-green-600", bg: "bg-green-500" };
+            if (score >= 50) return { text: "Good", color: "text-yellow-600", bg: "bg-yellow-500" };
+            return { text: "Needs Improvement", color: "text-red-600", bg: "bg-red-500" };
+        }
+
+        function createMetric(containerId, title, score) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const status = getMetricStatus(score);
+            container.innerHTML = `
+                <div class="bg-gray-50 p-6 rounded-2xl border">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-xl font-bold">${title}</h4>
+                        <span class="font-bold text-xl ${status.color}">${score}<span class="text-sm text-gray-400">/100</span></span>
+                    </div>
+                    <div class="metric-bar-bg">
+                        <div class="metric-bar-fg ${status.bg}" style="width: 0%;" data-width="${score}%"></div>
+                    </div>
+                    <p class="text-right text-sm font-semibold mt-1 ${status.color}">${status.text}</p>
+                </div>
+            `;
+        }
+
+        function createBarChart(canvasId, labels, data, bgColors, borderColors) {
+            const ctx = document.getElementById(canvasId)?.getContext('2d');
+            if(!ctx) return;
+            new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets: [{ label: 'Value', data, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 2, borderRadius: 8 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                    scales: {
+                        y: { min: Math.min(...data) - 5, grid: { drawOnChartArea: false }, ticks: { font: { weight: 'bold' } } },
+                        x: { grid: { display: false } }
+                    },
+                    animation: { duration: 1500, easing: 'easeOutQuart' }
+                }
+            });
+        }
+        
+        function renderAllMetricsAndCharts(data) {
+            createMetric('stress-metric', 'Stress Level', data.metrics.stress.value);
+            createMetric('sleep-metric', 'Sleep Quality', data.metrics.sleep.value);
+            createMetric('nutrition-metric', 'Nutrition Score', data.metrics.nutrition.value);
+            createMetric('hydration-metric', 'Hydration Level', data.metrics.hydration.value);
+            createMetric('activity-metric', 'Activity Score', data.metrics.activity.value);
+
+            if (data.potential) {
+                 createBarChart('potentialAgeChart', ['Current Bio-Age', 'Potential Age'], [data.wellnessAge, data.potential.age], ['#a855f7', '#d8b4fe'], ['#8b5cf6', '#c084fc']);
+                 createBarChart('potentialLifespanChart', ['Standard Lifespan', 'Potential Lifespan'], [82, data.potential.lifespan], ['#6b7280', '#10b981'], ['#4b5563', '#059669']);
+            }
+        }
+        
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // --- INITIALIZATION ---
+        
+        async function initializeReport() {
+            const params = new URLSearchParams(window.location.search);
+            const sessionId = params.get('session_id');
+
+            if (!sessionId) {
+                document.getElementById('loading-text').textContent = "Error: Session ID is missing. Please complete the quiz first.";
+                document.querySelector('#loading-overlay .spinner').style.display = 'none';
+                return;
+            }
+            
+            try {
+                const reportData = await fetchHybridReportData(sessionId);
+                
+                const loadingOverlay = document.getElementById('loading-overlay');
+                const reportContent = document.getElementById('report-content');
+                
+                populateUI(reportData);
+                renderAllMetricsAndCharts(reportData);
+
+                loadingOverlay.style.opacity = 0;
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                    reportContent.style.visibility = 'visible';
+
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add('active');
+                                const bars = entry.target.querySelectorAll('.metric-bar-fg');
+                                bars.forEach(bar => {
+                                    bar.style.width = bar.dataset.width;
+                                });
+                            }
+                        });
+                    }, { threshold: 0.1 });
+
+                    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+                }, 500);
+
+            } catch(error) {
+                console.error("Failed to initialize report:", error);
+                document.getElementById('loading-text').textContent = `Error: ${error.message}`;
+                document.querySelector('#loading-overlay .spinner').style.display = 'none';
+            }
+        }
+        
+        initializeReport();
+
+        // PDF Download Logic
+        document.querySelectorAll('.download-pdf-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const element = document.getElementById('report-content');
+                const opt = {
+                    margin: 0.2,
+                    filename: 'AI-WELLNESSCORE-Report.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+                html2pdf().set(opt).from(element).save();
+            });
+        });
+    });
+    </script>
+</body>
+</html>

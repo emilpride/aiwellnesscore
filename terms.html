@@ -4,85 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terms of Service - AI WELLNESSCORE</title>
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .prose h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .prose p, .prose li {
+            color: #4b5563; /* text-gray-600 */
+        }
+        .prose a {
+            color: #7c3aed; /* text-purple-600 */
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .prose a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-900 antialiased">
 
-<header class="site-header">
-    <div class="site-header__inner">
-        <a href="index.html" class="site-logo">
-            <img src="logo.png" alt="AI WELLNESSCORE logo" style="height:48px; width:auto;">
-            <span>AI WELLNESSCORE</span>
-        </a>
-        <nav class="site-nav">
-            <a href="index.html#about">About</a>
-            <a href="index.html#features">Features</a>
-            <a href="quiz-new.html" class="primary-cta">Start Analysis</a>
-        </nav>
-    </div>
-</header>
-
-<main class="page-wrapper">
-    <section class="glass-panel animate-on-scroll">
-        <span class="badge">Legal essentials</span>
-        <h1 class="section-heading">Terms of Service</h1>
-        <p class="section-subtitle">Last updated: September 1, 2025</p>
-        <p class="section-subtitle">These Terms govern your access to AI WELLNESSCORE. By engaging with our site or products, you agree to the principles below. Please read them carefully.</p>
-    </section>
-
-    <article class="glass-panel glass-panel--muted animate-on-scroll" style="display:grid; gap:1.75rem;">
-        <section>
-            <h2 class="section-heading-sm">1. Medical disclaimer</h2>
-            <p class="section-subtitle"><strong>AI WELLNESSCORE is not a medical device and does not replace professional guidance.</strong> All insights are educational. Always consult a qualified health provider before starting any new regimen.</p>
-        </section>
-
-        <section>
-            <h2 class="section-heading-sm">2. Using the service</h2>
-            <p class="section-subtitle">You must be at least 18 years old and agree to comply with applicable laws. You are responsible for how you interact with the experience.</p>
-        </section>
-
-        <section>
-            <h2 class="section-heading-sm">3. Payments & refunds</h2>
-            <p class="section-subtitle">Payments are processed via Stripe. Because AI WELLNESSCORE generates personalized digital reports instantly, <strong>purchases are final and non-refundable.</strong></p>
-        </section>
-
-        <section>
-            <h2 class="section-heading-sm">4. Intellectual property</h2>
-            <p class="section-subtitle">All content, brand assets, and technology remain the property of Digital Global Solutions LLP and our licensors.</p>
-        </section>
-
-        <section>
-            <h2 class="section-heading-sm">5. Limitation of liability</h2>
-            <p class="section-subtitle">We are not liable for indirect, incidental, or consequential damages arising from use of the service.</p>
-        </section>
-
-        <section>
-            <h2 class="section-heading-sm">6. Modifications</h2>
-            <p class="section-subtitle">We may update these Terms periodically. Continued use after updates means you accept the revised Terms.</p>
-        </section>
-
-        <section>
-            <h2 class="section-heading-sm">7. Contact</h2>
-            <p class="section-subtitle">Questions or concerns? <a href="contact.html" style="color: var(--brand-accent); text-decoration: none;">Reach us here</a> or write to:</p>
-            <p class="section-subtitle">Digital Global Solutions LLP<br>71-75 Shelton Street, Covent Garden<br>London, United Kingdom, WC2H 9JQ</p>
-        </section>
-    </article>
-</main>
-
-<footer class="site-footer">
-    <div style="max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; align-items: center; text-align: center;">
-        <div style="display:flex; gap:1.5rem; flex-wrap:wrap; justify-content:center;">
-            <a href="privacy.html">Privacy Policy</a>
-            <a href="terms.html">Terms of Service</a>
-            <a href="contact.html">Contact</a>
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <a href="index.html">
+                    <img src="logo.png" alt="AI WELLNESSCORE Logo" class="h-16 w-auto">
+                </a>
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="index.html#faq" class="text-gray-600 hover:text-gray-900 transition-colors">FAQ</a>
+                    <a href="quiz.html" class="px-5 py-2 text-sm font-semibold bg-white border border-gray-200 rounded-full hover:bg-gray-100 text-gray-700 transition-all">Start Analysis</a>
+                </nav>
+            </div>
         </div>
-        <p style="margin:0; opacity:0.85;">&copy; 2025 AI WELLNESSCORE. All rights reserved.</p>
-    </div>
-</footer>
+    </header>
+
+    <main class="py-16 md:py-24">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="prose lg:prose-lg max-w-none">
+                <h1 class="text-4xl font-extrabold tracking-tight">Terms of Service</h1>
+                <p class="text-lg text-gray-500">Last updated: September 1, 2025</p>
+
+                <p>Welcome to AI WELLNESSCORE. These Terms of Service ("Terms") govern your use of our website and services (collectively, the "Service"), provided by <strong>Digital Global Solutions LLP</strong>.</p>
+                <p>By accessing or using our Service, you agree to be bound by these Terms. If you do not agree to these Terms, please do not use our Service.</p>
+
+                <h2>1. Medical Disclaimer</h2>
+                <p><strong>Our Service is not a medical device and does not provide medical advice.</strong> The information, including but not limited to, text, graphics, images, and other material contained on this website are for informational and educational purposes only. The purpose of this Service is to promote broad consumer understanding and knowledge of various wellness topics. It is not intended to be a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health care provider with any questions you may have regarding a medical condition or treatment and before undertaking a new health care regimen.</p>
+
+                <h2>2. Use of the Service</h2>
+                <p>You agree to use the Service only for lawful purposes. You must be at least 18 years old to use our Service. You are responsible for ensuring that your use of the Service complies with all applicable laws and regulations.</p>
+
+                <h2>3. Payments and Refunds</h2>
+                <p>Certain features of the Service, such as accessing your full personalized report, may require payment. All payments are processed through our third-party payment processor, Stripe. By providing a payment method, you expressly authorize us to charge the designated amount.</p>
+                <p>Due to the digital nature of our product and the immediate delivery of the personalized report, all sales are final. <strong>We do not offer refunds once a payment has been processed and a report has been generated.</strong></p>
+
+                <h2>4. Intellectual Property</h2>
+                <p>The Service and its original content, features, and functionality are and will remain the exclusive property of Digital Global Solutions LLP and its licensors. The Service is protected by copyright, trademark, and other laws of both the United Kingdom and foreign countries.</p>
+
+                <h2>5. Limitation of Liability</h2>
+                <p>In no event shall Digital Global Solutions LLP, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.</p>
+
+                <h2>6. Changes to Terms</h2>
+                <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. We will provide notice of any changes by posting the new Terms of Service on this page. Your continued use of the Service after any such changes constitutes your acceptance of the new Terms.</p>
+                
+                <h2>7. Contact Us</h2>
+                <p>If you have any questions or concerns about these Terms of Service, please <a href="contact.html">contact us here</a>.</p>
+                <p>
+                    <strong>Address:</strong><br>
+                    Digital Global Solutions LLP<br>
+                    71-75 Shelton Street, Covent Garden<br>
+                    London, United Kingdom, WC2H 9JQ
+                </p>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="text-center p-8 border-t border-gray-200 bg-white">
+        <div class="max-w-7xl mx-auto text-gray-500">
+            <div class="flex justify-center space-x-6 mb-4">
+                <a href="privacy.html" class="hover:text-gray-800 transition">Privacy Policy</a>
+                <a href="terms.html" class="hover:text-gray-800 transition">Terms of Service</a>
+            </div>
+            <p>&copy; 2025 AI WELLNESSCORE. All Rights Reserved.</p>
+        </div>
+    </footer>
 
 </body>
 </html>
