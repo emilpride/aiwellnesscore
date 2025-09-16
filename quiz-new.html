@@ -1052,8 +1052,12 @@ quizQuestions: [
     { key: 'hydration_visual', type: 'animation' },
     { key: 'stress', type: 'slider', text: "How stressed do you usually feel?", subtext: "Chronic stress can significantly accelerate the aging process.", min: 1, max: 10, defaultValue: 5, unit: ''},
     { key: 'mindfulness', type: 'options', text: "How often do you practice mindfulness?", subtext: "Mindfulness practices can reduce stress and improve focus.", options: ["Never", "Sometimes", "Weekly", "Daily"] },
+    { key: 'mood', type: 'emoji_slider', text: "How would you describe your overall mood?", subtext: "Your mental state is deeply connected to your physical health.", options: [ { text: '😟', value: 'Often stressed or down' }, { text: '😐', value: 'Changes a lot' }, { text: '🙂', value: 'Mostly content' }, { text: '😄', value: 'Happy & energetic' } ] },
+    /*
     { key: 'mood', type: 'emoji_slider', text: "How would you describe your overall mood?", subtext: "Your mental state is deeply connected to your physical health.", options: [ { text: 'рџџ', value: 'Often stressed or down' }, { text: 'рџђ', value: 'Changes a lot' }, { text: 'рџ™‚', value: 'Mostly content' }, { text: 'рџЉ', value: 'Happy & energetic' } ] },
     { key: 'alcohol', type: 'options', text: "How much alcohol do you drink weekly?", subtext: "Alcohol consumption can affect sleep, hydration, and cellular health.", options: ["None", "1вЂ“3 drinks", "4вЂ“7 drinks", "8+ drinks"] },
+    */
+    { key: 'alcohol', type: 'options', text: "How much alcohol do you drink weekly?", subtext: "Alcohol consumption can affect sleep, hydration, and cellular health.", options: ["None", "1-3 drinks", "4-7 drinks", "8+ drinks"] },
     { key: 'smoking', type: 'options', text: "Do you smoke?", subtext: "Smoking is a major factor in premature aging and disease.", options: ["Never", "Used to, but quit", "Occasionally", "Yes, daily"] },
     { key: 'screen_time', type: 'options', text: "How much screen time do you have daily (outside of work)?", subtext: "Excessive screen time can impact sleep and mental well-being.", options: ["Less than 2 hours", "2вЂ“4 hours", "4вЂ“6 hours", "More than 6 hours"] },
     { key: 'selfie', type: 'camera_step', text: 'AI Photo Analysis рџ“ё', subtext: '(Optional вЂ“ helps us analyze skin health & fine lines)'},
@@ -1697,9 +1701,7 @@ function next() {
         }
 
         valueDisplay.innerHTML = displayHTML;
-    }    
-    valueDisplay.innerHTML = displayHTML;
-}
+    }
     
     function renderAnimation(key) {
         goToStep('quiz'); // Keep quiz step active for animation
@@ -1744,7 +1746,10 @@ function next() {
         } else if (key === 'mindfulness_visual') {
             animationHTML = `<div class="insight-card mindfulness-card"><div class="breath-circle"><div class="breath-pulse" id="mindfulness-pulse"></div></div><h3>Mindfulness Rhythm</h3><p id="mindfulness-cue">Inhale slowly</p></div>`;
         } else if (key === 'mood_visual_broken') {
+            const faces = ['🙂','😐','😕','😟','😢','😠'];
+            /*
             const faces = ['рџ™‚','рџЊ','рџђ','рџ®вЂЌрџ’Ё','рџЉ','рџЃ'];
+            */
             animationHTML = `<div class="w-full max-w-sm mx-auto text-center"><div class="flex justify-center gap-2 text-3xl">${faces.map(f=>`<span class='animate-bounce'>${f}</span>`).join('')}</div></div>`;
         } else if (key === 'alcohol_visual') {
             animationHTML = `<div class="insight-card alcohol-card"><div class="insight-icon">рџЌ·</div><div class="glass-meter"><div class="glass-fill" id="alcohol-fill"></div></div><h3>Alcohol Balance</h3><p id="alcohol-tip">Even small breaks restore deeper sleep.</p></div>`;
