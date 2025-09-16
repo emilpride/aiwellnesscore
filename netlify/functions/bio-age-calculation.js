@@ -96,6 +96,63 @@ const bioAgeScoring = {
   }
 };
 
+// Normalize quiz answers to match scoring keys
+function normalizeAnswers(answers = {}) {
+  const out = { ...answers };
+  const norm = (s) => (typeof s === 'string' ? s.replace(/[\u2013\u2014]/g, '-').trim() : s);
+
+  // Sleep
+  if (out.sleep) {
+    const v = norm(String(out.sleep)).toLowerCase();
+    if (v.includes('7-8')) out.sleep = '7-8 hours';
+    else if (v.includes('5-6')) out.sleep = '5-6 hours';
+    else if (v.includes('more than 8')) out.sleep = 'More than 8 hours';
+    else if (v.includes('less than 5')) out.sleep = 'Less than 5 hours';
+  }
+
+  // Nutrition (servings)
+  if (out.nutrition) {
+    const v = norm(String(out.nutrition)).toLowerCase();
+    if (v.includes('more than 5')) out.nutrition = 'More than 5';
+    else if (v.includes('4-5')) out.nutrition = '4-5';
+    else if (v.includes('2-3')) out.nutrition = '2-3';
+    else if (v.includes('0-1')) out.nutrition = '0-1';
+  }
+
+  // Hydration (cups -> glasses)
+  if (out.hydration) {
+    const v = norm(String(out.hydration)).toLowerCase();
+    if (v.includes('10+')) out.hydration = '10+ glasses';
+    else if (v.includes('7-9')) out.hydration = '7-9 glasses';
+    else if (v.includes('4-6')) out.hydration = '4-6 glasses';
+    else if (v.includes('1-3')) out.hydration = '1-3 glasses';
+  }
+
+  // Alcohol
+  if (out.alcohol) {
+    const v = norm(String(out.alcohol)).toLowerCase();
+    if (v === 'none') out.alcohol = '0';
+    else if (v.includes('1-3')) out.alcohol = '1-3';
+    else if (v.includes('4-7')) out.alcohol = '4-7';
+    else if (v.includes('8+')) out.alcohol = '8+';
+  }
+
+  // Smoking
+  if (out.smoking) {
+    const v = norm(String(out.smoking)).toLowerCase();
+    if (v === 'never') out.smoking = 'No, never';
+  }
+
+  // Screen time
+  if (out.screen_time) {
+    const v = norm(String(out.screen_time)).toLowerCase();
+    if (v.includes('2-4')) out.screen_time = '2-4 hours';
+    else if (v.includes('4-6')) out.screen_time = '4-6 hours';
+  }
+
+  return out;
+}
+
 /**
  * @description Calculates the biological age based on chronological age, quiz answers, and photo analysis.
  * @param {number} chronoAge - The user's chronological age.
@@ -106,11 +163,12 @@ const bioAgeScoring = {
 // /netlify/functions/bio-age-calculation.js
 
 function calculateBioAge(chronoAge, userAnswers, faceAnalysisResult) {
+  const answers = normalizeAnswers(userAnswers || {});
   let totalScore = 0;
   let bmiValue = 0; // --- ДОБАВЛЕНО: переменная для хранения ИМТ
 
-  const heightM = parseFloat(userAnswers.height) / 100;
-  const weightKg = parseFloat(userAnswers.weight);
+  const heightM = parseFloat(answers.height) / 100;
+  const weightKg = parseFloat(answers.weight);
   if (heightM > 0 && weightKg > 0) {
     const bmi = weightKg / (heightM * heightM);
     bmiValue = parseFloat(bmi.toFixed(1)); // --- ДОБАВЛЕНО: сохраняем ИМТ
@@ -121,13 +179,13 @@ function calculateBioAge(chronoAge, userAnswers, faceAnalysisResult) {
     }
   }
 
-  for (const key in userAnswers) {
-    if (bioAgeScoring[key] && bioAgeScoring[key][userAnswers[key]]) {
-      totalScore += bioAgeScoring[key][userAnswers[key]];
+  for (const key in answers) {
+    if (bioAgeScoring[key] && bioAgeScoring[key][answers[key]]) {
+      totalScore += bioAgeScoring[key][answers[key]];
     }
   }
 
-  const stressLevel = parseInt(userAnswers.stress, 10);
+  const stressLevel = parseInt(answers.stress, 10);
   if (stressLevel >= 1 && stressLevel <= 3) {
     totalScore -= 1;
   } else if (stressLevel >= 7 && stressLevel <= 8) {

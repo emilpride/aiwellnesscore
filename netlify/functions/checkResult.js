@@ -5,7 +5,7 @@ const { getFirestore } = require('firebase-admin/firestore');
 
 if (!getApps().length) {
   try {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
     initializeApp({ credential: cert(serviceAccount) });
   } catch (e) { console.error("Firebase init error in checkResult.js:", e); }
 }

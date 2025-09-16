@@ -26,7 +26,20 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: 'Photo data is required' }) };
     }
 
-    const base64Image = photoDataUrl.split(';base64,').pop();
+    // Validate that input is an image data URL and limit size (~4MB)
+    if (!/^data:image\//i.test(photoDataUrl)) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Only image data URLs are accepted.' }) };
+    }
+    const base64Part = photoDataUrl.split(';base64,').pop();
+    if (!base64Part) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Invalid image data' }) };
+    }
+    const approxBytes = Math.max(0, Math.ceil((base64Part.length * 3) / 4) - (base64Part.endsWith('==') ? 2 : base64Part.endsWith('=') ? 1 : 0));
+    if (approxBytes > 4 * 1024 * 1024) {
+      return { statusCode: 413, body: JSON.stringify({ error: 'Image is too large. Max 4MB.' }) };
+    }
+
+    const base64Image = base64Part;
 
     const formData = {
       api_key: process.env.FACEPLUSPLUS_API_KEY,

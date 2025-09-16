@@ -8,7 +8,7 @@ const { bioAgeScoring } = require('./bio-age-calculation.js');
 // Инициализация Firebase Admin SDK
 if (!getApps().length) {
   try {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
     initializeApp({ credential: cert(serviceAccount) });
   } catch (e) {
     console.error("Firebase init error in getProfileData.js:", e);

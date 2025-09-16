@@ -7,7 +7,7 @@ const RateLimiter = require('./utils/rateLimiter');
 
 if (!getApps().length) {
   try {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
     initializeApp({
       credential: cert(serviceAccount)
     });
