@@ -1450,6 +1450,7 @@ async function handleAnswer(questionKey, answer) {
         //       
         setTimeout(next, 100);
     }
+    App.handleAnswer = handleAnswer;
 
     //   handleOptionClick
     async function handleOptionClick(event, key, value) {
