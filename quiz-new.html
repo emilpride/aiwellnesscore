@@ -945,8 +945,8 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         <div class="flex items-center gap-4 max-w-2xl mx-auto">
             <a href="index.html" class="flex-shrink-0"><img src="logo.png" alt="Logo" class="h-8 w-auto"></a>
             <button id="back-btn" class="text-gray-600 hover:text-gray-900 transition hidden p-2 -ml-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg></button>
-            <div id="progress-container" class="flex-grow h-2 rounded-full overflow-hidden"><div id="progress-bar-inner" class="h-full transition-all duration-500 ease-out"></div></div>
-            <button id="burger-menu-btn" class="text-gray-600 hover:text-gray-900 transition p-2 -mr-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
+            <div id="progress-container" class="flex-grow h-2 rounded-full overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress-bar-inner" class="h-full transition-all duration-500 ease-out"></div></div>
+            <button id="burger-menu-btn" aria-label="Menu" class="text-gray-600 hover:text-gray-900 transition p-2 -mr-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
         </div>
     </header>
 
@@ -1080,7 +1080,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     </div>
 </nav>
 
-<div id="camera-modal">
+<div id="camera-modal" role="dialog" aria-modal="true" aria-labelledby="camera-guide-text">
     <div id="camera-container">
         <video id="camera-video" autoplay playsinline></video>
         <canvas id="camera-canvas"></canvas>
@@ -1088,7 +1088,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             <h3 id="camera-guide-text" class="text-lg font-semibold">Center your face in the oval</h3>
             <div id="camera-guide-box"></div>
         </div>
-        <button id="close-camera-btn" title="Close Camera">
+        <button id="close-camera-btn" title="Close Camera" aria-label="Close Camera">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
     </div>
@@ -1136,8 +1136,20 @@ document.addEventListener('DOMContentLoaded', () => {
         ],
     };
 
+    // Utils
+    function escapeHtml(value) {
+        if (value === undefined || value === null) return '';
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     // Fix mojibake in quizQuestions texts/options
-    (function fixMojibake(){
+    // Normalize texts/options only if they are clearly broken (defensive, idempotent)
+    (function normalizeQuizQuestions(){
         try {
             const list = (typeof App !== 'undefined' && Array.isArray(App.quizQuestions)) ? App.quizQuestions : [];
             list.forEach(item => {
@@ -1145,48 +1157,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (typeof item.text === 'string') {
                     item.text = item.text.replace(/What.?Ts/g, "What's");
                 }
-                if (item && item.key === 'sleep' && Array.isArray(item.options)) {
-                    item.options = [
-                        { text: 'Less than 5 hours' },
-                        { text: '56 hours' },
-                        { text: '78 hours' },
-                        { text: 'More than 8 hours' }
-                    ];
+                // Sleep: fix collapsed dashes like '56' -> '5-6', '78' -> '7-8'
+                if (item.key === 'sleep' && Array.isArray(item.options)) {
+                    item.options = item.options.map(opt => {
+                        const t = (typeof opt === 'string') ? opt : (opt?.text || opt);
+                        if (!t) return opt;
+                        if (/^56\s*hours$/.test(t)) return { text: '5-6 hours' };
+                        if (/^78\s*hours$/.test(t)) return { text: '7-8 hours' };
+                        return (typeof opt === 'string') ? opt : { text: opt.text };
+                    });
                 }
-                if (item && item.key === 'activity' && Array.isArray(item.options)) {
-                    item.options = [
-                        { text: 'Rarely / Never' },
-                        { text: '12 times a week' },
-                        { text: '34 times a week' },
-                        { text: '5+ times a week' }
-                    ];
+                // Activity: '12 times' -> '1-2 times', '34 times' -> '3-4 times'
+                if (item.key === 'activity' && Array.isArray(item.options)) {
+                    item.options = item.options.map(opt => {
+                        const t = (typeof opt === 'string') ? opt : (opt?.text || opt);
+                        if (!t) return opt;
+                        if (/^12\s+times/.test(t)) return { text: '1-2 times a week' };
+                        if (/^34\s+times/.test(t)) return { text: '3-4 times a week' };
+                        return (typeof opt === 'string') ? opt : { text: opt.text };
+                    });
                 }
-                if (item && item.key === 'nutrition' && Array.isArray(item.options)) {
-                    item.options = ['01 serving', '23 servings', '45 servings', 'More than 5 servings'];
+                // Nutrition: '01/23/45' -> '0-1/2-3/4-5'
+                if (item.key === 'nutrition' && Array.isArray(item.options)) {
+                    item.options = item.options.map(opt => {
+                        const s = String(typeof opt === 'string' ? opt : opt?.text || opt);
+                        return s.replace(/^01\b/, '0-1').replace(/^23\b/, '2-3').replace(/^45\b/, '4-5');
+                    });
                 }
-                if (item && item.key === 'processed_food' && Array.isArray(item.options)) {
-                    item.options = ['Rarely', '12 times a week', '34 times a week', 'Daily'];
+                // Processed food: same numeric collapse
+                if (item.key === 'processed_food' && Array.isArray(item.options)) {
+                    item.options = item.options.map(opt => {
+                        const s = String(typeof opt === 'string' ? opt : opt?.text || opt);
+                        return s.replace(/^12\b/, '1-2').replace(/^34\b/, '3-4');
+                    });
                 }
-                if (item && item.key === 'hydration' && Array.isArray(item.options)) {
-                    item.options = ['13 cups', '46 cups', '79 cups', '10+ cups'];
+                // Hydration: '13/46/79' -> '1-3/4-6/7-9'
+                if (item.key === 'hydration' && Array.isArray(item.options)) {
+                    item.options = item.options.map(opt => {
+                        const s = String(typeof opt === 'string' ? opt : opt?.text || opt);
+                        return s.replace(/^13\b/, '1-3').replace(/^46\b/, '4-6').replace(/^79\b/, '7-9');
+                    });
                 }
-                if (item && item.key === 'screen_time' && Array.isArray(item.options)) {
-                    item.options = ['Less than 2 hours', '24 hours', '46 hours', 'More than 6 hours'];
-                }
-                if (item && item.key === 'selfie') {
-                    item.text = 'AI Photo Analysis';
-                    item.subtext = '(Optional  helps us analyze skin health & fine lines)';
-                }
-                if (item && item.key === 'email') {
-                    item.text = 'Enter your email';
-                }
-                if (item && item.key === 'mood' && Array.isArray(item.options)) {
-                    item.options = [
-                        { text: '', value: 'Often stressed or down' },
-                        { text: '', value: 'Changes a lot' },
-                        { text: '', value: 'Mostly content' },
-                        { text: '', value: 'Happy & energetic' }
-                    ];
+                // Screen time: '24/46' -> '2-4/4-6'
+                if (item.key === 'screen_time' && Array.isArray(item.options)) {
+                    item.options = item.options.map(opt => {
+                        const s = String(typeof opt === 'string' ? opt : opt?.text || opt);
+                        return s.replace(/^24\b/, '2-4').replace(/^46\b/, '4-6');
+                    });
                 }
             });
         } catch (e) { /* noop */ }
@@ -1571,8 +1588,11 @@ function next() {
         const passedNonAnimationCount = passedQuestions.filter(q => q.type !== 'animation').length;
         
         const progress = (passedNonAnimationCount / totalNonAnimationCount) * 100;
-
-        document.getElementById('progress-bar-inner').style.width = `${Math.min(100, progress)}%`;
+        const clamped = Math.min(100, progress);
+        const bar = document.getElementById('progress-bar-inner');
+        const container = document.getElementById('progress-container');
+        if (bar) bar.style.width = `${clamped}%`;
+        if (container) container.setAttribute('aria-valuenow', String(Math.round(clamped)));
         document.getElementById('back-btn').classList.toggle('hidden', App.currentQuestionIndex <= 0);
     }
 
@@ -1583,16 +1603,6 @@ function next() {
         const wrapper = document.getElementById('question-wrapper');
         const footerWrapper = document.getElementById('footer-actions');
         footerWrapper.innerHTML = '';
-
-        const escapeHtml = (value) => {
-            if (value === undefined || value === null) return '';
-            return String(value)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        };
 
         const iconMap = {
             userGoal: 'UG',
@@ -1966,16 +1976,16 @@ function next() {
         let motivation = '';
         const la = App.lastAnswer || {};
         const motiv = {
-            sleep: (v) => v && (''+v).includes('Less') ? "Short nights add up. Even +2030 minutes can boost energy tomorrow." : v && (''+v).includes('7') ? "Great sleep window  your recovery rhythm is on point." : "Aim for a steady schedule  consistency drives deeper rest.",
-            activity: (v) => v && (''+v).includes('Rarely') ? "Small starts matter: a 10minute walk still counts  todays the day." : v && (''+v).includes('5+') ? "Powerful routine  your heart and brain thank you." : "Consistency beats intensity. Keep moving and build momentum.",
-            hydration: (v) => v && (''+v).includes('1') ? "Your cells are thirsty. Keep a bottle nearby  sip, dont wait." : v && (''+v).includes('10') ? "Hydration hero  this keeps skin and energy stable." : "A steady sip routine can lift focus and mood.",
-            nutrition: (v) => v && (''+v).includes('0') ? "Add one colorful serving today  simple, tangible, effective." : v && (''+v).includes('More') ? "Antioxidant rich  youre feeding longevity." : "Try a colors on the plate rule for balance.",
-            processed_food: (v) => v && (''+v).includes('Daily') ? "Tiny swaps beat big overhauls  try one wholefood swap today." : v && (''+v).includes('Rarely') ? "Nice baseline  your gut and skin benefit." : "Plan a quick snack kit to skip impulse grabs.",
-            mindfulness: (v) => v==='Daily' ? "Calm is a skill  youre practicing longevity." : v==='Never' ? "60 seconds of breathing shifts your nervous system  try now." : "Make micropauses your superpower during the day.",
-            mood: (v) => v && (''+v).toLowerCase().includes('stressed') ? "Youre not alone  short walks and breath cycles help quickly." : v && (''+v).toLowerCase().includes('happy') ? "That spark fuels better choices everywhere  keep it going." : "Label the mood, lighten the load  awareness already helps.",
-            alcohol: (v) => v && (''+v).includes('8+') ? "Your sleep will love one dry day. Notice the morning after." : v==='None' ? "Clear head, clear gains  your biology likes it." : "Try a hydration chaser  better sleep, better recovery.",
-            smoking: (v) => v && (''+v).toLowerCase().includes('daily') ? "Microwins count: delay the first cigarette by 10 minutes." : v==='Never' ? "Massive longterm edge  keep it that way." : "Swap one trigger routine for a quick breath walk.",
-            screen_time: (v) => v && (''+v).includes('More than 6') ? "Screens steal sleep  set a tiny cutoff 15 minutes earlier tonight." : v && (''+v).includes('Less than 2') ? "Nice boundary  your circadian rhythm thanks you." : "Batch the scrolling  fewer switches, calmer brain."
+            sleep: (v) => v && (''+v).includes('Less') ? "Short nights add up. Even +20–30 minutes can boost energy tomorrow." : v && (''+v).includes('7') ? "Great sleep window — your recovery rhythm is on point." : "Aim for a steady schedule — consistency drives deeper rest.",
+            activity: (v) => v && (''+v).includes('Rarely') ? "Small starts matter: a 10‑minute walk still counts — today’s the day." : v && (''+v).includes('5+') ? "Powerful routine — your heart and brain thank you." : "Consistency beats intensity. Keep moving and build momentum.",
+            hydration: (v) => v && (''+v).includes('1') ? "Your cells are thirsty. Keep a bottle nearby — sip, don’t wait." : v && (''+v).includes('10') ? "Hydration hero — this keeps skin and energy stable." : "A steady sip routine can lift focus and mood.",
+            nutrition: (v) => v && (''+v).includes('0') ? "Add one colorful serving today — simple, tangible, effective." : v && (''+v).includes('More') ? "Antioxidant‑rich — you’re feeding longevity." : "Try a ‘colors on the plate’ rule for balance.",
+            processed_food: (v) => v && (''+v).includes('Daily') ? "Tiny swaps beat big overhauls — try one whole‑food swap today." : v && (''+v).includes('Rarely') ? "Nice baseline — your gut and skin benefit." : "Plan a quick snack kit to skip impulse grabs.",
+            mindfulness: (v) => v==='Daily' ? "Calm is a skill — you’re practicing longevity." : v==='Never' ? "60 seconds of breathing shifts your nervous system — try now." : "Make micro‑pauses your superpower during the day.",
+            mood: (v) => v && (''+v).toLowerCase().includes('stressed') ? "You’re not alone — short walks and breath cycles help quickly." : v && (''+v).toLowerCase().includes('happy') ? "That spark fuels better choices everywhere — keep it going." : "Label the mood, lighten the load — awareness already helps.",
+            alcohol: (v) => v && (''+v).includes('8+') ? "Your sleep will love one dry day. Notice the morning after." : v==='None' ? "Clear head, clear gains — your biology likes it." : "Try a hydration chaser — better sleep, better recovery.",
+            smoking: (v) => v && (''+v).toLowerCase().includes('daily') ? "Micro‑wins count: delay the first cigarette by 10 minutes." : v==='Never' ? "Massive long‑term edge — keep it that way." : "Swap one trigger routine for a quick breath walk.",
+            screen_time: (v) => v && (''+v).includes('More than 6') ? "Screens steal sleep — set a tiny cutoff 15 minutes earlier tonight." : v && (''+v).includes('Less than 2') ? "Nice boundary — your circadian rhythm thanks you." : "Batch the scrolling — fewer switches, calmer brain."
         };
         if (la.key && typeof motiv[la.key] === 'function') {
             try { motivation = motiv[la.key](la.value) || ''; } catch (e) { motivation = ''; }
@@ -1997,12 +2007,6 @@ function next() {
             animationHTML = `<div class="w-full max-w-sm mx-auto bg-white p-6 rounded-2xl shadow-sm text-center"><div class="font-semibold text-gray-600 mb-3">Smart Swaps</div><div class="flex justify-center gap-3"><div class="px-3 py-2 rounded-lg bg-rose-100 text-rose-600 line-through"> Soda</div><div class="px-3 py-2 rounded-lg bg-emerald-100 text-emerald-700"> Water</div></div></div>`;
         } else if (key === 'mindfulness_visual') {
             animationHTML = `<div class="insight-card mindfulness-card"><div class="breath-circle"><div class="breath-pulse" id="mindfulness-pulse"></div></div><h3>Mindfulness Rhythm</h3><p id="mindfulness-cue">Inhale slowly</p></div>`;
-        } else if (key === 'mood_visual_broken') {
-            const faces = ['','','','','',''];
-            /*
-            const faces = ['','','','','',''];
-            */
-            animationHTML = `<div class="w-full max-w-sm mx-auto text-center"><div class="flex justify-center gap-2 text-3xl">${faces.map(f=>`<span class='animate-bounce'>${f}</span>`).join('')}</div></div>`;
         } else if (key === 'alcohol_visual') {
             animationHTML = `<div class="insight-card alcohol-card"><div class="insight-icon"></div><div class="glass-meter"><div class="glass-fill" id="alcohol-fill"></div></div><h3>Alcohol Balance</h3><p id="alcohol-tip">Even small breaks restore deeper sleep.</p></div>`;
         } else if (key === 'smoking_visual') {
