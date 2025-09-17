@@ -1562,7 +1562,17 @@ function next() {
         const footerWrapper = document.getElementById('footer-actions');
         footerWrapper.innerHTML = '';
 
-                        const iconMap = {
+        const escapeHtml = (value) => {
+            if (value === undefined || value === null) return '';
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        };
+
+        const iconMap = {
             userGoal: 'UG',
             age: 'AG',
             gender: 'SX',
@@ -1584,29 +1594,49 @@ function next() {
             sun_protection: 'SP',
             selfie: 'SF'
         };
-        const icon = iconMap[question.key] || '';
-        const showSubtext = question.subtext && question.type !== 'camera_step' && question.type !== 'email_step';
+        const icon = escapeHtml(iconMap[question.key] || '');
+        const questionText = escapeHtml(question.text || '');
+        const subtextRaw = question.subtext || '';
+        const subtext = escapeHtml(subtextRaw);
+        const showSubtext = subtextRaw && question.type !== 'camera_step' && question.type !== 'email_step';
 
-        let contentHTML = `
-            <div class="question-lead">
-                <span class="question-icon">${icon}</span>
-                <div class="question-copy">
-                    <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight text-gray-900">${question.text}</h2>
-                    ${showSubtext ? `<p class="mt-3 text-base sm:text-lg text-gray-600 max-w-xl">${question.subtext}</p>` : ''}
-                </div>
-            </div>
-            <div class="question-body"></div>`;
-
-        if (question.key === 'stress') {
-            const sliderValue = App.userAnswers[question.key] || question.defaultValue;
-            contentHTML = `
+        let leadHTML = '';
+        if (question.type === 'camera_step') {
+            leadHTML = `
+                <div class="question-lead">
+                    <div class="question-media">
+                        <img src="face.jpeg" alt="Face scan illustration" class="question-illustration">
+                    </div>
+                    <div class="question-copy text-center">
+                        <h2 class="text-3xl font-bold text-gray-900">${questionText}</h2>
+                        ${showSubtext ? `<p class="mt-3 text-gray-600 max-w-sm mx-auto">${subtext}</p>` : ''}
+                    </div>
+                </div>`;
+        } else if (question.type === 'email_step') {
+            leadHTML = `
+                <div class="question-lead">
+                    <span class="question-icon">${icon}</span>
+                    <div class="question-copy text-center">
+                        <h2 class="text-3xl font-bold text-gray-900">${questionText}</h2>
+                        ${showSubtext ? `<p class="mt-3 text-gray-600 max-w-sm mx-auto">${subtext}</p>` : ''}
+                    </div>
+                </div>`;
+        } else {
+            leadHTML = `
                 <div class="question-lead">
                     <span class="question-icon">${icon}</span>
                     <div class="question-copy">
-                        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight text-gray-900">${question.text}</h2>
-                        ${question.subtext ? `<p class="mt-3 text-base sm:text-lg text-gray-600 max-w-xl">${question.subtext}</p>` : ''}
+                        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight text-gray-900">${questionText}</h2>
+                        ${showSubtext ? `<p class="mt-3 text-base sm:text-lg text-gray-600 max-w-xl">${subtext}</p>` : ''}
                     </div>
-                </div>
+                </div>`;
+        }
+
+        const sliderValue = question.key === 'stress'
+            ? (App.userAnswers[question.key] ?? question.defaultValue ?? question.min ?? 5)
+            : null;
+        const baseBodyHTML = question.key === 'stress'
+            ? `
                 <div class="question-body">
                     <div class="slider-panel stress-panel">
                         <div class="slider-readout"><span id="slider-value-display"></span></div>
@@ -1616,79 +1646,196 @@ function next() {
                             <span>Stressed</span>
                         </div>
                     </div>
-                </div>`;
-        } else if (question.type === 'camera_step') {
-            contentHTML = `
-                <div class="question-lead">
-                    <div class="question-media">
-                        <img src="face.jpeg" alt="Face scan illustration" class="question-illustration">
-                    </div>
-                    <div class="question-copy text-center">
-                        <h2 class="text-3xl font-bold text-gray-900">${question.text}</h2>
-                        ${question.subtext ? `<p class="mt-3 text-gray-600 max-w-sm mx-auto">${question.subtext}</p>` : ''}
-                    </div>
-                </div>`;
-        } else if (question.type === 'email_step') {
-            contentHTML = `
-                <div class="question-lead">
-                    <span class="question-icon">${icon}</span>
-                    <div class="question-copy text-center">
-                        <h2 class="text-3xl font-bold text-gray-900">${question.text}</h2>
-                        ${question.subtext ? `<p class="mt-3 text-gray-600 max-w-sm mx-auto">${question.subtext}</p>` : ''}
-                    </div>
-                </div>`;
-            footerWrapper.innerHTML = `<div class="flex flex-col gap-3 max-w-sm mx-auto mt-6">
-                <input type="email" id="email-input" placeholder="you@example.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-[--brand-accent] focus:border-[--brand-accent]">
-                <div class="flex gap-2">
-                    <button id="email-submit-btn" class="flex-1 bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-5 rounded-lg hover:opacity-90 transition">Submit</button>
-                    <button id="email-skip-btn" class="flex-1 bg-white border border-gray-300 text-gray-600 font-semibold py-3 px-5 rounded-lg hover:bg-gray-50 transition">Skip</button>
-                </div>
+                </div>`
+            : '<div class="question-body"></div>';
+
+        wrapper.innerHTML = `
+            <div class="question-shell cardless question-content question-content-enter">
+                ${leadHTML}
+                ${baseBodyHTML}
             </div>`;
-            const submitBtn = footerWrapper.querySelector('#email-submit-btn');
-            const skipBtn = footerWrapper.querySelector('#email-skip-btn');
-            if (submitBtn) {
-                submitBtn.addEventListener('click', () => {
-                    const emailInput = document.getElementById('email-input');
-                    const email = emailInput ? emailInput.value.trim() : '';
-                    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                        handleAnswer('email', email);
-                    } else {
-                        alert('Please enter a valid email address.');
-                    }
+
+        const bodyEl = wrapper.querySelector('.question-body');
+
+        if (question.key === 'stress') {
+            const sliderEl = wrapper.querySelector('#slider-input');
+            if (sliderEl) {
+                updateSliderDisplay(question, sliderEl.value);
+                sliderEl.addEventListener('input', (event) => updateSliderDisplay(question, event.target.value));
+            }
+            footerWrapper.innerHTML = `<button id="slider-continue-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Continue</button>`;
+            const continueBtn = footerWrapper.querySelector('#slider-continue-btn');
+            if (continueBtn && sliderEl) {
+                continueBtn.addEventListener('click', () => {
+                    handleAnswer(question.key, Number(sliderEl.value));
                 });
             }
-            if (skipBtn) {
-                skipBtn.addEventListener('click', async () => {
-                    try { await trackEvent('emailSkipped'); } catch (e) {}
-                    handleAnswer('email', 'skipped');
-                });
+            return;
+        }
+
+        switch (question.type) {
+            case 'slider': {
+                if (!bodyEl) break;
+                const startValue = App.userAnswers[question.key] ?? question.defaultValue ?? question.min ?? 0;
+                bodyEl.innerHTML = `
+                    <div class="slider-panel">
+                        <div class="slider-readout"><span id="slider-value-display"></span></div>
+                        <input type="range" min="${question.min}" max="${question.max}" step="1" value="${startValue}" class="question-slider" id="slider-input">
+                    </div>`;
+                const sliderEl = bodyEl.querySelector('#slider-input');
+                if (sliderEl) {
+                    updateSliderDisplay(question, sliderEl.value);
+                    sliderEl.addEventListener('input', (event) => updateSliderDisplay(question, event.target.value));
+                }
+                footerWrapper.innerHTML = `<button id="slider-continue-btn" class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition">Continue</button>`;
+                const continueBtn = footerWrapper.querySelector('#slider-continue-btn');
+                if (continueBtn && sliderEl) {
+                    continueBtn.addEventListener('click', () => {
+                        handleAnswer(question.key, Number(sliderEl.value));
+                    });
+                }
+                break;
             }
-        } else if (question.type === 'emoji_slider') {
-            const emojis = question.options.map(opt => `<span>${opt.text}</span>`).join('');
-            const sliderContent = `<div id="mood-slider-container"><div id="mood-emojis">${emojis}</div><input type="range" min="0" max="${question.options.length - 1}" value="1" step="1" id="mood-slider" class="question-slider mood-slider"></div>`;
-            if (targetContainer) {
-                targetContainer.insertAdjacentHTML('beforeend', sliderContent);
-            }
-            footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="mood-confirm-btn">Confirm</button>`;
-            const moodSlider = document.getElementById('mood-slider');
-            const emojiSpans = document.querySelectorAll('#mood-emojis span');
-            const updateEmojiSelection = () => {
-                if (!moodSlider) return;
-                emojiSpans.forEach((span, index) => {
-                    span.style.transform = index == moodSlider.value ? 'scale(1.5)' : 'scale(1)';
-                    span.style.opacity = index == moodSlider.value ? '1' : '0.5';
+            case 'options': {
+                if (!bodyEl) break;
+                const options = Array.isArray(question.options) ? question.options : [];
+                if (!options.length) {
+                    bodyEl.innerHTML = '<p class="text-center text-gray-500 mt-6">No options available.</p>';
+                    break;
+                }
+                bodyEl.innerHTML = `
+                    <div class="flex flex-col gap-3 mt-6">
+                        ${options.map((opt, idx) => {
+                            let optionText;
+                            if (typeof opt === 'object' && opt !== null) {
+                                optionText = escapeHtml(opt.text ?? opt.value ?? `Option ${idx + 1}`);
+                            } else {
+                                optionText = escapeHtml(opt);
+                            }
+                            return `<button type="button" class="answer-option" data-index="${idx}"><span>${optionText}</span></button>`;
+                        }).join('')}
+                    </div>`;
+                const buttons = bodyEl.querySelectorAll('button.answer-option');
+                buttons.forEach((btn) => {
+                    btn.addEventListener('pointerdown', () => btn.classList.add('pressed'));
+                    btn.addEventListener('pointerup', () => btn.classList.remove('pressed'));
+                    btn.addEventListener('pointerleave', () => btn.classList.remove('pressed'));
+                    btn.addEventListener('click', (event) => {
+                        const index = Number(btn.getAttribute('data-index'));
+                        const opt = options[index];
+                        const value = (typeof opt === 'object' && opt !== null)
+                            ? (opt.value ?? opt.text ?? opt)
+                            : opt;
+                        handleOptionClick(event, question.key, value);
+                    });
                 });
-            };
-            if (moodSlider) {
-                moodSlider.addEventListener('input', updateEmojiSelection);
-                updateEmojiSelection();
+                break;
             }
-            const moodConfirm = footerWrapper.querySelector('#mood-confirm-btn');
-            if (moodConfirm && moodSlider) {
-                moodConfirm.addEventListener('click', () => {
-                    const selectedValue = question.options[moodSlider.value].value;
-                    handleAnswer(question.key, selectedValue);
+            case 'gender_selection': {
+                if (!bodyEl) break;
+                const options = Array.isArray(question.options) ? question.options : [];
+                bodyEl.innerHTML = `
+                    <div class="gender-stack gap-4 mt-6">
+                        ${options.map((opt, idx) => {
+                            const value = escapeHtml(opt?.value ?? `option_${idx}`);
+                            const label = escapeHtml(opt?.label ?? opt?.text ?? (opt?.value ?? `Option ${idx + 1}`));
+                            const img = opt?.img ? `<img src="${opt.img}" alt="${label}" class="gender-image">` : '';
+                            return `
+                                <button type="button" class="gender-option" data-value="${value}">
+                                    <div class="gender-image-container">${img}</div>
+                                    <span class="gender-label font-semibold text-lg">${label}</span>
+                                </button>`;
+                        }).join('')}
+                    </div>`;
+                const buttons = bodyEl.querySelectorAll('button.gender-option');
+                buttons.forEach((btn) => {
+                    btn.addEventListener('pointerdown', () => btn.classList.add('pressed'));
+                    btn.addEventListener('pointerup', () => btn.classList.remove('pressed'));
+                    btn.addEventListener('pointerleave', () => btn.classList.remove('pressed'));
+                    btn.addEventListener('click', (event) => {
+                        const value = btn.getAttribute('data-value');
+                        handleOptionClick(event, question.key, value);
+                    });
                 });
+                break;
+            }
+            case 'camera_step': {
+                if (!bodyEl) break;
+                bodyEl.innerHTML = `
+                    <div class="flex flex-col gap-4 items-center mt-6">
+                        <button type="button" id="open-camera-btn" class="w-full sm:max-w-xs bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-6 rounded-full text-lg hover:opacity-90 transition">Open Camera</button>
+                        <button type="button" id="skip-camera-btn" class="text-sm text-gray-500 underline hover:text-gray-700">Skip photo</button>
+                    </div>`;
+                const openBtn = bodyEl.querySelector('#open-camera-btn');
+                if (openBtn) {
+                    openBtn.addEventListener('click', () => {
+                        openCamera();
+                        try { trackEvent('selfieCameraOpened'); } catch (e) { /* ignore */ }
+                    });
+                }
+                const skipBtn = bodyEl.querySelector('#skip-camera-btn');
+                if (skipBtn) {
+                    skipBtn.addEventListener('click', () => {
+                        handleAnswer('selfie', 'skipped');
+                    });
+                }
+                break;
+            }
+            case 'email_step': {
+                // Footer is populated earlier in this function
+                break;
+            }
+            case 'emoji_slider': {
+                if (!bodyEl) break;
+                const options = Array.isArray(question.options) ? question.options : [];
+                if (!options.length) {
+                    bodyEl.innerHTML = '<p class="text-center text-gray-500 mt-6">No options available.</p>';
+                    break;
+                }
+                let activeIndex = 1;
+                const previousValue = App.userAnswers[question.key];
+                if (previousValue) {
+                    const foundIndex = options.findIndex((opt) => {
+                        if (typeof opt === 'object' && opt !== null) {
+                            return (opt.value ?? opt.text) === previousValue;
+                        }
+                        return opt === previousValue;
+                    });
+                    if (foundIndex >= 0) activeIndex = foundIndex;
+                }
+                bodyEl.innerHTML = `
+                    <div id="mood-slider-container">
+                        <div id="mood-emojis">${options.map((opt) => escapeHtml(opt?.text ?? opt)).join('')}</div>
+                        <input type="range" min="0" max="${Math.max(options.length - 1, 0)}" value="${activeIndex}" step="1" id="mood-slider" class="question-slider mood-slider">
+                    </div>`;
+                footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="mood-confirm-btn">Confirm</button>`;
+                const moodSlider = document.getElementById('mood-slider');
+                const emojiSpans = document.querySelectorAll('#mood-emojis span');
+                const updateEmojiSelection = () => {
+                    if (!moodSlider) return;
+                    emojiSpans.forEach((span, index) => {
+                        span.style.transform = index == moodSlider.value ? 'scale(1.5)' : 'scale(1)';
+                        span.style.opacity = index == moodSlider.value ? '1' : '0.5';
+                    });
+                };
+                if (moodSlider) {
+                    updateEmojiSelection();
+                    moodSlider.addEventListener('input', updateEmojiSelection);
+                }
+                const moodConfirm = document.getElementById('mood-confirm-btn');
+                if (moodConfirm && moodSlider) {
+                    moodConfirm.addEventListener('click', () => {
+                        const selected = options[moodSlider.value];
+                        const value = (typeof selected === 'object' && selected !== null)
+                            ? (selected.value ?? selected.text)
+                            : selected;
+                        handleAnswer(question.key, value);
+                    });
+                }
+                break;
+            }
+            default: {
+                break;
             }
         }
     }
@@ -2441,5 +2588,8 @@ const deviceType = getDeviceType();
 
 </body>
 </html>
+
+
+
 
 
