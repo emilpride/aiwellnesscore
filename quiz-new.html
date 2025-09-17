@@ -708,6 +708,30 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             box-shadow: 0 8px 18px rgba(59, 130, 246, 0.3);
         }
 
+        /* Widen question views to near full-screen with minimal margins */
+        #step-quiz.quiz-step { padding: 0.25rem; }
+        #step-quiz #quiz-card {
+            max-width: none;
+            margin-left: 0.25rem;
+            margin-right: 0.25rem;
+            padding-left: 0.25rem;
+            padding-right: 0.25rem;
+        }
+        #step-quiz #question-wrapper { padding: 0.25rem; }
+        #step-quiz .question-shell {
+            width: 100%;
+            max-width: none;
+            padding: clamp(0.5rem, 1.5vw, 1rem);
+        }
+        #step-quiz .question-lead,
+        #step-quiz .question-copy,
+        #step-quiz .question-body {
+            max-width: none;
+            width: 100%;
+        }
+        #step-quiz .question-body { margin: 0; }
+        #step-quiz .question-shell.cardless { padding: clamp(0.5rem, 1.5vw, 1rem); }
+
         /* Loading steps styling */
         #step-loading { position: relative; z-index: 1; }
         #step-loading .steps-list {
