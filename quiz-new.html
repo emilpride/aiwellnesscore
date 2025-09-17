@@ -348,11 +348,28 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             pointer-events: none;
         }
         /* BMI vertical scale (match profile.html) */
-        #bmi-details { display: flex; align-items: center; justify-content: center; gap: 1rem; height: 250px; }
+        #bmi-details { display: flex; align-items: center; justify-content: center; gap: 1.25rem; height: 250px; }
         #bmi-scale-container { position: relative; width: 32px; height: 100%; flex: 0 0 auto; }
         #bmi-scale-gradient-vertical { width: 100%; height: 100%; background: linear-gradient(to top, #43B7FF, #33C75A, #FBF447, #FFA64D, #FF7D7E); border-radius: 100px; position: absolute; inset: 0; }
         #bmi-thumb { position: absolute; width: 40px; height: 40px; background: linear-gradient(180deg, #F2F2F2 0%, #E8E8E8 100%); border: 2px solid #FFFFFF; box-shadow: 0 0 6.9px rgba(0,0,0,0.25); border-radius: 50%; left: 50%; transform: translateX(-50%); bottom: 0%; transition: bottom 1.5s cubic-bezier(0.22, 1, 0.36, 1); z-index: 1; }
-        #bmi-value-display { position: absolute; bottom: var(--thumb-position, 0%); left: 50%; transform: translate(-50%, 50%); font-weight: 800; color: var(--brand-dark-text); background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.06); border-radius: 999px; padding: 0.15rem 0.5rem; font-size: 0.95rem; box-shadow: 0 6px 16px rgba(15,23,42,0.12); white-space: nowrap; pointer-events: none; transition: bottom 1.5s cubic-bezier(0.22, 1, 0.36, 1); }
+        #bmi-value-display {
+            position: absolute;
+            bottom: var(--thumb-position, 0%);
+            left: calc(100% + 0.75rem); /* place to the right of the scale */
+            transform: translateY(50%);
+            font-weight: 900;
+            color: var(--brand-dark-text);
+            background: rgba(255,255,255,0.95);
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 999px;
+            padding: 0.2rem 0.6rem;
+            font-size: clamp(1.1rem, 3.5vw, 1.6rem); /* larger digits */
+            line-height: 1;
+            box-shadow: 0 6px 16px rgba(15,23,42,0.12);
+            white-space: nowrap;
+            pointer-events: none;
+            transition: bottom 1.5s cubic-bezier(0.22, 1, 0.36, 1), color 0.6s ease;
+        }
         
         .sleep-animation-container {
             background-color: #1c2a4e; border-radius: 50%;
@@ -2199,6 +2216,30 @@ function next() {
         bmiValueDisplay.style.setProperty('--thumb-position', `${thumbBottomPosition}%`);
         bmiThumb.style.bottom = `${thumbBottomPosition}%`;
 
+        // Dynamic color along scale (blue -> green -> yellow -> orange -> red)
+        const stops = [
+            { t: 0.0,  c: [0x43, 0xB7, 0xFF] }, // blue
+            { t: 0.33, c: [0x33, 0xC7, 0x5A] }, // green
+            { t: 0.60, c: [0xFB, 0xF4, 0x47] }, // yellow
+            { t: 0.80, c: [0xFF, 0xA6, 0x4D] }, // orange
+            { t: 1.0,  c: [0xFF, 0x7D, 0x7E] }  // red
+        ];
+        const clamp01 = (x) => Math.max(0, Math.min(1, x));
+        const lerp = (a,b,t) => a + (b - a) * t;
+        const toHex = (rgbArr) => '#' + rgbArr.map(v => Math.round(v).toString(16).padStart(2,'0')).join('');
+        const colorAt = (t) => {
+            t = clamp01(t);
+            for (let i = 0; i < stops.length - 1; i++) {
+                const a = stops[i], b = stops[i+1];
+                if (t <= b.t) {
+                    const local = (t - a.t) / (b.t - a.t);
+                    const rgb = [0,1,2].map(ch => lerp(a.c[ch], b.c[ch], local));
+                    return toHex(rgb);
+                }
+            }
+            return toHex(stops[stops.length - 1].c);
+        };
+
         let currentBmi = 0;
         const startTimestamp = performance.now();
         const duration = 1500;
@@ -2208,11 +2249,14 @@ function next() {
             const progress = Math.min(elapsed / duration, 1);
             currentBmi = progress * bmi;
             bmiValueDisplay.textContent = currentBmi.toFixed(1);
+            const tNow = clamp01((currentBmi - minBmi) / (maxBmi - minBmi));
+            bmiValueDisplay.style.color = colorAt(tNow);
 
             if (progress < 1) {
                 requestAnimationFrame(animateBmiValue);
             } else {
                 bmiValueDisplay.textContent = bmi.toFixed(1);
+                bmiValueDisplay.style.color = colorAt(normalizedBmi);
             }
         };
         requestAnimationFrame(animateBmiValue);
