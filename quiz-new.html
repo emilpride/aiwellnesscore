@@ -495,7 +495,6 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             margin: 0 auto;
         }
         .question-icon { display: none; }
-        }
         .question-copy {
             width: 100%;
             max-width: 800px;
@@ -691,7 +690,6 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             .question-lead {
                 align-items: center;
                 text-align: center;
-            }
             }
             .question-copy {
                 margin: 0 auto;
@@ -1883,8 +1881,8 @@ function next() {
                 bodyEl.innerHTML = `
                     <div id="mood-slider-container" class="flex flex-col gap-4 items-center mt-4">
                         <div class="w-full space-y-2">
-                            <div id="mood-emojis" class="flex justify-between text-3xl">${emojiData.map((item, idx) => `<span data-index="${idx}">${escapeHtml(item.face)}</span>`).join(')}</div>
-                            <div id="mood-labels" class="flex justify-between text-xs text-gray-500">${emojiData.map(item => `<span class="mood-label">${escapeHtml(item.label)}</span>`).join(')}</div>
+                            <div id="mood-emojis" class="flex justify-between text-3xl">${emojiData.map((item, idx) => `<span data-index="${idx}">${escapeHtml(item.face)}</span>`).join('')}</div>
+                            <div id="mood-labels" class="flex justify-between text-xs text-gray-500">${emojiData.map(item => `<span class="mood-label">${escapeHtml(item.label)}</span>`).join('')}</div>
                         </div>
                         <input type="range" min="0" max="${Math.max(emojiData.length - 1, 0)}" value="${activeIndex}" step="1" id="mood-slider" class="question-slider mood-slider" aria-valuemin="0" aria-valuemax="${Math.max(emojiData.length - 1, 0)}" aria-valuenow="${activeIndex}">
                         <p id="mood-selection-label" class="text-sm text-gray-600 text-center">${escapeHtml(initialDescription)}</p>
