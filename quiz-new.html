@@ -123,7 +123,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
-            touch-action: pan-y; /* allow vertical scrolling, keep horizontal drag for slider */
+            touch-action: pan-x; /* allow vertical scrolling, keep horizontal drag for slider */
         }
         input[type="range"]:focus { outline: none; }
         /* Make the clickable area slightly larger on iOS */
@@ -543,6 +543,10 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             background: rgba(255, 255, 255, 0.82);
             border-radius: 26px;
             padding: clamp(1.75rem, 3vw, 2.25rem);
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             border: 1px solid rgba(148, 163, 184, 0.28);
             box-shadow: 0 20px 40px rgba(80, 56, 140, 0.14);
         }
@@ -553,6 +557,11 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         }
         #slider-value-display {
             display: inline-flex;
+            justify-content: center;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            min-width: 12ch;
+            line-height: 1;
             align-items: baseline;
             gap: 0.75rem;
             font-size: clamp(2.5rem, 4vw, 3.25rem);
@@ -642,6 +651,8 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             border: 1px solid rgba(148, 163, 184, 0.24);
             box-shadow: 0 18px 36px rgba(80, 56, 140, 0.15);
         }
+        #mood-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: #94a3b8; gap: 0.5rem; }
+        #mood-labels .mood-label { flex: 1 1 0; text-align: center; line-height: 1.2; }
         #mood-slider {
             width: 100%;
             margin-top: 1.25rem;
@@ -1101,7 +1112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Replace the old quizQuestions array with this one
         quizQuestions: [
             { key: 'userGoal', type: 'options', text: "What's your main goal?", subtext: "This helps us tailor the final report to your interests.", options: [{ text: 'Find out my Biological Age', value: 'bio_age' }, { text: 'Get a Skin Health Analysis', value: 'skin' }, { text: 'Receive a 7-Day Improvement Plan', value: 'plan' }, { text: 'All of the above!', value: 'all' }] },
-            { key: 'age', type: 'slider', text: "How old are you?", subtext: "Your age is a key factor in calculating your biological age baseline.", min: 18, max: 90, defaultValue: 30, unit: 'years' },
+            { key: 'age', type: 'slider', text: "How old are you?", subtext: "Your age is a key factor in calculating your biological age baseline.", min: 16, max: 120, defaultValue: 30, unit: 'years' },
             { key: 'gender', type: 'gender_selection', text: "What's your biological sex?", subtext: "Biological sex influences body composition and metabolic rate.", options: [{ value: 'male', img: 'male.svg' }, { value: 'female', img: 'female.svg' }] },
             { key: 'height', type: 'slider', text: "What's your height?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 140, max: 220, defaultValue: 175, unit: 'cm' },
             { key: 'weight', type: 'slider', text: "What's your weight?", subtext: "We use this to calculate your Body Mass Index (BMI).", min: 40, max: 150, defaultValue: 77, unit: 'kg' },
@@ -1667,6 +1678,7 @@ function next() {
             </div>`;
 
         const bodyEl = wrapper.querySelector('.question-body');
+        const previousAnswer = App.userAnswers[question.key];
 
         if (question.key === 'stress') {
             const sliderEl = wrapper.querySelector('#slider-input');
@@ -1687,11 +1699,13 @@ function next() {
         switch (question.type) {
             case 'slider': {
                 if (!bodyEl) break;
-                const startValue = App.userAnswers[question.key] ?? question.defaultValue ?? question.min ?? 0;
+                const sliderMin = question.min ?? 0;
+                const sliderMax = question.max ?? 100;
+                const startValue = Number(previousAnswer ?? question.defaultValue ?? sliderMin);
                 bodyEl.innerHTML = `
                     <div class="slider-panel">
                         <div class="slider-readout"><span id="slider-value-display"></span></div>
-                        <input type="range" min="${question.min}" max="${question.max}" step="1" value="${startValue}" class="question-slider" id="slider-input">
+                        <input type="range" min="${sliderMin}" max="${sliderMax}" step="1" value="${startValue}" class="question-slider" id="slider-input" aria-valuemin="${sliderMin}" aria-valuemax="${sliderMax}" aria-valuenow="${startValue}">
                     </div>`;
                 const sliderEl = bodyEl.querySelector('#slider-input');
                 if (sliderEl) {
@@ -1793,7 +1807,44 @@ function next() {
                 break;
             }
             case 'email_step': {
-                // Footer is populated earlier in this function
+                if (!bodyEl) break;
+                const previousValue = (previousAnswer && previousAnswer !== 'skipped') ? previousAnswer : '';
+                bodyEl.innerHTML = `
+                    <div class="flex flex-col gap-4 mt-6 max-w-sm mx-auto w-full">
+                        <input type="email" id="email-input" value="${escapeHtml(previousValue)}" placeholder="you@example.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-[--brand-accent] focus:border-[--brand-accent]" autocomplete="email">
+                        <p class="text-sm text-gray-500 text-center">We only use your email to send the personalized summary.</p>
+                    </div>`;
+                footerWrapper.innerHTML = `
+                    <div class="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto mt-6 w-full">
+                        <button id="email-submit-btn" class="flex-1 bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 px-5 rounded-lg hover:opacity-90 transition">Send my summary</button>
+                        <button id="email-skip-btn" class="flex-1 bg-white border border-gray-300 text-gray-600 font-semibold py-3 px-5 rounded-lg hover:bg-gray-50 transition">Skip for now</button>
+                    </div>`;
+                const emailInput = bodyEl.querySelector('#email-input');
+                const submitBtn = footerWrapper.querySelector('#email-submit-btn');
+                const skipBtn = footerWrapper.querySelector('#email-skip-btn');
+                const submitEmail = () => {
+                    if (!emailInput) return;
+                    const email = emailInput.value.trim();
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        alert('Please enter a valid email address.');
+                        return;
+                    }
+                    handleAnswer('email', email);
+                };
+                if (submitBtn) {
+                    submitBtn.addEventListener('click', submitEmail);
+                }
+                if (emailInput) {
+                    emailInput.addEventListener('keyup', (event) => {
+                        if (event.key === 'Enter') { submitEmail(); }
+                    });
+                }
+                if (skipBtn) {
+                    skipBtn.addEventListener('click', async () => {
+                        try { await trackEvent('emailSkipped'); } catch (e) { /* noop */ }
+                        handleAnswer('email', 'skipped');
+                    });
+                }
                 break;
             }
             case 'emoji_slider': {
@@ -1803,31 +1854,45 @@ function next() {
                     bodyEl.innerHTML = '<p class="text-center text-gray-500 mt-6">No options available.</p>';
                     break;
                 }
+                const fallbackFaces = ['\u{1F61F}', '\u{1F610}', '\u{1F642}', '\u{1F929}'];
+                const emojiData = options.map((opt, idx) => {
+                    if (typeof opt === 'object' && opt !== null) {
+                        const face = opt.text?.trim() || opt.emoji || fallbackFaces[idx] || '\u{1F642}';
+                        const value = (typeof opt === 'object' && opt !== null) ? (opt.value ?? opt.text ?? face) : (typeof opt === 'string' ? opt : face);
+                        return { face, value, label: opt.value ?? value };
+                    }
+                    const face = typeof opt === 'string' ? opt.trim() : fallbackFaces[idx] || '\u{1F642}';
+                    return { face, value: face, label: face };
+                });
                 let activeIndex = 1;
-                const previousValue = App.userAnswers[question.key];
-                if (previousValue) {
-                    const foundIndex = options.findIndex((opt) => {
-                        if (typeof opt === 'object' && opt !== null) {
-                            return (opt.value ?? opt.text) === previousValue;
-                        }
-                        return opt === previousValue;
-                    });
+                if (previousAnswer) {
+                    const foundIndex = emojiData.findIndex(item => item.value === previousAnswer);
                     if (foundIndex >= 0) activeIndex = foundIndex;
                 }
+                const initialDescription = previousAnswer || emojiData[activeIndex].label;
                 bodyEl.innerHTML = `
-                    <div id="mood-slider-container">
-                        <div id="mood-emojis">${options.map((opt) => escapeHtml(opt?.text ?? opt)).join('')}</div>
-                        <input type="range" min="0" max="${Math.max(options.length - 1, 0)}" value="${activeIndex}" step="1" id="mood-slider" class="question-slider mood-slider">
+                    <div id="mood-slider-container" class="flex flex-col gap-4 items-center mt-4">
+                        <div class="w-full space-y-2">
+                            <div id="mood-emojis" class="flex justify-between text-3xl">${emojiData.map((item, idx) => `<span data-index="${idx}">${escapeHtml(item.face)}</span>`).join(')}</div>
+                            <div id="mood-labels" class="flex justify-between text-xs text-gray-500">${emojiData.map(item => `<span class="mood-label">${escapeHtml(item.label)}</span>`).join(')}</div>
+                        </div>
+                        <input type="range" min="0" max="${Math.max(emojiData.length - 1, 0)}" value="${activeIndex}" step="1" id="mood-slider" class="question-slider mood-slider" aria-valuemin="0" aria-valuemax="${Math.max(emojiData.length - 1, 0)}" aria-valuenow="${activeIndex}">
+                        <p id="mood-selection-label" class="text-sm text-gray-600 text-center">${escapeHtml(initialDescription)}</p>
                     </div>`;
                 footerWrapper.innerHTML = `<button class="w-full sm:max-w-xs mx-auto block bg-[--brand-accent] text-[--brand-dark-text] font-bold py-3 rounded-full text-lg hover:opacity-90 transition" id="mood-confirm-btn">Confirm</button>`;
                 const moodSlider = document.getElementById('mood-slider');
                 const emojiSpans = document.querySelectorAll('#mood-emojis span');
+                const selectionLabel = document.getElementById('mood-selection-label');
                 const updateEmojiSelection = () => {
                     if (!moodSlider) return;
                     emojiSpans.forEach((span, index) => {
-                        span.style.transform = index == moodSlider.value ? 'scale(1.5)' : 'scale(1)';
+                        span.style.transform = index == moodSlider.value ? 'scale(1.45)' : 'scale(1)';
                         span.style.opacity = index == moodSlider.value ? '1' : '0.5';
                     });
+                    const current = emojiData[moodSlider.value];
+                    if (selectionLabel && current) {
+                        selectionLabel.textContent = current.label;
+                    }
                 };
                 if (moodSlider) {
                     updateEmojiSelection();
@@ -1836,11 +1901,8 @@ function next() {
                 const moodConfirm = document.getElementById('mood-confirm-btn');
                 if (moodConfirm && moodSlider) {
                     moodConfirm.addEventListener('click', () => {
-                        const selected = options[moodSlider.value];
-                        const value = (typeof selected === 'object' && selected !== null)
-                            ? (selected.value ?? selected.text)
-                            : selected;
-                        handleAnswer(question.key, value);
+                        const selected = emojiData[moodSlider.value];
+                        handleAnswer(question.key, selected ? selected.value : previousAnswer);
                     });
                 }
                 break;
