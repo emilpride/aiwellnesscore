@@ -347,6 +347,12 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             user-select: none;
             pointer-events: none;
         }
+        /* BMI vertical scale (match profile.html) */
+        #bmi-details { display: flex; align-items: center; justify-content: center; gap: 1rem; height: 250px; }
+        #bmi-scale-container { position: relative; width: 32px; height: 100%; flex: 0 0 auto; }
+        #bmi-scale-gradient-vertical { width: 100%; height: 100%; background: linear-gradient(to top, #43B7FF, #33C75A, #FBF447, #FFA64D, #FF7D7E); border-radius: 100px; position: absolute; inset: 0; }
+        #bmi-thumb { position: absolute; width: 40px; height: 40px; background: linear-gradient(180deg, #F2F2F2 0%, #E8E8E8 100%); border: 2px solid #FFFFFF; box-shadow: 0 0 6.9px rgba(0,0,0,0.25); border-radius: 50%; left: 50%; transform: translateX(-50%); bottom: 0%; transition: bottom 1.5s cubic-bezier(0.22, 1, 0.36, 1); z-index: 1; }
+        #bmi-value-display { position: absolute; bottom: var(--thumb-position, 0%); left: 50%; transform: translate(-50%, 50%); font-weight: 800; color: var(--brand-dark-text); background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.06); border-radius: 999px; padding: 0.15rem 0.5rem; font-size: 0.95rem; box-shadow: 0 6px 16px rgba(15,23,42,0.12); white-space: nowrap; pointer-events: none; transition: bottom 1.5s cubic-bezier(0.22, 1, 0.36, 1); }
         
         .sleep-animation-container {
             background-color: #1c2a4e; border-radius: 50%;
