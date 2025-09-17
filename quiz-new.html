@@ -84,7 +84,9 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         main#steps-wrapper { position: relative; width: 100%; flex-grow: 1; overflow-x: hidden; overflow-y: auto; }
         
         .quiz-step {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute; left: 0; width: 100%;
+            top: var(--header-offset, 0px);
+            height: calc(100% - var(--header-offset, 0px));
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 1rem; 
             background-color: transparent; /* Changed to show animated background */
@@ -2676,8 +2678,10 @@ const deviceType = getDeviceType();
         const header = document.getElementById('quiz-header');
         const main = document.getElementById('steps-wrapper');
         if (header && main) {
-            const headerHeight = header.offsetHeight;
-            main.style.paddingTop = `${headerHeight}px`;
+            const headerHeight = header.offsetHeight || 0;
+            document.documentElement.style.setProperty('--header-offset', `${headerHeight}px`);
+            // Use CSS variable for absolute-positioned steps; no extra padding needed
+            main.style.paddingTop = '0px';
         }
     }
     window.addEventListener('resize', adjustMainPadding);
