@@ -55,6 +55,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             background-size: 400% 400%;
             animation: moveBackground 40s ease infinite;
             position: relative;
+            overflow-x: hidden;
         }
         body::before, body::after {
             content: "";
@@ -81,7 +82,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             width: 100vw; height: 100vh; height: calc(var(--vh, 1vh) * 100); 
             overflow: hidden;
         }
-        main#steps-wrapper { position: relative; width: 100%; flex-grow: 1; overflow-x: hidden; overflow-y: auto; }
+        main#steps-wrapper { position: relative; width: 100%; flex-grow: 1; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         
         .quiz-step {
             position: absolute; left: 0; width: 100%;
@@ -91,7 +92,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             padding: 1rem; 
             background-color: transparent; /* Changed to show animated background */
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 1; overflow-y: auto;
+            opacity: 1; overflow-y: auto; z-index: 1;
         }
         .quiz-step:not(.active) { 
             opacity: 0; 
@@ -126,6 +127,8 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             -webkit-appearance: none;
             appearance: none;
             touch-action: pan-x; /* allow vertical scrolling, keep horizontal drag for slider */
+            -webkit-user-select: none;
+            user-select: none;
         }
         input[type="range"]:focus { outline: none; }
         /* Make the clickable area slightly larger on iOS */
@@ -399,6 +402,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             border-top: 1px solid rgba(0, 0, 0, 0.05); /* Lighter border */
             box-shadow: none; /* Removed shadow, blur is enough */
             display: none; 
+            pointer-events: none;
             padding: 1rem; 
         }
         /*      */
@@ -714,16 +718,19 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         #step-quiz.quiz-step { padding: 0.25rem; }
         #step-quiz #quiz-card {
             max-width: none;
-            margin-left: 0.25rem;
-            margin-right: 0.25rem;
+            width: 100%;
+            margin-left: 0;
+            margin-right: 0;
             padding-left: 0.25rem;
             padding-right: 0.25rem;
+            box-sizing: border-box;
         }
         #step-quiz #question-wrapper { padding: 0.25rem; }
         #step-quiz .question-shell {
             width: 100%;
             max-width: none;
             padding: clamp(0.5rem, 1.5vw, 1rem);
+            box-sizing: border-box;
         }
         #step-quiz .question-lead,
         #step-quiz .question-copy,
@@ -1550,8 +1557,8 @@ async function handleAnswer(questionKey, answer) {
             progressContainer.style.visibility = 'visible';
             backBtn.classList.toggle('hidden', App.currentQuestionIndex <= 0);
         }
-
-        document.getElementById('quiz-footer').style.display = (stepKey === 'quiz' || stepKey === 'bmi') ? 'block' : 'none';
+        // Keep global footer hidden to avoid overlay issues on mobile; using in-card footer actions instead
+        document.getElementById('quiz-footer').style.display = 'none';
     }
     
     // : /quiz-new.html
