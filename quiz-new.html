@@ -81,7 +81,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             width: 100vw; height: 100vh; height: calc(var(--vh, 1vh) * 100); 
             overflow: hidden;
         }
-        main#steps-wrapper { position: relative; width: 100%; flex-grow: 1; overflow: hidden; }
+        main#steps-wrapper { position: relative; width: 100%; flex-grow: 1; overflow-x: hidden; overflow-y: auto; }
         
         .quiz-step {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -99,6 +99,17 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         /* Avoid transform on the active step to prevent iOS Safari range-slider drag bugs */
         .quiz-step.active { transform: none; }
         .quiz-step.prev:not(.active) { transform: scale(0.95); }
+        #quiz-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            min-height: 100%;
+            gap: clamp(2rem, 4vw, 3rem);
+            padding: clamp(2rem, 6vh, 3.5rem) clamp(1.5rem, 4vw, 3rem);
+        }
+        #quiz-card > * { width: 100%; }
+        #step-quiz { justify-content: flex-start; align-items: stretch; }
 
         @keyframes contentFadeInUp {
             from { opacity: 0; transform: translateY(25px); }
@@ -286,16 +297,33 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             cursor: not-allowed;
         }
         .gender-stack {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 1.25rem;
-        }        .gender-option:hover:not(:disabled) { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.07); }
-        .gender-option.selected { transform: translateY(-5px) scale(1.02); border-color: var(--brand-accent); box-shadow: 0 0 20px rgba(222, 190, 169, 0.8); }
-        .gender-option .gender-image-container { 
-            overflow: hidden; 
-            border-radius: 9999px; /* Changed to make it circular */
-            margin-bottom: 1rem; 
-            aspect-ratio: 1/1;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            width: 100%;
+            flex-wrap: nowrap;
+        }
+        .gender-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            width: 100%;
+            max-width: 260px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--brand-dark-text);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 18px;
+            padding: 1.25rem 1rem;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+        }
+        .gender-stack .gender-option {
+            flex: 1 1 0;
         }
         .gender-option .gender-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
         .gender-option:hover:not(:disabled) .gender-image { transform: scale(1.05); }
@@ -407,9 +435,9 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             width: 100%;
         }
         .question-shell {
-            width: min(100%, 1100px);
+            width: min(100%, 860px);
             margin: 0 auto;
-            padding: clamp(2.5rem, 5vw, 3.5rem);
+            padding: clamp(2.25rem, 4.5vw, 3.25rem);
             border-radius: 32px;
             background: rgba(255, 255, 255, 0.68);
             border: 1px solid rgba(255, 255, 255, 0.55);
@@ -418,8 +446,8 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             -webkit-backdrop-filter: blur(26px);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: clamp(2rem, 5vw, 3.5rem);
+            align-items: stretch;
+            gap: clamp(1.75rem, 4vw, 3rem);
             position: relative;
             overflow: hidden;
         }
@@ -444,8 +472,8 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             box-shadow: 0 18px 40px rgba(60, 44, 115, 0.15);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 1.75rem;
+            align-items: stretch;
+            gap: 1.5rem;
             text-align: center;
         }
         .question-shell.cardless::before {
@@ -455,39 +483,25 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            gap: 1.75rem;
-            width: min(100%, clamp(540px, 65vw, 860px));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 800px;
             margin: 0 auto;
         }
         .question-shell.cardless .question-lead {
             align-items: center;
             text-align: center;
-            width: min(100%, 32rem);
+            max-width: 640px;
             margin: 0 auto;
         }
-        .question-icon {
-            width: 72px;
-            height: 72px;
-            border-radius: 22px;
-            background: linear-gradient(145deg, rgba(167, 139, 250, 0.24), rgba(56, 189, 248, 0.22));
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: var(--brand-dark-text);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 15px 35px rgba(81, 56, 140, 0.1);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-        }
-        .question-shell.cardless .question-icon {
-            margin: 0 auto;
+        .question-icon { display: none; }
         }
         .question-copy {
             width: 100%;
-            max-width: min(100%, 44rem);
+            max-width: 800px;
         }
         .question-shell.cardless .question-copy {
-            max-width: min(100%, 32rem);
+            max-width: 640px;
             margin: 0 auto;
         }
         .question-copy h2 {
@@ -503,7 +517,8 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             display: flex;
             flex-direction: column;
             gap: 1.25rem;
-            width: min(100%, clamp(540px, 65vw, 860px));
+            width: 100%;
+            max-width: 800px;
             margin: 0 auto;
         }
         .answer-stack {
@@ -666,21 +681,9 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                 align-items: center;
                 text-align: center;
             }
-            .question-shell:not(.cardless) .question-icon {
-                align-self: center;
             }
             .question-copy {
                 margin: 0 auto;
-            }
-        }
-        @media (max-width: 640px) {
-            .question-icon {
-                width: 60px;
-                height: 60px;
-                border-radius: 18px;
-            }
-            #slider-value-display {
-                font-size: clamp(2.25rem, 8vw, 2.75rem);
             }
         }
         .question-content.animation-wrapper {
@@ -902,10 +905,18 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         @media (max-width: 640px) {
             body::before, body::after { opacity: 0.18; width: 260px; height: 260px; }
             #quiz-container { background: rgba(255,255,255,0.94); }
+            #quiz-card { padding: clamp(1.5rem, 10vw, 2.5rem) 1.25rem 2.5rem; gap: 2rem; }
+            .question-shell { padding: 1.75rem 1.25rem; border-radius: 24px; }
+            .question-body { max-width: 100%; }
             .question-content { padding: 1.4rem; border-radius: 22px; box-shadow: 0 18px 40px rgba(96, 78, 159, 0.2); }
             #progress-container { height: 10px; }
             .insight-card { padding: 1.6rem 1.75rem; }
             .question-content .answer-option { background: rgba(255,255,255,0.95); }
+            #slider-value-display { font-size: clamp(2.25rem, 8vw, 2.75rem); }
+            .gender-stack { flex-wrap: wrap; gap: 0.75rem; }
+            .gender-stack .gender-option { flex: 1 1 calc(50% - 0.75rem); max-width: 100%; }
+            .gender-option { padding: 1rem 0.75rem; }
+            .gender-option .gender-image-container { width: 88px; height: 88px; margin-bottom: 0.5rem; }
         }
     </style>
 </head>
