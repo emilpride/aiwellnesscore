@@ -777,6 +777,15 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             padding: clamp(0.5rem, 1.5vw, 1rem);
             box-sizing: border-box;
         }
+        /* Ensure animation views are vertically centered */
+        #step-quiz .animation-wrapper { min-height: 100%; }
+        #question-wrapper.is-animation {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
         #step-quiz .question-lead,
         #step-quiz .question-copy,
         #step-quiz .question-body {
@@ -1677,6 +1686,8 @@ function next() {
         if (!question) return;
 
         const wrapper = document.getElementById('question-wrapper');
+        // Ensure normal questions are not in animation centering mode
+        if (wrapper) wrapper.classList.remove('is-animation');
         const footerWrapper = document.getElementById('footer-actions');
         footerWrapper.innerHTML = '';
 
@@ -2050,6 +2061,7 @@ function next() {
     function renderAnimation(key) {
         goToStep('quiz'); // Keep quiz step active for animation
         const wrapper = document.getElementById('question-wrapper');
+        if (wrapper) wrapper.classList.add('is-animation');
         document.getElementById('footer-actions').innerHTML = '';
         document.getElementById('back-btn').classList.add('hidden'); // Hide back button for animations
 
@@ -2776,6 +2788,7 @@ const deviceType = getDeviceType();
 
 </body>
 </html>
+
 
 
 
