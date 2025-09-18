@@ -794,22 +794,34 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         }
         #step-quiz .question-body { margin: 0; }
         #step-quiz .question-shell.cardless { padding: clamp(0.5rem, 1.5vw, 1rem); }
+        /* --- FIX 1: только для экрана загрузки — выравниваем контент сверху, а не по центру --- */
+#step-loading.quiz-step {
+  justify-content: flex-start;                 /* вместо center из .quiz-step */
+  padding-top: clamp(16px, 4vh, 24px);         /* небольшой верхний отступ */
+}
+
 
         /* Loading steps styling */
         #step-loading { position: relative; z-index: 1; }
         /* Шаги просто располагаются НИЖЕ анимации и не перекрывают её */
+/* --- FIX 3: шаги сразу под заголовком, без огромного зазора --- */
 #step-loading .steps-list {
-    position: static;                 /* <-- главное изменение */
-    width: min(90%, 22rem);
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin: 1rem 0 0.5rem;            /* небольшой отступ от заголовка */
+  position: static;                 /* на всякий случай: точно в документном потоке */
+  width: min(90%, 22rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;               /* <-- ключ: маленький отступ сверху */
+  margin-bottom: 0.5rem;
 }
+
 /* Резервируем высоту под анимацию, чтобы шаги при маленьких экранах её не догоняли */
+/* --- FIX 2: блок-герой НЕ растягивается, идёт обычным потоком --- */
 #step-loading .loader-guard {
-    min-height: clamp(260px, 40vh, 420px);
+  min-height: 0;          /* отменяем резервирование места */
+  flex: 0 0 auto;         /* запрещаем растяжение (заменяет flex-1) */
 }
+
 
 
         .analysis-step {
@@ -1134,7 +1146,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         <section id="step-loading" class="quiz-step prev">
   <div class="w-full h-full flex flex-col items-center relative">
     <!-- ГЕРОЙ (анимация + заголовок) всегда по центру по вертикали -->
-    <div id="loading-hero" class="loader-guard flex flex-col items-center justify-center flex-1">
+    <div id="loading-hero" class="loader-guard flex flex-col items-center">
       <div id="loading-animation" class="w-48 h-48"></div>
       <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-800 mt-4 text-center">
         Analyzing Your Unique Profile...
