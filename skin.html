@@ -18,19 +18,19 @@
     /></noscript>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skin AI - Face++ Powered Skin Intelligence</title>
+    <title>Skin AI - Intelligent Skin Analysis</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <meta name="description" content="Upload or capture a live photo to unlock dermatologist-style insights powered by Face++.">
+    <meta name="description" content="Upload or capture a live photo to unlock dermatologist-style insights in seconds.">
     <link rel="canonical" href="https://aiwellnesscore.com/skin.html" />
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://aiwellnesscore.com/skin.html">
     <meta property="og:title" content="AI WELLNESSCORE - Skin Intelligence">
-    <meta property="og:description" content="Real skin analysis powered by Face++ at your fingertips.">
+    <meta property="og:description" content="Real skin analysis insights at your fingertips.">
     <meta property="og:image" content="https://aiwellnesscore.com/og-image.png">
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://aiwellnesscore.com/skin.html">
     <meta property="twitter:title" content="AI WELLNESSCORE - Skin Intelligence">
-    <meta property="twitter:description" content="Real skin analysis powered by Face++ at your fingertips.">
+    <meta property="twitter:description" content="Real skin analysis insights at your fingertips.">
     <meta property="twitter:image" content="https://aiwellnesscore.com/og-image.png">
 
     <script type="application/ld+json">
@@ -266,7 +266,7 @@
         }
 
         .feature-list li::before {
-            content: '\u2713';
+            content: '?';
             color: var(--brand-highlight);
             font-weight: 700;
             margin-right: 0.5rem;
@@ -410,7 +410,7 @@
                         <header class="space-y-4 mb-8 text-center md:text-left">
                             <span class="text-xs font-semibold tracking-[0.18em] uppercase text-[color:var(--brand-muted)]">Step 1</span>
                             <h1 class="text-3xl md:text-4xl font-black tracking-tight">Capture or upload your skin snapshot</h1>
-                            <p class="text-sm md:text-base text-[color:var(--brand-muted)] max-w-xl">Use a clear, well-lit photo (or take a live selfie) so Face++ can map 40+ dermatologist-grade skin indicators within seconds.</p>
+                            <p class="text-sm md:text-base text-[color:var(--brand-muted)] max-w-xl">Use a clear, well-lit photo (or take a live selfie) so our analysis engine can map 40+ dermatologist-grade skin indicators within seconds.</p>
                             <div class="tab-switch">
                                 <button class="tab-button active" data-input-tab="upload">Upload photo</button>
                                 <button class="tab-button" data-input-tab="camera">Use live camera</button>
@@ -442,7 +442,7 @@
                         <header class="space-y-3 text-center md:text-left">
                             <span class="text-xs font-semibold tracking-[0.18em] uppercase text-[color:var(--brand-muted)]">Step 2</span>
                             <h2 class="text-2xl md:text-3xl font-bold">Choose how deep you want to go</h2>
-                            <p class="text-sm md:text-base text-[color:var(--brand-muted)]">Every plan includes a downloadable report. Higher tiers unlock Face++ overlays, coordinate maps, and richer severity scoring.</p>
+                            <p class="text-sm md:text-base text-[color:var(--brand-muted)]">Every plan includes a downloadable report. Higher tiers unlock advanced overlays, coordinate maps, and richer severity scoring.</p>
                         </header>
                         <div class="plan-grid mt-8">
                             <article class="plan-card" data-plan="basic">
@@ -495,8 +495,8 @@
                     <div id="results-stage" class="stage-card p-8 md:p-10 hidden">
                         <header class="space-y-3 text-center md:text-left">
                             <span class="text-xs font-semibold tracking-[0.18em] uppercase text-[color:var(--brand-muted)]">Step 3</span>
-                            <h2 class="text-2xl md:text-3xl font-bold">Your Face++ skin intelligence report</h2>
-                            <p class="text-sm md:text-base text-[color:var(--brand-muted)]">Every metric below is returned directly from Face++ Professional Skin Analysis.</p>
+                            <h2 class="text-2xl md:text-3xl font-bold">Your skin intelligence report</h2>
+                            <p class="text-sm md:text-base text-[color:var(--brand-muted)]">Every metric below is returned directly from our analysis engine.</p>
                         </header>
                         <div class="mt-8 flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start">
                             <img id="result-image" src="#" alt="Analyzed face preview" class="w-48 h-48 rounded-2xl object-cover border-2 border-[color:var(--brand-accent)] shadow-lg">
@@ -518,7 +518,7 @@
 
         <footer class="px-4 md:px-6 py-10 border-t border-[color:var(--border-soft)] bg-white/70">
             <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-                <p>AI WELLNESSCORE &copy; 2025. Educational insights · Not a medical service.</p>
+                <p>AI WELLNESSCORE &copy; 2025. Educational insights - Not a medical service.</p>
                 <div class="flex items-center gap-4">
                     <a href="privacy.html" class="hover:text-[color:var(--brand-dark-text)]">Privacy</a>
                     <a href="terms.html" class="hover:text-[color:var(--brand-dark-text)]">Terms</a>
@@ -531,22 +531,40 @@
     <div id="analysis-overlay" class="analysis-overlay hidden">
         <div class="overlay-card">
             <div class="overlay-spinner"></div>
-            <h3 id="analysis-overlay-message" class="text-lg font-semibold">Processing…</h3>
+            <h3 id="analysis-overlay-message" class="text-lg font-semibold">Processing...</h3>
             <p id="analysis-overlay-subtitle" class="overlay-subtitle"></p>
         </div>
     </div>
-
-    <div id="plan-modal" class="modal-backdrop hidden">
-        <div class="modal-card">
-            <button id="plan-modal-close" class="modal-close" aria-label="Close">&times;</button>
-            <span id="plan-modal-tag" class="modal-tag"></span>
-            <div>
-                <h3 id="plan-modal-title" class="text-2xl font-bold"></h3>
-                <p id="plan-modal-price" class="text-lg font-semibold mt-1"></p>
-                <p id="plan-modal-description" class="text-sm text-[color:var(--brand-muted)] mt-2"></p>
+    <div id="payment-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div id="payment-modal-content" class="w-full max-w-3xl bg-white rounded-2xl shadow-xl transform scale-95 opacity-0 transition duration-300">
+            <div class="p-6 md:p-8 relative">
+                <button id="payment-modal-close" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-3xl leading-none" aria-label="Close">&times;</button>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-center mb-6" style="color: var(--brand-dark-text);">Secure your plan</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                                                            <div class="bg-gray-50 rounded-xl p-5 md:p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">Plan summary</h3>
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <div class="flex justify-between">
+                                <span>Selected plan</span>
+                                <span id="modal-plan-name">--</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Regular price</span>
+                                <span id="modal-plan-regular">$0.00</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-gray-900 font-bold text-xl py-3 border-t border-gray-200 mt-4">
+                            <span>Today's price</span>
+                            <span id="modal-plan-total">$0.00</span>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 md:p-6 border border-gray-100">
+                        <p id="modal-plan-description" class="text-sm text-[color:var(--brand-muted)] mb-4"></p>
+                        <ul id="modal-plan-features" class="feature-list mb-6"></ul>
+                        <button id="payment-modal-confirm" class="cta-button w-full">Pay & analyze</button>
+                    </div>
+                </div>
             </div>
-            <ul id="plan-modal-features" class="feature-list"></ul>
-            <button id="plan-modal-action" class="cta-button w-full">Secure payment & analyze</button>
         </div>
     </div>
     <script>
@@ -556,13 +574,13 @@
                 title: 'Basic plan',
                 tag: 'Starter',
                 price: '$1',
-                description: 'Essential Face++ metrics to understand your baseline skin health.',
+                description: 'Essential skin metrics to understand your baseline skin health.',
                 modalFeatures: [
                     'Skin type classification with confidence levels',
                     'Wrinkle, acne, pore and pigmentation detection',
                     'Under-eye puffiness and skin age snapshot'
                 ],
-                subtitle: 'Delivering core Face++ insights'
+                subtitle: 'Delivering core skin insights'
             },
             advanced: {
                 title: 'Advanced plan',
@@ -586,7 +604,7 @@
                     'Dark circle contours & ROI combined map',
                     'Texture, roughness, pigmentation, and sensitivity heatmaps'
                 ],
-                subtitle: 'Delivering the complete Face++ dataset'
+                subtitle: 'Delivering the complete full dataset'
             }
         };
 
@@ -646,14 +664,15 @@
         const overlay = document.getElementById('analysis-overlay');
         const overlayMessage = document.getElementById('analysis-overlay-message');
         const overlaySubtitle = document.getElementById('analysis-overlay-subtitle');
-        const planModal = document.getElementById('plan-modal');
-        const planModalClose = document.getElementById('plan-modal-close');
-        const planModalTag = document.getElementById('plan-modal-tag');
-        const planModalTitle = document.getElementById('plan-modal-title');
-        const planModalPrice = document.getElementById('plan-modal-price');
-        const planModalDescription = document.getElementById('plan-modal-description');
-        const planModalFeatures = document.getElementById('plan-modal-features');
-        const planModalAction = document.getElementById('plan-modal-action');
+        const paymentModal = document.getElementById('payment-modal');
+        const paymentModalContent = document.getElementById('payment-modal-content');
+        const paymentModalClose = document.getElementById('payment-modal-close');
+        const modalPlanName = document.getElementById('modal-plan-name');
+        const modalPlanRegular = document.getElementById('modal-plan-regular');
+        const modalPlanTotal = document.getElementById('modal-plan-total');
+        const modalPlanDescription = document.getElementById('modal-plan-description');
+        const modalPlanFeatures = document.getElementById('modal-plan-features');
+        const paymentModalConfirm = document.getElementById('payment-modal-confirm');
         const resultsContent = document.getElementById('results-content');
         const resultPlanTitle = document.getElementById('result-plan-title');
         const resultPrice = document.getElementById('result-price');
@@ -701,7 +720,7 @@
             }
             clearAllStates();
             uploadStage.classList.add('hidden');
-            showOverlay('Validating photo…', 'Ensuring clarity and face position');
+            showOverlay('Validating photo...', 'Ensuring clarity and face position');
             setTimeout(() => {
                 hideOverlay();
                 planStage.classList.remove('hidden');
@@ -905,7 +924,7 @@
             if (Array.isArray(apiData?.maps)) {
                 apiData.maps.forEach((map) => {
                     const title = MAP_LABELS[map.type] || map.type;
-                    content.push({ title, text: 'Overlay provided by Face++', image: map.dataUrl });
+                    content.push({ title, text: 'Overlay generated by the analysis engine', image: map.dataUrl });
                 });
             }
 
@@ -973,10 +992,10 @@
 
         async function handlePlanPayment(plan) {
             selectedPlan = plan;
-            closePlanModal();
-            showOverlay('Processing secure payment…', PLAN_DETAILS[plan]?.subtitle || 'Connecting to payment gateway');
+            closePaymentModal();
+            showOverlay('Processing secure payment...', PLAN_DETAILS[plan]?.subtitle || 'Connecting to payment gateway');
             await new Promise((resolve) => setTimeout(resolve, 1200));
-            showOverlay('Analyzing your skin…', 'Mapping 40+ dermatologist-style signals');
+            showOverlay('Analyzing your skin...', 'Mapping 40+ dermatologist-style signals');
             try {
                 const apiData = await analyzeSkin(plan);
                 hideOverlay();
@@ -996,25 +1015,27 @@
             }
         }
 
-        function openPlanModal(plan) {
+                function openPaymentModal(plan) {
             if (!PLAN_DETAILS[plan]) return;
             const details = PLAN_DETAILS[plan];
-            planModalTag.textContent = details.tag;
-            planModalTitle.textContent = details.title;
-            planModalPrice.textContent = details.price;
-            planModalDescription.textContent = details.description;
-            planModalFeatures.innerHTML = '';
+            modalPlanName.textContent = details.title;
+            modalPlanRegular.textContent = details.regular || details.price;
+            modalPlanTotal.textContent = details.price;
+            modalPlanDescription.textContent = details.description;
+            modalPlanFeatures.innerHTML = '';
             details.modalFeatures.forEach((feature) => {
                 const li = document.createElement('li');
                 li.textContent = feature;
-                planModalFeatures.appendChild(li);
+                modalPlanFeatures.appendChild(li);
             });
-            planModalAction.dataset.plan = plan;
-            planModal.classList.remove('hidden');
+            paymentModalConfirm.dataset.plan = plan;
+            paymentModal.classList.remove('opacity-0', 'pointer-events-none');
+            paymentModalContent.classList.remove('scale-95', 'opacity-0');
         }
 
-        function closePlanModal() {
-            planModal.classList.add('hidden');
+        function closePaymentModal() {
+            paymentModal.classList.add('opacity-0', 'pointer-events-none');
+            paymentModalContent.classList.add('scale-95', 'opacity-0');
         }
 
         function resetFlow() {
@@ -1060,7 +1081,7 @@
                 const img = new Image();
                 img.onload = function () {
                     if (img.width < 200 || img.height < 200 || img.width > 4096 || img.height > 4096) {
-                        imageError.textContent = 'Image dimensions must be between 200?200 and 4096?4096 pixels.';
+                        imageError.textContent = 'Image dimensions must be between 200 x 200 and 4096 x 4096 pixels.';
                         imageError.classList.remove('hidden');
                         uploadInput.value = '';
                         return;
@@ -1083,20 +1104,20 @@
             switchInputTab('upload');
         });
 
-        planModalClose.addEventListener('click', closePlanModal);
-        planModal.addEventListener('click', (event) => {
-            if (event.target === planModal) closePlanModal();
+        paymentModalClose.addEventListener('click', closePaymentModal);
+        paymentModal.addEventListener('click', (event) => {
+            if (event.target === paymentModal) closePaymentModal();
         });
 
         document.querySelectorAll('[data-plan-select]').forEach((btn) => {
-            btn.addEventListener('click', () => openPlanModal(btn.dataset.planSelect));
+            btn.addEventListener('click', () => openPaymentModal(btn.dataset.planSelect));
         });
 
-        planModalAction.addEventListener('click', () => {
-            const plan = planModalAction.dataset.plan;
+        paymentModalConfirm.addEventListener('click', () => {
+            const plan = paymentModalConfirm.dataset.plan;
             if (!uploadedImageDataUrl) {
                 showError('Please upload or capture a photo first.');
-                closePlanModal();
+                closePaymentModal();
                 resetFlow();
                 return;
             }
@@ -1111,4 +1132,41 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
