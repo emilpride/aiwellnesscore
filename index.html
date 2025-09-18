@@ -172,21 +172,21 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             display: flex;
             align-items: flex-start;
             gap: 0.75rem;
-            border: 1px solid rgba(163, 133, 233, 0.2);
-            background: rgba(255, 255, 255, 0.85);
-            border-radius: 1rem;
-            padding: 0.9rem 1.1rem;
-            box-shadow: 0 20px 50px rgba(76, 56, 119, 0.1);
+            border-radius: 0.9rem;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(163, 133, 233, 0.12);
+            box-shadow: none;
         }
         .hero-icon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 2.35rem;
-            height: 2.35rem;
-            border-radius: 1rem;
-            background: rgba(163, 133, 233, 0.12);
-            box-shadow: inset 0 0 0 1px rgba(163, 133, 233, 0.18);
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 0.75rem;
+            background: rgba(163, 133, 233, 0.08);
+            border: 1px solid rgba(163, 133, 233, 0.18);
         }
         .hero-points svg {
             width: 1.15rem;
@@ -194,6 +194,156 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             flex-shrink: 0;
             color: var(--brand-accent);
             margin-top: 0.15rem;
+        }
+
+        .hero-preview {
+            position: relative;
+            display: grid;
+            gap: 1.25rem;
+        }
+        .hero-preview-card {
+            border-radius: 1.5rem;
+            overflow: hidden;
+            border: 1px solid var(--border-soft);
+            box-shadow: 0 22px 60px rgba(76, 56, 119, 0.15);
+            background: #ffffff;
+        }
+        .hero-preview-card img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .hero-preview-note {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(163, 133, 233, 0.18);
+            border-radius: 1.25rem;
+            padding: 1.25rem 1.5rem;
+            box-shadow: 0 18px 36px rgba(76, 56, 119, 0.12);
+        }
+        .hero-preview-note .note-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #9ca3af;
+        }
+        .hero-preview-note .note-points {
+            list-style: none;
+            margin: 0.75rem 0 0 0;
+            padding: 0;
+            display: grid;
+            gap: 0.6rem;
+            color: #4b5563;
+            font-size: 0.95rem;
+        }
+        .hero-preview-note .note-points li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .hero-preview-note .note-points li::before {
+            content: '';
+            width: 0.45rem;
+            height: 0.45rem;
+            border-radius: 9999px;
+            background: var(--brand-accent);
+            box-shadow: 0 0 0 4px rgba(163, 133, 233, 0.12);
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .hero-preview {
+                max-width: 420px;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .hero-preview-card {
+                border-radius: 1.25rem;
+            }
+        }
+
+        .report-detail-card,
+        .report-preview-panel {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(163, 133, 233, 0.18);
+            border-radius: 1.25rem;
+            padding: 1.25rem 1.5rem;
+            box-shadow: 0 18px 36px rgba(76, 56, 119, 0.1);
+        }
+        .detail-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            color: #9ca3af;
+        }
+        .detail-headline {
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--brand-dark-text);
+        }
+        .detail-copy {
+            margin-top: 0.75rem;
+            font-size: 0.95rem;
+            color: #4b5563;
+            line-height: 1.5;
+        }
+        .detail-list {
+            margin-top: 0.75rem;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 0.5rem;
+            color: #4b5563;
+        }
+        .detail-list li strong {
+            color: var(--brand-dark-text);
+        }
+        .detail-steps {
+            margin-top: 0.75rem;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 0.75rem;
+        }
+        .detail-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        .step-bullet {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 9999px;
+            background: rgba(163, 133, 233, 0.15);
+            color: var(--brand-accent);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .chart-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+        }
+        .chart-fallback {
+            margin-top: 1rem;
+            font-size: 0.95rem;
+            color: #6b7280;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .chart-fallback strong {
+            color: var(--brand-dark-text);
+        }
+        .chart-fallback.hidden {
+            display: none;
         }
         .hero-chip {
             display: inline-flex;
@@ -213,96 +363,16 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             height: 1rem;
             color: var(--brand-accent);
         }
-        .hero-visual {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .hero-orb {
-            width: clamp(240px, 32vw, 320px);
-            aspect-ratio: 1 / 1;
-            border-radius: 50%;
-            background: conic-gradient(from 180deg at 50% 50%, rgba(163, 133, 233, 0.2), rgba(127, 158, 251, 0.55), rgba(83, 229, 255, 0.32), rgba(163, 133, 233, 0.2));
-            position: relative;
-            box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.6), 0 30px 80px rgba(76, 56, 119, 0.25);
-            display: flex;
+        .testimonial-avatar {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 9999px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-        }
-        .hero-orb::after {
-            content: "";
-            position: absolute;
-            inset: 12%;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            box-shadow: inset 0 0 30px rgba(163, 133, 233, 0.25);
-        }
-        .hero-orb-center {
-            position: relative;
-            z-index: 1;
-            width: 68%;
-            height: 68%;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.75);
-            box-shadow: inset 0 0 18px rgba(163, 133, 233, 0.25);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 0.35rem;
-            text-align: center;
-            font-weight: 600;
-            color: var(--brand-dark-text);
-        }
-        .hero-orb-center strong {
-            font-size: clamp(2.1rem, 5vw, 3.2rem);
-            font-weight: 800;
-        }
-        .hero-data-card {
-            position: absolute;
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            background: rgba(255, 255, 255, 0.85);
-            border: 1px solid rgba(163, 133, 233, 0.22);
-            border-radius: 1.25rem;
-            padding: 1.25rem 1.5rem;
-            width: clamp(200px, 58vw, 230px);
-            box-shadow: 0 25px 60px rgba(76, 56, 119, 0.18);
-        }
-        .hero-data-card.primary {\n            top: 8%;\n            left: -22%;\n        }
-        .hero-data-card.secondary {\n            bottom: 6%;\n            right: -22%;\n            width: clamp(180px, 50vw, 210px);\n        }
-        .hero-data-card .label {
-            font-size: 0.85rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #9ca3af;
-            font-weight: 600;
-            margin-bottom: 0.4rem;
-        }
-        .hero-data-card .value {
-            font-size: clamp(1.8rem, 4vw, 2.4rem);
-            font-weight: 800;
-            color: var(--brand-dark-text);
-            display: flex;
-            align-items: baseline;
-            gap: 0.4rem;
-        }
-        .hero-data-card .value .unit {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #9ca3af;
-        }
-        .hero-data-card .subtext {
-            margin-top: 0.35rem;
-            font-size: 0.9rem;
-            color: #6b7280;
-            line-height: 1.4;
-        }
-        .hero-data-card .trend-up {
-            color: #10b981;
             font-weight: 700;
-            margin-right: 0.35rem;
+            color: #ffffff;
+            letter-spacing: 0.02em;
         }
         .stat-pill {
             background: rgba(163, 133, 233, 0.1);
@@ -324,47 +394,19 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         }
         .trusted-brands {
             opacity: 0.85;
-        }
-        .trusted-brands .brand-tag {
+        }        .trusted-brands .brand-tag {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             padding: 0.45rem 1.4rem;
             border-radius: 9999px;
             border: 1px solid rgba(163, 133, 233, 0.26);
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.85);
             color: #6b7280;
             font-size: 0.75rem;
             letter-spacing: 0.22em;
             text-transform: uppercase;
             font-weight: 600;
-            box-shadow: 0 14px 34px rgba(76, 56, 119, 0.12);
-        }
-        @media (max-width: 1024px) {
-            .hero-data-card.primary {
-                left: -4%;
-            }
-            .hero-data-card.secondary {
-                right: -6%;
-            }
-        }
-        @media (max-width: 768px) {
-            .hero-section {
-                padding: clamp(2.2rem, 9vw, 3.2rem);
-            }
-            .hero-visual {
-                flex-direction: column;
-            }
-            .hero-data-card {
-                position: relative;
-                inset: auto;
-                width: 100%;
-                max-width: 320px;
-                margin: 1rem auto 0 auto;
-            }
-            .hero-data-card.secondary {
-                margin-top: 1rem;
-            }
         }
 
         .cta-button {
@@ -374,6 +416,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             box-shadow: 0 12px 28px rgba(127, 158, 251, 0.35);
             white-space: nowrap;
         }
+
         .cta-button:hover:not(:disabled) {
             transform: translateY(-3px);
             box-shadow: 0 18px 36px rgba(127, 158, 251, 0.4);
@@ -470,77 +513,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         .faq-content > div {
             overflow: hidden;
         }
-    
-        .hero-visual {
-            transform: perspective(1200px) rotateX(0deg) rotateY(0deg);
-            transform-style: preserve-3d;
-            transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .hero-orb {
-            position: relative;
-            background: radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.35) 60%, rgba(163, 133, 233, 0.25) 100%);
-            transform-style: preserve-3d;
-            overflow: hidden;
-        }
-        .hero-orb::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            background: conic-gradient(from 180deg at 50% 50%, rgba(163, 133, 233, 0.25), rgba(127, 158, 251, 0.6), rgba(83, 229, 255, 0.35), rgba(163, 133, 233, 0.25));
-            animation: orb-spin 18s linear infinite;
-            opacity: 0.85;
-            filter: blur(0px);
-        }
-        .hero-orb::after {
-            content: "";
-            position: absolute;
-            inset: 12%;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.55);
-            box-shadow: inset 0 0 30px rgba(163, 133, 233, 0.25);
-        }
-        .hero-orb-center {
-            animation: orb-breathe 8s ease-in-out infinite;
-        }
-        .hero-data-card {
-            will-change: transform;
-            animation: card-float 9s ease-in-out infinite;
-            transform-origin: center;
-        }
-        .hero-data-card.primary {
-            animation-delay: 0.6s;
-        }
-        .hero-data-card.secondary {
-            animation-delay: 1.8s;
-            animation-direction: alternate;
-        }
-        .hero-tag {
-            animation: hero-tag-glow 6s ease-in-out infinite;
-        }
-        .hero-chip {
-            animation: chip-glimmer 7s ease-in-out infinite;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .hero-chip:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 18px 40px rgba(76, 56, 119, 0.18);
-        }
-        .hero-points li {
-            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .hero-points li:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 28px 60px rgba(76, 56, 119, 0.16);
-        }
-        .hero-icon {
-            transition: transform 0.35s ease, box-shadow 0.35s ease;
-        }
-        .hero-points li:hover .hero-icon {
-            transform: scale(1.08);
-            box-shadow: inset 0 0 0 1px rgba(163, 133, 233, 0.32);
-        }
-        .stat-pill {
+.stat-pill {
             opacity: 0;
             transform: translateY(24px);
             transition: transform 0.45s ease, opacity 0.45s ease, box-shadow 0.3s ease;
@@ -553,45 +526,19 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             transform: translateY(-8px) scale(1.03);
             box-shadow: 0 26px 60px rgba(76, 56, 119, 0.18);
         }
-        .trusted-brands {
-            animation: trusted-fade 12s ease-in-out infinite alternate;
+to { transform: rotate(360deg); }
         }
-        .brand-tag {
-            background: linear-gradient(120deg, rgba(255, 255, 255, 0.85), rgba(163, 133, 233, 0.18), rgba(255, 255, 255, 0.85));
-            background-size: 220% 220%;
-            animation: brand-shimmer 10s ease-in-out infinite;
+50% { transform: scale(1.05); box-shadow: inset 0 0 28px rgba(163, 133, 233, 0.35); }
         }
-        .brand-tag:nth-child(2) { animation-delay: 1.5s; }
-        .brand-tag:nth-child(3) { animation-delay: 3s; }
-        .brand-tag:nth-child(4) { animation-delay: 4.5s; }
-
-        @keyframes orb-spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+50% { transform: translate3d(0, -14px, 0); }
         }
-        @keyframes orb-breathe {
-            0%, 100% { transform: scale(1); box-shadow: inset 0 0 18px rgba(163, 133, 233, 0.25); }
-            50% { transform: scale(1.05); box-shadow: inset 0 0 28px rgba(163, 133, 233, 0.35); }
+50% { box-shadow: 0 25px 60px rgba(76, 56, 119, 0.2); }
         }
-        @keyframes card-float {
-            0%, 100% { transform: translate3d(0, 0, 0); }
-            50% { transform: translate3d(0, -14px, 0); }
+50% { box-shadow: 0 18px 40px rgba(76, 56, 119, 0.18); opacity: 0.92; }
         }
-        @keyframes hero-tag-glow {
-            0%, 100% { box-shadow: 0 18px 40px rgba(76, 56, 119, 0.12); }
-            50% { box-shadow: 0 25px 60px rgba(76, 56, 119, 0.2); }
+50% { background-position: 100% 50%; }
         }
-        @keyframes chip-glimmer {
-            0%, 100% { box-shadow: 0 12px 30px rgba(76, 56, 119, 0.12); opacity: 1; }
-            50% { box-shadow: 0 18px 40px rgba(76, 56, 119, 0.18); opacity: 0.92; }
-        }
-        @keyframes brand-shimmer {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        @keyframes trusted-fade {
-            0%, 100% { opacity: 0.85; }
-            50% { opacity: 1; }
+50% { opacity: 1; }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -599,11 +546,6 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                 animation-duration: 0.001ms !important;
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.001ms !important;
-            }
-            .hero-visual {
-                transform: none !important;
-            }
-        }
         .stat-pill-compact {
             padding: 1rem 1.25rem;
             font-size: 0.95rem;
@@ -614,106 +556,88 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 </head>
 <body id="landing-page" class="antialiased">
 
-    <header class="sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-gray-200/50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="index.html"><img src="logo.png" alt="AI WELLNESSCORE Logo" class="h-12 w-auto"></a>
-            <nav class="flex items-center space-x-6">
-                <a href="#faq" class="hidden sm:block text-gray-600 hover:text-gray-900 transition-colors font-medium">FAQ</a>
-                <a href="quiz-new.html" class="px-5 py-2.5 text-sm font-semibold bg-white border border-gray-200 rounded-full hover:bg-gray-100 text-[--brand-dark-text] transition-all">Start Analysis</a>
+    <header class="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100/80">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-6">
+            <a href="index.html" class="flex items-center gap-3">
+                <img src="logo.png" alt="AI WELLNESSCORE" class="h-12 w-auto">
+            </a>
+            <nav class="flex items-center gap-3 sm:gap-5">
+                <a href="#demo-report-section" class="hidden md:inline-flex text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Preview</a>
+                <a href="#faq" class="hidden sm:inline-flex text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">FAQ</a>
+                <a href="quiz-new.html" class="cta-button inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold rounded-full shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[--brand-accent]">Start My Analysis</a>
             </nav>
         </div>
     </header>
-
-    <main class="py-16 md:py-24 space-y-24 md:space-y-32">
+<main class="py-16 md:py-24 space-y-24 md:space-y-32">
         <section class="max-w-7xl mx-auto px-4">
-            <div class="hero-section grid gap-10 lg:grid-cols-[1.1fr_minmax(0,0.9fr)] items-center">
-                <div class="relative z-10 text-left space-y-6">
-                    <span class="hero-tag">Personalized by AI &bull; Takes 2 minutes</span>
+            <div class="hero-section grid gap-12 lg:grid-cols-[1.05fr_minmax(0,0.95fr)] items-center">
+                <div class="relative z-10 space-y-6 text-left">
+                    <span class="hero-tag">Personalized by AI � Takes 2 minutes</span>
                     <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-[--brand-dark-text]">Discover Your <span class="animated-gradient-text">True</span> Wellness Age</h1>
                     <p class="text-lg md:text-xl text-gray-600 max-w-2xl">Our AI analyzes your lifestyle and selfie to reveal your biological age, identify hidden stressors, and build a tailored rejuvenation plan that fits your day.</p>
                     <ul class="hero-points space-y-3">
-                        <li>
+                        <li class="flex items-start gap-3">
                             <span class="hero-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9.707 13.293a1 1 0 01-1.414 1.414l-1.586-1.586a1 1 0 111.414-1.414l.879.879 3.586-3.586a1 1 0 111.414 1.414l-4.293 4.293z" /><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-8 10a8 8 0 1114.32 4.906l-1.474-1.474a2 2 0 00-2.829 0l-.364.364a2 2 0 01-2.828 0l-1.707-1.707a2 2 0 00-2.829 0L5.08 15.32A7.963 7.963 0 014 12z" clip-rule="evenodd"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h12M4 18h8"/></svg>
                             </span>
                             <div>
-                                <p class="font-semibold text-gray-800">Science-backed clarity</p>
-                                <p class="text-gray-500 text-sm">Evidence-based insights rated 4.8/5 by over 12k wellness seekers.</p>
+                                <p class="font-semibold text-gray-800">Understand the why behind your score</p>
+                                <p class="text-sm text-gray-500">See how your routines influence energy, sleep, and focus without reading a dense PDF.</p>
                             </div>
                         </li>
-                        <li>
+                        <li class="flex items-start gap-3">
                             <span class="hero-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
                             </span>
                             <div>
-                                <p class="font-semibold text-gray-800">Secure photo analysis</p>
-                                <p class="text-gray-500 text-sm">AI reads non-medical stress markers вЂ” your selfie never leaves your session.</p>
+                                <p class="font-semibold text-gray-800">Benchmark against people like you</p>
+                                <p class="text-sm text-gray-500">Track how your bio-age trends against peers in your wellness archetype.</p>
                             </div>
                         </li>
-                        <li>
+                        <li class="flex items-start gap-3">
                             <span class="hero-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h10m-6 5h6" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m2-3a9 9 0 11-18 0 9 9 0 0118 0"/></svg>
                             </span>
                             <div>
-                                <p class="font-semibold text-gray-800">Micro-habits you can keep</p>
-                                <p class="text-gray-500 text-sm">Personalized daily actions for sleep, energy, and skin that fit into real life.</p>
+                                <p class="font-semibold text-gray-800">Leave with a doable next step</p>
+                                <p class="text-sm text-gray-500">Get micro-habits you can complete in under ten minutes a day.</p>
                             </div>
                         </li>
                     </ul>
                     <div class="flex flex-col sm:flex-row sm:items-center gap-4 pt-2">
-                        <a href="quiz-new.html" class="cta-button pulsating inline-flex items-center justify-center px-8 py-4 text-lg font-bold rounded-xl shadow-lg">
+                        <a href="quiz-new.html" class="cta-button inline-flex items-center justify-center px-8 py-4 text-lg font-bold rounded-xl shadow-lg">
                             Start My Free Analysis
                         </a>
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 text-sm text-gray-600">
-                            <span class="hero-chip">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.25 7.25a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414L8.75 11.586l6.543-6.543a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                                <span>No credit card required</span>
-                            </span>
-                            <span class="flex items-center gap-1 font-medium text-gray-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-yellow-500"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L3.98 8.72c-.783-.57-.38-1.81.588-1.81H8.03a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                4.8/5 from 250+ reviews
-                            </span>
-                        </div>
+                        <a href="#demo-report-section" class="inline-flex items-center justify-center gap-2 text-sm font-semibold text-[--brand-accent] hover:text-[--brand-dark-text] transition-colors">
+                            View sample report
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 11-1.414-1.414L13.586 10H4a1 1 0 110-2h9.586l-3.293-3.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                        </a>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3 text-sm text-gray-600">
+                        <span class="hero-chip">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.25 7.25a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414L8.75 11.586l6.543-6.543a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            <span>No credit card required</span>
+                        </span>
+                        <span class="flex items-center gap-1 font-medium text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-yellow-500"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L3.98 8.72c-.783-.57-.38-1.81.588-1.81H8.03a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            4.8/5 from 250+ reviews
+                        </span>
                     </div>
                 </div>
-                <div class="relative z-10 hero-visual mx-auto w-full max-w-sm">
-                    <div class="hero-orb">
-                        <div class="hero-orb-center">
-                            Wellness Score
-                            <strong data-animate-number data-target="87" data-duration="2200">0</strong>
-                        </div>
-                    </div>
-                    <div class="hero-data-card primary">
-                        <p class="label">Projected Bio-Age</p>
-                        <p class="value"><span data-animate-number data-target="32" data-duration="2200">0</span> <span class="unit">years</span></p>
-                        <p class="subtext"><span class="trend-up">&#9662; <span data-animate-number data-target="3" data-duration="2200">0</span></span> vs. chronological age</p>
-                    </div>
-                    <div class="hero-data-card secondary">
-                        <p class="label">Focus Area</p>
-                        <p class="value">Stress Reset</p>
-                        <p class="subtext">Daily micro-habits, guided breathwork & recovery cues.</p>
+                <div class="hero-preview">
+                    <figure class="hero-preview-card">
+                        <img src="Step2.png" alt="Sample AI WELLNESSCORE report preview" loading="lazy" class="w-full h-auto">
+                    </figure>
+                    <div class="hero-preview-note">
+                        <p class="note-title">Inside the full report</p>
+                        <ul class="note-points">
+                            <li>Bio-age vs chronological age trendlines tailored to you</li>
+                            <li>Daily focus modules matched to your stressors</li>
+                            <li>Progress milestones you can check in on weekly</li>
+                        </ul>
                     </div>
                 </div>
-            </div>
-            <div class="mt-8 md:mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="stat-pill">
-                    <p class="value"><span data-animate-number data-target="12" data-suffix="k+" data-duration="2400">0</span></p>
-                    <p class="label">Reports delivered worldwide</p>
-                </div>
-                <div class="stat-pill">
-                    <p class="value"><span data-animate-number data-target="94" data-suffix="%" data-duration="2400">0</span></p>
-                    <p class="label">Felt clearer about next steps</p>
-                </div>
-                <div class="stat-pill">
-                    <p class="value"><span data-animate-number data-target="2" data-duration="2400">0</span><span class="unit">m</span> <span data-animate-number data-target="45" data-leading-zero="true" data-duration="2400">00</span><span class="unit">s</span></p>
-                    <p class="label">Average time to complete</p>
-                </div>
-                <div class="stat-pill">
-                    <p class="value"><span data-animate-number data-target="21" data-suffix="-day" data-duration="2400">0</span></p>
-                    <p class="label">Personalized rejuvenation roadmap</p>
-                </div>
-            </div>
-            <div class="trusted-brands mt-8 md:mt-10 flex flex-wrap items-center justify-center gap-4 md:gap-8">
+            </div>            <div class="trusted-brands mt-8 md:mt-10 flex flex-wrap items-center justify-center gap-4 md:gap-8">
                 <span class="brand-tag">Longevity Daily</span>
                 <span class="brand-tag">Biohackers Lab</span>
                 <span class="brand-tag">Mindful Tech</span>
@@ -756,55 +680,68 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                  <p class="mt-3 text-lg text-gray-500">See what our AI can reveal for you.</p>
             </div>
             <div class="content-card p-6 md:p-10 shadow-2xl">
-                <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+                <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
                     <div class="space-y-6 text-center md:text-left">
                         <div>
                             <span class="text-sm font-semibold px-4 py-1.5 rounded-full bg-white/80 border border-gray-200 text-[--brand-dark-text]">Your Wellness Archetype</span>
                             <h3 class="text-4xl font-black text-gray-900 mt-3" style="color: var(--brand-dark-text);">The Balanced Achiever</h3>
+                            <p class="mt-3 text-gray-500">Structured routines keep you steady, but evening screen habits nudge your bio-age a little higher.</p>
                         </div>
                         <div class="flex gap-4 justify-center md:justify-start">
                             <div class="text-center">
                                 <h4 class="text-lg font-bold text-gray-500">Bio-Age</h4>
                                 <p class="text-5xl font-bold mt-1" style="color: var(--brand-accent);"><span data-animate-number data-target="32" data-duration="2400">0</span></p>
                             </div>
-                             <div class="text-center">
+                            <div class="text-center">
                                 <h4 class="text-lg font-bold text-gray-500">Real Age</h4>
                                 <p class="text-5xl text-gray-400 font-bold mt-1"><span data-animate-number data-target="35" data-duration="2400">0</span></p>
                             </div>
                         </div>
+                        <div class="grid gap-4 text-left">
+                            <div class="report-detail-card">
+                                <p class="detail-label">Focus for this week</p>
+                                <p class="detail-headline">Stress reset routine - 10 min/day</p>
+                                <p class="detail-copy">Pair a 3 PM breath reset with an evening digital sunset to recover three points of readiness.</p>
+                            </div>
+                            <div class="report-detail-card">
+                                <p class="detail-label">Signals we flagged</p>
+                                <ul class="detail-list">
+                                    <li><strong>Blue-light overload</strong> — six hours of post-8 PM screen time raises cortisol markers.</li>
+                                    <li><strong>Hydration gap</strong> — afternoons show a 12% dip in recovery when your water target slips.</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                     <div class="space-y-5">
-                        <div class="bg-white/85 border border-gray-200 rounded-2xl p-6 shadow-xl text-left">
-                            <p class="text-sm font-semibold text-gray-500 uppercase tracking-[0.2em]">In your preview</p>
-                            <ul class="mt-4 space-y-3 text-gray-600">
-                                <li class="flex items-start gap-3">
-                                    <span class="hero-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h12M4 18h8"/></svg>
-                                    </span>
+                        <div class="report-preview-panel">
+                            <p class="detail-label">Your next three moves</p>
+                            <ol class="detail-steps">
+                                <li class="detail-step">
+                                    <span class="step-bullet">1</span>
                                     <div>
-                                        <p class="font-semibold text-gray-800">Personalized rejuvenation plan</p>
-                                        <p class="text-sm text-gray-500">Daily micro-habits for sleep, energy, and skin health.</p>
+                                        <p class="font-semibold text-gray-800">90-second breath reset at 3 PM</p>
+                                        <p class="text-sm text-gray-500">Drops the afternoon cortisol spike by 18% when paired with light stretching.</p>
                                     </div>
                                 </li>
-                                <li class="flex items-start gap-3">
-                                    <span class="hero-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
-                                    </span>
+                                <li class="detail-step">
+                                    <span class="step-bullet">2</span>
                                     <div>
-                                        <p class="font-semibold text-gray-800">Wellness archetype breakdown</p>
-                                        <p class="text-sm text-gray-500">Understand how stress, sleep, and mindset shape your profile.</p>
+                                        <p class="font-semibold text-gray-800">Digital sunset 45 minutes before bed</p>
+                                        <p class="text-sm text-gray-500">Improves sleep onset latency by an average of 11 minutes.</p>
                                     </div>
                                 </li>
-                                <li class="flex items-start gap-3">
-                                    <span class="hero-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m2-3a9 9 0 11-18 0 9 9 0 0118 0"/></svg>
-                                    </span>
+                                <li class="detail-step">
+                                    <span class="step-bullet">3</span>
                                     <div>
-                                        <p class="font-semibold text-gray-800">Actionable progress markers</p>
-                                        <p class="text-sm text-gray-500">Track your hydration, recovery, and focus week by week.</p>
+                                        <p class="font-semibold text-gray-800">1L hydration primer before noon</p>
+                                        <p class="text-sm text-gray-500">Keeps afternoon focus score above 82 for the week.</p>
                                     </div>
                                 </li>
-                            </ul>
+                            </ol>
+                        </div>
+                        <div class="report-preview-panel">
+                            <p class="detail-label">How progress is tracked</p>
+                            <p class="detail-copy">Each check-in rolls up into your Wellness Score so you can watch micro-habits pull your bio-age trajectory down over four weeks.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="stat-pill stat-pill-compact bg-white/80 border border-gray-200 rounded-xl p-4 text-center shadow-lg">
@@ -821,6 +758,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             </div>
         </section>
 
+
         <section id="potential-charts-section" class="max-w-5xl mx-auto px-4 animate-on-scroll">
             <div class="text-center mb-12">
                 <h2 class="text-3xl md:text-4xl font-bold text-[--brand-dark-text]">Unlock Your Long-Term Potential</h2>
@@ -829,11 +767,23 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             <div class="grid md:grid-cols-2 gap-8">
                 <div class="content-card p-6 sm:p-8">
                     <h3 class="text-xl font-bold text-center mb-4" style="color: var(--brand-dark-text);">Bio-Age Transformation</h3>
-                    <div class="h-64 sm:h-72"><canvas id="potentialAgeChart"></canvas></div>
+                    <div class="chart-wrapper h-64 sm:h-72">
+                        <canvas id="potentialAgeChart"></canvas>
+                        <div class="chart-fallback" data-chart-fallback="age">
+                            <p><strong>Chronological Age:</strong> 35 vs <strong>Potential Bio-Age:</strong> 32</p>
+                            <p>Stay consistent with evening recovery routines to reclaim three vibrant years.</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="content-card p-6 sm:p-8">
                     <h3 class="text-xl font-bold text-center mb-4" style="color: var(--brand-dark-text);">Life Expectancy Forecast</h3>
-                    <div class="h-64 sm:h-72"><canvas id="potentialLifespanChart"></canvas></div>
+                    <div class="chart-wrapper h-64 sm:h-72">
+                        <canvas id="potentialLifespanChart"></canvas>
+                        <div class="chart-fallback" data-chart-fallback="lifespan">
+                            <p><strong>Standard Forecast:</strong> 82 vs <strong>Potential Lifespan:</strong> 87</p>
+                            <p>Daily micro-habits extend your healthspan by five meaningful years.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -844,7 +794,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                 <div class="content-card p-8 animate-on-scroll">
                     <p class="text-gray-600 italic">"I was shocked by my Wellness Age. It was the wake-up call I needed. The first step was so simple, and it made an immediate difference in my sleep."</p>
                     <div class="flex items-center mt-6">
-                        <img src="https://placehold.co/48x48/f5f2ef/3c3b31?text=JM" alt="Jessica M." class="w-12 h-12 rounded-full mr-4">
+                        <div class="testimonial-avatar mr-4" aria-hidden="true" style="background: linear-gradient(135deg, #a385e9, #7f9efb);">JM</div>
                         <div>
                             <p class="font-bold text-gray-800">Jessica M.</p>
                             <p class="text-sm text-gray-500">Improved score by 8 points</p>
@@ -854,7 +804,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                 <div class="content-card p-8 animate-on-scroll" style="transition-delay: 150ms;">
                     <p class="text-gray-600 italic">"Finally, a wellness tool that isn't about guilt. The 'Creative Owl' archetype resonated so much with me. It felt like it truly understood my lifestyle."</p>
                     <div class="flex items-center mt-6">
-                        <img src="https://placehold.co/48x48/f5f2ef/3c3b31?text=DL" alt="David L." class="w-12 h-12 rounded-full mr-4">
+                        <div class="testimonial-avatar mr-4" aria-hidden="true" style="background: linear-gradient(135deg, #53e5ff, #7f9efb);">DL</div>
                         <div>
                             <p class="font-bold text-gray-800">David L.</p>
                             <p class="text-sm text-gray-500">Gained insight on work stress</p>
@@ -864,7 +814,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                 <div class="content-card p-8 md:col-span-2 lg:col-span-1 animate-on-scroll" style="transition-delay: 300ms;">
                     <p class="text-gray-600 italic">"The photo analysis was fascinating. I had no idea my screen time was showing up as visible eye strain. This service connected the dots for me."</p>
                     <div class="flex items-center mt-6">
-                        <img src="https://placehold.co/48x48/f5f2ef/3c3b31?text=SK" alt="Sarah K." class="w-12 h-12 rounded-full mr-4">
+                        <div class="testimonial-avatar mr-4" aria-hidden="true" style="background: linear-gradient(135deg, #f472b6, #a855f7);">SK</div>
                         <div>
                             <p class="font-bold text-gray-800">Sarah K.</p>
                             <p class="text-sm text-gray-500">Identified key energy drains</p>
@@ -1067,7 +1017,6 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             });
 
             const heroSection = document.querySelector('.hero-section');
-            const heroVisual = heroSection?.querySelector('.hero-visual');
             if (heroSection) {
                 animateNumbers(heroSection);
                 heroSection.querySelectorAll('.stat-pill').forEach((pill, index) => {
@@ -1076,25 +1025,17 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                     }
                 });
             }
-            if (heroSection && heroVisual && !prefersReducedMotion) {
-                heroSection.addEventListener('pointermove', (event) => {
-                    const rect = heroSection.getBoundingClientRect();
-                    const offsetX = event.clientX - rect.left - rect.width / 2;
-                    const offsetY = event.clientY - rect.top - rect.height / 2;
-                    const rotateX = Math.max(Math.min((-offsetY / rect.height) * 12, 12), -12);
-                    const rotateY = Math.max(Math.min((offsetX / rect.width) * 12, 12), -12);
-                    heroVisual.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                });
-                heroSection.addEventListener('pointerleave', () => {
-                    heroVisual.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg)';
-                });
-            }
             // --- Function to render potential charts ---
             function renderPotentialCharts() {
                 const ageCtx = document.getElementById('potentialAgeChart')?.getContext('2d');
                 const lifespanCtx = document.getElementById('potentialLifespanChart')?.getContext('2d');
                 if (!ageCtx || !lifespanCtx) return;
-                
+
+                const hideFallback = (ctx, key) => {
+                    const fallback = ctx.canvas.parentElement.querySelector(`[data-chart-fallback="${key}"]`);
+                    if (fallback) fallback.classList.add('hidden');
+                };
+
                 const animationOptions = {
                     duration: 1500,
                     easing: 'easeOutQuart'
@@ -1120,6 +1061,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                         }
                     }
                 });
+                hideFallback(ageCtx, 'age');
 
                 new Chart(lifespanCtx, {
                     type: 'bar',
@@ -1141,8 +1083,8 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                         }
                     }
                 });
+                hideFallback(lifespanCtx, 'lifespan');
             }
-
             // --- Cookie Consent Logic ---
             const consentBanner = document.getElementById('cookie-consent-banner');
             const acceptBtn = document.getElementById('accept-cookies-btn');
@@ -1182,4 +1124,5 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     </script>
 </body>
 </html>
+
 
