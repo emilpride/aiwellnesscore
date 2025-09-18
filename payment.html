@@ -25,21 +25,37 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
-        :root { 
-            --brand-accent: #debea9;
-            --brand-dark-text: #3c3b31; 
+        :root {
+            --brand-accent: #A385E9;
+            --brand-dark-text: #2d2b33;
+            --brand-highlight: #53E5FF;
+            --surface-strong: #ffffff;
+            --surface-soft: #f7f5ff;
+            --border-soft: rgba(163, 133, 233, 0.18);
         }
         
-        html, body { 
-            overscroll-behavior: none; 
-            font-family: 'Inter', sans-serif; 
-            background: linear-gradient(120deg, #fdfcfb, #f9f7f5, #f5f2ef, #f9f7f5, #fdfcfb);
-            background-size: 400% 400%;
-            animation: moveBackground 40s ease infinite;
+        html, body {
+            overscroll-behavior: none;
+            font-family: 'Inter', 'Raleway', sans-serif;
+            background-color: #ffffff;
+            color: var(--brand-dark-text);
+            -webkit-font-smoothing: antialiased;
+            min-height: 100%;
             scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #payment-page {
+            flex: 1;
+            background-color: #ffffff;
         }
 
         @keyframes moveBackground {
@@ -49,27 +65,31 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         }
 
         .content-card {
-            background-color: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            background-color: var(--surface-strong);
             border-radius: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+            border: 1px solid var(--border-soft);
+            box-shadow: 0 24px 60px rgba(76, 56, 119, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .content-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 32px 80px rgba(76, 56, 119, 0.12);
         }
 
         .cta-button {
-            background-color: var(--brand-dark-text);
-            color: white;
+            background-image: linear-gradient(135deg, var(--brand-accent), #7f9efb);
+            color: #ffffff;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 15px rgba(60, 59, 49, 0.2);
+            box-shadow: 0 12px 28px rgba(127, 158, 251, 0.35);
             white-space: nowrap;
         }
         .cta-button:hover:not(:disabled) {
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(60, 59, 49, 0.3);
+            box-shadow: 0 18px 36px rgba(127, 158, 251, 0.4);
         }
         .cta-button:disabled {
-            opacity: 0.7;
+            opacity: 0.6;
             cursor: not-allowed;
         }
         
@@ -85,16 +105,17 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         #loading-overlay.active { display: flex; }
 
         .timer-box {
-            background-color: var(--brand-dark-text);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
+            background-image: linear-gradient(135deg, var(--brand-accent), #7f9efb);
+            color: #ffffff;
+            padding: 8px 14px;
+            border-radius: 10px;
             font-weight: 700;
             letter-spacing: 1px;
+            box-shadow: 0 16px 32px rgba(127, 158, 251, 0.35);
         }
         
         .plan-toggle-group {
-            background-color: rgba(0,0,0,0.04);
+            background-color: rgba(163, 133, 233, 0.12);
             border-radius: 9999px;
             padding: 4px;
             display: inline-flex;
@@ -103,16 +124,16 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             padding: 8px 20px;
             border-radius: 9999px;
             font-weight: 600;
-            color: #57534e; /* stone-600 */
+            color: #625b71;
             cursor: pointer;
             transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
             border: none;
             background-color: transparent;
         }
         .plan-toggle-btn.active {
-            background-color: white;
+            background-color: #ffffff;
             color: var(--brand-dark-text);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 20px rgba(76, 56, 119, 0.18);
         }
 
         #sales-section {
@@ -120,16 +141,17 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         }
         
         .plan-option {
-            border: 2px solid #E5E7EB;
+            border: 2px solid rgba(163, 133, 233, 0.2);
             border-radius: 1rem;
-            transition: border-color 0.2s ease, background-color 0.2s ease;
+            background-color: rgba(255, 255, 255, 0.85);
+            transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
             cursor: pointer;
         }
         
         .custom-radio {
             width: 1.25rem;
             height: 1.25rem;
-            border: 2px solid #D1D5DB;
+            border: 2px solid rgba(163, 133, 233, 0.4);
             border-radius: 50%;
             margin-right: 1rem;
             flex-shrink: 0;
@@ -147,14 +169,15 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         }
 
         input[type="radio"]:checked + .plan-option {
-             border-color: var(--brand-dark-text);
-             background-color: #FFF;
+             border-color: var(--brand-accent);
+             background-color: #ffffff;
+             box-shadow: 0 18px 40px rgba(76, 56, 119, 0.18);
         }
         input[type="radio"]:checked + .plan-option .custom-radio {
-            border-color: var(--brand-dark-text);
+            border-color: var(--brand-accent);
         }
         input[type="radio"]:checked + .plan-option .custom-radio .inner-circle {
-            background-color: var(--brand-dark-text);
+            background-color: var(--brand-accent);
         }
         
         details summary::-webkit-details-marker { display: none; }
@@ -174,6 +197,16 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             font-weight: 300;
             transition: transform 0.3s ease-in-out;
         }
+        h1, h2, h3, h4 {
+            font-family: 'Raleway', 'Inter', sans-serif;
+            letter-spacing: -0.01em;
+        }
+
+        .section-heading {
+            font-size: clamp(1.75rem, 3vw, 2.25rem);
+            font-weight: 700;
+        }
+
         details[open] summary:after {
             transform: translateY(-50%) rotate(45deg);
         }
@@ -190,9 +223,10 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         }
         #payment-element {
             padding: 1.25rem;
-            border: 1px solid #d1d5db;
-            background-color: white;
-            border-radius: 12px;
+            border: 1px solid rgba(163, 133, 233, 0.25);
+            background-color: #ffffff;
+            border-radius: 14px;
+            box-shadow: inset 0 0 0 1px rgba(163, 133, 233, 0.08);
         }
         #payment-request-button > div {
              height: 48px;
@@ -200,9 +234,9 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         }
     </style>
 </head>
-<body class="antialiased text-gray-800">
+<body id="payment-page" class="antialiased">
 
-    <div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex-col items-center justify-center">
+    <div id="loading-overlay" class="fixed inset-0 bg-white/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
         <div class="w-16 h-16 border-4 border-gray-300 border-t-[--brand-accent] rounded-full animate-spin"></div>
         <p class="mt-4 text-lg font-semibold text-gray-700">Loading...</p>
     </div>
@@ -324,7 +358,7 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                 </div>
             </label>
             <div class="relative">
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[--brand-dark-text] text-white text-xs font-bold px-3 py-1 rounded-full z-10">MOST POPULAR</div>
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[--brand-accent] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">MOST POPULAR</div>
                 <label>
                     <input type="radio" name="plan" value="advanced" class="sr-only" checked>
                     <div class="plan-option p-4 flex justify-between items-center">
