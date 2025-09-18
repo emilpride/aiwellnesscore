@@ -1,0 +1,745 @@
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <script>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '785592354117222');
+        fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
+    /></noscript>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skin AI - Your Personal Skin Analysis</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta name="description" content="Our AI analyzes your lifestyle and selfie to reveal your true wellness age and create a personalized plan for rejuvenation.">
+    <link rel="canonical" href="https://aiwellnesscore.com/" />
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aiwellnesscore.com/">
+    <meta property="og:title" content="AI WELLNESSCORE - Discover Your True Wellness Age">
+    <meta property="og:description" content="Our AI analyzes your lifestyle and selfie to reveal your true wellness age and provides a personalized plan to fight burnout and improve skin health.">
+    <meta property="og:image" content="https://aiwellnesscore.com/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://aiwellnesscore.com/">
+    <meta property="twitter:title" content="AI WELLNESSCORE - Discover Your True Wellness Age">
+    <meta property="twitter:description" content="Our AI analyzes your lifestyle and selfie to reveal your true wellness age and provides a personalized plan to fight burnout and improve skin health.">
+    <meta property="twitter:image" content="https://aiwellnesscore.com/og-image.png">
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": "AI WELLNESSCORE",
+          "applicationCategory": "HealthApplication",
+          "operatingSystem": "Web",
+          "offers": {
+            "@type": "Offer",
+            "price": "9.99",
+            "priceCurrency": "USD"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "reviewCount": "250"
+          },
+          "description": "An educational tool that provides insights into your lifestyle and general well-being through an AI-powered quiz and photo analysis."
+        }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --brand-accent: #debea9;
+            --brand-accent-strong: #c7a996;
+            --brand-dark-text: #3c3b31;
+            --brand-muted: #6f6c66;
+            --surface-strong: #ffffff;
+            --surface-soft: rgba(255, 255, 255, 0.82);
+            --surface-outline: rgba(60, 59, 49, 0.08);
+            --bg-gradient: linear-gradient(140deg, #fdfcfb 0%, #f9f7f5 35%, #f5f2ef 68%, #fdfcfb 100%);
+        }
+
+        html, body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--brand-dark-text);
+            min-height: 100%;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            body {
+                background-size: 200% 200%;
+                animation: slowGlow 26s ease-in-out infinite;
+            }
+        }
+
+        @keyframes slowGlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .page-shell {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header.sticky {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(60, 59, 49, 0.08);
+        }
+
+        .card-surface {
+            background: var(--surface-soft);
+            border: 1px solid var(--surface-outline);
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 48px rgba(60, 59, 49, 0.08);
+        }
+
+        .upload-dropzone {
+            border: 2px dashed rgba(60, 59, 49, 0.18);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .upload-dropzone:hover {
+            border-color: var(--brand-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 16px 32px rgba(60, 59, 49, 0.1);
+        }
+
+        .skin-card {
+            position: relative;
+            transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .skin-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 50px rgba(60, 59, 49, 0.12);
+        }
+
+        .skin-card.selected {
+            border-color: var(--brand-accent);
+            box-shadow: 0 26px 56px rgba(60, 59, 49, 0.16);
+        }
+
+        .skin-card button[disabled] {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: -0.75rem;
+            right: 1.5rem;
+            background: var(--brand-accent);
+            color: var(--brand-dark-text);
+            font-weight: 700;
+            font-size: 0.7rem;
+            padding: 0.45rem 0.9rem;
+            border-radius: 999px;
+            box-shadow: 0 12px 24px rgba(60, 59, 49, 0.18);
+            letter-spacing: 0.08em;
+        }
+        .cta-button {
+            background: var(--brand-dark-text);
+            color: #ffffff;
+            border-radius: 999px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+            box-shadow: 0 14px 28px rgba(60, 59, 49, 0.16);
+        }
+
+        .cta-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            background: var(--brand-accent);
+            color: var(--brand-dark-text);
+            box-shadow: 0 18px 42px rgba(60, 59, 49, 0.18);
+        }
+
+        .analysis-preview {
+            position: relative;
+            width: 17rem;
+            height: 17rem;
+            border-radius: 1.5rem;
+            border: 2px solid rgba(222, 190, 169, 0.6);
+            overflow: hidden;
+            box-shadow: 0 22px 48px rgba(60, 59, 49, 0.18);
+        }
+
+        .scan-line {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, transparent, rgba(222, 190, 169, 0.85), transparent);
+            box-shadow: 0 0 12px rgba(222, 190, 169, 0.75);
+        }
+
+        @keyframes scanLine {
+            0% { transform: translateY(-6px); }
+            100% { transform: translateY(calc(100% + 6px)); }
+        }
+
+        .scan-line.active {
+            animation: scanLine 2.6s ease-in-out infinite;
+        }
+
+        .results-card {
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(60, 59, 49, 0.07);
+            border-radius: 1.25rem;
+            box-shadow: 0 18px 40px rgba(60, 59, 49, 0.1);
+        }
+
+        .chart-container {
+            position: relative;
+            padding-top: 12px;
+            min-height: 200px;
+        }
+
+        .chart-container canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        .subtle-label {
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--brand-muted);
+        }
+
+        @media (max-width: 768px) {
+            .analysis-preview {
+                width: 14rem;
+                height: 14rem;
+            }
+            .skin-card {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased text-[--brand-dark-text]">
+    <div class="page-shell">
+        <header class="sticky top-0 z-40">
+            <div class="max-w-6xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between gap-6">
+                <a href="index.html" class="flex items-center gap-2">
+                    <img src="logo.png" alt="AI WELLNESSCORE" class="h-10 w-auto">
+                    <span class="text-sm font-semibold tracking-wide text-[--brand-muted] hidden sm:inline">Skin Intelligence</span>
+                </a>
+                <nav class="flex items-center gap-3 sm:gap-5 text-sm font-medium">
+                    <a href="quiz-new.html" class="hidden md:inline-flex text-[--brand-muted] hover:text-[--brand-dark-text] transition-colors">Wellness Quiz</a>
+                    <a href="result.html" class="hidden md:inline-flex text-[--brand-muted] hover:text-[--brand-dark-text] transition-colors">Sample Report</a>
+                    <a href="#plans" class="cta-button inline-flex items-center gap-2 px-4 py-2 font-semibold">
+                        <span>Start Analysis</span>
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="flex-1">
+            <section class="max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16">
+                <div class="grid lg:grid-cols-[1.05fr_minmax(0,0.95fr)] gap-10 lg:gap-16 items-start">
+                    <div class="card-surface p-8 md:p-10">
+                        <header class="mb-8 text-center md:text-left">
+                            <span class="subtle-label">Step 1</span>
+                            <h1 class="mt-2 text-3xl md:text-4xl font-black tracking-tight">Perfect AI Skin Analysis</h1>
+                            <p class="mt-3 text-base md:text-lg text-[--brand-muted]">Upload a clear selfie and let our AI deliver a dermatologist-inspired readout with tailored guidance in seconds.</p>
+                            <div class="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[var(--surface-outline)] bg-white/80 text-sm font-medium text-[--brand-muted]">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-[--brand-accent]"><path d="M10.75 2.75a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z"/><path d="M4 5.75A2.75 2.75 0 016.75 3h6.5A2.75 2.75 0 0116 5.75v8.5A2.75 2.75 0 0113.25 17h-6.5A2.75 2.75 0 014 14.25v-8.5zM5.5 8.5a.75.75 0 011.5 0v4a.75.75 0 01-1.5 0v-4zm3 1.5a.75.75 0 011.5 0v2.5a.75.75 0 01-1.5 0V10zm3 1a.75.75 0 011.5 0v1.5a.75.75 0 01-1.5 0V11z"/></svg>
+                                <span>Derm-grade insights without the clinic invoice</span>
+                            </div>
+                        </header>
+
+                        <div id="upload-state" class="space-y-6">
+                            <div class="text-center">
+                                <h2 class="text-xl font-semibold">Upload your photo</h2>
+                                <p class="mt-2 text-sm text-[--brand-muted]">Use a clear, front-facing JPG under 8 MB for the most accurate read.</p>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <input type="file" id="photo-upload" accept="image/jpeg,image/jpg" class="hidden" onchange="previewImage(event)">
+                                <label for="photo-upload" class="upload-dropzone card-surface w-72 h-72 rounded-3xl flex flex-col items-center justify-center gap-3 text-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-[--brand-muted]"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                                    <div>
+                                        <p class="text-sm font-semibold">Drag & drop or click to upload</p>
+                                        <p id="file-label" class="text-xs text-[--brand-muted] mt-1">JPG or JPEG, up to 8 MB</p>
+                                    </div>
+                                </label>
+                                <p id="image-error" class="hidden mt-3 text-sm font-semibold text-red-500"></p>
+                            </div>
+                            <p class="text-xs text-[--brand-muted] text-center">
+                                By continuing you agree to our <a href="terms.html" target="_blank" class="underline hover:text-[--brand-dark-text]">Terms</a> and <a href="privacy.html" target="_blank" class="underline hover:text-[--brand-dark-text]">Privacy Policy</a>.
+                            </p>
+                        </div>
+
+                        <div id="analysis-state" class="hidden flex flex-col items-center gap-6">
+                            <div class="analysis-preview">
+                                <img id="image-preview" src="#" alt="Uploaded preview" class="w-full h-full object-cover">
+                                <div id="scan-line" class="scan-line"></div>
+                            </div>
+                            <p class="text-sm text-[--brand-muted]">Hold tight while we calibrate lighting, tone, and focus for the best analysis.</p>
+                        </div>
+
+                        <div id="loading" class="hidden text-center space-y-4">
+                            <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/80 border border-[var(--surface-outline)]">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[--brand-accent] animate-ping"></span>
+                                <span class="text-sm font-medium text-[--brand-muted]">Analyzing your photo…</span>
+                            </div>
+                            <p class="text-sm text-[--brand-muted] max-w-sm mx-auto">We are mapping over 40 facial zones to understand hydration, tone, sensitivity and structural stress.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-6" id="plans">
+                        <div id="plans-state" class="hidden card-surface p-8 md:p-10">
+                            <div class="text-center md:text-left">
+                                <span class="subtle-label">Step 2</span>
+                                <h2 class="mt-2 text-2xl md:text-3xl font-bold">Choose your analysis depth</h2>
+                                <p class="mt-2 text-sm md:text-base text-[--brand-muted]">Every plan includes a downloadable report, visual overlays, and skincare guidance tailored to your routine.</p>
+                            </div>
+                            <div class="grid md:grid-cols-3 gap-4 mt-8">
+                                <article id="basic-plan" class="skin-card card-surface p-6 flex flex-col" onclick="selectPlan('basic')">
+                                    <h3 class="text-lg font-bold">Basic</h3>
+                                    <div class="flex items-baseline gap-2 mt-2">
+                                        <span class="text-3xl font-extrabold">$1</span>
+                                        <span class="text-sm font-medium text-[--brand-muted] line-through">$2</span>
+                                    </div>
+                                    <p class="mt-3 text-sm text-[--brand-muted]">Fast insights on your most visible skin concerns.</p>
+                                    <ul class="mt-4 text-sm text-[--brand-muted] space-y-2 flex-1">
+                                        <li>Wrinkle and fine-line detection</li>
+                                        <li>Acne and pore monitoring</li>
+                                        <li>Pigmentation spotting</li>
+                                        <li>Under-eye status</li>
+                                    </ul>
+                                    <button class="cta-button mt-6 py-2.5 px-4 font-semibold">Select</button>
+                                </article>
+
+                                <article id="advanced-plan" class="skin-card card-surface p-6 flex flex-col" onclick="selectPlan('advanced')">
+                                    <span class="plan-badge">Most Popular</span>
+                                    <h3 class="text-lg font-bold">Advanced</h3>
+                                    <div class="flex items-baseline gap-2 mt-2">
+                                        <span class="text-3xl font-extrabold">$5</span>
+                                        <span class="text-sm font-medium text-[--brand-muted] line-through">$7</span>
+                                    </div>
+                                    <p class="mt-3 text-sm text-[--brand-muted]">Deeper metrics, quantified scores, and sensitivity overlays.</p>
+                                    <ul class="mt-4 text-sm text-[--brand-muted] space-y-2 flex-1">
+                                        <li>All Basic features</li>
+                                        <li>Severity scoring for each concern</li>
+                                        <li>Oil & hydration heatmaps</li>
+                                        <li>Sensitivity and redness contouring</li>
+                                    </ul>
+                                    <button class="cta-button mt-6 py-2.5 px-4 font-semibold">Select</button>
+                                </article>
+
+                                <article id="pro-plan" class="skin-card card-surface p-6 flex flex-col" onclick="selectPlan('pro')">
+                                    <h3 class="text-lg font-bold">Professional</h3>
+                                    <div class="flex items-baseline gap-2 mt-2">
+                                        <span class="text-3xl font-extrabold">$9</span>
+                                        <span class="text-sm font-medium text-[--brand-muted] line-through">$12</span>
+                                    </div>
+                                    <p class="mt-3 text-sm text-[--brand-muted]">Dermatologist-level breakdown with every overlay and index.</p>
+                                    <ul class="mt-4 text-sm text-[--brand-muted] space-y-2 flex-1">
+                                        <li>All Advanced features</li>
+                                        <li>Wrinkle analysis across 12 facial zones</li>
+                                        <li>Acne type differentiation</li>
+                                        <li>Pigmentation mapping with coordinates</li>
+                                        <li>Composite skin health dashboard</li>
+                                    </ul>
+                                    <button class="cta-button mt-6 py-2.5 px-4 font-semibold">Select</button>
+                                </article>
+                            </div>
+                        </div>
+
+                        <div id="results" class="hidden card-surface p-8 md:p-10">
+                            <div class="text-center md:text-left">
+                                <span class="subtle-label">Step 3</span>
+                                <h2 class="mt-2 text-2xl md:text-3xl font-bold">Your skin report is ready</h2>
+                                <p class="mt-2 text-sm md:text-base text-[--brand-muted]">Review the highlights below and download your tailored plan straight away.</p>
+                            </div>
+                            <div class="mt-8 flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start">
+                                <img id="result-image" src="#" alt="Analysis preview" class="w-48 h-48 rounded-2xl object-cover border-2 border-[--brand-accent] shadow-lg">
+                                <div class="text-center md:text-left">
+                                    <h3 id="result-plan-title" class="text-xl font-bold"></h3>
+                                    <p id="result-price" class="mt-1 text-lg font-semibold"></p>
+                                    <p id="result-description" class="mt-2 text-sm text-[--brand-muted]"></p>
+                                </div>
+                            </div>
+                            <div id="results-content" class="mt-6 space-y-5"></div>
+                            <div class="mt-8 flex flex-wrap gap-3">
+                                <button onclick="window.location.reload()" class="cta-button px-6 py-2.5 font-semibold">Analyze again</button>
+                                <a href="quiz-new.html" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full border border-[var(--surface-outline)] text-sm font-semibold text-[--brand-muted] hover:border-[--brand-accent] hover:text-[--brand-dark-text] transition">
+                                    Explore wellness quiz
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="px-4 md:px-6 py-10 border-t border-[var(--surface-outline)] bg-white/70">
+            <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[--brand-muted]">
+                <p>AI WELLNESSCORE &copy; 2025. Educational use only · Not a medical service.</p>
+                <div class="flex items-center gap-4">
+                    <a href="privacy.html" class="hover:text-[--brand-dark-text]">Privacy</a>
+                    <a href="terms.html" class="hover:text-[--brand-dark-text]">Terms</a>
+                    <a href="contact.html" class="hover:text-[--brand-dark-text]">Contact</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        let selectedPlan = null;
+        let uploadedFile = null;
+
+        function selectPlan(plan) {
+            document.querySelectorAll('.skin-card').forEach(card => {
+                card.classList.remove('selected');
+                const button = card.querySelector('button');
+                if (button) button.disabled = false;
+            });
+
+            const selected = document.getElementById(`${plan}-plan`);
+            if (!selected) return;
+            selected.classList.add('selected');
+            const planButton = selected.querySelector('button');
+            if (planButton) planButton.disabled = true;
+            selectedPlan = plan;
+            analyzeSkin(plan);
+        }
+
+        function previewImage(event) {
+            const file = event.target.files?.[0];
+            const imagePreview = document.getElementById('image-preview');
+            const imageError = document.getElementById('image-error');
+            const fileLabel = document.getElementById('file-label');
+
+            uploadedFile = null;
+            imageError.classList.add('hidden');
+
+            if (!file) {
+                document.getElementById('upload-state').classList.remove('hidden');
+                document.getElementById('analysis-state').classList.add('hidden');
+                document.getElementById('plans-state').classList.add('hidden');
+                return;
+            }
+
+            const validTypes = ['image/jpeg', 'image/jpg'];
+            const maxSize = 8 * 1024 * 1024;
+
+            if (!validTypes.includes(file.type)) {
+                imageError.textContent = 'Invalid file format. Please use JPG or JPEG.';
+                imageError.classList.remove('hidden');
+                event.target.value = '';
+                return;
+            }
+
+            if (file.size > maxSize) {
+                imageError.textContent = 'File is too large. Maximum size is 8 MB.';
+                imageError.classList.remove('hidden');
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    if (img.width < 200 || img.height < 200 || img.width > 4096 || img.height > 4096) {
+                        imageError.textContent = 'Image dimensions must be between 200x200 and 4096x4096 pixels.';
+                        imageError.classList.remove('hidden');
+                        event.target.value = '';
+                        return;
+                    }
+
+                    uploadedFile = file;
+                    if (fileLabel) fileLabel.textContent = file.name;
+
+                    imagePreview.src = e.target?.result || '#';
+                    document.getElementById('upload-state').classList.add('hidden');
+                    document.getElementById('analysis-state').classList.remove('hidden');
+                    const scanLine = document.getElementById('scan-line');
+                    scanLine?.classList.add('active');
+
+                    setTimeout(() => {
+                        document.getElementById('analysis-state').classList.add('hidden');
+                        document.getElementById('plans-state').classList.remove('hidden');
+                        scanLine?.classList.remove('active');
+                    }, 2200);
+                };
+                img.src = e.target?.result || '#';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function analyzeSkin(plan) {
+            if (!plan || !uploadedFile) {
+                return;
+            }
+
+            document.getElementById('plans-state').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+
+            setTimeout(() => {
+                const results = getSimulatedResults(plan);
+                displayResults(results);
+            }, 2000);
+        }
+        function getSimulatedResults(plan) {
+            const baseResults = {
+                basic: {
+                    title: 'Basic',
+                    price: '$1',
+                    description: "A brief report on your skin's condition with key indicators. Perfect for a quick, affordable first look.",
+                    content: [
+                        { title: 'Wrinkle assessment', text: 'Minor wrinkles detected on the forehead and around the eyes.' },
+                        { title: 'Acne analysis', text: 'No signs of active acne detected.' },
+                        { title: 'Pore analysis', text: 'Enlarged pores observed across the T-zone.' },
+                        { title: 'Pigmentation', text: 'Light pigmentation spots mapped across the cheeks.' },
+                        { title: 'Under-eye status', text: 'Subtle puffiness and mild dark circles detected.' }
+                    ]
+                },
+                advanced: {
+                    content: [
+                        { title: 'Overall skin health score', text: 'Your current score is 85 out of 100.' },
+                        {
+                            title: 'Wrinkle breakdown',
+                            text: 'Detected 12 fine lines and 3 deep wrinkles.',
+                            chart: {
+                                type: 'bar',
+                                data: {
+                                    labels: ['Fine lines', 'Deep wrinkles'],
+                                    datasets: [{
+                                        label: 'Count',
+                                        data: [12, 3],
+                                        backgroundColor: ['#debea9', '#a58d7c'],
+                                        borderColor: ['#3c3b31', '#3c3b31'],
+                                        borderWidth: 1
+                                    }]
+                                }
+                            }
+                        },
+                        {
+                            title: 'Pore & blackhead score',
+                            text: 'Pore score: 70/100, blackhead score: 81/100.',
+                            chart: {
+                                type: 'doughnut',
+                                data: {
+                                    labels: ['Pores', 'Blackheads'],
+                                    datasets: [{
+                                        label: 'Score',
+                                        data: [70, 81],
+                                        backgroundColor: ['#a58d7c', '#debea9'],
+                                        borderColor: ['#ffffff'],
+                                        borderWidth: 2
+                                    }]
+                                }
+                            }
+                        },
+                        {
+                            title: 'Oil & hydration map',
+                            text: 'Oily zones: 25%. Dehydrated zones: 15%.',
+                            image: 'https://placehold.co/600x400/f5f2ef/debea9?text=Oil+and+Hydration+Map'
+                        },
+                        {
+                            title: 'Sensitivity focus',
+                            text: 'Cheek area shows heightened sensitivity. Severity score: 93/100.',
+                            image: 'https://placehold.co/600x400/f5f2ef/debea9?text=Sensitivity+Map'
+                        }
+                    ]
+                },
+                pro: {
+                    content: [
+                        {
+                            title: 'Skin health dashboard',
+                            text: 'Your composite health score is 85 / 100.',
+                            chart: {
+                                type: 'doughnut',
+                                data: {
+                                    labels: ['Health', 'Concerns'],
+                                    datasets: [{
+                                        label: 'Score',
+                                        data: [85, 15],
+                                        backgroundColor: ['#debea9', '#a58d7c'],
+                                        borderColor: ['#ffffff'],
+                                        borderWidth: 2
+                                    }]
+                                }
+                            }
+                        },
+                        {
+                            title: 'Wrinkle & acne overlay',
+                            text: 'Full classification across forehead, eye, and nasolabial zones.',
+                            chart: {
+                                type: 'bar',
+                                data: {
+                                    labels: ['Forehead', 'Eye', 'Nasolabial'],
+                                    datasets: [
+                                        {
+                                            label: 'Wrinkle score',
+                                            data: [75, 80, 85],
+                                            backgroundColor: '#a58d7c'
+                                        },
+                                        {
+                                            label: 'Acne severity',
+                                            data: [5, 20, 10],
+                                            backgroundColor: '#debea9'
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            title: 'Pigmentation & hydration index',
+                            text: 'Freckles, melasma, and hydration levels segmented by facial regions.',
+                            chart: {
+                                type: 'doughnut',
+                                data: {
+                                    labels: ['Hydration', 'Pigmentation', 'Other'],
+                                    datasets: [{
+                                        label: 'Score',
+                                        data: [75, 60, 85],
+                                        backgroundColor: ['#debea9', '#a58d7c', '#f5f2ef'],
+                                        borderColor: ['#ffffff'],
+                                        borderWidth: 2
+                                    }]
+                                }
+                            }
+                        },
+                        {
+                            title: 'Under-eye analysis',
+                            text: 'Structural dark circles detected with medium severity.',
+                            image: 'https://placehold.co/600x400/f5f2ef/debea9?text=Under-Eye+Map'
+                        }
+                    ]
+                }
+            };
+
+            const plans = {
+                basic: {
+                    title: baseResults.basic.title,
+                    price: baseResults.basic.price,
+                    description: baseResults.basic.description,
+                    content: baseResults.basic.content
+                },
+                advanced: {
+                    title: 'Advanced',
+                    price: '$5',
+                    description: 'A detailed report with quantified metrics and visualizations. Perfect for those who seek specific data-driven insights.',
+                    content: [...baseResults.basic.content, ...baseResults.advanced.content]
+                },
+                pro: {
+                    title: 'Professional',
+                    price: '$9',
+                    description: 'A comprehensive report with every parameter and dermatologist-level recommendations.',
+                    content: [...baseResults.basic.content, ...baseResults.advanced.content, ...baseResults.pro.content]
+                }
+            };
+
+            return plans[plan];
+        }
+
+        function displayResults(results) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('result-image').src = document.getElementById('image-preview').src;
+            document.getElementById('result-plan-title').textContent = results.title;
+            document.getElementById('result-price').textContent = results.price;
+            document.getElementById('result-description').textContent = results.description;
+
+            const resultsContent = document.getElementById('results-content');
+            resultsContent.innerHTML = '';
+
+            results.content.forEach(item => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'results-card p-5 md:p-6';
+
+                const heading = document.createElement('h4');
+                heading.className = 'text-lg font-semibold mb-2';
+                heading.textContent = item.title;
+                wrapper.appendChild(heading);
+
+                const bodyText = document.createElement('p');
+                bodyText.className = 'text-sm text-[--brand-muted]';
+                bodyText.textContent = item.text;
+                wrapper.appendChild(bodyText);
+
+                if (item.image) {
+                    const img = document.createElement('img');
+                    img.src = item.image;
+                    img.alt = item.title;
+                    img.className = 'mt-4 rounded-xl border border-[var(--surface-outline)] shadow-sm';
+                    wrapper.appendChild(img);
+                }
+
+                if (item.chart) {
+                    const chartWrapper = document.createElement('div');
+                    chartWrapper.className = 'chart-container';
+                    const canvas = document.createElement('canvas');
+                    const canvasId = `chart-${Math.random().toString(36).slice(2, 9)}`;
+                    canvas.id = canvasId;
+                    chartWrapper.appendChild(canvas);
+                    wrapper.appendChild(chartWrapper);
+
+                    setTimeout(() => {
+                        const ctx = document.getElementById(canvasId)?.getContext('2d');
+                        if (!ctx) return;
+                        new Chart(ctx, {
+                            type: item.chart.type,
+                            data: item.chart.data,
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                        labels: {
+                                            color: getComputedStyle(document.documentElement).getPropertyValue('--brand-dark-text') || '#3c3b31',
+                                            font: { size: 12 }
+                                        }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                        titleColor: '#3c3b31',
+                                        bodyColor: '#3c3b31',
+                                        borderColor: 'rgba(60, 59, 49, 0.12)',
+                                        borderWidth: 1,
+                                        displayColors: true
+                                    }
+                                },
+                                scales: item.chart.type === 'bar' ? {
+                                    x: { ticks: { color: '#3c3b31' }, grid: { color: 'rgba(60,59,49,0.06)' } },
+                                    y: { ticks: { color: '#3c3b31' }, grid: { color: 'rgba(60,59,49,0.06)' } }
+                                } : {}
+                            }
+                        });
+                    }, 0);
+                }
+
+                resultsContent.appendChild(wrapper);
+            });
+        }
+    </script>
+</body>
+</html>
+
