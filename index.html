@@ -477,7 +477,147 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         .faq-content > div {
             overflow: hidden;
         }
-    </style>
+    
+        .hero-visual {
+            transform: perspective(1200px) rotateX(0deg) rotateY(0deg);
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .hero-orb {
+            position: relative;
+            background: radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.35) 60%, rgba(163, 133, 233, 0.25) 100%);
+            transform-style: preserve-3d;
+            overflow: hidden;
+        }
+        .hero-orb::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: conic-gradient(from 180deg at 50% 50%, rgba(163, 133, 233, 0.25), rgba(127, 158, 251, 0.6), rgba(83, 229, 255, 0.35), rgba(163, 133, 233, 0.25));
+            animation: orb-spin 18s linear infinite;
+            opacity: 0.85;
+            filter: blur(0px);
+        }
+        .hero-orb::after {
+            content: "";
+            position: absolute;
+            inset: 12%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.55);
+            box-shadow: inset 0 0 30px rgba(163, 133, 233, 0.25);
+        }
+        .hero-orb-center {
+            animation: orb-breathe 8s ease-in-out infinite;
+        }
+        .hero-data-card {
+            will-change: transform;
+            animation: card-float 9s ease-in-out infinite;
+            transform-origin: center;
+        }
+        .hero-data-card.primary {
+            animation-delay: 0.6s;
+        }
+        .hero-data-card.secondary {
+            animation-delay: 1.8s;
+            animation-direction: alternate;
+        }
+        .hero-tag {
+            animation: hero-tag-glow 6s ease-in-out infinite;
+        }
+        .hero-chip {
+            animation: chip-glimmer 7s ease-in-out infinite;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hero-chip:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 40px rgba(76, 56, 119, 0.18);
+        }
+        .hero-points li {
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .hero-points li:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 28px 60px rgba(76, 56, 119, 0.16);
+        }
+        .hero-icon {
+            transition: transform 0.35s ease, box-shadow 0.35s ease;
+        }
+        .hero-points li:hover .hero-icon {
+            transform: scale(1.08);
+            box-shadow: inset 0 0 0 1px rgba(163, 133, 233, 0.32);
+        }
+        .stat-pill {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: transform 0.45s ease, opacity 0.45s ease, box-shadow 0.3s ease;
+        }
+        .stat-pill.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .stat-pill:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 26px 60px rgba(76, 56, 119, 0.18);
+        }
+        .trusted-brands {
+            animation: trusted-fade 12s ease-in-out infinite alternate;
+        }
+        .brand-tag {
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0.85), rgba(163, 133, 233, 0.18), rgba(255, 255, 255, 0.85));
+            background-size: 220% 220%;
+            animation: brand-shimmer 10s ease-in-out infinite;
+        }
+        .brand-tag:nth-child(2) { animation-delay: 1.5s; }
+        .brand-tag:nth-child(3) { animation-delay: 3s; }
+        .brand-tag:nth-child(4) { animation-delay: 4.5s; }
+
+        @keyframes orb-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes orb-breathe {
+            0%, 100% { transform: scale(1); box-shadow: inset 0 0 18px rgba(163, 133, 233, 0.25); }
+            50% { transform: scale(1.05); box-shadow: inset 0 0 28px rgba(163, 133, 233, 0.35); }
+        }
+        @keyframes card-float {
+            0%, 100% { transform: translate3d(0, 0, 0); }
+            50% { transform: translate3d(0, -14px, 0); }
+        }
+        @keyframes hero-tag-glow {
+            0%, 100% { box-shadow: 0 18px 40px rgba(76, 56, 119, 0.12); }
+            50% { box-shadow: 0 25px 60px rgba(76, 56, 119, 0.2); }
+        }
+        @keyframes chip-glimmer {
+            0%, 100% { box-shadow: 0 12px 30px rgba(76, 56, 119, 0.12); opacity: 1; }
+            50% { box-shadow: 0 18px 40px rgba(76, 56, 119, 0.18); opacity: 0.92; }
+        }
+        @keyframes brand-shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        @keyframes trusted-fade {
+            0%, 100% { opacity: 0.85; }
+            50% { opacity: 1; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+            .hero-visual {
+                transform: none !important;
+            }
+        }
+        .stat-pill-compact {
+            padding: 1rem 1.25rem;
+            font-size: 0.95rem;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(163, 133, 233, 0.18);
+        }
+</style>
 </head>
 <body id="landing-page" class="antialiased">
 
@@ -547,13 +687,13 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                     <div class="hero-orb">
                         <div class="hero-orb-center">
                             Wellness Score
-                            <strong>87</strong>
+                            <strong data-animate-number data-target="87" data-duration="2200">0</strong>
                         </div>
                     </div>
                     <div class="hero-data-card primary">
                         <p class="label">Projected Bio-Age</p>
-                        <p class="value">32 <span class="unit">years</span></p>
-                        <p class="subtext"><span class="trend-up">▼ 3</span> vs. chronological age</p>
+                        <p class="value"><span data-animate-number data-target="32" data-duration="2200">0</span> <span class="unit">years</span></p>
+                        <p class="subtext"><span class="trend-up">&#9662; <span data-animate-number data-target="3" data-duration="2200">0</span></span> vs. chronological age</p>
                     </div>
                     <div class="hero-data-card secondary">
                         <p class="label">Focus Area</p>
@@ -564,19 +704,19 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             </div>
             <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="stat-pill">
-                    <p class="value">12k+</p>
+                    <p class="value"><span data-animate-number data-target="12" data-suffix="k+" data-duration="2400">0</span></p>
                     <p class="label">Reports delivered worldwide</p>
                 </div>
                 <div class="stat-pill">
-                    <p class="value">94%</p>
+                    <p class="value"><span data-animate-number data-target="94" data-suffix="%" data-duration="2400">0</span></p>
                     <p class="label">Felt clearer about next steps</p>
                 </div>
                 <div class="stat-pill">
-                    <p class="value">2m 45s</p>
+                    <p class="value"><span data-animate-number data-target="2" data-duration="2400">0</span><span class="unit">m</span> <span data-animate-number data-target="45" data-leading-zero="true" data-duration="2400">00</span><span class="unit">s</span></p>
                     <p class="label">Average time to complete</p>
                 </div>
                 <div class="stat-pill">
-                    <p class="value">21-day</p>
+                    <p class="value"><span data-animate-number data-target="21" data-suffix="-day" data-duration="2400">0</span></p>
                     <p class="label">Personalized rejuvenation roadmap</p>
                 </div>
             </div>
@@ -632,11 +772,11 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                         <div class="flex gap-4 justify-center md:justify-start">
                             <div class="text-center">
                                 <h4 class="text-lg font-bold text-gray-500">Bio-Age</h4>
-                                <p class="text-5xl font-bold mt-1" style="color: var(--brand-accent);">32</p>
+                                <p class="text-5xl font-bold mt-1" style="color: var(--brand-accent);"><span data-animate-number data-target="32" data-duration="2400">0</span></p>
                             </div>
                              <div class="text-center">
                                 <h4 class="text-lg font-bold text-gray-500">Real Age</h4>
-                                <p class="text-5xl text-gray-400 font-bold mt-1">35</p>
+                                <p class="text-5xl text-gray-400 font-bold mt-1"><span data-animate-number data-target="35" data-duration="2400">0</span></p>
                             </div>
                         </div>
                     </div>
@@ -674,13 +814,13 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                             </ul>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-white/80 border border-gray-200 rounded-xl p-4 text-center shadow-lg">
+                            <div class="stat-pill stat-pill-compact bg-white/80 border border-gray-200 rounded-xl p-4 text-center shadow-lg">
                                 <p class="text-sm font-semibold text-gray-500">Average sleep gain</p>
-                                <p class="text-2xl font-bold text-[--brand-accent]">+47 min</p>
+                                <p class="text-2xl font-bold text-[--brand-accent]"><span data-animate-number data-target="47" data-prefix="+" data-duration="2400">0</span> <span class="unit">min</span></p>
                             </div>
                             <div class="bg-white/80 border border-gray-200 rounded-xl p-4 text-center shadow-lg">
                                 <p class="text-sm font-semibold text-gray-500">Stress reduction</p>
-                                <p class="text-2xl font-bold text-[--brand-accent]">-32%</p>
+                                <p class="text-2xl font-bold text-[--brand-accent]"><span data-animate-number data-target="32" data-prefix="-" data-suffix="%" data-duration="2400">0</span></p>
                             </div>
                         </div>
                     </div>
@@ -805,43 +945,119 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         document.addEventListener('DOMContentLoaded', () => {
             let potentialChartsRendered = false;
 
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+            document.querySelectorAll('[data-animate-number]').forEach(el => {
+                const prefix = el.dataset.prefix || '';
+                const suffix = el.dataset.suffix || '';
+                const start = parseFloat(el.dataset.start || '0');
+                const decimals = parseInt(el.dataset.decimals || '0', 10);
+                let display = decimals > 0 ? start.toFixed(decimals) : Math.round(start);
+                if (el.dataset.leadingZero === 'true') {
+                    display = display.toString().padStart(2, '0');
+                }
+                el.textContent = `${prefix}${display}${suffix}`;
+            });
+
+            const animateNumbers = (root) => {
+                if (!root) return;
+                root.querySelectorAll('[data-animate-number]').forEach(el => {
+                    if (el.dataset.animated === 'true') return;
+                    const target = parseFloat(el.dataset.target);
+                    if (Number.isNaN(target)) return;
+                    const duration = parseInt(el.dataset.duration || '1500', 10);
+                    const prefix = el.dataset.prefix || '';
+                    const suffix = el.dataset.suffix || '';
+                    const decimals = parseInt(el.dataset.decimals || '0', 10);
+                    const leadingZero = el.dataset.leadingZero === 'true';
+                    const start = parseFloat(el.dataset.start || '0');
+                    const easeFn = el.dataset.ease === 'linear' ? (t) => t : easeOutCubic;
+
+                    if (prefersReducedMotion) {
+                        let finalDisplay = decimals > 0 ? target.toFixed(decimals) : Math.round(target);
+                        if (leadingZero) {
+                            finalDisplay = finalDisplay.toString().padStart(2, '0');
+                        }
+                        el.textContent = `${prefix}${finalDisplay}${suffix}`;
+                        el.dataset.animated = 'true';
+                        return;
+                    }
+
+                    const startTime = performance.now();
+
+                    const animate = (now) => {
+                        let progress = Math.min((now - startTime) / duration, 1);
+                        progress = easeFn(progress);
+                        let value = start + (target - start) * progress;
+                        let display = decimals > 0 ? value.toFixed(decimals) : Math.round(value);
+                        if (progress >= 1) {
+                            display = decimals > 0 ? target.toFixed(decimals) : Math.round(target);
+                        }
+                        let output = display.toString();
+                        if (leadingZero) {
+                            output = output.padStart(2, '0');
+                        }
+                        el.textContent = `${prefix}${output}${suffix}`;
+
+                        if (progress < 1) {
+                            requestAnimationFrame(animate);
+                        } else {
+                            el.dataset.animated = 'true';
+                        }
+                    };
+
+                    requestAnimationFrame(animate);
+                });
+            };
             // --- Intersection Observer for fade-in animations ---
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('visible');
-                        
-                        if (entry.target.id === 'demo-report-section') {
+                        animateNumbers(entry.target);
+                        entry.target.querySelectorAll('.stat-pill').forEach((pill, index) => {
+                            if (!pill.classList.contains('is-visible')) {
+                                setTimeout(() => pill.classList.add('is-visible'), index * 120);
+                            }
+                        });                        if (entry.target.id === 'demo-report-section') {
                             const scoreText = entry.target.querySelector('#score-text');
                             const scoreRing = entry.target.querySelector('#score-ring');
                             if (scoreText && scoreRing && !scoreText.dataset.animated) {
                                 scoreText.dataset.animated = 'true';
                                 const finalScore = 82;
-                                
+
                                 const radius = 15.9155;
                                 const circumference = radius * 2 * Math.PI;
-                                
-                                scoreRing.style.strokeDasharray = `${circumference} ${circumference}`;
-                                scoreRing.style.strokeDashoffset = circumference;
-                                
                                 const offset = circumference - (finalScore / 100) * circumference;
-                                setTimeout(() => {
-                                   scoreRing.style.strokeDashoffset = offset;
-                                }, 100);
 
-                                let currentScore = 50;
-                                const interval = setInterval(() => {
-                                    if (currentScore >= finalScore) {
-                                        clearInterval(interval);
-                                        scoreText.textContent = finalScore;
-                                    } else {
-                                        currentScore++;
-                                        scoreText.textContent = currentScore;
-                                    }
-                                }, 25);
+                                scoreRing.style.strokeDasharray = `${circumference} ${circumference}`;
+
+                                if (prefersReducedMotion) {
+                                    scoreRing.style.transition = 'none';
+                                    scoreRing.style.strokeDashoffset = offset;
+                                    scoreText.textContent = finalScore;
+                                } else {
+                                    scoreRing.style.strokeDashoffset = circumference;
+                                    setTimeout(() => {
+                                        scoreRing.style.strokeDashoffset = offset;
+                                    }, 100);
+
+                                    let currentScore = 50;
+                                    const interval = setInterval(() => {
+                                        if (currentScore >= finalScore) {
+                                            clearInterval(interval);
+                                            scoreText.textContent = finalScore;
+                                        } else {
+                                            currentScore++;
+                                            scoreText.textContent = currentScore;
+                                        }
+                                    }, 25);
+                                }
                             }
                         }
-                        
+
                         if (entry.target.id === 'potential-charts-section' && !potentialChartsRendered) {
                             renderPotentialCharts();
                             potentialChartsRendered = true;
@@ -856,6 +1072,29 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                 observer.observe(section);
             });
 
+            const heroSection = document.querySelector('.hero-section');
+            const heroVisual = heroSection?.querySelector('.hero-visual');
+            if (heroSection) {
+                animateNumbers(heroSection);
+                heroSection.querySelectorAll('.stat-pill').forEach((pill, index) => {
+                    if (!pill.classList.contains('is-visible')) {
+                        setTimeout(() => pill.classList.add('is-visible'), 200 + index * 140);
+                    }
+                });
+            }
+            if (heroSection && heroVisual && !prefersReducedMotion) {
+                heroSection.addEventListener('pointermove', (event) => {
+                    const rect = heroSection.getBoundingClientRect();
+                    const offsetX = event.clientX - rect.left - rect.width / 2;
+                    const offsetY = event.clientY - rect.top - rect.height / 2;
+                    const rotateX = Math.max(Math.min((-offsetY / rect.height) * 12, 12), -12);
+                    const rotateY = Math.max(Math.min((offsetX / rect.width) * 12, 12), -12);
+                    heroVisual.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                });
+                heroSection.addEventListener('pointerleave', () => {
+                    heroVisual.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg)';
+                });
+            }
             // --- Function to render potential charts ---
             function renderPotentialCharts() {
                 const ageCtx = document.getElementById('potentialAgeChart')?.getContext('2d');
