@@ -23,20 +23,36 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
-        :root { 
-            --brand-accent: #debea9;
-            --brand-dark-text: #3c3b31; 
+        :root {
+            --brand-accent: #A385E9;
+            --brand-dark-text: #2d2b33;
+            --brand-highlight: #53E5FF;
+            --surface-strong: #ffffff;
+            --surface-soft: #f7f5ff;
+            --border-soft: rgba(163, 133, 233, 0.18);
         }
         
-        html, body { 
-            overscroll-behavior: none; 
-            font-family: 'Inter', sans-serif; 
-            background: linear-gradient(120deg, #fdfcfb, #f9f7f5, #f5f2ef, #f9f7f5, #fdfcfb);
-            background-size: 400% 400%;
-            animation: moveBackground 40s ease infinite;
+        html, body {
+            overscroll-behavior: none;
+            font-family: 'Inter', 'Raleway', sans-serif;
+            background-color: #ffffff;
+            color: var(--brand-dark-text);
+            -webkit-font-smoothing: antialiased;
+            min-height: 100%;
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #profile-page {
+            flex: 1;
+            background-color: #ffffff;
         }
 
         @keyframes moveBackground {
@@ -46,66 +62,91 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         }
 
         .content-card {
-            background-color: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            background-color: var(--surface-strong);
             border-radius: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+            border: 1px solid var(--border-soft);
+            box-shadow: 0 24px 60px rgba(76, 56, 119, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .content-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 32px 80px rgba(76, 56, 119, 0.12);
         }
         
         .cta-button {
-            background-color: var(--brand-dark-text);
-            color: white;
+            background-image: linear-gradient(135deg, var(--brand-accent), #7f9efb);
+            color: #ffffff;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 15px rgba(60, 59, 49, 0.2);
+            box-shadow: 0 12px 28px rgba(127, 158, 251, 0.35);
         }
         .cta-button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(60, 59, 49, 0.3);
+            box-shadow: 0 18px 36px rgba(127, 158, 251, 0.4);
+        }
+        .cta-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .highlight-stat {
             background-color: #ffffff;
-            border-radius: 1.25rem;
-            padding: 1.5rem;
+            border-radius: 1.5rem;
+            padding: 1.75rem;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 12px 36px rgba(76, 56, 119, 0.08);
+            border: 1px solid var(--border-soft);
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
         .highlight-stat .value {
-            font-weight: 900;
-            font-size: 4rem;
+            font-family: 'Raleway', 'Inter', sans-serif;
+            font-weight: 800;
+            font-size: clamp(2.75rem, 4vw, 3.5rem);
             line-height: 1;
             color: var(--brand-dark-text);
+            letter-spacing: -0.02em;
         }
         
         .highlight-stat .label {
             font-weight: 600;
-            color: #78716c; /* stone-500 */
-            margin-top: 0.5rem;
+            color: #6b7280;
+            margin-top: 0.6rem;
         }
 
         .bio-age {
-            background: linear-gradient(to right, #cdaa8d, #b69882);
+            background: linear-gradient(135deg, var(--brand-accent), #7f9efb);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .factor-list li {
-            background-color: #f9fafb;
-            padding: 0.75rem 1rem;
-            border-radius: 0.75rem;
-            border: 1px solid #f3f4f6;
+            background-color: rgba(163, 133, 233, 0.08);
+            padding: 0.85rem 1.25rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(163, 133, 233, 0.18);
             display: flex;
             align-items: flex-start;
+            gap: 0.75rem;
         }
 
-        #loading-overlay { transition: opacity 0.5s ease-out; }
+        h1, h2, h3, h4 {
+            font-family: 'Raleway', 'Inter', sans-serif;
+            letter-spacing: -0.01em;
+        }
+
+        .section-heading {
+            font-size: clamp(1.75rem, 3vw, 2.25rem);
+            font-weight: 700;
+        }
+
+        #loading-overlay {
+            transition: opacity 0.5s ease-out;
+            background-color: rgba(255, 255, 255, 0.92);
+        }
         
         /* BMI Widget Styles - Matched with quiz-new.html */
         #bmi-scale-container {
@@ -144,8 +185,8 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         /* Scroll Animations */
         .animate-on-scroll {
             opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
         }
         .animate-on-scroll.visible {
             opacity: 1;
@@ -210,9 +251,9 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         }
     </style>
 </head>
-<body class="antialiased text-gray-800">
+<body id="profile-page" class="antialiased">
 
-    <div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+    <div id="loading-overlay" class="fixed inset-0 bg-white/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
         <div class="w-16 h-16 border-4 border-gray-300 border-t-[--brand-accent] rounded-full animate-spin"></div>
         <p id="loading-text" class="mt-4 text-lg font-semibold text-gray-700">Preparing your profile...</p>
     </div>
@@ -276,10 +317,10 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
                     <p id="archetype-name" class="text-3xl font-extrabold mt-2" style="color: var(--brand-dark-text);">The Driven Achiever</p>
                     <p id="archetype-desc" class="mt-2 text-gray-700">You excel at work and stay active, but high stress and lack of sleep are holding you back from your full potential.</p>
                 </div>
-                 <div class="content-card p-6 text-center bg-yellow-50 border-yellow-200 animate-on-scroll delay-1">
-                    <p class="font-semibold text-yellow-800">Your Key Focus Area</p>
-                    <p id="focus-area-name" class="text-3xl font-extrabold text-yellow-900 mt-2">Stress Management</p>
-                    <p id="focus-area-desc" class="mt-2 text-yellow-800">Lowering your stress is the single most effective way to improve your biological age and overall well-being.</p>
+                 <div class="content-card p-6 text-center animate-on-scroll delay-1">
+                    <p class="font-semibold text-purple-600">Your Key Focus Area</p>
+                    <p id="focus-area-name" class="text-3xl font-extrabold text-purple-700 mt-2">Stress Management</p>
+                    <p id="focus-area-desc" class="mt-2 text-purple-600">Lowering your stress is the single most effective way to improve your biological age and overall well-being.</p>
                 </div>
             </section>
 
