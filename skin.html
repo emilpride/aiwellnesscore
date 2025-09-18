@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
@@ -19,20 +18,21 @@
     /></noscript>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skin AI - Your Personal Skin Analysis</title>
+    <title>Skin AI - Face++ Powered Skin Intelligence</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <meta name="description" content="Our AI analyzes your lifestyle and selfie to reveal your true wellness age and create a personalized plan for rejuvenation.">
-    <link rel="canonical" href="https://aiwellnesscore.com/" />
+    <meta name="description" content="Upload or capture a live photo to unlock dermatologist-style insights powered by Face++.">
+    <link rel="canonical" href="https://aiwellnesscore.com/skin.html" />
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://aiwellnesscore.com/">
-    <meta property="og:title" content="AI WELLNESSCORE - Discover Your True Wellness Age">
-    <meta property="og:description" content="Our AI analyzes your lifestyle and selfie to reveal your true wellness age and provides a personalized plan to fight burnout and improve skin health.">
+    <meta property="og:url" content="https://aiwellnesscore.com/skin.html">
+    <meta property="og:title" content="AI WELLNESSCORE - Skin Intelligence">
+    <meta property="og:description" content="Real skin analysis powered by Face++ at your fingertips.">
     <meta property="og:image" content="https://aiwellnesscore.com/og-image.png">
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://aiwellnesscore.com/">
-    <meta property="twitter:title" content="AI WELLNESSCORE - Discover Your True Wellness Age">
-    <meta property="twitter:description" content="Our AI analyzes your lifestyle and selfie to reveal your true wellness age and provides a personalized plan to fight burnout and improve skin health.">
+    <meta property="twitter:url" content="https://aiwellnesscore.com/skin.html">
+    <meta property="twitter:title" content="AI WELLNESSCORE - Skin Intelligence">
+    <meta property="twitter:description" content="Real skin analysis powered by Face++ at your fingertips.">
     <meta property="twitter:image" content="https://aiwellnesscore.com/og-image.png">
+
     <script type="application/ld+json">
         {
           "@context": "https://schema.org",
@@ -58,687 +58,1056 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --brand-accent: #debea9;
-            --brand-accent-strong: #c7a996;
-            --brand-dark-text: #3c3b31;
-            --brand-muted: #6f6c66;
+            --brand-accent: #A385E9;
+            --brand-highlight: #53E5FF;
+            --brand-dark-text: #2d2b33;
+            --brand-muted: #6b7280;
+            --border-soft: rgba(163, 133, 233, 0.18);
             --surface-strong: #ffffff;
-            --surface-soft: rgba(255, 255, 255, 0.82);
-            --surface-outline: rgba(60, 59, 49, 0.08);
-            --bg-gradient: linear-gradient(140deg, #fdfcfb 0%, #f9f7f5 35%, #f5f2ef 68%, #fdfcfb 100%);
+            --surface-soft: rgba(255, 255, 255, 0.9);
+            --bg-gradient: linear-gradient(135deg, #f7f5ff 0%, #ffffff 45%, #eff8ff 100%);
         }
 
         html, body {
-            font-family: 'Inter', sans-serif;
+            font-family: "Inter", sans-serif;
             background: var(--bg-gradient);
             color: var(--brand-dark-text);
             min-height: 100%;
             -webkit-font-smoothing: antialiased;
         }
 
-        body {
-            margin: 0;
-        }
+        body { margin: 0; }
 
         @media (prefers-reduced-motion: no-preference) {
             body {
                 background-size: 200% 200%;
-                animation: slowGlow 26s ease-in-out infinite;
+                animation: bgGlow 24s ease-in-out infinite;
             }
         }
 
-        @keyframes slowGlow {
+        @keyframes bgGlow {
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
         }
 
-        .page-shell {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+        .page-shell { display: flex; flex-direction: column; min-height: 100vh; }
 
         header.sticky {
             background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(18px);
-            border-bottom: 1px solid rgba(60, 59, 49, 0.08);
+            border-bottom: 1px solid rgba(163, 133, 233, 0.16);
+            backdrop-filter: blur(16px);
         }
 
-        .card-surface {
+        .stage-card {
             background: var(--surface-soft);
-            border: 1px solid var(--surface-outline);
-            border-radius: 1.5rem;
-            box-shadow: 0 20px 48px rgba(60, 59, 49, 0.08);
+            border: 1px solid rgba(163, 133, 233, 0.12);
+            border-radius: 1.75rem;
+            box-shadow: 0 24px 60px rgba(53, 46, 88, 0.12);
+        }
+
+        .tab-switch {
+            display: inline-flex;
+            padding: 0.3rem;
+            background: rgba(163, 133, 233, 0.1);
+            border-radius: 999px;
+            border: 1px solid rgba(163, 133, 233, 0.2);
+        }
+
+        .tab-button {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.55rem 1.6rem;
+            border-radius: 999px;
+            color: var(--brand-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-button.active {
+            background: var(--surface-strong);
+            color: var(--brand-dark-text);
+            box-shadow: 0 12px 24px rgba(163, 133, 233, 0.2);
         }
 
         .upload-dropzone {
-            border: 2px dashed rgba(60, 59, 49, 0.18);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+            border: 2px dashed rgba(163, 133, 233, 0.4);
+            border-radius: 1.5rem;
+            width: 18rem;
+            height: 18rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7rem;
+            background: rgba(255, 255, 255, 0.85);
+            transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .upload-dropzone:hover {
             border-color: var(--brand-accent);
             transform: translateY(-2px);
-            box-shadow: 0 16px 32px rgba(60, 59, 49, 0.1);
+            box-shadow: 0 18px 36px rgba(163, 133, 233, 0.24);
         }
 
-        .skin-card {
-            position: relative;
-            transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
-            cursor: pointer;
+        .camera-panel {
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(163, 133, 233, 0.18);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
         }
 
-        .skin-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 24px 50px rgba(60, 59, 49, 0.12);
+        .camera-panel video {
+            width: 100%;
+            max-width: 20rem;
+            border-radius: 1.25rem;
+            border: 1px solid rgba(163, 133, 233, 0.18);
+            box-shadow: 0 16px 30px rgba(53, 46, 88, 0.12);
         }
 
-        .skin-card.selected {
-            border-color: var(--brand-accent);
-            box-shadow: 0 26px 56px rgba(60, 59, 49, 0.16);
-        }
-
-        .skin-card button[disabled] {
-            opacity: 0.6;
-            cursor: default;
-        }
-
-        .plan-badge {
-            position: absolute;
-            top: -0.75rem;
-            right: 1.5rem;
-            background: var(--brand-accent);
-            color: var(--brand-dark-text);
-            font-weight: 700;
-            font-size: 0.7rem;
-            padding: 0.45rem 0.9rem;
-            border-radius: 999px;
-            box-shadow: 0 12px 24px rgba(60, 59, 49, 0.18);
-            letter-spacing: 0.08em;
-        }
         .cta-button {
-            background: var(--brand-dark-text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: var(--brand-accent);
             color: #ffffff;
             border-radius: 999px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
-            box-shadow: 0 14px 28px rgba(60, 59, 49, 0.16);
+            padding: 0.85rem 1.8rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            box-shadow: 0 18px 30px rgba(163, 133, 233, 0.26);
         }
 
-        .cta-button:hover:not(:disabled) {
+        .cta-button:hover {
             transform: translateY(-2px);
-            background: var(--brand-accent);
+            background: #8f72e0;
+            box-shadow: 0 24px 40px rgba(163, 133, 233, 0.32);
+        }
+
+        .cta-button.secondary {
+            background: rgba(163, 133, 233, 0.15);
             color: var(--brand-dark-text);
-            box-shadow: 0 18px 42px rgba(60, 59, 49, 0.18);
+            box-shadow: none;
         }
 
-        .analysis-preview {
+        .cta-button.secondary:hover {
+            background: rgba(163, 133, 233, 0.25);
+            transform: none;
+        }
+        .plan-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .plan-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        .plan-card {
             position: relative;
-            width: 17rem;
-            height: 17rem;
+            padding: 1.75rem;
             border-radius: 1.5rem;
-            border: 2px solid rgba(222, 190, 169, 0.6);
-            overflow: hidden;
-            box-shadow: 0 22px 48px rgba(60, 59, 49, 0.18);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(163, 133, 233, 0.16);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .scan-line {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, transparent, rgba(222, 190, 169, 0.85), transparent);
-            box-shadow: 0 0 12px rgba(222, 190, 169, 0.75);
+        .plan-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 42px rgba(53, 46, 88, 0.15);
         }
 
-        @keyframes scanLine {
-            0% { transform: translateY(-6px); }
-            100% { transform: translateY(calc(100% + 6px)); }
-        }
-
-        .scan-line.active {
-            animation: scanLine 2.6s ease-in-out infinite;
-        }
-
-        .results-card {
-            background: rgba(255, 255, 255, 0.78);
-            border: 1px solid rgba(60, 59, 49, 0.07);
-            border-radius: 1.25rem;
-            box-shadow: 0 18px 40px rgba(60, 59, 49, 0.1);
-        }
-
-        .chart-container {
-            position: relative;
-            padding-top: 12px;
-            min-height: 200px;
-        }
-
-        .chart-container canvas {
-            width: 100% !important;
-            height: auto !important;
-        }
-
-        .subtle-label {
+        .plan-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
             font-size: 0.75rem;
             letter-spacing: 0.12em;
             text-transform: uppercase;
+            font-weight: 700;
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            border: 1px solid rgba(163, 133, 233, 0.24);
+            background: rgba(163, 133, 233, 0.12);
+            color: var(--brand-dark-text);
+        }
+
+        .plan-price {
+            font-size: 2.35rem;
+            font-weight: 800;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 0.65rem;
+            font-size: 0.95rem;
             color: var(--brand-muted);
         }
 
-        @media (max-width: 768px) {
-            .analysis-preview {
-                width: 14rem;
-                height: 14rem;
-            }
-            .skin-card {
-                padding: 1.25rem;
-            }
+        .feature-list li::before {
+            content: '\u2713';
+            color: var(--brand-highlight);
+            font-weight: 700;
+            margin-right: 0.5rem;
         }
+
+        .results-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(163, 133, 233, 0.14);
+            border-radius: 1.25rem;
+            box-shadow: 0 18px 40px rgba(53, 46, 88, 0.14);
+        }
+
+        .analysis-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 16, 26, 0.55);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            z-index: 80;
+        }
+
+        .analysis-overlay.hidden { display: none; }
+
+        .overlay-card {
+            background: rgba(28, 26, 38, 0.88);
+            border-radius: 1.5rem;
+            padding: 2.5rem 2.25rem;
+            max-width: 24rem;
+            text-align: center;
+            color: #f8f7ff;
+            box-shadow: 0 32px 70px rgba(18, 16, 31, 0.45);
+        }
+
+        .overlay-spinner {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 999px;
+            border: 4px solid rgba(255, 255, 255, 0.18);
+            border-top-color: #ffffff;
+            margin: 0 auto 1.5rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 16, 26, 0.55);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            z-index: 70;
+        }
+
+        .modal-backdrop.hidden { display: none; }
+
+        .modal-card {
+            position: relative;
+            background: var(--surface-strong);
+            border-radius: 1.75rem;
+            padding: 2.25rem 2rem;
+            max-width: 28rem;
+            width: 100%;
+            box-shadow: 0 32px 70px rgba(53, 46, 88, 0.2);
+            border: 1px solid rgba(163, 133, 233, 0.18);
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.2rem;
+            border: none;
+            background: rgba(163, 133, 233, 0.12);
+            color: var(--brand-dark-text);
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 999px;
+            font-size: 1.35rem;
+            line-height: 2.25rem;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .modal-close:hover { background: rgba(163, 133, 233, 0.22); }
+
+        .modal-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding: 0.4rem 1rem;
+            border-radius: 999px;
+            border: 1px solid rgba(163, 133, 233, 0.24);
+            background: rgba(163, 133, 233, 0.12);
+            color: var(--brand-dark-text);
+        }
+
+        .overlay-subtitle { color: rgba(255, 255, 255, 0.72); font-size: 0.9rem; margin-top: 0.35rem; }
+
+        footer {
+            color: var(--brand-muted);
+            font-size: 0.75rem;
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
-<body class="antialiased text-[--brand-dark-text]">
+<body class="antialiased">
     <div class="page-shell">
         <header class="sticky top-0 z-40">
             <div class="max-w-6xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between gap-6">
-                <a href="index.html" class="flex items-center gap-2">
+                <a href="index.html" class="flex items-center gap-3">
                     <img src="logo.png" alt="AI WELLNESSCORE" class="h-10 w-auto">
-                    <span class="text-sm font-semibold tracking-wide text-[--brand-muted] hidden sm:inline">Skin Intelligence</span>
+                    <span class="hidden sm:inline text-sm font-semibold tracking-wide text-[color:var(--brand-muted)]">Skin Intelligence</span>
                 </a>
-                <nav class="flex items-center gap-3 sm:gap-5 text-sm font-medium">
-                    <a href="quiz-new.html" class="hidden md:inline-flex text-[--brand-muted] hover:text-[--brand-dark-text] transition-colors">Wellness Quiz</a>
-                    <a href="result.html" class="hidden md:inline-flex text-[--brand-muted] hover:text-[--brand-dark-text] transition-colors">Sample Report</a>
-                    <a href="#plans" class="cta-button inline-flex items-center gap-2 px-4 py-2 font-semibold">
-                        <span>Start Analysis</span>
-                    </a>
+                <nav class="flex items-center gap-3 sm:gap-5 text-sm font-semibold text-[color:var(--brand-muted)]">
+                    <a href="quiz-new.html" class="hidden md:inline-flex hover:text-[color:var(--brand-dark-text)] transition">Wellness Quiz</a>
+                    <a href="result.html" class="hidden md:inline-flex hover:text-[color:var(--brand-dark-text)] transition">Sample Report</a>
+                    <a href="#plans" class="cta-button px-4 py-2 text-sm">Start Analysis</a>
                 </nav>
             </div>
         </header>
 
         <main class="flex-1">
-            <section class="max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16">
-                <div class="grid lg:grid-cols-[1.05fr_minmax(0,0.95fr)] gap-10 lg:gap-16 items-start">
-                    <div class="card-surface p-8 md:p-10">
-                        <header class="mb-8 text-center md:text-left">
-                            <span class="subtle-label">Step 1</span>
-                            <h1 class="mt-2 text-3xl md:text-4xl font-black tracking-tight">Perfect AI Skin Analysis</h1>
-                            <p class="mt-3 text-base md:text-lg text-[--brand-muted]">Upload a clear selfie and let our AI deliver a dermatologist-inspired readout with tailored guidance in seconds.</p>
-                            <div class="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[var(--surface-outline)] bg-white/80 text-sm font-medium text-[--brand-muted]">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-[--brand-accent]"><path d="M10.75 2.75a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z"/><path d="M4 5.75A2.75 2.75 0 016.75 3h6.5A2.75 2.75 0 0116 5.75v8.5A2.75 2.75 0 0113.25 17h-6.5A2.75 2.75 0 014 14.25v-8.5zM5.5 8.5a.75.75 0 011.5 0v4a.75.75 0 01-1.5 0v-4zm3 1.5a.75.75 0 011.5 0v2.5a.75.75 0 01-1.5 0V10zm3 1a.75.75 0 011.5 0v1.5a.75.75 0 01-1.5 0V11z"/></svg>
-                                <span>Derm-grade insights without the clinic invoice</span>
+            <section class="max-w-6xl mx-auto px-4 md:px-6 py-14 md:py-18">
+                <div class="grid gap-10 lg:grid-cols-[1.05fr_minmax(0,0.95fr)] items-start">
+                    <div id="upload-stage" class="stage-card p-8 md:p-10">
+                        <header class="space-y-4 mb-8 text-center md:text-left">
+                            <span class="text-xs font-semibold tracking-[0.18em] uppercase text-[color:var(--brand-muted)]">Step 1</span>
+                            <h1 class="text-3xl md:text-4xl font-black tracking-tight">Capture or upload your skin snapshot</h1>
+                            <p class="text-sm md:text-base text-[color:var(--brand-muted)] max-w-xl">Use a clear, well-lit photo (or take a live selfie) so Face++ can map 40+ dermatologist-grade skin indicators within seconds.</p>
+                            <div class="tab-switch">
+                                <button class="tab-button active" data-input-tab="upload">Upload photo</button>
+                                <button class="tab-button" data-input-tab="camera">Use live camera</button>
                             </div>
                         </header>
-
-                        <div id="upload-state" class="space-y-6">
-                            <div class="text-center">
-                                <h2 class="text-xl font-semibold">Upload your photo</h2>
-                                <p class="mt-2 text-sm text-[--brand-muted]">Use a clear, front-facing JPG under 8 MB for the most accurate read.</p>
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <input type="file" id="photo-upload" accept="image/jpeg,image/jpg" class="hidden" onchange="previewImage(event)">
-                                <label for="photo-upload" class="upload-dropzone card-surface w-72 h-72 rounded-3xl flex flex-col items-center justify-center gap-3 text-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-[--brand-muted]"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-                                    <div>
-                                        <p class="text-sm font-semibold">Drag & drop or click to upload</p>
-                                        <p id="file-label" class="text-xs text-[--brand-muted] mt-1">JPG or JPEG, up to 8 MB</p>
-                                    </div>
-                                </label>
-                                <p id="image-error" class="hidden mt-3 text-sm font-semibold text-red-500"></p>
-                            </div>
-                            <p class="text-xs text-[--brand-muted] text-center">
-                                By continuing you agree to our <a href="terms.html" target="_blank" class="underline hover:text-[--brand-dark-text]">Terms</a> and <a href="privacy.html" target="_blank" class="underline hover:text-[--brand-dark-text]">Privacy Policy</a>.
-                            </p>
+                        <div id="upload-tab" class="flex flex-col items-center gap-6">
+                            <input type="file" id="photo-upload" accept="image/jpeg,image/jpg" class="hidden">
+                            <label for="photo-upload" class="upload-dropzone text-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-[color:var(--brand-muted)]"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                                <div>
+                                    <p class="text-sm font-semibold">Drag & drop or click to upload</p>
+                                    <p id="file-label" class="text-xs text-[color:var(--brand-muted)]">JPG or JPEG, up to 8 MB</p>
+                                </div>
+                            </label>
+                            <p id="image-error" class="hidden text-sm font-semibold text-red-500"></p>
                         </div>
-
-                        <div id="analysis-state" class="hidden flex flex-col items-center gap-6">
-                            <div class="analysis-preview">
-                                <img id="image-preview" src="#" alt="Uploaded preview" class="w-full h-full object-cover">
-                                <div id="scan-line" class="scan-line"></div>
+                        <div id="camera-tab" class="hidden camera-panel">
+                            <video id="camera-stream" playsinline autoplay muted class="hidden"></video>
+                            <div class="flex flex-wrap gap-3">
+                                <button id="start-camera-btn" class="cta-button secondary">Enable camera</button>
+                                <button id="capture-photo-btn" class="cta-button hidden">Capture photo</button>
+                                <button id="cancel-camera-btn" class="cta-button secondary hidden">Cancel</button>
                             </div>
-                            <p class="text-sm text-[--brand-muted]">Hold tight while we calibrate lighting, tone, and focus for the best analysis.</p>
+                            <p class="text-xs text-[color:var(--brand-muted)] text-center">Tip: keep your face centered, remove glasses, and use even lighting.</p>
                         </div>
+                        <p id="analysis-error" class="hidden text-sm font-semibold text-red-500 text-center mt-6"></p>
+                    </div>
+                    <div id="plan-stage" class="stage-card p-8 md:p-10 hidden">
+                        <header class="space-y-3 text-center md:text-left">
+                            <span class="text-xs font-semibold tracking-[0.18em] uppercase text-[color:var(--brand-muted)]">Step 2</span>
+                            <h2 class="text-2xl md:text-3xl font-bold">Choose how deep you want to go</h2>
+                            <p class="text-sm md:text-base text-[color:var(--brand-muted)]">Every plan includes a downloadable report. Higher tiers unlock Face++ overlays, coordinate maps, and richer severity scoring.</p>
+                        </header>
+                        <div class="plan-grid mt-8">
+                            <article class="plan-card" data-plan="basic">
+                                <span class="plan-tag">Starter</span>
+                                <div>
+                                    <h3 class="text-xl font-bold">Basic</h3>
+                                    <p class="plan-price">$1</p>
+                                    <p class="text-sm text-[color:var(--brand-muted)]">Capture the essentials: wrinkle, pore, pigment, and under-eye readouts.</p>
+                                </div>
+                                <ul class="feature-list">
+                                    <li>Wrinkle, acne, pore & pigmentation flags</li>
+                                    <li>Under-eye puffiness detection</li>
+                                    <li>Skin type classification</li>
+                                </ul>
+                                <button class="cta-button w-full" data-plan-select="basic">Choose Basic</button>
+                            </article>
 
-                        <div id="loading" class="hidden text-center space-y-4">
-                            <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/80 border border-[var(--surface-outline)]">
-                                <span class="w-2.5 h-2.5 rounded-full bg-[--brand-accent] animate-ping"></span>
-                                <span class="text-sm font-medium text-[--brand-muted]">Analyzing your photo…</span>
-                            </div>
-                            <p class="text-sm text-[--brand-muted] max-w-sm mx-auto">We are mapping over 40 facial zones to understand hydration, tone, sensitivity and structural stress.</p>
+                            <article class="plan-card" data-plan="advanced">
+                                <span class="plan-tag">Most popular</span>
+                                <div>
+                                    <h3 class="text-xl font-bold">Advanced</h3>
+                                    <p class="plan-price">$5</p>
+                                    <p class="text-sm text-[color:var(--brand-muted)]">Unlock severity scoring, hydration maps, and sensitivity overlays.</p>
+                                </div>
+                                <ul class="feature-list">
+                                    <li>All Basic insights plus severity scores</li>
+                                    <li>Hydration & sensitivity heat maps</li>
+                                    <li>Blackhead & pore coordinate exports</li>
+                                </ul>
+                                <button class="cta-button w-full" data-plan-select="advanced">Choose Advanced</button>
+                            </article>
+
+                            <article class="plan-card" data-plan="pro">
+                                <span class="plan-tag">Clinic grade</span>
+                                <div>
+                                    <h3 class="text-xl font-bold">Professional</h3>
+                                    <p class="plan-price">$9</p>
+                                    <p class="text-sm text-[color:var(--brand-muted)]">Full dermatologist-grade overlays, wrinkle matrices, and ROI maps.</p>
+                                </div>
+                                <ul class="feature-list">
+                                    <li>All Advanced insights plus wrinkle outlines</li>
+                                    <li>Roughness & texture maps (PNG overlays)</li>
+                                    <li>Dark-circle contours & ROI combined map</li>
+                                </ul>
+                                <button class="cta-button w-full" data-plan-select="pro">Choose Professional</button>
+                            </article>
                         </div>
                     </div>
-                    <div class="space-y-6" id="plans">
-                        <div id="plans-state" class="hidden card-surface p-8 md:p-10">
-                            <div class="text-center md:text-left">
-                                <span class="subtle-label">Step 2</span>
-                                <h2 class="mt-2 text-2xl md:text-3xl font-bold">Choose your analysis depth</h2>
-                                <p class="mt-2 text-sm md:text-base text-[--brand-muted]">Every plan includes a downloadable report, visual overlays, and skincare guidance tailored to your routine.</p>
-                            </div>
-                            <div class="grid md:grid-cols-3 gap-4 mt-8">
-                                <article id="basic-plan" class="skin-card card-surface p-6 flex flex-col" onclick="selectPlan('basic')">
-                                    <h3 class="text-lg font-bold">Basic</h3>
-                                    <div class="flex items-baseline gap-2 mt-2">
-                                        <span class="text-3xl font-extrabold">$1</span>
-                                        <span class="text-sm font-medium text-[--brand-muted] line-through">$2</span>
-                                    </div>
-                                    <p class="mt-3 text-sm text-[--brand-muted]">Fast insights on your most visible skin concerns.</p>
-                                    <ul class="mt-4 text-sm text-[--brand-muted] space-y-2 flex-1">
-                                        <li>Wrinkle and fine-line detection</li>
-                                        <li>Acne and pore monitoring</li>
-                                        <li>Pigmentation spotting</li>
-                                        <li>Under-eye status</li>
-                                    </ul>
-                                    <button class="cta-button mt-6 py-2.5 px-4 font-semibold">Select</button>
-                                </article>
 
-                                <article id="advanced-plan" class="skin-card card-surface p-6 flex flex-col" onclick="selectPlan('advanced')">
-                                    <span class="plan-badge">Most Popular</span>
-                                    <h3 class="text-lg font-bold">Advanced</h3>
-                                    <div class="flex items-baseline gap-2 mt-2">
-                                        <span class="text-3xl font-extrabold">$5</span>
-                                        <span class="text-sm font-medium text-[--brand-muted] line-through">$7</span>
-                                    </div>
-                                    <p class="mt-3 text-sm text-[--brand-muted]">Deeper metrics, quantified scores, and sensitivity overlays.</p>
-                                    <ul class="mt-4 text-sm text-[--brand-muted] space-y-2 flex-1">
-                                        <li>All Basic features</li>
-                                        <li>Severity scoring for each concern</li>
-                                        <li>Oil & hydration heatmaps</li>
-                                        <li>Sensitivity and redness contouring</li>
-                                    </ul>
-                                    <button class="cta-button mt-6 py-2.5 px-4 font-semibold">Select</button>
-                                </article>
-
-                                <article id="pro-plan" class="skin-card card-surface p-6 flex flex-col" onclick="selectPlan('pro')">
-                                    <h3 class="text-lg font-bold">Professional</h3>
-                                    <div class="flex items-baseline gap-2 mt-2">
-                                        <span class="text-3xl font-extrabold">$9</span>
-                                        <span class="text-sm font-medium text-[--brand-muted] line-through">$12</span>
-                                    </div>
-                                    <p class="mt-3 text-sm text-[--brand-muted]">Dermatologist-level breakdown with every overlay and index.</p>
-                                    <ul class="mt-4 text-sm text-[--brand-muted] space-y-2 flex-1">
-                                        <li>All Advanced features</li>
-                                        <li>Wrinkle analysis across 12 facial zones</li>
-                                        <li>Acne type differentiation</li>
-                                        <li>Pigmentation mapping with coordinates</li>
-                                        <li>Composite skin health dashboard</li>
-                                    </ul>
-                                    <button class="cta-button mt-6 py-2.5 px-4 font-semibold">Select</button>
-                                </article>
+                    <div id="results-stage" class="stage-card p-8 md:p-10 hidden">
+                        <header class="space-y-3 text-center md:text-left">
+                            <span class="text-xs font-semibold tracking-[0.18em] uppercase text-[color:var(--brand-muted)]">Step 3</span>
+                            <h2 class="text-2xl md:text-3xl font-bold">Your Face++ skin intelligence report</h2>
+                            <p class="text-sm md:text-base text-[color:var(--brand-muted)]">Every metric below is returned directly from Face++ Professional Skin Analysis.</p>
+                        </header>
+                        <div class="mt-8 flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start">
+                            <img id="result-image" src="#" alt="Analyzed face preview" class="w-48 h-48 rounded-2xl object-cover border-2 border-[color:var(--brand-accent)] shadow-lg">
+                            <div class="text-center md:text-left space-y-1">
+                                <h3 id="result-plan-title" class="text-xl font-bold"></h3>
+                                <p id="result-price" class="text-lg font-semibold"></p>
+                                <p id="result-description" class="text-sm text-[color:var(--brand-muted)]"></p>
                             </div>
                         </div>
-
-                        <div id="results" class="hidden card-surface p-8 md:p-10">
-                            <div class="text-center md:text-left">
-                                <span class="subtle-label">Step 3</span>
-                                <h2 class="mt-2 text-2xl md:text-3xl font-bold">Your skin report is ready</h2>
-                                <p class="mt-2 text-sm md:text-base text-[--brand-muted]">Review the highlights below and download your tailored plan straight away.</p>
-                            </div>
-                            <div class="mt-8 flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start">
-                                <img id="result-image" src="#" alt="Analysis preview" class="w-48 h-48 rounded-2xl object-cover border-2 border-[--brand-accent] shadow-lg">
-                                <div class="text-center md:text-left">
-                                    <h3 id="result-plan-title" class="text-xl font-bold"></h3>
-                                    <p id="result-price" class="mt-1 text-lg font-semibold"></p>
-                                    <p id="result-description" class="mt-2 text-sm text-[--brand-muted]"></p>
-                                </div>
-                            </div>
-                            <div id="results-content" class="mt-6 space-y-5"></div>
-                            <div class="mt-8 flex flex-wrap gap-3">
-                                <button onclick="window.location.reload()" class="cta-button px-6 py-2.5 font-semibold">Analyze again</button>
-                                <a href="quiz-new.html" class="inline-flex items-center justify-center px-6 py-2.5 rounded-full border border-[var(--surface-outline)] text-sm font-semibold text-[--brand-muted] hover:border-[--brand-accent] hover:text-[--brand-dark-text] transition">
-                                    Explore wellness quiz
-                                </a>
-                            </div>
+                        <div id="results-content" class="mt-6 space-y-5"></div>
+                        <div class="mt-8 flex flex-wrap gap-3">
+                            <button id="analyze-again-btn" class="cta-button secondary px-5 py-2.5">Analyze another photo</button>
+                            <a href="quiz-new.html" class="cta-button px-5 py-2.5">Explore wellness quiz</a>
                         </div>
                     </div>
                 </div>
             </section>
         </main>
 
-        <footer class="px-4 md:px-6 py-10 border-t border-[var(--surface-outline)] bg-white/70">
-            <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[--brand-muted]">
-                <p>AI WELLNESSCORE &copy; 2025. Educational use only · Not a medical service.</p>
+        <footer class="px-4 md:px-6 py-10 border-t border-[color:var(--border-soft)] bg-white/70">
+            <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+                <p>AI WELLNESSCORE &copy; 2025. Educational insights · Not a medical service.</p>
                 <div class="flex items-center gap-4">
-                    <a href="privacy.html" class="hover:text-[--brand-dark-text]">Privacy</a>
-                    <a href="terms.html" class="hover:text-[--brand-dark-text]">Terms</a>
-                    <a href="contact.html" class="hover:text-[--brand-dark-text]">Contact</a>
+                    <a href="privacy.html" class="hover:text-[color:var(--brand-dark-text)]">Privacy</a>
+                    <a href="terms.html" class="hover:text-[color:var(--brand-dark-text)]">Terms</a>
+                    <a href="contact.html" class="hover:text-[color:var(--brand-dark-text)]">Contact</a>
                 </div>
             </div>
         </footer>
     </div>
 
+    <div id="analysis-overlay" class="analysis-overlay hidden">
+        <div class="overlay-card">
+            <div class="overlay-spinner"></div>
+            <h3 id="analysis-overlay-message" class="text-lg font-semibold">Processing…</h3>
+            <p id="analysis-overlay-subtitle" class="overlay-subtitle"></p>
+        </div>
+    </div>
+
+    <div id="plan-modal" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <button id="plan-modal-close" class="modal-close" aria-label="Close">&times;</button>
+            <span id="plan-modal-tag" class="modal-tag"></span>
+            <div>
+                <h3 id="plan-modal-title" class="text-2xl font-bold"></h3>
+                <p id="plan-modal-price" class="text-lg font-semibold mt-1"></p>
+                <p id="plan-modal-description" class="text-sm text-[color:var(--brand-muted)] mt-2"></p>
+            </div>
+            <ul id="plan-modal-features" class="feature-list"></ul>
+            <button id="plan-modal-action" class="cta-button w-full">Secure payment & analyze</button>
+        </div>
+    </div>
     <script>
+    (function () {
+        const PLAN_DETAILS = {
+            basic: {
+                title: 'Basic plan',
+                tag: 'Starter',
+                price: '$1',
+                description: 'Essential Face++ metrics to understand your baseline skin health.',
+                modalFeatures: [
+                    'Skin type classification with confidence levels',
+                    'Wrinkle, acne, pore and pigmentation detection',
+                    'Under-eye puffiness and skin age snapshot'
+                ],
+                subtitle: 'Delivering core Face++ insights'
+            },
+            advanced: {
+                title: 'Advanced plan',
+                tag: 'Most popular',
+                price: '$5',
+                description: 'Severity scores, hydration mapping, and coordinate overlays for targeted care.',
+                modalFeatures: [
+                    'Hydration, oiliness & sensitivity overlays (PNG / JPG)',
+                    'Pigmentation & roughness scoring with area ratios',
+                    'Blackhead and pore coordinate exports'
+                ],
+                subtitle: 'Unlocking severity scores and overlays'
+            },
+            pro: {
+                title: 'Professional plan',
+                tag: 'Clinic grade',
+                price: '$9',
+                description: 'Full dermatologist-inspired dataset with wrinkle outlines and ROI heatmaps.',
+                modalFeatures: [
+                    'Wrinkle outlines + deep vs shallow metrics',
+                    'Dark circle contours & ROI combined map',
+                    'Texture, roughness, pigmentation, and sensitivity heatmaps'
+                ],
+                subtitle: 'Delivering the complete Face++ dataset'
+            }
+        };
+
+        const PLAN_COPY = {
+            basic: {
+                title: 'Basic',
+                price: '$1',
+                blurb: "Focused essentials to understand your skin's baseline today."
+            },
+            advanced: {
+                title: 'Advanced',
+                price: '$5',
+                blurb: 'Granular metrics, severity scoring, and visual overlays for targeted care.'
+            },
+            pro: {
+                title: 'Professional',
+                price: '$9',
+                blurb: 'Dermatologist-style coordinates, scoring, and imagery for deep analysis.'
+            }
+        };
+
+        const SKIN_TYPE_LABELS = ['Oily', 'Dry', 'Balanced', 'Combination'];
+        const SKIN_TONE_LABELS = ['Very light', 'Light', 'Intermediate', 'Tan', 'Brown', 'Dark', 'Unclassified'];
+        const SKIN_HUE_LABELS = ['Warm (yellow-leaning)', 'Neutral', 'Warm (red-leaning)', 'Unclassified'];
+        const SEVERITY_SCALE = ['None / minimal', 'Mild', 'Moderate', 'Severe'];
+        const MAP_LABELS = {
+            red_area: 'Redness (sensitivity) map',
+            brown_area: 'Pigmentation concentration map',
+            water_area: 'Hydration deficiency map',
+            texture_enhanced_pores: 'Texture: enlarged pores highlight',
+            texture_enhanced_blackheads: 'Texture: blackhead highlight',
+            texture_enhanced_lines: 'Texture: wrinkle highlight',
+            rough_area: 'Texture: roughness map',
+            roi_outline_map: 'ROI outline map'
+        };
+        const MARK_LABELS = {
+            melanin_mark: 'Pigmentation coordinates',
+            sensitivity_mark: 'Sensitivity (redness) coordinates',
+            blackheads_mark: 'Blackhead coordinates',
+            pores_mark: 'Pore coordinates',
+            wrinkle_mark: 'Wrinkle outlines',
+            dark_circle_outline: 'Dark circle outlines'
+        };
+
+        let uploadedImageDataUrl = null;
         let selectedPlan = null;
-        let uploadedFile = null;
+        let chartInstances = [];
+        let cameraStream = null;
 
-        function selectPlan(plan) {
-            document.querySelectorAll('.skin-card').forEach(card => {
-                card.classList.remove('selected');
-                const button = card.querySelector('button');
-                if (button) button.disabled = false;
-            });
+        const uploadStage = document.getElementById('upload-stage');
+        const planStage = document.getElementById('plan-stage');
+        const resultsStage = document.getElementById('results-stage');
+        const uploadInput = document.getElementById('photo-upload');
+        const imageError = document.getElementById('image-error');
+        const errorBanner = document.getElementById('analysis-error');
+        const imagePreview = document.getElementById('result-image');
+        const overlay = document.getElementById('analysis-overlay');
+        const overlayMessage = document.getElementById('analysis-overlay-message');
+        const overlaySubtitle = document.getElementById('analysis-overlay-subtitle');
+        const planModal = document.getElementById('plan-modal');
+        const planModalClose = document.getElementById('plan-modal-close');
+        const planModalTag = document.getElementById('plan-modal-tag');
+        const planModalTitle = document.getElementById('plan-modal-title');
+        const planModalPrice = document.getElementById('plan-modal-price');
+        const planModalDescription = document.getElementById('plan-modal-description');
+        const planModalFeatures = document.getElementById('plan-modal-features');
+        const planModalAction = document.getElementById('plan-modal-action');
+        const resultsContent = document.getElementById('results-content');
+        const resultPlanTitle = document.getElementById('result-plan-title');
+        const resultPrice = document.getElementById('result-price');
+        const resultDescription = document.getElementById('result-description');
+        const tabButtons = document.querySelectorAll('[data-input-tab]');
+        const uploadTab = document.getElementById('upload-tab');
+        const cameraTab = document.getElementById('camera-tab');
+        const startCameraBtn = document.getElementById('start-camera-btn');
+        const capturePhotoBtn = document.getElementById('capture-photo-btn');
+        const cancelCameraBtn = document.getElementById('cancel-camera-btn');
+        const videoEl = document.getElementById('camera-stream');
+        const analyzeAgainBtn = document.getElementById('analyze-again-btn');
 
-            const selected = document.getElementById(`${plan}-plan`);
-            if (!selected) return;
-            selected.classList.add('selected');
-            const planButton = selected.querySelector('button');
-            if (planButton) planButton.disabled = true;
-            selectedPlan = plan;
-            analyzeSkin(plan);
+        function destroyCharts() {
+            chartInstances.forEach((chart) => chart?.destroy?.());
+            chartInstances = [];
         }
 
-        function previewImage(event) {
-            const file = event.target.files?.[0];
-            const imagePreview = document.getElementById('image-preview');
-            const imageError = document.getElementById('image-error');
-            const fileLabel = document.getElementById('file-label');
-
-            uploadedFile = null;
+        function clearAllStates() {
+            errorBanner.classList.add('hidden');
+            errorBanner.textContent = '';
             imageError.classList.add('hidden');
+            imageError.textContent = '';
+        }
 
-            if (!file) {
-                document.getElementById('upload-state').classList.remove('hidden');
-                document.getElementById('analysis-state').classList.add('hidden');
-                document.getElementById('plans-state').classList.add('hidden');
-                return;
+        function showOverlay(message, subtitle) {
+            overlayMessage.textContent = message;
+            overlaySubtitle.textContent = subtitle || '';
+            overlay.classList.remove('hidden');
+        }
+
+        function hideOverlay() {
+            overlay.classList.add('hidden');
+        }
+
+        function showError(message) {
+            errorBanner.textContent = message;
+            errorBanner.classList.remove('hidden');
+        }
+
+        function handleImageReady(dataUrl, fileLabelText) {
+            uploadedImageDataUrl = dataUrl;
+            if (fileLabelText) {
+                document.getElementById('file-label').textContent = fileLabelText;
+            }
+            clearAllStates();
+            uploadStage.classList.add('hidden');
+            showOverlay('Validating photo…', 'Ensuring clarity and face position');
+            setTimeout(() => {
+                hideOverlay();
+                planStage.classList.remove('hidden');
+            }, 1600);
+        }
+
+        function switchInputTab(tab) {
+            tabButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.inputTab === tab));
+            if (tab === 'camera') {
+                uploadTab.classList.add('hidden');
+                cameraTab.classList.remove('hidden');
+            } else {
+                uploadTab.classList.remove('hidden');
+                cameraTab.classList.add('hidden');
+                stopCamera();
+            }
+        }
+
+        async function startCamera() {
+            try {
+                clearAllStates();
+                if (!navigator.mediaDevices?.getUserMedia) {
+                    showError('Camera access is not supported on this device.');
+                    return;
+                }
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+                cameraStream = stream;
+                videoEl.srcObject = stream;
+                videoEl.classList.remove('hidden');
+                startCameraBtn.classList.add('hidden');
+                capturePhotoBtn.classList.remove('hidden');
+                cancelCameraBtn.classList.remove('hidden');
+            } catch (error) {
+                console.error('Camera error:', error);
+                showError('Unable to access camera. Please allow permission or upload a photo instead.');
+            }
+        }
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach((track) => track.stop());
+                cameraStream = null;
+            }
+            videoEl.srcObject = null;
+            videoEl.classList.add('hidden');
+            startCameraBtn.classList.remove('hidden');
+            capturePhotoBtn.classList.add('hidden');
+            cancelCameraBtn.classList.add('hidden');
+        }
+
+        function capturePhoto() {
+            if (!cameraStream) return;
+            const trackSettings = cameraStream.getVideoTracks()[0]?.getSettings?.() || {};
+            const width = trackSettings.width || 720;
+            const height = trackSettings.height || 960;
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoEl, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+            stopCamera();
+            handleImageReady(dataUrl, 'Captured from camera');
+        }
+
+        function formatPercentage(value, digits = 1) {
+            if (typeof value !== 'number' || !isFinite(value)) return null;
+            return `${(value * 100).toFixed(digits)}%`;
+        }
+
+        function describeSeverity(value) {
+            if (typeof value !== 'number') return 'Not available';
+            return SEVERITY_SCALE[value] || `Level ${value}`;
+        }
+        function buildScoresSummary(scores) {
+            if (!scores || typeof scores !== 'object') return null;
+            const summary = [];
+            if (typeof scores.total_score === 'number') {
+                summary.push(`Overall skin score: ${scores.total_score}`);
+            }
+            const highlighted = ['wrinkle_score', 'water_score', 'melanin_score', 'oily_intensity_score', 'dark_circle_score'];
+            const details = highlighted
+                .filter((key) => typeof scores[key] === 'number')
+                .map((key) => `${key.replace(/_/g, ' ').replace('score', '').trim()}: ${scores[key]}`);
+            if (details.length) {
+                summary.push(details.join(' · '));
+            }
+            return summary.join('. ');
+        }
+
+        function summariseMark(data) {
+            if (!data || typeof data !== 'object') return 'Coordinate data available';
+            const pieces = [];
+            if (typeof data.count === 'number') {
+                pieces.push(`Detected ${data.count} region${data.count === 1 ? '' : 's'}`);
+            }
+            if (Array.isArray(data.coord)) {
+                pieces.push(`${data.coord.length} coordinate point${data.coord.length === 1 ? '' : 's'}`);
+            }
+            if (Array.isArray(data.rectangle)) {
+                pieces.push(`${data.rectangle.length} bounding box${data.rectangle.length === 1 ? '' : 'es'}`);
+            }
+            if (Array.isArray(data.polygon)) {
+                pieces.push(`${data.polygon.length} polygon${data.polygon.length === 1 ? '' : 's'}`);
+            }
+            return pieces.length ? pieces.join('; ') : 'Coordinate data available';
+        }
+
+        function buildPlanPresentation(plan, apiData) {
+            const copy = PLAN_COPY[plan] || PLAN_COPY.basic;
+            const result = apiData?.result || {};
+            const scores = apiData?.score_info || result.score_info;
+            const imageQuality = apiData?.image_quality || result.image_quality;
+            const content = [];
+
+            if (result.skin_type) {
+                const typeIdx = typeof result.skin_type.value === 'number' ? result.skin_type.value : null;
+                const typeLabel = typeIdx !== null ? (SKIN_TYPE_LABELS[typeIdx] || 'Unclassified') : 'Unclassified';
+                const confidence = result.skin_type.details?.[typeIdx]?.confidence;
+                const confidenceText = typeof confidence === 'number' ? ` (confidence ${(confidence * 100).toFixed(0)}%)` : '';
+                content.push({ title: 'Skin type', text: `Detected ${typeLabel.toLowerCase()} skin${confidenceText}.` });
             }
 
+            if (result.oily_intensity?.full_face) {
+                const oily = result.oily_intensity.full_face;
+                const areaText = formatPercentage(oily.area);
+                content.push({ title: 'Oil distribution', text: `Full-face oil coverage ${areaText || 'N/A'} with severity: ${describeSeverity(oily.intensity)}.` });
+            }
+
+            if (result.water) {
+                const severity = typeof result.water.water_severity === 'number' ? `${result.water.water_severity}` : 'N/A';
+                const waterArea = formatPercentage(result.water.water_area);
+                content.push({ title: 'Hydration status', text: `Water deficiency area ${waterArea || 'N/A'}. Severity index ${severity}.` });
+            }
+
+            if (result.skintone_ita) {
+                const tone = result.skintone_ita;
+                const toneLabel = SKIN_TONE_LABELS[tone.skintone] || 'Unclassified';
+                content.push({ title: 'Skin tone (ITA)', text: `ITA angle ${tone.ita}°. Categorised as ${toneLabel.toLowerCase()}.` });
+            } else if (result.skintone) {
+                const toneLabel = SKIN_TONE_LABELS[result.skintone.value] || 'Unclassified';
+                content.push({ title: 'Skin tone', text: `Categorised as ${toneLabel.toLowerCase()} with confidence ${(result.skintone.confidence * 100).toFixed(0)}%.` });
+            }
+
+            if (result.skin_hue_ha) {
+                const hueLabel = SKIN_HUE_LABELS[result.skin_hue_ha.skin_hue] || 'Unclassified';
+                content.push({ title: 'Skin hue (HA)', text: `Hue angle ${result.skin_hue_ha.HA}°. Tone classified as ${hueLabel.toLowerCase()}.` });
+            }
+
+            if (result.melanin) {
+                const melaninArea = formatPercentage(result.melanin.brown_area);
+                const concentration = result.melanin.melanin_concentration;
+                content.push({ title: 'Pigmentation summary', text: `Overall pigmented area ${melaninArea || 'N/A'} with intensity score ${typeof concentration === 'number' ? concentration : 'N/A'}.` });
+            }
+
+            if (result.blackhead) {
+                content.push({ title: 'Blackhead severity', text: `Severity: ${describeSeverity(result.blackhead.value)}${typeof result.blackhead_count === 'number' ? ` · Estimated count ${result.blackhead_count}` : ''}.` });
+            }
+
+            if (result.enlarged_pore_count) {
+                const segments = Object.entries(result.enlarged_pore_count)
+                    .map(([region, value]) => `${region.replace(/_/g, ' ')}: ${value}`)
+                    .join(' · ');
+                if (segments) {
+                    content.push({ title: 'Enlarged pore count', text: segments });
+                }
+            }
+
+            if (result.rough) {
+                const areaText = formatPercentage(result.rough.rough_area);
+                content.push({ title: 'Texture & roughness', text: `Overall roughness area ${areaText || 'N/A'} with severity ${result.rough.rough_severity ?? 'N/A'}.` });
+            }
+
+            if (result.sensitivity) {
+                const areaText = formatPercentage(result.sensitivity.sensitivity_area);
+                const intensity = result.sensitivity.sensitivity_intensity;
+                content.push({ title: 'Sensitivity', text: `Redness coverage ${areaText || 'N/A'} with intensity score ${typeof intensity === 'number' ? intensity : 'N/A'}.` });
+            }
+
+            if (result.skin_age) {
+                content.push({ title: 'Skin age estimate', text: `Estimated skin age: ${result.skin_age.value}` });
+            }
+
+            if (scores) {
+                const summary = buildScoresSummary(scores);
+                if (summary) content.push({ title: 'Score summary', text: summary });
+            }
+
+            if (imageQuality) {
+                const bits = [];
+                if (typeof imageQuality.face_ratio === 'number') bits.push(`Face ratio ${formatPercentage(imageQuality.face_ratio, 0)}`);
+                if (imageQuality.face_orientation) {
+                    const { yaw, pitch, roll } = imageQuality.face_orientation;
+                    bits.push(`Yaw ${yaw?.toFixed?.(1) ?? '—'}° · Pitch ${pitch?.toFixed?.(1) ?? '—'}° · Roll ${roll?.toFixed?.(1) ?? '—'}°`);
+                }
+                if (typeof imageQuality.hair_occlusion === 'number') bits.push(`Hair covering ${formatPercentage(imageQuality.hair_occlusion)}`);
+                if (typeof imageQuality.glasses === 'number') bits.push(imageQuality.glasses ? 'Glasses detected' : 'No glasses detected');
+                if (bits.length) content.push({ title: 'Image quality checks', text: bits.join(' · ') });
+            }
+
+            if (Array.isArray(apiData?.maps)) {
+                apiData.maps.forEach((map) => {
+                    const title = MAP_LABELS[map.type] || map.type;
+                    content.push({ title, text: 'Overlay provided by Face++', image: map.dataUrl });
+                });
+            }
+
+            if (apiData?.marks && typeof apiData.marks === 'object') {
+                Object.entries(apiData.marks).forEach(([key, value]) => {
+                    const label = MARK_LABELS[key] || key;
+                    content.push({ title: label, text: summariseMark(value) });
+                });
+            }
+
+            if (!content.length) {
+                content.push({ title: 'Analysis summary', text: 'The analysis completed successfully, but no detailed metrics were returned. Please try requesting a richer plan.' });
+            }
+
+            return {
+                title: copy.title,
+                price: copy.price,
+                description: copy.blurb,
+                content
+            };
+        }
+        function renderResults(presentation) {
+            destroyCharts();
+            resultsContent.innerHTML = '';
+            presentation.content.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'results-card p-5 md:p-6';
+
+                const heading = document.createElement('h4');
+                heading.className = 'text-lg font-semibold mb-2';
+                heading.textContent = item.title;
+                card.appendChild(heading);
+
+                if (item.text) {
+                    const para = document.createElement('p');
+                    para.className = 'text-sm text-[color:var(--brand-muted)]';
+                    para.textContent = item.text;
+                    card.appendChild(para);
+                }
+
+                if (item.image) {
+                    const img = document.createElement('img');
+                    img.src = item.image;
+                    img.alt = item.title;
+                    img.className = 'mt-4 rounded-xl border border-[color:var(--border-soft)] shadow-sm';
+                    card.appendChild(img);
+                }
+
+                resultsContent.appendChild(card);
+            });
+        }
+
+        async function analyzeSkin(plan) {
+            const response = await fetch('/.netlify/functions/faceppSkin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imageDataUrl: uploadedImageDataUrl, plan })
+            });
+            const payload = await response.json();
+            if (!response.ok) {
+                throw new Error(payload?.error || 'Unable to analyze the photo.');
+            }
+            return payload;
+        }
+
+        async function handlePlanPayment(plan) {
+            selectedPlan = plan;
+            closePlanModal();
+            showOverlay('Processing secure payment…', PLAN_DETAILS[plan]?.subtitle || 'Connecting to payment gateway');
+            await new Promise((resolve) => setTimeout(resolve, 1200));
+            showOverlay('Analyzing your skin…', 'Mapping 40+ dermatologist-style signals');
+            try {
+                const apiData = await analyzeSkin(plan);
+                hideOverlay();
+                planStage.classList.add('hidden');
+                const presentation = buildPlanPresentation(plan, apiData);
+                imagePreview.src = uploadedImageDataUrl;
+                resultPlanTitle.textContent = `${presentation.title} report`;
+                resultPrice.textContent = presentation.price;
+                resultDescription.textContent = presentation.description;
+                renderResults(presentation);
+                resultsStage.classList.remove('hidden');
+            } catch (error) {
+                console.error('Analysis error:', error);
+                hideOverlay();
+                planStage.classList.remove('hidden');
+                showError(error.message || 'Unable to analyze your skin right now. Please try again.');
+            }
+        }
+
+        function openPlanModal(plan) {
+            if (!PLAN_DETAILS[plan]) return;
+            const details = PLAN_DETAILS[plan];
+            planModalTag.textContent = details.tag;
+            planModalTitle.textContent = details.title;
+            planModalPrice.textContent = details.price;
+            planModalDescription.textContent = details.description;
+            planModalFeatures.innerHTML = '';
+            details.modalFeatures.forEach((feature) => {
+                const li = document.createElement('li');
+                li.textContent = feature;
+                planModalFeatures.appendChild(li);
+            });
+            planModalAction.dataset.plan = plan;
+            planModal.classList.remove('hidden');
+        }
+
+        function closePlanModal() {
+            planModal.classList.add('hidden');
+        }
+
+        function resetFlow() {
+            stopCamera();
+            destroyCharts();
+            uploadedImageDataUrl = null;
+            selectedPlan = null;
+            uploadInput.value = '';
+            document.getElementById('file-label').textContent = 'JPG or JPEG, up to 8 MB';
+            clearAllStates();
+            resultsStage.classList.add('hidden');
+            planStage.classList.add('hidden');
+            uploadStage.classList.remove('hidden');
+            switchInputTab('upload');
+        }
+
+        uploadInput.addEventListener('change', (event) => {
+            const file = event.target.files?.[0];
+            clearAllStates();
+            if (!file) return;
             const validTypes = ['image/jpeg', 'image/jpg'];
             const maxSize = 8 * 1024 * 1024;
-
             if (!validTypes.includes(file.type)) {
                 imageError.textContent = 'Invalid file format. Please use JPG or JPEG.';
                 imageError.classList.remove('hidden');
                 event.target.value = '';
                 return;
             }
-
             if (file.size > maxSize) {
                 imageError.textContent = 'File is too large. Maximum size is 8 MB.';
                 imageError.classList.remove('hidden');
                 event.target.value = '';
                 return;
             }
-
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
+                const result = e.target?.result;
+                if (typeof result !== 'string') {
+                    imageError.textContent = 'Unable to read the selected file.';
+                    imageError.classList.remove('hidden');
+                    return;
+                }
                 const img = new Image();
-                img.onload = function() {
+                img.onload = function () {
                     if (img.width < 200 || img.height < 200 || img.width > 4096 || img.height > 4096) {
-                        imageError.textContent = 'Image dimensions must be between 200x200 and 4096x4096 pixels.';
+                        imageError.textContent = 'Image dimensions must be between 200?200 and 4096?4096 pixels.';
                         imageError.classList.remove('hidden');
-                        event.target.value = '';
+                        uploadInput.value = '';
                         return;
                     }
-
-                    uploadedFile = file;
-                    if (fileLabel) fileLabel.textContent = file.name;
-
-                    imagePreview.src = e.target?.result || '#';
-                    document.getElementById('upload-state').classList.add('hidden');
-                    document.getElementById('analysis-state').classList.remove('hidden');
-                    const scanLine = document.getElementById('scan-line');
-                    scanLine?.classList.add('active');
-
-                    setTimeout(() => {
-                        document.getElementById('analysis-state').classList.add('hidden');
-                        document.getElementById('plans-state').classList.remove('hidden');
-                        scanLine?.classList.remove('active');
-                    }, 2200);
+                    handleImageReady(result, file.name);
                 };
-                img.src = e.target?.result || '#';
+                img.src = result;
             };
             reader.readAsDataURL(file);
-        }
+        });
 
-        function analyzeSkin(plan) {
-            if (!plan || !uploadedFile) {
+        tabButtons.forEach((btn) => {
+            btn.addEventListener('click', () => switchInputTab(btn.dataset.inputTab));
+        });
+
+        startCameraBtn.addEventListener('click', startCamera);
+        capturePhotoBtn.addEventListener('click', capturePhoto);
+        cancelCameraBtn.addEventListener('click', () => {
+            stopCamera();
+            switchInputTab('upload');
+        });
+
+        planModalClose.addEventListener('click', closePlanModal);
+        planModal.addEventListener('click', (event) => {
+            if (event.target === planModal) closePlanModal();
+        });
+
+        document.querySelectorAll('[data-plan-select]').forEach((btn) => {
+            btn.addEventListener('click', () => openPlanModal(btn.dataset.planSelect));
+        });
+
+        planModalAction.addEventListener('click', () => {
+            const plan = planModalAction.dataset.plan;
+            if (!uploadedImageDataUrl) {
+                showError('Please upload or capture a photo first.');
+                closePlanModal();
+                resetFlow();
                 return;
             }
+            handlePlanPayment(plan);
+        });
 
-            document.getElementById('plans-state').classList.add('hidden');
-            document.getElementById('loading').classList.remove('hidden');
-
-            setTimeout(() => {
-                const results = getSimulatedResults(plan);
-                displayResults(results);
-            }, 2000);
-        }
-        function getSimulatedResults(plan) {
-            const baseResults = {
-                basic: {
-                    title: 'Basic',
-                    price: '$1',
-                    description: "A brief report on your skin's condition with key indicators. Perfect for a quick, affordable first look.",
-                    content: [
-                        { title: 'Wrinkle assessment', text: 'Minor wrinkles detected on the forehead and around the eyes.' },
-                        { title: 'Acne analysis', text: 'No signs of active acne detected.' },
-                        { title: 'Pore analysis', text: 'Enlarged pores observed across the T-zone.' },
-                        { title: 'Pigmentation', text: 'Light pigmentation spots mapped across the cheeks.' },
-                        { title: 'Under-eye status', text: 'Subtle puffiness and mild dark circles detected.' }
-                    ]
-                },
-                advanced: {
-                    content: [
-                        { title: 'Overall skin health score', text: 'Your current score is 85 out of 100.' },
-                        {
-                            title: 'Wrinkle breakdown',
-                            text: 'Detected 12 fine lines and 3 deep wrinkles.',
-                            chart: {
-                                type: 'bar',
-                                data: {
-                                    labels: ['Fine lines', 'Deep wrinkles'],
-                                    datasets: [{
-                                        label: 'Count',
-                                        data: [12, 3],
-                                        backgroundColor: ['#debea9', '#a58d7c'],
-                                        borderColor: ['#3c3b31', '#3c3b31'],
-                                        borderWidth: 1
-                                    }]
-                                }
-                            }
-                        },
-                        {
-                            title: 'Pore & blackhead score',
-                            text: 'Pore score: 70/100, blackhead score: 81/100.',
-                            chart: {
-                                type: 'doughnut',
-                                data: {
-                                    labels: ['Pores', 'Blackheads'],
-                                    datasets: [{
-                                        label: 'Score',
-                                        data: [70, 81],
-                                        backgroundColor: ['#a58d7c', '#debea9'],
-                                        borderColor: ['#ffffff'],
-                                        borderWidth: 2
-                                    }]
-                                }
-                            }
-                        },
-                        {
-                            title: 'Oil & hydration map',
-                            text: 'Oily zones: 25%. Dehydrated zones: 15%.',
-                            image: 'https://placehold.co/600x400/f5f2ef/debea9?text=Oil+and+Hydration+Map'
-                        },
-                        {
-                            title: 'Sensitivity focus',
-                            text: 'Cheek area shows heightened sensitivity. Severity score: 93/100.',
-                            image: 'https://placehold.co/600x400/f5f2ef/debea9?text=Sensitivity+Map'
-                        }
-                    ]
-                },
-                pro: {
-                    content: [
-                        {
-                            title: 'Skin health dashboard',
-                            text: 'Your composite health score is 85 / 100.',
-                            chart: {
-                                type: 'doughnut',
-                                data: {
-                                    labels: ['Health', 'Concerns'],
-                                    datasets: [{
-                                        label: 'Score',
-                                        data: [85, 15],
-                                        backgroundColor: ['#debea9', '#a58d7c'],
-                                        borderColor: ['#ffffff'],
-                                        borderWidth: 2
-                                    }]
-                                }
-                            }
-                        },
-                        {
-                            title: 'Wrinkle & acne overlay',
-                            text: 'Full classification across forehead, eye, and nasolabial zones.',
-                            chart: {
-                                type: 'bar',
-                                data: {
-                                    labels: ['Forehead', 'Eye', 'Nasolabial'],
-                                    datasets: [
-                                        {
-                                            label: 'Wrinkle score',
-                                            data: [75, 80, 85],
-                                            backgroundColor: '#a58d7c'
-                                        },
-                                        {
-                                            label: 'Acne severity',
-                                            data: [5, 20, 10],
-                                            backgroundColor: '#debea9'
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        {
-                            title: 'Pigmentation & hydration index',
-                            text: 'Freckles, melasma, and hydration levels segmented by facial regions.',
-                            chart: {
-                                type: 'doughnut',
-                                data: {
-                                    labels: ['Hydration', 'Pigmentation', 'Other'],
-                                    datasets: [{
-                                        label: 'Score',
-                                        data: [75, 60, 85],
-                                        backgroundColor: ['#debea9', '#a58d7c', '#f5f2ef'],
-                                        borderColor: ['#ffffff'],
-                                        borderWidth: 2
-                                    }]
-                                }
-                            }
-                        },
-                        {
-                            title: 'Under-eye analysis',
-                            text: 'Structural dark circles detected with medium severity.',
-                            image: 'https://placehold.co/600x400/f5f2ef/debea9?text=Under-Eye+Map'
-                        }
-                    ]
-                }
-            };
-
-            const plans = {
-                basic: {
-                    title: baseResults.basic.title,
-                    price: baseResults.basic.price,
-                    description: baseResults.basic.description,
-                    content: baseResults.basic.content
-                },
-                advanced: {
-                    title: 'Advanced',
-                    price: '$5',
-                    description: 'A detailed report with quantified metrics and visualizations. Perfect for those who seek specific data-driven insights.',
-                    content: [...baseResults.basic.content, ...baseResults.advanced.content]
-                },
-                pro: {
-                    title: 'Professional',
-                    price: '$9',
-                    description: 'A comprehensive report with every parameter and dermatologist-level recommendations.',
-                    content: [...baseResults.basic.content, ...baseResults.advanced.content, ...baseResults.pro.content]
-                }
-            };
-
-            return plans[plan];
-        }
-
-        function displayResults(results) {
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('results').classList.remove('hidden');
-            document.getElementById('result-image').src = document.getElementById('image-preview').src;
-            document.getElementById('result-plan-title').textContent = results.title;
-            document.getElementById('result-price').textContent = results.price;
-            document.getElementById('result-description').textContent = results.description;
-
-            const resultsContent = document.getElementById('results-content');
-            resultsContent.innerHTML = '';
-
-            results.content.forEach(item => {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'results-card p-5 md:p-6';
-
-                const heading = document.createElement('h4');
-                heading.className = 'text-lg font-semibold mb-2';
-                heading.textContent = item.title;
-                wrapper.appendChild(heading);
-
-                const bodyText = document.createElement('p');
-                bodyText.className = 'text-sm text-[--brand-muted]';
-                bodyText.textContent = item.text;
-                wrapper.appendChild(bodyText);
-
-                if (item.image) {
-                    const img = document.createElement('img');
-                    img.src = item.image;
-                    img.alt = item.title;
-                    img.className = 'mt-4 rounded-xl border border-[var(--surface-outline)] shadow-sm';
-                    wrapper.appendChild(img);
-                }
-
-                if (item.chart) {
-                    const chartWrapper = document.createElement('div');
-                    chartWrapper.className = 'chart-container';
-                    const canvas = document.createElement('canvas');
-                    const canvasId = `chart-${Math.random().toString(36).slice(2, 9)}`;
-                    canvas.id = canvasId;
-                    chartWrapper.appendChild(canvas);
-                    wrapper.appendChild(chartWrapper);
-
-                    setTimeout(() => {
-                        const ctx = document.getElementById(canvasId)?.getContext('2d');
-                        if (!ctx) return;
-                        new Chart(ctx, {
-                            type: item.chart.type,
-                            data: item.chart.data,
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: {
-                                        position: 'top',
-                                        labels: {
-                                            color: getComputedStyle(document.documentElement).getPropertyValue('--brand-dark-text') || '#3c3b31',
-                                            font: { size: 12 }
-                                        }
-                                    },
-                                    tooltip: {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                        titleColor: '#3c3b31',
-                                        bodyColor: '#3c3b31',
-                                        borderColor: 'rgba(60, 59, 49, 0.12)',
-                                        borderWidth: 1,
-                                        displayColors: true
-                                    }
-                                },
-                                scales: item.chart.type === 'bar' ? {
-                                    x: { ticks: { color: '#3c3b31' }, grid: { color: 'rgba(60,59,49,0.06)' } },
-                                    y: { ticks: { color: '#3c3b31' }, grid: { color: 'rgba(60,59,49,0.06)' } }
-                                } : {}
-                            }
-                        });
-                    }, 0);
-                }
-
-                resultsContent.appendChild(wrapper);
-            });
-        }
+        analyzeAgainBtn.addEventListener('click', () => {
+            resetFlow();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    })();
     </script>
 </body>
 </html>
