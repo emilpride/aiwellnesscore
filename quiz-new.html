@@ -797,16 +797,21 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
 
         /* Loading steps styling */
         #step-loading { position: relative; z-index: 1; }
-        #step-loading .steps-list {
-            position: absolute;
-            bottom: 2.5rem;
-            left: 50%;
-            transform: translateX(-50%);
-            width: min(90%, 18rem);
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
+        /* Шаги просто располагаются НИЖЕ анимации и не перекрывают её */
+#step-loading .steps-list {
+    position: static;                 /* <-- главное изменение */
+    width: min(90%, 22rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1rem 0 0.5rem;            /* небольшой отступ от заголовка */
+}
+/* Резервируем высоту под анимацию, чтобы шаги при маленьких экранах её не догоняли */
+#step-loading .loader-guard {
+    min-height: clamp(260px, 40vh, 420px);
+}
+
+
         .analysis-step {
             display: flex;
             align-items: center;
@@ -822,6 +827,10 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
         }
+        /* Скрыть обводку кружка до момента done */
+.analysis-step .circle { border-color: transparent; }
+.analysis-step .circle.done { background: #a385e9; border-color: #a385e9; }
+
         .analysis-step.show {
             opacity: 1;
             transform: translateY(0);
@@ -838,15 +847,21 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             background: #a385e9;
             border-color: #a385e9;
         }
-        .analysis-step .circle::after {
-            content: "\\2713";
-            position: absolute;
-            inset: 0;
-            color: white;
-            font-size: 14px;
-            line-height: 22px;
-            text-align: center;
-        }
+        /* Галочка скрыта по умолчанию — появится только когда кружку добавим класс .done */
+.analysis-step .circle::after {
+    content: "✓";                     /* нормальный символ галочки */
+    position: absolute;
+    inset: 0;
+    color: white;
+    font-size: 14px;
+    line-height: 22px;
+    text-align: center;
+    opacity: 0;                       /* скрыто, пока шаг не "done" */
+    transition: opacity .2s ease;
+}
+.analysis-step .circle.done::after {
+    opacity: 1;                       /* показываем галочку, когда шаг отмечен done */
+}
         .analysis-step .step-text {
             flex: 1;
             font-size: 0.875rem;
@@ -1117,12 +1132,20 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         </section>
         
         <section id="step-loading" class="quiz-step prev">
-            <div class="w-full h-full flex flex-col items-center justify-center relative">
-                <div id="loading-animation" class="w-48 h-48"></div>
-                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-800 mt-4 text-center">Analyzing Your Unique Profile...</h2>
-                <div id="analysis-steps" class="steps-list space-y-2"></div>
-            </div>
-        </section>
+  <div class="w-full h-full flex flex-col items-center relative">
+    <!-- ГЕРОЙ (анимация + заголовок) всегда по центру по вертикали -->
+    <div id="loading-hero" class="loader-guard flex flex-col items-center justify-center flex-1">
+      <div id="loading-animation" class="w-48 h-48"></div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-800 mt-4 text-center">
+        Analyzing Your Unique Profile...
+      </h2>
+    </div>
+
+    <!-- ШАГИ: всегда внизу, не перекрывают героя -->
+    <div id="analysis-steps" class="steps-list"></div>
+  </div>
+</section>
+
 
         <!-- NEW: Selfie Confirmation Step -->
         <section id="step-selfie-confirm" class="quiz-step prev">
