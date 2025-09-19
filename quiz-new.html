@@ -77,20 +77,12 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
         }
         /* --- END NEW BACKGROUND --- */
 
-        #quiz-container {
-  width: 100%;
-  min-height: 100dvh; /* современный аналог vh, учитывает мобилки */
-  overflow: hidden;
-  margin-inline: auto; /* центрирование */
-  max-width: 1100px;   /* ограничение ширины на десктопе */
-}
-        main#steps-wrapper {
-  position: relative;
-  width: 100%;
-  flex-grow: 1;
-  overflow: hidden; /* убираем постоянный скролл */
-}
-
+        #quiz-container { 
+            display: flex; flex-direction: column; position: relative; 
+            width: 100vw; height: 100vh; height: calc(var(--vh, 1vh) * 100); 
+            overflow: hidden;
+        }
+        main#steps-wrapper { position: relative; width: 100%; flex-grow: 1; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         
         .quiz-step {
             position: absolute; left: 0; width: 100%;
@@ -1049,17 +1041,6 @@ src="https://www.facebook.com/tr?id=785592354117222&ev=PageView&noscript=1"
             .gender-option { padding: 1rem 0.75rem; }
             .gender-option .gender-image-container { width: 88px; height: 88px; margin-bottom: 0.5rem; }
         }
-        @media (min-width: 1024px) {
-  #quiz-container {
-    max-width: 1100px; /* или 42rem (как max-w-2xl) */
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-html, body {
-  overflow-x: hidden;
-}
-
     </style>
 </head>
 <body>
@@ -1071,7 +1052,7 @@ html, body {
         <p class="text-sm text-gray-500 mt-2">Warming up your personalized experience</p>
     </div>
 
-<div id="quiz-container" class="mx-auto px-4 lg:max-w-2xl">
+<div id="quiz-container">
     <header id="quiz-header" class="w-full p-4 fixed top-0 left-0 right-0">
         <div class="flex items-center gap-4 max-w-2xl mx-auto">
             <a href="index.html" class="flex-shrink-0"><img src="logo.png" alt="Logo" class="h-8 w-auto"></a>
@@ -2842,11 +2823,3 @@ const deviceType = getDeviceType();
 
 </body>
 </html>
-
-
-
-
-
-
-
-
