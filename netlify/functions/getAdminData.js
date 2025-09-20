@@ -61,7 +61,7 @@ exports.handler = async (event) => {
     const statsDoc = await statsRef.get();
     const totalSessionsCount = statsDoc.exists ? statsDoc.data().totalCount : 0;
 
-    const { password, startDate, endDate, pricing } = body;
+    const { password, startDate, endDate, startDateTime, endDateTime, limit, pricing } = body;
     if (password !== process.env.SHAURMA) {
       return { statusCode: 401, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Unauthorized' }) };
     }
@@ -87,15 +87,18 @@ exports.handler = async (event) => {
     const sessionsRef = db.collection('sessions');
     let query = sessionsRef.orderBy('createdAt', 'desc');
 
-    if (startDate) { query = query.where('createdAt', '>=', new Date(startDate).toISOString()); }
-    if (endDate) {
-        const endOfDay = new Date(endDate);
-        endOfDay.setHours(23, 59, 59, 999);
-        query = query.where('createdAt', '<=', endOfDay.toISOString());
-    }
+    // Support date-only and precise datetime filters
+    const startIso = startDateTime
+      ? new Date(startDateTime).toISOString()
+      : (startDate ? new Date(startDate + 'T00:00:00').toISOString() : null);
+    const endIso = endDateTime
+      ? new Date(endDateTime).toISOString()
+      : (endDate ? (() => { const d = new Date(endDate + 'T23:59:59.999'); return d.toISOString(); })() : null);
+    if (startIso) { query = query.where('createdAt', '>=', startIso); }
+    if (endIso) { query = query.where('createdAt', '<=', endIso); }
 
     // Limit number of sessions to keep payload under limits
-    const maxItems = Math.max(1, Math.min(Number(body.limit) || 150, 300));
+    const maxItems = Math.max(1, Math.min(Number(limit) || 100, 300));
     query = query.limit(maxItems);
 
     const sessionsSnapshot = await query.get();
@@ -212,6 +215,9 @@ exports.handler = async (event) => {
         country: country, email: answers.email || 'N/A', gender: answers.gender || 'N/A', age: answers.age || 'N/A', userGoal: answers.userGoal || 'N/A',
         progress: progress, dropOffPoint: dropOffDisplay, duration: duration, paymentStatus: data.paymentStatus || 'pending',
         paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A',
+        // Restore fields needed for funnel/debug, but keep heavy data out of answers
+        errors: Array.isArray(data.errors) ? data.errors : [],
+        events: typeof data.events === 'object' && data.events ? data.events : {},
         resultLink: `result.html?session_id=${doc.id}`,
         progressPercent: progressPercent,
         durationMs: durationMs,
