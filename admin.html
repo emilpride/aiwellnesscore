@@ -60,12 +60,12 @@
                 <h1 class="text-3xl font-bold text-white text-center sm:text-left">AI WellnessCore Dashboard</h1>
                 <div class="flex flex-col sm:flex-row items-center gap-4">
                     <div class="flex-grow flex items-center gap-2 w-full">
-                        <label for="start-date-stats" class="text-sm font-medium text-gray-400 flex-shrink-0">From:</label>
-                        <input type="datetime-local" id="start-date-stats" class="form-input w-full">
+                        <label for="start-date-stats" class="text-sm font-medium text-gray-400 flex-shrink-0">From (24h):</label>
+                        <input type="datetime-local" id="start-date-stats" class="form-input w-full" step="60">
                     </div>
                     <div class="flex-grow flex items-center gap-2 w-full">
-                        <label for="end-date-stats" class="text-sm font-medium text-gray-400 flex-shrink-0">To:</label>
-                        <input type="datetime-local" id="end-date-stats" class="form-input w-full">
+                        <label for="end-date-stats" class="text-sm font-medium text-gray-400 flex-shrink-0">To (24h):</label>
+                        <input type="datetime-local" id="end-date-stats" class="form-input w-full" step="60">
                     </div>
                     <button id="refresh-data-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 w-full sm:w-auto justify-center">
                         <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
@@ -456,11 +456,22 @@
         console.log('First session events:', allSessionsData[0].events);
     }
     
-    let filteredSessions = allSessionsData.filter(s => 
-        (selectedSources.length === 0 || selectedSources.includes(s.trafficSource)) && 
-        (!startDateInput || new Date(s.createdAt) >= new Date(startDateInput)) && 
-        (!endDateInput || new Date(s.createdAt) <= new Date(endDateInput + 'T23:59:59'))
-    );
+    const parseFilterDate = (val, isEnd = false) => {
+        if (!val) return null;
+        // datetime-local includes 'T'. If only date is provided, extend to start/end of day
+        if (val.includes('T')) return new Date(val);
+        return new Date(val + (isEnd ? 'T23:59:59.999' : 'T00:00:00.000'));
+    };
+    const startDT = parseFilterDate(startDateInput, false);
+    const endDT = parseFilterDate(endDateInput, true);
+    let filteredSessions = allSessionsData.filter(s => {
+        const created = new Date(s.createdAt);
+        return (
+            (selectedSources.length === 0 || selectedSources.includes(s.trafficSource)) &&
+            (!startDT || created >= startDT) &&
+            (!endDT || created <= endDT)
+        );
+    });
     
     // ОТЛАДКА: Проверяем отфильтрованные данные
     console.log('Filtered sessions count:', filteredSessions.length);

@@ -116,7 +116,7 @@ exports.handler = async (event) => {
     let messagesData = messagesSnapshot.docs.map(doc => {
       const d = doc.data() || {};
       const { attachment, file, ...rest } = d;
-      return { id: doc.id, ...rest, receivedAt: d.createdAt ? new Date(d.createdAt).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' }) : null };
+      return { id: doc.id, ...rest, receivedAt: d.createdAt ? new Date(d.createdAt).toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short', hour12: false }) : null };
     });
 
     // Load pricing to return for admin UI
@@ -150,7 +150,13 @@ exports.handler = async (event) => {
       // Trim heavy fields (e.g., base64 selfie) from answers
       const answersSafe = {};
       for (const key of ALL_QUESTION_KEYS) {
-        if (key === 'selfie') continue;
+        if (key === 'selfie') {
+          // Preserve only presence flag for funnel, not the heavy data
+          if (Object.prototype.hasOwnProperty.call(answers, 'selfie')) {
+            answersSafe.selfie = true;
+          }
+          continue;
+        }
         if (Object.prototype.hasOwnProperty.call(answers, key)) {
           answersSafe[key] = answers[key];
         }
