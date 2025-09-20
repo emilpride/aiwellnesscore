@@ -31,20 +31,23 @@ async function getServerPricing() {
 }
 
 exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' } };
+  }
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, headers: { 'Access-Control-Allow-Origin': '*' }, body: 'Method Not Allowed' };
   }
   try {
     const { sessionId, plan } = JSON.parse(event.body);
 
     // Validate inputs (do NOT trust client amount)
     if (!sessionId || !plan) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Session ID and plan are required.' }) };
+      return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Session ID and plan are required.' }) };
     }
 
     const normalizedPlan = String(plan).toLowerCase();
     if (!['basic', 'advanced', 'premium'].includes(normalizedPlan)) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Invalid plan selected.' }) };
+      return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Invalid plan selected.' }) };
     }
 
     // Load pricing from server-side source of truth
@@ -71,12 +74,14 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
+      headers: { 'Access-Control-Allow-Origin': '*' },
       body: JSON.stringify({ clientSecret: paymentIntent.client_secret }),
     };
   } catch (error) {
       console.error("Payment Intent creation error:", error);
       return { 
-        statusCode: 500, 
+        statusCode: 500,
+        headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({ 
           userError: 'Failed to process payment. Please try again or contact support.', 
           details: error.message 

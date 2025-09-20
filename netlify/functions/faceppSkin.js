@@ -46,14 +46,25 @@ function normaliseDataUrl(value, fallbackMime = 'image/png') {
 }
 
 exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    };
+  }
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, headers: { 'Access-Control-Allow-Origin': '*' }, body: 'Method Not Allowed' };
   }
 
   if (!process.env.FACEPLUSPLUS_API_KEY || !process.env.FACEPLUSPLUS_API_SECRET) {
     console.error('Face++ API credentials are missing.');
     return {
       statusCode: 500,
+      headers: { 'Access-Control-Allow-Origin': '*' },
       body: JSON.stringify({ error: 'Skin analysis service is not configured.' })
     };
   }
@@ -64,6 +75,7 @@ exports.handler = async (event) => {
     if (!imageDataUrl || typeof imageDataUrl !== 'string') {
       return {
         statusCode: 400,
+        headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({ error: 'imageDataUrl is required.' })
       };
     }
@@ -71,6 +83,7 @@ exports.handler = async (event) => {
     if (!/^data:image\//i.test(imageDataUrl)) {
       return {
         statusCode: 400,
+        headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({ error: 'imageDataUrl must be a valid data URI.' })
       };
     }
@@ -79,6 +92,7 @@ exports.handler = async (event) => {
     if (!base64Part) {
       return {
         statusCode: 400,
+        headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({ error: 'Invalid image data provided.' })
       };
     }
@@ -87,6 +101,7 @@ exports.handler = async (event) => {
     if (approxBytes > 8 * 1024 * 1024) {
       return {
         statusCode: 413,
+        headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({ error: 'Image is too large. Maximum size is 8 MB.' })
       };
     }
@@ -159,6 +174,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
+      headers: { 'Access-Control-Allow-Origin': '*' },
       body: JSON.stringify(responseBody)
     };
   } catch (error) {
@@ -167,6 +183,7 @@ exports.handler = async (event) => {
     const message = error.response?.data?.error_message || error.message || 'Failed to analyze skin.';
     return {
       statusCode: status,
+      headers: { 'Access-Control-Allow-Origin': '*' },
       body: JSON.stringify({ error: message })
     };
   }
