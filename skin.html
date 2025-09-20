@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
     <script>
@@ -55,6 +55,7 @@
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -560,8 +561,13 @@
                     </div>
                     <div class="bg-white rounded-xl p-5 md:p-6 border border-gray-100">
                         <p id="modal-plan-description" class="text-sm text-[color:var(--brand-muted)] mb-4"></p>
-                        <ul id="modal-plan-features" class="feature-list mb-6"></ul>
-                        <button id="payment-modal-confirm" class="cta-button w-full">Pay & analyze</button>
+                        <ul id="modal-plan-features" class="feature-list mb-4"></ul>
+                        <div id="payment-element" class="mb-3"></div>
+                        <p id="payment-error" class="text-sm text-red-600 mb-3 hidden"></p>
+                        <button id="payment-modal-confirm" class="cta-button w-full flex items-center justify-center gap-2">
+                            <svg id="payment-spinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+                            <span id="payment-btn-text">Pay & analyze</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -713,8 +719,26 @@
             errorBanner.classList.remove('hidden');
         }
 
-        function handleImageReady(dataUrl, fileLabelText) {
-            uploadedImageDataUrl = dataUrl;
+        async function handleImageReady(dataUrl, fileLabelText) {
+            async function compressIfNeeded(srcDataUrl) {
+                try {
+                    const img = new Image();
+                    await new Promise((res, rej) => { img.onload = () => res(true); img.onerror = rej; img.src = srcDataUrl; });
+                    const maxSide = 1600;
+                    let { width, height } = img;
+                    const scale = Math.min(1, maxSide / Math.max(width, height));
+                    if (scale < 1) { width = Math.round(width * scale); height = Math.round(height * scale); }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    let q = 0.9; let out = canvas.toDataURL('image/jpeg', q);
+                    const bytes = (d) => Math.ceil((d.length * 3) / 4);
+                    while (bytes((out.split(',')[1]||'')) > 7.5 * 1024 * 1024 && q > 0.5) { q -= 0.1; out = canvas.toDataURL('image/jpeg', q); }
+                    return out;
+                } catch (e) { return srcDataUrl; }
+            }
+            uploadedImageDataUrl = await compressIfNeeded(dataUrl);
             if (fileLabelText) {
                 document.getElementById('file-label').textContent = fileLabelText;
             }
@@ -781,7 +805,7 @@
             canvas.height = height;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(videoEl, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
             stopCamera();
             handleImageReady(dataUrl, 'Captured from camera');
         }
@@ -806,7 +830,7 @@
                 .filter((key) => typeof scores[key] === 'number')
                 .map((key) => `${key.replace(/_/g, ' ').replace('score', '').trim()}: ${scores[key]}`);
             if (details.length) {
-                summary.push(details.join(' · '));
+                summary.push(details.join(' Â· '));
             }
             return summary.join('. ');
         }
@@ -859,7 +883,7 @@
             if (result.skintone_ita) {
                 const tone = result.skintone_ita;
                 const toneLabel = SKIN_TONE_LABELS[tone.skintone] || 'Unclassified';
-                content.push({ title: 'Skin tone (ITA)', text: `ITA angle ${tone.ita}°. Categorised as ${toneLabel.toLowerCase()}.` });
+                content.push({ title: 'Skin tone (ITA)', text: `ITA angle ${tone.ita}Â°. Categorised as ${toneLabel.toLowerCase()}.` });
             } else if (result.skintone) {
                 const toneLabel = SKIN_TONE_LABELS[result.skintone.value] || 'Unclassified';
                 content.push({ title: 'Skin tone', text: `Categorised as ${toneLabel.toLowerCase()} with confidence ${(result.skintone.confidence * 100).toFixed(0)}%.` });
@@ -867,7 +891,7 @@
 
             if (result.skin_hue_ha) {
                 const hueLabel = SKIN_HUE_LABELS[result.skin_hue_ha.skin_hue] || 'Unclassified';
-                content.push({ title: 'Skin hue (HA)', text: `Hue angle ${result.skin_hue_ha.HA}°. Tone classified as ${hueLabel.toLowerCase()}.` });
+                content.push({ title: 'Skin hue (HA)', text: `Hue angle ${result.skin_hue_ha.HA}Â°. Tone classified as ${hueLabel.toLowerCase()}.` });
             }
 
             if (result.melanin) {
@@ -877,13 +901,13 @@
             }
 
             if (result.blackhead) {
-                content.push({ title: 'Blackhead severity', text: `Severity: ${describeSeverity(result.blackhead.value)}${typeof result.blackhead_count === 'number' ? ` · Estimated count ${result.blackhead_count}` : ''}.` });
+                content.push({ title: 'Blackhead severity', text: `Severity: ${describeSeverity(result.blackhead.value)}${typeof result.blackhead_count === 'number' ? ` Â· Estimated count ${result.blackhead_count}` : ''}.` });
             }
 
             if (result.enlarged_pore_count) {
                 const segments = Object.entries(result.enlarged_pore_count)
                     .map(([region, value]) => `${region.replace(/_/g, ' ')}: ${value}`)
-                    .join(' · ');
+                    .join(' Â· ');
                 if (segments) {
                     content.push({ title: 'Enlarged pore count', text: segments });
                 }
@@ -914,11 +938,11 @@
                 if (typeof imageQuality.face_ratio === 'number') bits.push(`Face ratio ${formatPercentage(imageQuality.face_ratio, 0)}`);
                 if (imageQuality.face_orientation) {
                     const { yaw, pitch, roll } = imageQuality.face_orientation;
-                    bits.push(`Yaw ${yaw?.toFixed?.(1) ?? '—'}° · Pitch ${pitch?.toFixed?.(1) ?? '—'}° · Roll ${roll?.toFixed?.(1) ?? '—'}°`);
+                    bits.push(`Yaw ${yaw?.toFixed?.(1) ?? 'â€”'}Â° Â· Pitch ${pitch?.toFixed?.(1) ?? 'â€”'}Â° Â· Roll ${roll?.toFixed?.(1) ?? 'â€”'}Â°`);
                 }
                 if (typeof imageQuality.hair_occlusion === 'number') bits.push(`Hair covering ${formatPercentage(imageQuality.hair_occlusion)}`);
                 if (typeof imageQuality.glasses === 'number') bits.push(imageQuality.glasses ? 'Glasses detected' : 'No glasses detected');
-                if (bits.length) content.push({ title: 'Image quality checks', text: bits.join(' · ') });
+                if (bits.length) content.push({ title: 'Image quality checks', text: bits.join(' Â· ') });
             }
 
             if (Array.isArray(apiData?.maps)) {
@@ -983,21 +1007,27 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ imageDataUrl: uploadedImageDataUrl, plan })
             });
-            const payload = await response.json();
+            const payload = await response.json().catch(() => ({}));
             if (!response.ok) {
                 throw new Error(payload?.error || 'Unable to analyze the photo.');
             }
             return payload;
         }
 
+        async function analyzeSkinWithRetry(plan, attempts = 3) {
+            let lastErr;
+            for (let i = 0; i < attempts; i++) {
+                try { return await analyzeSkin(plan); } catch (e) { lastErr = e; await new Promise(r => setTimeout(r, 800 * (i + 1))); }
+            }
+            throw lastErr || new Error('Analysis failed');
+        }
+
         async function handlePlanPayment(plan) {
-            selectedPlan = plan;
-            closePaymentModal();
-            showOverlay('Processing secure payment...', PLAN_DETAILS[plan]?.subtitle || 'Connecting to payment gateway');
-            await new Promise((resolve) => setTimeout(resolve, 1200));
-            showOverlay('Analyzing your skin...', 'Mapping 40+ dermatologist-style signals');
             try {
-                const apiData = await analyzeSkin(plan);
+                if (!uploadedImageDataUrl) { showError('Please upload or capture a photo first.'); return; }
+                selectedPlan = plan;
+                showOverlay('Analyzing your skin...', 'Mapping 40+ dermatologist-style signals');
+                const apiData = await analyzeSkinWithRetry(plan);
                 hideOverlay();
                 planStage.classList.add('hidden');
                 const presentation = buildPlanPresentation(plan, apiData);
@@ -1012,11 +1042,14 @@
                 hideOverlay();
                 planStage.classList.remove('hidden');
                 showError(error.message || 'Unable to analyze your skin right now. Please try again.');
+            } finally {
+                closePaymentModal();
             }
         }
 
-                function openPaymentModal(plan) {
+                async function openPaymentModal(plan) {
             if (!PLAN_DETAILS[plan]) return;
+            if (!uploadedImageDataUrl) { showError('Please upload or capture a photo first.'); return; }
             const details = PLAN_DETAILS[plan];
             modalPlanName.textContent = details.title;
             modalPlanRegular.textContent = details.regular || details.price;
@@ -1029,6 +1062,55 @@
                 modalPlanFeatures.appendChild(li);
             });
             paymentModalConfirm.dataset.plan = plan;
+
+            // Initialize Stripe Elements inside modal
+            try {
+                const keyResp = await fetch('/.netlify/functions/get-stripe-key');
+                const { publishableKey } = await keyResp.json();
+                if (!publishableKey) throw new Error('Stripe key missing');
+                const stripe = Stripe(publishableKey);
+
+                const piResp = await fetch('/.netlify/functions/payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan }) });
+                const piJson = await piResp.json();
+                if (!piResp.ok) throw new Error(piJson.error || piJson.userError || 'Payment init failed');
+                const clientSecret = piJson.clientSecret;
+
+                const appearance = { theme: 'flat', variables: { colorPrimary: '#7f9efb' } };
+                const elements = stripe.elements({ clientSecret, appearance });
+                const paymentElement = elements.create('payment');
+                const mountPoint = document.getElementById('payment-element');
+                mountPoint.innerHTML = '';
+                paymentElement.mount('#payment-element');
+
+                paymentModalConfirm.onclick = async () => {
+                    const errEl = document.getElementById('payment-error');
+                    const spinner = document.getElementById('payment-spinner');
+                    const btnText = document.getElementById('payment-btn-text');
+                    errEl.classList.add('hidden');
+                    paymentModalConfirm.disabled = true;
+                    spinner.classList.remove('hidden');
+                    btnText.textContent = 'Processingâ€¦';
+                    try {
+                        const { error } = await stripe.confirmPayment({ elements, confirmParams: {} });
+                        if (error) throw error;
+                        closePaymentModal();
+                        await handlePlanPayment(plan); // continue with analysis after success
+                    } catch (e) {
+                        errEl.textContent = e.message || 'Payment failed';
+                        errEl.classList.remove('hidden');
+                    } finally {
+                        paymentModalConfirm.disabled = false;
+                        spinner.classList.add('hidden');
+                        btnText.textContent = 'Pay & analyze';
+                    }
+                };
+            } catch (e) {
+                console.error('Stripe init error:', e);
+                const errEl = document.getElementById('payment-error');
+                errEl.textContent = e.message || 'Payment is unavailable';
+                errEl.classList.remove('hidden');
+            }
+
             paymentModal.classList.remove('opacity-0', 'pointer-events-none');
             paymentModalContent.classList.remove('scale-95', 'opacity-0');
         }
@@ -1113,16 +1195,7 @@
             btn.addEventListener('click', () => openPaymentModal(btn.dataset.planSelect));
         });
 
-        paymentModalConfirm.addEventListener('click', () => {
-            const plan = paymentModalConfirm.dataset.plan;
-            if (!uploadedImageDataUrl) {
-                showError('Please upload or capture a photo first.');
-                closePaymentModal();
-                resetFlow();
-                return;
-            }
-            handlePlanPayment(plan);
-        });
+        // paymentModalConfirm click is assigned dynamically in openPaymentModal after Stripe Elements mounts
 
         analyzeAgainBtn.addEventListener('click', () => {
             resetFlow();
@@ -1132,6 +1205,7 @@
     </script>
 </body>
 </html>
+
 
 
 

@@ -38,11 +38,11 @@ exports.handler = async (event) => {
     return { statusCode: 405, headers: { 'Access-Control-Allow-Origin': '*' }, body: 'Method Not Allowed' };
   }
   try {
-    const { sessionId, plan } = JSON.parse(event.body);
+    const { sessionId, plan } = JSON.parse(event.body || '{}');
 
     // Validate inputs (do NOT trust client amount)
-    if (!sessionId || !plan) {
-      return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Session ID and plan are required.' }) };
+    if (!plan) {
+      return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Plan is required.' }) };
     }
 
     const normalizedPlan = String(plan).toLowerCase();
@@ -57,16 +57,22 @@ exports.handler = async (event) => {
     const currency = (pricing.currency || 'USD').toLowerCase();
 
     // Persist selected plan type into the session
-    const sessionRef = db.collection('sessions').doc(sessionId);
-    await sessionRef.update({ planType: normalizedPlan, updatedAt: new Date().toISOString() });
-    console.log(`[${sessionId}] Plan type "${normalizedPlan}" saved to session.`);
+    if (sessionId) {
+      try {
+        const sessionRef = db.collection('sessions').doc(sessionId);
+        await sessionRef.set({ planType: normalizedPlan, updatedAt: new Date().toISOString() }, { merge: true });
+        console.log(`[${sessionId}] Plan type "${normalizedPlan}" saved to session.`);
+      } catch (e) {
+        console.warn('Session update skipped or failed (non-blocking):', e?.message || e);
+      }
+    }
 
     // Create Stripe PaymentIntent with server-computed amount
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
       currency,
       automatic_payment_methods: { enabled: true },
-      metadata: { sessionId }
+      metadata: { sessionId: sessionId || 'skin-standalone' }
     });
 
     // Do not log the entire object to avoid leaking client_secret
