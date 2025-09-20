@@ -3,13 +3,29 @@ const { initializeApp, cert, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const RateLimiter = require('./utils/rateLimiter');
 
-if (!getApps().length) {
+// Lazy Firebase init to avoid 502 when env is missing/misconfigured
+function ensureFirestore() {
   try {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
-    initializeApp({ credential: cert(serviceAccount) });
-  } catch (e) { console.error("Firebase init error in getAdminData.js:", e); }
+    if (!getApps().length) {
+      const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+      if (!key) {
+        throw new Error('FIREBASE_SERVICE_ACCOUNT_KEY is not set');
+      }
+      let serviceAccount;
+      try {
+        serviceAccount = JSON.parse(key);
+      } catch (e) {
+        throw new Error('FIREBASE_SERVICE_ACCOUNT_KEY contains invalid JSON');
+      }
+      initializeApp({ credential: cert(serviceAccount) });
+    }
+    return getFirestore();
+  } catch (e) {
+    // Surface a controlled error; caller will format response
+    e._firebaseInit = true;
+    throw e;
+  }
 }
-const db = getFirestore();
 
 const ALL_QUESTION_KEYS = [
     'userGoal', 'age', 'gender', 'height', 'weight', 'sleep', 'activity',
@@ -26,17 +42,19 @@ const countryCodeToName = {
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
 
   try {
+    // Initialize Firestore safely
+    const db = ensureFirestore();
     // Basic rate limiting per IP and action
     const ip = event.headers['x-nf-client-connection-ip'] || event.headers['x-forwarded-for'] || 'unknown';
     const body = JSON.parse(event.body);
     const action = body?.action || 'getAdminData';
     const rate = await RateLimiter.checkLimit(ip, action);
     if (!rate.allowed) {
-      return { statusCode: 429, headers: { 'Retry-After': Math.ceil(rate.retryAfter/1000).toString() }, body: JSON.stringify({ error: 'Too many requests' }) };
+      return { statusCode: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': Math.ceil(rate.retryAfter/1000).toString() }, body: JSON.stringify({ error: 'Too many requests' }) };
     }
 
     const statsRef = db.collection('metadata').doc('sessions');
@@ -45,7 +63,7 @@ exports.handler = async (event) => {
 
     const { password, startDate, endDate, pricing } = body;
     if (password !== process.env.SHAURMA) {
-      return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
+      return { statusCode: 401, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Unauthorized' }) };
     }
 
     // Handle admin updates for pricing
@@ -63,7 +81,7 @@ exports.handler = async (event) => {
         prices: { basic, advanced, premium },
         updatedAt: new Date().toISOString()
       }, { merge: true });
-      return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+      return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ok: true }) };
     }
 
     const sessionsRef = db.collection('sessions');
@@ -109,7 +127,7 @@ exports.handler = async (event) => {
     }
 
     if (sessionsSnapshot.empty) {
-      return { statusCode: 200, body: JSON.stringify({ sessions: [], statistics: { totalSessions: totalSessionsCount, sessionsInPeriod: 0, completedQuizzes: 0 }, messages: messagesData, pricing: pricingData }) };
+      return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessions: [], statistics: { totalSessions: totalSessionsCount, sessionsInPeriod: 0, completedQuizzes: 0 }, messages: messagesData, pricing: pricingData }) };
     }
     
     let totalRevenue = 0, successfulPayments = 0, completedQuizzes = 0, totalErrors = 0;
@@ -223,6 +241,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         sessions: sessionsData,
         statistics: { ...statistics, newerSessionsCount: newerSessionsCount },
@@ -232,7 +251,8 @@ exports.handler = async (event) => {
     };
   } catch (error) {
     console.error('Error in getAdminData function:', error);
-    return { statusCode: 500, body: JSON.stringify({ error: 'Internal Server Error' }) };
+    const message = error && error._firebaseInit ? `Configuration error: ${error.message}` : 'Internal Server Error';
+    return { statusCode: 500, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: message }) };
   }
 };
 
