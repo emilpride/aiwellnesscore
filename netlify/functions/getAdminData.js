@@ -89,10 +89,10 @@ exports.handler = async (event) => {
 
     // Support date-only and precise datetime filters
     const startIso = startDateTime
-      ? new Date(startDateTime).toISOString()
+      ? (/Z$/.test(startDateTime) ? startDateTime : new Date(startDateTime).toISOString())
       : (startDate ? new Date(startDate + 'T00:00:00').toISOString() : null);
     const endIso = endDateTime
-      ? new Date(endDateTime).toISOString()
+      ? (/Z$/.test(endDateTime) ? endDateTime : new Date(endDateTime).toISOString())
       : (endDate ? (() => { const d = new Date(endDate + 'T23:59:59.999'); return d.toISOString(); })() : null);
     if (startIso) { query = query.where('createdAt', '>=', startIso); }
     if (endIso) { query = query.where('createdAt', '<=', endIso); }

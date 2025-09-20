@@ -228,9 +228,12 @@
             try {
                 const startDT = document.getElementById('start-date-stats').value;
                 const endDT = document.getElementById('end-date-stats').value;
+                // Convert local selections to UTC ISO to avoid server timezone drift
+                const startUTC = startDT ? new Date(startDT).toISOString() : null;
+                const endUTC = endDT ? new Date(endDT).toISOString() : null;
                 const response = await fetch('/.netlify/functions/getAdminData', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: password, startDateTime: startDT || null, endDateTime: endDT || null, limit: 100 })
+                    body: JSON.stringify({ password: password, startDateTime: startUTC, endDateTime: endUTC, limit: 100 })
                 });
                 if (response.status === 401) throw new Error('Incorrect password.');
                 if (!response.ok) throw new Error('Could not fetch data from server.');
