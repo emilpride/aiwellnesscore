@@ -76,7 +76,7 @@ exports.handler = async (event) => {
         query = query.where('createdAt', '<=', endOfDay.toISOString());
     }
 
-    query = query.limit(1000);
+    query = query.limit(300);
 
     const sessionsSnapshot = await query.get();
     
