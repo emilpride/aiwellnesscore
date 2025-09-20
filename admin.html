@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - AI WellnessCore</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         :root {
@@ -40,6 +41,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body class="antialiased">
 
@@ -201,6 +203,10 @@
         let allSessionsData = [], statisticsData = {}, allMessagesData = [], pricingData = null, adminPassword = null;
         let sortState = { column: 'createdAt', direction: 'desc' };
 
+        // Initialize 24h datetime pickers
+        const fpStart = flatpickr('#start-date-stats', { enableTime: true, time_24hr: true, dateFormat: 'Y-m-d\\TH:i', minuteIncrement: 1, allowInput: true });
+        const fpEnd = flatpickr('#end-date-stats', { enableTime: true, time_24hr: true, dateFormat: 'Y-m-d\\TH:i', minuteIncrement: 1, allowInput: true });
+
         const formatDateTimeLocal = (date) => {
             const y = date.getFullYear();
             const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -215,8 +221,8 @@
             if(isInitialLoad) {
                 const end = new Date();
                 const start = new Date(end.getTime() - 12 * 60 * 60 * 1000); // last 12 hours
-                document.getElementById('end-date-stats').value = formatDateTimeLocal(end);
-                document.getElementById('start-date-stats').value = formatDateTimeLocal(start);
+                if (fpEnd) fpEnd.setDate(end, true);
+                if (fpStart) fpStart.setDate(start, true);
             }
             loginError.textContent = ''; refreshBtn.disabled = true; refreshIcon.classList.add('animate-spin');
             try {
