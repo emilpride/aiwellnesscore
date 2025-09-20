@@ -94,7 +94,9 @@ exports.handler = async (event) => {
         query = query.where('createdAt', '<=', endOfDay.toISOString());
     }
 
-    query = query.limit(300);
+    // Limit number of sessions to keep payload under limits
+    const maxItems = Math.max(1, Math.min(Number(body.limit) || 150, 300));
+    query = query.limit(maxItems);
 
     const sessionsSnapshot = await query.get();
     
@@ -107,8 +109,12 @@ exports.handler = async (event) => {
     }
 
     const messagesRef = db.collection('contact_submissions');
-    const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').get();
-    let messagesData = messagesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), receivedAt: new Date(doc.data().createdAt).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' }) }));
+    const messagesSnapshot = await messagesRef.orderBy('createdAt', 'desc').limit(200).get();
+    let messagesData = messagesSnapshot.docs.map(doc => {
+      const d = doc.data() || {};
+      const { attachment, file, ...rest } = d;
+      return { id: doc.id, ...rest, receivedAt: d.createdAt ? new Date(d.createdAt).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' }) : null };
+    });
 
     // Load pricing to return for admin UI
     let pricingDoc = await db.collection('metadata').doc('pricing').get();
@@ -138,6 +144,14 @@ exports.handler = async (event) => {
     const sessionsData = sessionsSnapshot.docs.map(doc => {
       const data = doc.data();
       const answers = data.answers || {};
+      // Trim heavy fields (e.g., base64 selfie) from answers
+      const answersSafe = {};
+      for (const key of ALL_QUESTION_KEYS) {
+        if (key === 'selfie') continue;
+        if (Object.prototype.hasOwnProperty.call(answers, key)) {
+          answersSafe[key] = answers[key];
+        }
+      }
 
       const answeredKeys = Object.keys(answers).filter(key => ALL_QUESTION_KEYS.includes(key));
       const answeredCount = answeredKeys.length;
@@ -197,12 +211,13 @@ exports.handler = async (event) => {
         id: doc.id, createdAt: data.createdAt, deviceType: data.deviceType || 'N/A', trafficSource: source, ipAddress: data.ipAddress || 'N/A',
         country: country, email: answers.email || 'N/A', gender: answers.gender || 'N/A', age: answers.age || 'N/A', userGoal: answers.userGoal || 'N/A',
         progress: progress, dropOffPoint: dropOffDisplay, duration: duration, paymentStatus: data.paymentStatus || 'pending',
-        paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A', errors: data.errors || [], events: data.events || {},
+        paymentAmount: data.paymentAmountUSD ? `$${data.paymentAmountUSD}` : 'N/A',
         resultLink: `result.html?session_id=${doc.id}`,
         progressPercent: progressPercent,
         durationMs: durationMs,
         errorCount: data.errors ? data.errors.length : 0,
-        answers: answers,
+        // Return trimmed answers only
+        answers: answersSafe,
       };
     });
 
