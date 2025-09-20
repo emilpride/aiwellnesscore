@@ -398,7 +398,7 @@
                 
                 let rowHtml = `<tr class="main-row">
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="#" data-column="number">${sessionNumber}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="Date" data-column="createdAt">${new Date(session.createdAt).toLocaleString('en-GB',{dateStyle:'short',timeStyle:'short'})}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="Date" data-column="createdAt">${new Date(session.createdAt).toLocaleString('en-GB',{dateStyle:'short',timeStyle:'short',hour12:false})}</td>
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="Device/Source" data-column="deviceType"><div class="font-medium">${session.deviceType}</div><div class="text-gray-400">${session.trafficSource}</div></td>
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="IP/Country" data-column="ipAddress"><div class="font-medium">${session.ipAddress}</div><div class="text-gray-400">${session.country}</div></td>
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300" data-label="Email" data-column="email">${emailDisplay}</td>
@@ -413,7 +413,7 @@
                 </tr>`;
 
                 if (session.errors && session.errors.length > 0) {
-                    rowHtml += `<tr id="errors-${session.id}" class="hidden"><td colspan="13" class="p-3 bg-gray-800" data-label="Error Details">${session.errors.map(err => `<div class="border-b border-gray-700 py-2 last:border-b-0"><p class="text-red-400 font-semibold">${err.message||'Unknown Error'}</p><p class="text-gray-400 text-xs font-mono break-all">${err.details||'No details'}</p><p class="text-gray-500 text-xs mt-1">${new Date(err.timestamp).toLocaleString()}</p></div>`).join('')}</td></tr>`;
+                    rowHtml += `<tr id="errors-${session.id}" class="hidden"><td colspan="13" class="p-3 bg-gray-800" data-label="Error Details">${session.errors.map(err => `<div class=\"border-b border-gray-700 py-2 last:border-b-0\"><p class=\"text-red-400 font-semibold\">${err.message||'Unknown Error'}</p><p class=\"text-gray-400 text-xs font-mono break-all\">${err.details||'No details'}</p><p class=\"text-gray-500 text-xs mt-1\">${new Date(err.timestamp).toLocaleString('en-GB',{dateStyle:'short',timeStyle:'short',hour12:false})}</p></div>`).join('')}</td></tr>`;
                 }
                 return rowHtml;
             }).join('');
